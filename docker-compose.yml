@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:15-alpine # Using specific version
+    volumes:
+      - ./postgres:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    # ports:
+    #   - "5432:5432" # Not exposing DB directly to host for security
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+        start_period: 10s
+
+  backend:
+    build: ./backend
+    volumes:
+      - ./backend:/app 
+    env_file:
+      - .env # Load environment variables from .env file
+    depends_on:
+      postgres:
+        condition: service_healthy # Wait for db to be healthy
+
+  frontend: # Renamed from frontend-builder
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173" # Expose Vite dev server port
+    volumes:
+       # Mount source code for hot-reloading
+      - ./frontend:/app
+       # Use anonymous volume for node_modules caching
+      - /app/node_modules 
+    command: npm run dev -- --host # Run dev server, accessible externally
+    depends_on:
+      - backend # Frontend needs backend for API calls
+    env_file: 
+      - .env # May need backend URL if not using proxy, but proxy is preferred
+
+# Removed nginx service
+
+volumes:
+  postgres_data: # Define the named volume for data persistence
+# Removed frontend_dist volume 
