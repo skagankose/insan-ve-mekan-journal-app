@@ -24,8 +24,14 @@ const LoginPage: React.FC = () => {
             navigate(from, { replace: true });
         } catch (err: any) {
             console.error("Login failed:", err);
-            const detail = err.response?.data?.detail || 'Login failed. Please check your credentials.';
-            setError(detail);
+            const detail = err.response?.data?.detail;
+            if (err.response?.status === 403 && detail === "Please confirm your email address to login.") {
+                // Assuming you have a showToast function available
+                // showToast(detail, { type: 'error' }); 
+                setError(detail); // Or set a specific state for this message
+            } else {
+                setError(detail || 'Login failed. Please check your credentials.');
+            }
         }
     };
 

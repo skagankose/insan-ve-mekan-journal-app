@@ -35,6 +35,7 @@ class UserBase(SQLModel):
     title: Optional[str] = None
     bio: Optional[str] = None
     role: UserRole = Field(default=UserRole.WRITER)
+    is_auth: bool = Field(default=False)
 
 
 # Define the User model for database table creation
@@ -42,6 +43,8 @@ class User(UserBase, table=True):
     __tablename__ = "users"
     id: Optional[int] = Field(default=None, primary_key=True)
     hashed_password: str
+    confirmation_token: Optional[str] = Field(default=None, index=True, unique=True)
+    confirmation_token_created_at: Optional[datetime] = Field(default=None)
 
     entries: List["JournalEntry"] = Relationship(back_populates="owner")
 
@@ -158,6 +161,29 @@ class JournalEntryProgressRead(JournalEntryProgressBase):
 # Define a JournalEntryProgress model for creation
 class JournalEntryProgressCreate(JournalEntryProgressBase):
     pass
+
+
+# --------------------- Application Settings Model ---------------------
+
+# Define a base Settings model
+class SettingsBase(SQLModel):
+    active_journal_id: Optional[int] = Field(default=None, foreign_key="journal.id")
+
+
+# Define the Settings model for database table creation
+class Settings(SettingsBase, table=True):
+    __tablename__ = "settings"
+    id: int = Field(default=1, primary_key=True)  # Single row with ID 1
+
+
+# Define a Settings model for reading from API
+class SettingsRead(SettingsBase):
+    id: int
+
+
+# Define a Settings model for updating
+class SettingsUpdate(SQLModel):
+    active_journal_id: Optional[int] = None
 
 
 # Link models now that they are all defined

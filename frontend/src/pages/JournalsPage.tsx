@@ -16,7 +16,7 @@ const JournalsPage: React.FC = () => {
     const [journalsWithEntries, setJournalsWithEntries] = useState<JournalWithEntries[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const { isAuthenticated, isLoading: authLoading } = useAuth();
+    const { isAuthenticated, isLoading: authLoading, user } = useAuth();
     const { t } = useLanguage();
     const { activeJournal, setActiveJournal } = useActiveJournal();
 
@@ -55,7 +55,13 @@ const JournalsPage: React.FC = () => {
     }, [isAuthenticated, authLoading]);
 
     const handleSetActive = (journal: Journal) => {
-        setActiveJournal(journal);
+        if (user && user.role === 'admin') {
+            setActiveJournal(journal);
+        } else {
+            // Optionally, provide feedback to non-admin users
+            console.warn("User does not have permission to set active journal.");
+            // You could also set an error state here to display a message to the user
+        }
     };
 
     const toggleJournalExpansion = async (journalId: number) => {
@@ -193,15 +199,17 @@ const JournalsPage: React.FC = () => {
                                         {activeJournal?.id === journal.id ? (
                                             <span className="active-label">{t('active') || 'Active'}</span>
                                         ) : (
-                                            <button 
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleSetActive(journal);
-                                                }} 
-                                                className="btn btn-small btn-secondary"
-                                            >
-                                                {t('setAsActive') || 'Set as Active'}
-                                            </button>
+                                            user && user.role === 'admin' && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleSetActive(journal);
+                                                    }}
+                                                    className="btn btn-small btn-secondary"
+                                                >
+                                                    {t('setAsActive') || 'Set as Active'}
+                                                </button>
+                                            )
                                         )}
                                     </div>
                                 </div>

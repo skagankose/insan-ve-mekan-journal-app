@@ -1,5 +1,6 @@
 from sqlmodel import Session, select
 from datetime import datetime
+import secrets
 
 from . import models
 from . import schemas
@@ -75,14 +76,28 @@ def get_user_by_email(db: Session, email: str):
     statement = select(models.User).where(models.User.email == email)
     return db.exec(statement).first()
 
+def get_user_by_token(db: Session, token: str):
+    """Get a user by their confirmation token."""
+    statement = select(models.User).where(models.User.confirmation_token == token)
+    return db.exec(statement).first()
+
 def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     """Create a new user, hashing the password before saving."""
     from .security import get_password_hash # Import here to avoid circular imports
 
     hashed_password = get_password_hash(user.password)
-    # Create a dictionary for the User model, excluding the plain password
     user_data = user.model_dump(exclude={"password"})
-    db_user = models.User(**user_data, hashed_password=hashed_password)
+    
+    # Generate confirmation token
+    confirmation_token = secrets.token_urlsafe(32)
+    confirmation_token_created_at = datetime.utcnow()
+
+    db_user = models.User(
+        **user_data,
+        hashed_password=hashed_password,
+        confirmation_token=confirmation_token,
+        confirmation_token_created_at=confirmation_token_created_at
+    )
     
     db.add(db_user)
     db.commit()
