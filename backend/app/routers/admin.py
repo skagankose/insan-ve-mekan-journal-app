@@ -4,6 +4,7 @@ from typing import List
 
 from .. import models, auth
 from ..database import get_session
+from .. import crud
 
 router = APIRouter(
     prefix="/admin",
@@ -74,4 +75,15 @@ def get_all_journal_entry_progress(
     """
     statement = select(models.JournalEntryProgress).offset(skip).limit(limit)
     progress_records = db.exec(statement).all()
-    return progress_records 
+    return progress_records
+
+@router.put("/settings", response_model=models.SettingsRead)
+def update_settings(
+    settings: models.SettingsUpdate,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_admin_user),
+):
+    """
+    Update application settings. Only accessible to admin users.
+    """
+    return crud.update_settings(db=db, settings_update=settings) 

@@ -27,8 +27,12 @@ const JournalsPage: React.FC = () => {
                 setError(null);
                 try {
                     const fetchedJournals = await apiService.getJournals();
+                    // Sort journals by date in descending order (newest first)
+                    const sortedJournals = [...fetchedJournals].sort((a, b) => 
+                        new Date(b.date).getTime() - new Date(a.date).getTime()
+                    );
                     // Initialize journals with empty entries array and collapsed state
-                    const journalsData = fetchedJournals.map(journal => ({
+                    const journalsData = sortedJournals.map(journal => ({
                         ...journal,
                         entries: [],
                         isExpanded: false,
@@ -54,14 +58,17 @@ const JournalsPage: React.FC = () => {
         }
     }, [isAuthenticated, authLoading]);
 
-    const handleSetActive = (journal: Journal) => {
-        if (user && user.role === 'admin') {
-            setActiveJournal(journal);
-        } else {
-            // Optionally, provide feedback to non-admin users
-            console.warn("User does not have permission to set active journal.");
-            // You could also set an error state here to display a message to the user
-        }
+    const handleSetActive = async (journal: Journal) => {
+            try {
+                // Update settings in the backend
+                await apiService.updateSettings({ active_journal_id: journal.id });
+                // Update local state
+                setActiveJournal(journal);
+            } catch (err: any) {
+                console.error("Failed to set active journal:", err);
+                // Optionally show an error message to the user
+                setError(err.response?.data?.detail || 'Failed to set active journal.');
+            }
     };
 
     const toggleJournalExpansion = async (journalId: number) => {
@@ -153,24 +160,12 @@ const JournalsPage: React.FC = () => {
         <div>
             <div className="page-header">
                 <h1 className="page-title">{t('journals')}</h1>
-                <Link to="/journals/new" className="btn btn-primary">
-                    {t('createNewJournal') || 'Create New Journal'}
-                </Link>
+                {user && (
+                    <Link to="/journals/new" className="btn btn-primary">
+                        {t('createNewJournal') || 'Create New Journal'}
+                    </Link>
+                )}
             </div>
-
-            {activeJournal && (
-                <div className="active-journal-badge">
-                    <span>{t('activeJournal') || 'Active Journal'}:</span> 
-                    <strong>{activeJournal.title}</strong>
-                    <button 
-                        onClick={() => setActiveJournal(null)}
-                        className="btn btn-small btn-outline"
-                        style={{ marginLeft: 'var(--spacing-2)' }}
-                    >
-                        {t('clear') || 'Clear'}
-                    </button>
-                </div>
-            )}
 
             {journalsWithEntries.length === 0 ? (
                 <div className="empty-state">
@@ -199,7 +194,7 @@ const JournalsPage: React.FC = () => {
                                         {activeJournal?.id === journal.id ? (
                                             <span className="active-label">{t('active') || 'Active'}</span>
                                         ) : (
-                                            user && user.role === 'admin' && (
+                                            user && (
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -210,6 +205,16 @@ const JournalsPage: React.FC = () => {
                                                     {t('setAsActive') || 'Set as Active'}
                                                 </button>
                                             )
+                                        )}
+                                        {user && user.role === 'admin' && (
+                                            <Link 
+                                                to={`/journals/edit/${journal.id}`}
+                                                className="btn btn-small btn-outline"
+                                                onClick={(e) => e.stopPropagation()}
+                                                style={{ marginLeft: '8px' }}
+                                            >
+                                                {t('edit') || 'Edit'}
+                                            </Link>
                                         )}
                                     </div>
                                 </div>
@@ -222,9 +227,6 @@ const JournalsPage: React.FC = () => {
                                         ) : journal.entries.length === 0 ? (
                                             <div className="no-entries-message">
                                                 <p>{t('noEntriesInJournal') || 'No entries in this journal yet.'}</p>
-                                                <Link to="/entries/new" className="btn btn-small btn-primary">
-                                                    {t('addEntry') || 'Add Entry'}
-                                                </Link>
                                             </div>
                                         ) : (
                                             <div className="entries-list">

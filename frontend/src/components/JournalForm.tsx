@@ -5,6 +5,8 @@ interface JournalFormData {
     title: string;
     content: string;
     abstract: string;
+    file_path: string;
+    status: string;
 }
 
 interface JournalFormProps {
@@ -19,7 +21,9 @@ const JournalForm: React.FC<JournalFormProps> = ({
     initialData = { 
         title: '', 
         content: '', 
-        abstract: '' 
+        abstract: '',
+        file_path: '',
+        status: '' // Default status, consider a more appropriate default from your enum if necessary
     }, // Default for new entry
     onSubmit,
     isSubmitting,
@@ -36,15 +40,17 @@ const JournalForm: React.FC<JournalFormProps> = ({
         const titleChanged = initialData.title !== formData.title;
         const contentChanged = initialData.content !== formData.content;
         const abstractChanged = initialData.abstract !== formData.abstract;
+        const filePathChanged = initialData.file_path !== formData.file_path;
+        const statusChanged = initialData.status !== formData.status;
 
-        if (titleChanged || contentChanged || abstractChanged) {
+        if (titleChanged || contentChanged || abstractChanged || filePathChanged || statusChanged) {
             // Only update state if the initialData values are different from current form state
             setFormData(initialData);
         }
         // Depend on the specific values from initialData, not the object reference itself.
         // This prevents the effect from running if the parent re-renders and passes a 
         // new initialData object reference with the same content.
-    }, [initialData.title, initialData.content, initialData.abstract]);
+    }, [initialData.title, initialData.content, initialData.abstract, initialData.file_path, initialData.status]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = event.target;
@@ -107,6 +113,40 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     required
                     disabled={isSubmitting}
                 />
+            </div>
+
+            <div className="form-group">
+                <label htmlFor="file_path" className="form-label">{t('filePath') || 'File Path'}</label>
+                <input
+                    type="text"
+                    id="file_path"
+                    name="file_path"
+                    className="form-input"
+                    value={formData.file_path}
+                    onChange={handleChange}
+                    placeholder={t('enterFilePath') || 'Enter file path'}
+                    disabled={isSubmitting}
+                />
+            </div>
+
+            <div className="form-group">
+                <label htmlFor="status" className="form-label">{t('status') || 'Status'}</label>
+                <select
+                    id="status"
+                    name="status"
+                    className="form-select"
+                    value={formData.status}
+                    onChange={handleChange}
+                    disabled={isSubmitting}
+                    required
+                >
+                    <option value="">{t('selectStatus') || '-- Select Status --'}</option>
+                    <option value="waiting_for_payment">{t('statusWaitingForPayment') || 'Waiting for Payment'}</option>
+                    <option value="waiting_for_writer">{t('statusWaitingForWriter') || 'Waiting for Writer'}</option>
+                    <option value="waiting_for_arbitrator">{t('statusWaitingForArbitrator') || 'Waiting for Arbitrator'}</option>
+                    <option value="waiting_for_editor">{t('statusWaitingForEditor') || 'Waiting for Editor'}</option>
+                    <option value="completed">{t('statusCompleted') || 'Completed'}</option>
+                </select>
             </div>
             
             <div className="form-group" style={{ marginTop: 'var(--spacing-6)', display: 'flex', justifyContent: 'flex-end' }}>

@@ -22,8 +22,11 @@ type TranslationKeys =
   | 'saving' | 'signingIn' | 'creatingAccount'
   | 'language' | 'turkish' | 'english'
   | 'abstract' | 'enterAbstract' | 'type' | 'submitted' | 'reviewed' | 'isAccepted'
-  | 'name' | 'bio' | 'role' | 'loading' | 'adminDashboard' | 'manageUsersAndSettings' | 'userManagement' | 'totalUsers'
-  | 'writer' | 'editor' | 'arbitrator' | 'admin';
+  | 'name' | 'bio' | 'role' | 'loading' | 'adminDashboard' | 'userManagement' | 'totalUsers'
+  | 'writer' | 'editor' | 'arbitrator' | 'admin'
+  | 'publicationDate' | 'isPublished' | 'editJournal' | 'updateJournal' | 'accessDeniedAdminOnly'
+  | 'theme' | 'lightMode' | 'darkMode' | 'switchToDark' | 'switchToLight'
+  | 'previousIssues' | 'publishedJournals' | 'completedEntries';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -39,12 +42,14 @@ const translations: Record<Language, TranslationDictionary> = {
     'welcome': 'Welcome',
     'myJournal': 'My Journal',
     'navigation': 'Navigation',
+    'previousIssues': 'Previous Issues',
     
     // Page titles
     'createNewEntry': 'Create New Journal Entry',
     'editEntry': 'Edit Journal Entry',
     'createAccount': 'Create an Account',
     'welcomeBack': 'Welcome Back',
+    'publishedJournals': 'Published Journals',
     
     // Form labels
     'title': 'Title',
@@ -80,6 +85,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'loginText': 'Log in',
     'pleaseLogin': 'Please log in to view your journal entries.',
     'loadingEntries': 'Loading your journal entries...',
+    'completedEntries': 'Completed Entries',
     
     // Placeholders
     'enterTitle': 'Enter a title for your journal entry',
@@ -96,7 +102,6 @@ const translations: Record<Language, TranslationDictionary> = {
 
     // Admin page
     'adminDashboard': 'Admin Dashboard',
-    'manageUsersAndSettings': 'Manage users and system settings',
     'userManagement': 'User Management',
     'totalUsers': 'Total users',
 
@@ -110,6 +115,20 @@ const translations: Record<Language, TranslationDictionary> = {
     'editor': 'Editor',
     'arbitrator': 'Arbitrator',
     'admin': 'Admin',
+
+    // New translations
+    'publicationDate': 'Publication Date',
+    'isPublished': 'Publish Journal',
+    'editJournal': 'Edit Journal',
+    'updateJournal': 'Update Journal',
+    'accessDeniedAdminOnly': 'Access Denied: Only administrators can perform this action.',
+
+    // Theme
+    'theme': 'Theme',
+    'lightMode': 'Light Mode',
+    'darkMode': 'Dark Mode',
+    'switchToDark': 'Switch to dark mode',
+    'switchToLight': 'Switch to light mode',
   },
   tr: {
     // Navigation
@@ -121,12 +140,14 @@ const translations: Record<Language, TranslationDictionary> = {
     'welcome': 'Hoş Geldiniz',
     'myJournal': 'Günlüğüm',
     'navigation': 'Navigasyon',
+    'previousIssues': 'Önceki Sayılar',
     
     // Page titles
     'createNewEntry': 'Yeni Günlük Kaydı Oluştur',
     'editEntry': 'Günlük Kaydını Düzenle',
     'createAccount': 'Hesap Oluştur',
     'welcomeBack': 'Tekrar Hoş Geldiniz',
+    'publishedJournals': 'Yayınlanmış Dergiler',
     
     // Form labels
     'title': 'Başlık',
@@ -162,6 +183,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'loginText': 'Giriş yap',
     'pleaseLogin': 'Günlük kayıtlarınızı görmek için lütfen giriş yapın.',
     'loadingEntries': 'Günlük kayıtlarınız yükleniyor...',
+    'completedEntries': 'Tamamlanmış Kayıtlar',
     
     // Placeholders
     'enterTitle': 'Günlük kaydınız için bir başlık girin',
@@ -178,7 +200,6 @@ const translations: Record<Language, TranslationDictionary> = {
 
     // Admin page
     'adminDashboard': 'Yönetici Paneli',
-    'manageUsersAndSettings': 'Kullanıcıları ve sistem ayarlarını yönetin',
     'userManagement': 'Kullanıcı Yönetimi',
     'totalUsers': 'Toplam kullanıcı',
 
@@ -192,6 +213,20 @@ const translations: Record<Language, TranslationDictionary> = {
     'editor': 'Editör',
     'arbitrator': 'Hakem',
     'admin': 'Yönetici',
+
+    // New translations
+    'publicationDate': 'Yayın Tarihi',
+    'isPublished': 'Dergiyi Yayınla',
+    'editJournal': 'Dergiyi Düzenle',
+    'updateJournal': 'Dergiyi Güncelle',
+    'accessDeniedAdminOnly': 'Erişim Reddedildi: Yalnızca yöneticiler bu işlemi gerçekleştirebilir.',
+
+    // Theme
+    'theme': 'Tema',
+    'lightMode': 'Açık Tema',
+    'darkMode': 'Koyu Tema',
+    'switchToDark': 'Koyu temaya geç',
+    'switchToLight': 'Açık temaya geç',
   }
 };
 

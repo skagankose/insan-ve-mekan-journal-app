@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'; // Use Link for client-sid
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageToggle from './LanguageToggle';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar: React.FC = () => {
     const { isAuthenticated, user, logout, isLoading } = useAuth(); // Get auth state and functions
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -25,18 +26,15 @@ const Navbar: React.FC = () => {
                 <div className="navbar-brand">
                     <Link to="/" className="navbar-logo">
                         <img src="/logo.png" alt="Journal App Logo" className="navbar-logo-image" />
-                        İnsan & Mekan
+                        {language === 'en' ? 'Human & Space' : 'İnsan & Mekan'}
                     </Link>
                 </div>
                 
                 <div className="navbar-menu">
                     <div className="navbar-start">
-                        <Link to="/" className="navbar-item">
-                            {t('journal')}
-                        </Link>
-                        {isAuthenticated && (
-                            <Link to="/entries/new" className="navbar-item">
-                                {t('newEntry')}
+                        {isAuthenticated && user && user.role === 'admin' && (
+                            <Link to="/" className="navbar-item">
+                                {t('journals')}
                             </Link>
                         )}
                         {isAuthenticated && user && user.role === 'admin' && (
@@ -47,11 +45,6 @@ const Navbar: React.FC = () => {
                     </div>
                     
                     <div className="navbar-end">
-                        {/* Language Toggle Button */}
-                        <div className="navbar-item">
-                            <LanguageToggle />
-                        </div>
-                        
                         {isAuthenticated && user ? (
                             <>
                                 <div className="navbar-item navbar-user">
@@ -78,6 +71,16 @@ const Navbar: React.FC = () => {
                                 </Link>
                             </>
                         )}
+                        
+                        {/* Theme Toggle Button */}
+                        <div className="navbar-item">
+                            <ThemeToggle />
+                        </div>
+                        
+                        {/* Language Toggle Button */}
+                        <div className="navbar-item">
+                            <LanguageToggle />
+                        </div>
                     </div>
                 </div>
             </div>

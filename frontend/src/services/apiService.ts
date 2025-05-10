@@ -33,9 +33,11 @@ interface JournalEntryRead {
     title: string;
     content: string;
     abstract: string;
+    file_path?: string;
     created_at: string; // ISO format string
     updated_at: string; // ISO format string
     owner_id: number;
+    status?: string; // Added status field, assuming backend can provide it
 }
 
 interface JournalEntryCreate {
@@ -50,6 +52,8 @@ interface JournalEntryUpdate {
     title?: string;
     content?: string;
     abstract?: string;
+    file_path?: string;
+    status?: string;
 }
 
 // Add Journal interface
@@ -58,12 +62,31 @@ interface Journal {
     title: string;
     date: string;
     issue: string;
+    is_published: boolean;
+    publication_date: string | null;
 }
 
 // Add JournalCreate interface
 interface JournalCreate {
     title: string;
     issue: string;
+    is_published: boolean;
+    publication_date: string | null;
+}
+
+interface JournalUpdate {
+    title?: string;
+    issue?: string;
+    is_published?: boolean;
+    publication_date?: string | null;
+}
+
+interface Settings {
+    active_journal_id: number | null;
+}
+
+interface SettingsUpdate {
+    active_journal_id: number | null;
 }
 
 // Create an Axios instance
@@ -166,6 +189,11 @@ const createJournal = async (journalData: JournalCreate): Promise<Journal> => {
     return response.data;
 };
 
+const updateJournal = async (journalId: number, journalData: JournalUpdate): Promise<Journal> => {
+    const response = await apiClient.put<Journal>(`/journals/${journalId}`, journalData);
+    return response.data;
+};
+
 // --- Admin API Calls ---
 
 const getAllUsers = async (skip: number = 0, limit: number = 100): Promise<UserRead[]> => {
@@ -196,6 +224,27 @@ const getAllJournalEntryProgress = async (skip: number = 0, limit: number = 100)
     return response.data;
 };
 
+const updateSettings = async (settingsData: SettingsUpdate): Promise<Settings> => {
+    const response = await apiClient.put<Settings>('/admin/settings', settingsData);
+    return response.data;
+};
+
+// Add a function to get published journals (no auth required)
+const getPublishedJournals = async (skip: number = 0, limit: number = 100): Promise<Journal[]> => {
+    const response = await axios.get<Journal[]>('/api/public/journals', {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+// Add a function to get entries for a published journal (no auth required)
+const getPublishedJournalEntries = async (journalId: number, skip: number = 0, limit: number = 100): Promise<JournalEntryRead[]> => {
+    const response = await axios.get<JournalEntryRead[]>(`/api/public/journals/${journalId}/entries`, {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
 export type { JournalEntryRead, JournalEntryCreate, JournalEntryUpdate, Journal };
 
 export default {
@@ -210,11 +259,15 @@ export default {
     deleteEntry,
     getJournals,
     createJournal,
+    updateJournal,
     getEntriesByJournal,
+    getPublishedJournals,
+    getPublishedJournalEntries,
     // Admin functions
     getAllUsers,
     getAllJournals,
     getAllJournalEntries,
     getAllJournalEntryProgress,
+    updateSettings,
     // apiClient, // Optionally export the instance if needed elsewhere
 }; 

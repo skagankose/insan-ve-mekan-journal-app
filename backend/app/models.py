@@ -65,6 +65,8 @@ class JournalBase(SQLModel):
     title: str = Field(index=True)
     date: datetime = Field(default_factory=datetime.utcnow)
     issue: str
+    is_published: bool = Field(default=False)
+    publication_date: Optional[datetime] = Field(default=None)  # Manually set publication date
 
 
 # Define the Journal model for database table creation
@@ -80,6 +82,13 @@ class JournalRead(JournalBase):
 
 class JournalCreate(JournalBase):
     pass
+
+
+class JournalUpdate(SQLModel):
+    title: Optional[str] = None
+    issue: Optional[str] = None
+    is_published: Optional[bool] = None
+    publication_date: Optional[datetime] = None
 
 
 # --------------------- Journal Entry Models ---------------------
@@ -126,6 +135,7 @@ class JournalEntryUpdate(SQLModel):
     abstract: Optional[str] = None
     content: Optional[str] = None
     file_path: Optional[str] = None
+    status: Optional[JournalEntryStatus] = None
 
 
 # --------------------- Journal Entry Progress Models ---------------------

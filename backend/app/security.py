@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any, Union, Optional
 
 from jose import jwt, JWTError
-from passlib.context import CryptContext
+import bcrypt  # Replace passlib with bcrypt
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
@@ -12,16 +12,22 @@ load_dotenv()
 
 # --- Password Hashing --- 
 
-# Use CryptContext for password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    # Convert passwords to bytes
+    password_bytes = plain_password.encode('utf-8')
+    hashed_bytes = hashed_password.encode('utf-8')
+    # Verify the password
+    return bcrypt.checkpw(password_bytes, hashed_bytes)
 
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    # Convert the password to bytes
+    password_bytes = password.encode('utf-8')
+    # Generate salt and hash the password
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    # Return the hash as a string
+    return hashed.decode('utf-8')
 
 
 # --- JWT Token Handling --- 
@@ -29,7 +35,7 @@ def get_password_hash(password: str) -> str:
 # Configuration from environment variables (add these to your .env file!)
 SECRET_KEY = os.getenv("SECRET_KEY", "your_default_secret_key_here_if_not_set") # Keep secret! Default is insecure.
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 43200))
 
 # Pydantic model for token data (the payload/claims)
 class TokenData(BaseModel):

@@ -50,4 +50,43 @@ def get_journals(
     """
     statement = select(models.Journal).offset(skip).limit(limit)
     journals = db.exec(statement).all()
-    return journals 
+    return journals
+
+@router.put("/{journal_id}", response_model=models.Journal)
+def update_journal(
+    journal_id: int,
+    journal_update: models.JournalUpdate,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Update a journal by ID. Only authenticated admin users can update journals.
+    """
+    # Check admin role
+    if current_user.role != models.UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions. Admin role required to update journals."
+        )
+    
+    # Get existing journal
+    statement = select(models.Journal).where(models.Journal.id == journal_id)
+    db_journal = db.exec(statement).first()
+    
+    if not db_journal:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Journal with ID {journal_id} not found"
+        )
+    
+    # Update journal fields with the data that was passed
+    journal_data = journal_update.model_dump(exclude_unset=True)
+    for key, value in journal_data.items():
+        setattr(db_journal, key, value)
+    
+    # Save changes
+    db.add(db_journal)
+    db.commit()
+    db.refresh(db_journal)
+    
+    return db_journal 

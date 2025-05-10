@@ -4,13 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const Sidebar: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { t } = useLanguage();
 
-  if (!isAuthenticated) {
-    return null; // Don't show sidebar for unauthenticated users
-  }
-
+  // Always show the sidebar, but with different content based on auth status
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
@@ -19,16 +16,21 @@ const Sidebar: React.FC = () => {
       
       <nav className="sidebar-nav">
         <ul className="sidebar-menu">
+          {/* Show New Entry link only for authenticated users */}
+          {isAuthenticated && (
+            <li className="sidebar-menu-item">
+              <Link to="/entries/new" className="sidebar-link">
+                <i className="sidebar-icon">✏️</i>
+                <span>{t('newEntry')}</span>
+              </Link>
+            </li>
+          )}
+          
+          {/* Always show Previous Issues link */}
           <li className="sidebar-menu-item">
-            <Link to="/" className="sidebar-link">
-              <i className="sidebar-icon">📚</i>
-              <span>{t('journals')}</span>
-            </Link>
-          </li>
-          <li className="sidebar-menu-item">
-            <Link to="/entries/new" className="sidebar-link">
-              <i className="sidebar-icon">✏️</i>
-              <span>{t('newEntry')}</span>
+            <Link to="/archive" className="sidebar-link">
+              <i className="sidebar-icon">🗄️</i> 
+              <span>{t('previousIssues')}</span>
             </Link>
           </li>
         </ul>

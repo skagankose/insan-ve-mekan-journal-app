@@ -3,8 +3,8 @@ from sib_api_v3_sdk.rest import ApiException
 from fastapi import HTTPException, status
 
 # Replace with your actual sender information
-SENDER_EMAIL = "noreply@humanand.space"  # Consider making this configurable
-SENDER_NAME = "noreply@humanand.space" # Consider making this configurable
+SENDER_EMAIL = "no-reply@humanand.space"  # Consider making this configurable
+SENDER_NAME = "no-reply@humanand.space" # Consider making this configurable
 # It's good practice to load API keys from environment variables or a config file
 # For this example, we'll pass it as an argument, but avoid hardcoding in production
 # BREVO_API_KEY = "YOUR_BREVO_API_KEY" 
@@ -35,7 +35,7 @@ def send_confirmation_email(
             <p><a href="{confirmation_link}">Confirm Email</a></p>
             <p>If you did not sign up for this account, you can ignore this email.</p>
             <p>Thanks,</p>
-            <p>The {SENDER_NAME} Team</p>
+            <p>The Human and Space Team</p>
         </body>
     </html>
     """

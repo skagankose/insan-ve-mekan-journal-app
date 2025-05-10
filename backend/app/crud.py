@@ -105,3 +105,35 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     return db_user
 
 # We'll add create_user and password hashing later 
+
+# --- Settings CRUD --- #
+
+def get_settings(db: Session) -> models.Settings:
+    """Get the application settings. There should only be one row with id=1."""
+    return db.get(models.Settings, 1)
+
+def create_settings(db: Session) -> models.Settings:
+    """Create the initial settings row if it doesn't exist."""
+    settings = models.Settings(id=None)
+    db.add(settings)
+    db.commit()
+    db.refresh(settings)
+    return settings
+
+def update_settings(db: Session, settings_update: models.SettingsUpdate) -> models.Settings:
+    """Update the application settings."""
+    db_settings = get_settings(db)
+    if not db_settings:
+        db_settings = create_settings(db)
+    
+    # Get the update data, excluding unset fields
+    update_data = settings_update.model_dump(exclude_unset=True)
+    
+    # Update fields
+    for key, value in update_data.items():
+        setattr(db_settings, key, value)
+    
+    db.add(db_settings)
+    db.commit()
+    db.refresh(db_settings)
+    return db_settings 

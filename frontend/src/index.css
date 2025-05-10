@@ -8,7 +8,7 @@
   --color-warning: #f59e0b;       /* Amber - warning states */
   --color-danger: #ef4444;        /* Red - error states */
   
-  /* Neutral Colors */
+  /* Light Theme Colors (default) */
   --color-text-primary: #212529;  /* Near Black - main text */  
   --color-text-secondary: #6c757d; /* Gray - secondary text */
   --color-text-tertiary: #adb5bd; /* Light gray - disabled/hint text */
@@ -86,6 +86,24 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark Theme Colors */
+[data-theme="dark"] {
+  --color-text-primary: #e9ecef;  /* Light Gray - main text */
+  --color-text-secondary: #adb5bd; /* Medium Gray - secondary text */
+  --color-text-tertiary: #6c757d; /* Dark Gray - disabled/hint text */
+  --color-text-inverse: #212529;  /* Dark - text on light bg */
+  
+  --color-background-primary: #212529;  /* Dark Gray - main content */
+  --color-background-secondary: #343a40; /* Darker Gray - page background */
+  --color-background-tertiary: #495057; /* Medium Dark Gray - tertiary content */
+  --color-background-brand: #121212;    /* Near Black - header/footer */
+  --color-background-elevated: #2c3034; /* Dark Gray - cards, modals, popovers */
+  
+  --color-border-light: #495057;  /* Dark Gray - subtle borders */
+  --color-border-medium: #6c757d; /* Medium Gray - visible borders */
+  --color-border-dark: #adb5bd;   /* Light Gray - emphasized borders */
 }
 
 /* Base Element Styling */

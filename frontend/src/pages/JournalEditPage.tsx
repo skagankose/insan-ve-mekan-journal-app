@@ -9,6 +9,8 @@ interface JournalFormData {
     title: string;
     content: string;
     abstract: string;
+    file_path: string;
+    status: string;
 }
 
 const JournalEditPage: React.FC = () => {
@@ -45,7 +47,9 @@ const JournalEditPage: React.FC = () => {
                 setInitialData({ 
                     title: entry.title, 
                     content: entry.content, 
-                    abstract: entry.abstract
+                    abstract: entry.abstract,
+                    file_path: entry.file_path || '',
+                    status: entry.status || ''
                 });
             } catch (err: any) {
                 console.error("Failed to fetch entry for editing:", err);

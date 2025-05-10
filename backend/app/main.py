@@ -1,11 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 # Import models here to ensure they are registered with SQLModel metadata
 from . import models # This line is important
-from .database import create_db_and_tables, engine # Import engine if needed elsewhere, or just the function
+from .database import create_db_and_tables, engine, get_session # Import engine if needed elsewhere, or just the function
 from .routers import entries # Import the entries router
 from .routers import auth # Import auth router
 from .routers import admin # Import admin router
@@ -32,7 +32,7 @@ async def lifecycle(app: FastAPI):
             # Create admin user
             admin_user = models.User(
                 username="admin",
-                email="admin@example.com",
+                email="admin@admin.com",
                 name="Administrator",
                 role=models.UserRole.ADMIN,
                 hashed_password=get_password_hash("admin")
@@ -42,6 +42,15 @@ async def lifecycle(app: FastAPI):
             print("Default admin user created.")
         else:
             print("Admin user already exists.")
+        
+        # Create initial settings if they don't exist
+        settings = crud.get_settings(session)
+        if not settings:
+            print("Creating initial settings...")
+            settings = crud.create_settings(session)
+            print("Initial settings created.")
+        else:
+            print("Settings already exist.")
     
     yield
     
@@ -69,6 +78,51 @@ app.include_router(entries.router) # Include the entries router
 app.include_router(auth.router) # Include auth router
 app.include_router(admin.router) # Include admin router
 app.include_router(journals.router) # Include journals router
+
+# Public endpoint for published journals (no auth required)
+@app.get("/public/journals", response_model=list[models.Journal])
+def get_published_journals(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_session)
+):
+    """
+    Get all published journals. This endpoint is publicly accessible without authentication.
+    """
+    statement = select(models.Journal).where(models.Journal.is_published == True).offset(skip).limit(limit)
+    journals = db.exec(statement).all()
+    return journals
+
+# Public endpoint for entries of a published journal (no auth required)
+@app.get("/public/journals/{journal_id}/entries", response_model=list[models.JournalEntry])
+def get_published_journal_entries(
+    journal_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_session)
+):
+    """
+    Get entries for a published journal. This endpoint is publicly accessible without authentication.
+    """
+    # First verify the journal exists and is published
+    journal_statement = select(models.Journal).where(
+        models.Journal.id == journal_id,
+        models.Journal.is_published == True
+    )
+    journal = db.exec(journal_statement).first()
+    
+    if not journal:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Published journal not found")
+    
+    # Get entries for this journal
+    entries_statement = select(models.JournalEntry).where(
+        models.JournalEntry.journal_id == journal_id,
+        models.JournalEntry.status == "COMPLETED"  # Only return completed entries
+    ).offset(skip).limit(limit)
+    
+    entries = db.exec(entries_statement).all()
+    return entries
 
 @app.get("/")
 def read_root():

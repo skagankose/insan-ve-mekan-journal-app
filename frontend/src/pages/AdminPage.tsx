@@ -12,6 +12,7 @@ interface User {
     title?: string;
     bio?: string;
     role: string;
+    is_auth?: boolean;
 }
 
 interface Journal {
@@ -19,6 +20,8 @@ interface Journal {
     title: string;
     date: string;
     issue: string;
+    is_published: boolean;
+    publication_date?: string;
 }
 
 interface JournalEntry {
@@ -26,7 +29,11 @@ interface JournalEntry {
     title: string;
     date: string;
     abstract: string;
+    content: string;
+    file_path?: string;
     status: string;
+    created_at: string;
+    updated_at: string;
     owner_id?: number;
     journal_id?: number;
 }
@@ -36,6 +43,10 @@ interface JournalEntryProgress {
     title: string;
     date: string;
     abstract: string;
+    content: string;
+    file_path?: string;
+    created_at: string;
+    updated_at: string;
     owner_id?: number;
     owner_role: string;
     journal_entry_id: number;
@@ -100,11 +111,7 @@ const AdminPage: React.FC = () => {
 
     return (
         <div className="container">
-            <div className="page-header">
                 <h1 className="page-title">{t('adminDashboard')}</h1>
-                <p className="page-subtitle">{t('manageUsersAndSettings')}</p>
-            </div>
-
             {/* Users Section */}
             <div className="card">
                 <h2>{t('userManagement')}</h2>
@@ -120,6 +127,8 @@ const AdminPage: React.FC = () => {
                                 <th>{t('email')}</th>
                                 <th>{t('role')}</th>
                                 <th>{t('title')}</th>
+                                <th>{t('bio')}</th>
+                                <th>{t('isAuth')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -135,6 +144,8 @@ const AdminPage: React.FC = () => {
                                         </span>
                                     </td>
                                     <td>{user.title || '-'}</td>
+                                    <td>{user.bio || '-'}</td>
+                                    <td>{user.is_auth ? '✓' : '✗'}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -155,6 +166,8 @@ const AdminPage: React.FC = () => {
                                 <th>{t('title')}</th>
                                 <th>{t('date')}</th>
                                 <th>{t('issue')}</th>
+                                <th>{t('isPublished')}</th>
+                                <th>{t('publicationDate')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -164,6 +177,8 @@ const AdminPage: React.FC = () => {
                                     <td>{journal.title}</td>
                                     <td>{new Date(journal.date).toLocaleDateString()}</td>
                                     <td>{journal.issue}</td>
+                                    <td>{journal.is_published ? '✓' : '✗'}</td>
+                                    <td>{journal.publication_date ? new Date(journal.publication_date).toLocaleDateString() : '-'}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -184,7 +199,11 @@ const AdminPage: React.FC = () => {
                                 <th>{t('title')}</th>
                                 <th>{t('date')}</th>
                                 <th>{t('abstract')}</th>
+                                <th>{t('content')}</th>
+                                <th>{t('filePath')}</th>
                                 <th>{t('status')}</th>
+                                <th>{t('createdAt')}</th>
+                                <th>{t('updatedAt')}</th>
                                 <th>{t('ownerID')}</th>
                                 <th>{t('journalID')}</th>
                             </tr>
@@ -196,11 +215,15 @@ const AdminPage: React.FC = () => {
                                     <td>{entry.title}</td>
                                     <td>{new Date(entry.date).toLocaleDateString()}</td>
                                     <td>{entry.abstract.substring(0, 50)}...</td>
+                                    <td>{entry.content.substring(0, 50)}...</td>
+                                    <td>{entry.file_path || '-'}</td>
                                     <td>
                                         <span className={`badge badge-${entry.status}`}>
                                             {entry.status}
                                         </span>
                                     </td>
+                                    <td>{new Date(entry.created_at).toLocaleDateString()}</td>
+                                    <td>{new Date(entry.updated_at).toLocaleDateString()}</td>
                                     <td>{entry.owner_id || '-'}</td>
                                     <td>{entry.journal_id || '-'}</td>
                                 </tr>
@@ -223,6 +246,10 @@ const AdminPage: React.FC = () => {
                                 <th>{t('title')}</th>
                                 <th>{t('date')}</th>
                                 <th>{t('abstract')}</th>
+                                <th>{t('content')}</th>
+                                <th>{t('filePath')}</th>
+                                <th>{t('createdAt')}</th>
+                                <th>{t('updatedAt')}</th>
                                 <th>{t('ownerID')}</th>
                                 <th>{t('ownerRole')}</th>
                                 <th>{t('journalEntryID')}</th>
@@ -235,6 +262,10 @@ const AdminPage: React.FC = () => {
                                     <td>{progress.title}</td>
                                     <td>{new Date(progress.date).toLocaleDateString()}</td>
                                     <td>{progress.abstract.substring(0, 50)}...</td>
+                                    <td>{progress.content.substring(0, 50)}...</td>
+                                    <td>{progress.file_path || '-'}</td>
+                                    <td>{new Date(progress.created_at).toLocaleDateString()}</td>
+                                    <td>{new Date(progress.updated_at).toLocaleDateString()}</td>
                                     <td>{progress.owner_id || '-'}</td>
                                     <td>{progress.owner_role}</td>
                                     <td>{progress.journal_entry_id}</td>
