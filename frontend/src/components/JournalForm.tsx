@@ -1,12 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-interface JournalFormData {
+// Helper function to replace lodash.isEqual for array comparison
+const arraysEqual = (a?: number[], b?: number[]): boolean => {
+    if (a === b) return true;
+    if (!a || !b) return !a && !b;
+    if (a.length !== b.length) return false;
+    
+    // Compare each element
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+};
+
+export interface JournalFormData {
     title: string;
-    content: string;
-    abstract: string;
-    file_path: string;
-    status: string;
+    abstract_tr: string;
+    abstract_en?: string;
+    keywords?: string;
+    page_number?: string;
+    article_type?: string;
+    language?: string;
+    doi?: string;
+    file_path?: string;
+    status?: string;
+    journal_id?: number;
+    authors_ids?: number[];
+    referees_ids?: number[];
+    date?: string;
 }
 
 interface JournalFormProps {
@@ -20,10 +42,16 @@ interface JournalFormProps {
 const JournalForm: React.FC<JournalFormProps> = ({
     initialData = { 
         title: '', 
-        content: '', 
-        abstract: '',
+        abstract_tr: '',
+        abstract_en: '',
+        keywords: '',
+        page_number: '',
+        article_type: '',
+        language: '',
+        doi: '',
         file_path: '',
-        status: '' // Default status, consider a more appropriate default from your enum if necessary
+        status: '',
+        date: new Date().toISOString().split('T')[0]
     }, // Default for new entry
     onSubmit,
     isSubmitting,
@@ -38,19 +66,29 @@ const JournalForm: React.FC<JournalFormProps> = ({
     // from the current formData to avoid unnecessary resets and input clearing issues.
     useEffect(() => {
         const titleChanged = initialData.title !== formData.title;
-        const contentChanged = initialData.content !== formData.content;
-        const abstractChanged = initialData.abstract !== formData.abstract;
+        const abstractTrChanged = initialData.abstract_tr !== formData.abstract_tr;
+        const abstractEnChanged = initialData.abstract_en !== formData.abstract_en;
+        const keywordsChanged = initialData.keywords !== formData.keywords;
+        const pageNumberChanged = initialData.page_number !== formData.page_number;
+        const articleTypeChanged = initialData.article_type !== formData.article_type;
+        const languageChanged = initialData.language !== formData.language;
+        const doiChanged = initialData.doi !== formData.doi;
         const filePathChanged = initialData.file_path !== formData.file_path;
         const statusChanged = initialData.status !== formData.status;
+        const dateChanged = initialData.date !== formData.date;
+        const journalIdChanged = initialData.journal_id !== formData.journal_id;
+        const authorsIdsChanged = !arraysEqual(initialData.authors_ids, formData.authors_ids);
+        const refereesIdsChanged = !arraysEqual(initialData.referees_ids, formData.referees_ids);
 
-        if (titleChanged || contentChanged || abstractChanged || filePathChanged || statusChanged) {
+        if (titleChanged || abstractTrChanged || abstractEnChanged || 
+            keywordsChanged || pageNumberChanged || articleTypeChanged || languageChanged || 
+            doiChanged || filePathChanged || statusChanged || dateChanged || journalIdChanged || 
+            authorsIdsChanged || refereesIdsChanged) {
             // Only update state if the initialData values are different from current form state
             setFormData(initialData);
         }
         // Depend on the specific values from initialData, not the object reference itself.
-        // This prevents the effect from running if the parent re-renders and passes a 
-        // new initialData object reference with the same content.
-    }, [initialData.title, initialData.content, initialData.abstract, initialData.file_path, initialData.status]);
+    }, [initialData]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = event.target;
@@ -86,14 +124,28 @@ const JournalForm: React.FC<JournalFormProps> = ({
             </div>
             
             <div className="form-group">
-                <label htmlFor="abstract" className="form-label">{t('abstract') || 'Abstract'}</label>
-                <textarea
-                    id="abstract"
-                    name="abstract"
-                    className="form-textarea"
-                    value={formData.abstract}
+                <label htmlFor="date" className="form-label">{t('date') || 'Date'}</label>
+                <input
+                    type="datetime-local"
+                    id="date"
+                    name="date"
+                    className="form-input"
+                    value={formData.date || ''}
                     onChange={handleChange}
-                    placeholder={t('enterAbstract') || 'Enter a brief summary...'}
+                    placeholder={t('enterDate') || 'Enter date'}
+                    disabled={isSubmitting}
+                />
+            </div>
+            
+            <div className="form-group">
+                <label htmlFor="abstract_tr" className="form-label">{t('abstractTurkish') || 'Abstract (Turkish)'}</label>
+                <textarea
+                    id="abstract_tr"
+                    name="abstract_tr"
+                    className="form-textarea"
+                    value={formData.abstract_tr}
+                    onChange={handleChange}
+                    placeholder={t('enterAbstractTr') || 'Enter a brief summary in Turkish...'}
                     rows={3}
                     required
                     disabled={isSubmitting}
@@ -101,20 +153,93 @@ const JournalForm: React.FC<JournalFormProps> = ({
             </div>
             
             <div className="form-group">
-                <label htmlFor="content" className="form-label">{t('content')}</label>
+                <label htmlFor="abstract_en" className="form-label">{t('abstractEnglish') || 'Abstract (English)'}</label>
                 <textarea
-                    id="content"
-                    name="content"
+                    id="abstract_en"
+                    name="abstract_en"
                     className="form-textarea"
-                    value={formData.content}
+                    value={formData.abstract_en || ''}
                     onChange={handleChange}
-                    placeholder={t('writeThoughts')}
-                    rows={12}
-                    required
+                    placeholder={t('enterAbstractEn') || 'Enter a brief summary in English...'}
+                    rows={3}
                     disabled={isSubmitting}
                 />
             </div>
-
+            
+            <div className="form-group">
+                <label htmlFor="keywords" className="form-label">{t('keywords') || 'Keywords'}</label>
+                <input
+                    type="text"
+                    id="keywords"
+                    name="keywords"
+                    className="form-input"
+                    value={formData.keywords || ''}
+                    onChange={handleChange}
+                    placeholder={t('enterKeywords') || 'Enter keywords separated by commas'}
+                    disabled={isSubmitting}
+                />
+            </div>
+            
+            <div className="form-group">
+                <label htmlFor="page_number" className="form-label">{t('pageNumber') || 'Page Number'}</label>
+                <input
+                    type="text"
+                    id="page_number"
+                    name="page_number"
+                    className="form-input"
+                    value={formData.page_number || ''}
+                    onChange={handleChange}
+                    placeholder={t('enterPageNumber') || 'Enter page number'}
+                    disabled={isSubmitting}
+                />
+            </div>
+            
+            <div className="form-group">
+                <label htmlFor="article_type" className="form-label">{t('articleType') || 'Article Type'}</label>
+                <select
+                    id="article_type"
+                    name="article_type"
+                    className="form-select"
+                    value={formData.article_type || ''}
+                    onChange={handleChange}
+                    disabled={isSubmitting}
+                >
+                    <option value="">{t('selectArticleType') || '-- Select Article Type --'}</option>
+                    <option value="theory">{t('articleTypeTheory') || 'Theory'}</option>
+                    <option value="research">{t('articleTypeResearch') || 'Research'}</option>
+                </select>
+            </div>
+            
+            <div className="form-group">
+                <label htmlFor="language" className="form-label">{t('language') || 'Language'}</label>
+                <select
+                    id="language"
+                    name="language"
+                    className="form-select"
+                    value={formData.language || ''}
+                    onChange={handleChange}
+                    disabled={isSubmitting}
+                >
+                    <option value="">{t('selectLanguage') || '-- Select Language --'}</option>
+                    <option value="tr">{t('turkish') || 'Turkish'}</option>
+                    <option value="en">{t('english') || 'English'}</option>
+                </select>
+            </div>
+            
+            <div className="form-group">
+                <label htmlFor="doi" className="form-label">{t('doi') || 'DOI'}</label>
+                <input
+                    type="text"
+                    id="doi"
+                    name="doi"
+                    className="form-input"
+                    value={formData.doi || ''}
+                    onChange={handleChange}
+                    placeholder={t('enterDoi') || 'Enter DOI'}
+                    disabled={isSubmitting}
+                />
+            </div>
+            
             <div className="form-group">
                 <label htmlFor="file_path" className="form-label">{t('filePath') || 'File Path'}</label>
                 <input
@@ -122,7 +247,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     id="file_path"
                     name="file_path"
                     className="form-input"
-                    value={formData.file_path}
+                    value={formData.file_path || ''}
                     onChange={handleChange}
                     placeholder={t('enterFilePath') || 'Enter file path'}
                     disabled={isSubmitting}
@@ -135,10 +260,9 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     id="status"
                     name="status"
                     className="form-select"
-                    value={formData.status}
+                    value={formData.status || ''}
                     onChange={handleChange}
                     disabled={isSubmitting}
-                    required
                 >
                     <option value="">{t('selectStatus') || '-- Select Status --'}</option>
                     <option value="waiting_for_payment">{t('statusWaitingForPayment') || 'Waiting for Payment'}</option>

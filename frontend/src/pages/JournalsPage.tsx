@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import apiService, { JournalEntryRead } from '../services/apiService';
+import * as apiService from '../services/apiService';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -7,7 +7,7 @@ import { useActiveJournal } from '../contexts/ActiveJournalContext';
 import { Journal } from '../services/apiService';
 
 interface JournalWithEntries extends Journal {
-    entries: JournalEntryRead[];
+    entries: apiService.JournalEntryRead[];
     isExpanded: boolean;
     isLoading: boolean;
 }
@@ -173,79 +173,234 @@ const JournalsPage: React.FC = () => {
                     <h3>{t('noJournals')}</h3>
                 </div>
             ) : (
-                <div className="journals-list">
-                    {journalsWithEntries.map((journal) => (
-                        <div key={journal.id} className="journal-section">
+                <div className="accordion journals-accordion" style={{ 
+                    padding: '16px 0',
+                    maxWidth: '100%',
+                    margin: '0 auto'
+                }}>
+                    {journalsWithEntries.map((journal, _index) => (
+                        <div key={journal.id} className="accordion-item" style={{ 
+                            marginBottom: '8px',
+                            borderRadius: '8px',
+                            border: activeJournal?.id === journal.id 
+                                ? '2px solid var(--color-primary)' 
+                                : '1px solid var(--color-border-light)',
+                            overflow: 'hidden',
+                            transition: 'all 0.3s ease'
+                        }}>
                             <div 
-                                className={`journal-card ${activeJournal?.id === journal.id ? 'active-journal' : ''}`}
+                                className={`accordion-header ${journal.isExpanded ? 'expanded' : ''}`} 
+                                onClick={() => toggleJournalExpansion(journal.id)}
+                                style={{ 
+                                    padding: '16px 20px',
+                                    backgroundColor: 'var(--color-background-primary)',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    position: 'relative',
+                                    userSelect: 'none',
+                                    borderBottom: journal.isExpanded 
+                                        ? '1px solid var(--color-border-light)' 
+                                        : 'none'
+                                }}
                             >
-                                <div className="journal-header" onClick={() => toggleJournalExpansion(journal.id)}>
-                                    <div>
-                                        <h3>
-                                            {journal.title} 
-                                            <span className="journal-expand-icon">
-                                                {journal.isExpanded ? '▼' : '►'}
+                                <div style={{ flex: 1 }}>
+                                    <h3 style={{ 
+                                        margin: 0, 
+                                        fontSize: 'var(--font-size-lg)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        color: 'var(--color-text-primary)'
+                                    }}>
+                                        <span className="chevron" style={{
+                                            display: 'inline-flex',
+                                            width: '24px',
+                                            height: '24px',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            marginRight: '12px',
+                                            transition: 'transform 0.3s ease',
+                                            transform: journal.isExpanded ? 'rotate(90deg)' : 'rotate(0deg)'
+                                        }}>
+                                            ›
+                                        </span>
+                                        {journal.title}
+                                        {activeJournal?.id === journal.id && (
+                                            <span className="active-badge" style={{
+                                                marginLeft: '12px',
+                                                fontSize: 'var(--font-size-xs)',
+                                                backgroundColor: 'var(--color-primary)',
+                                                color: 'white',
+                                                padding: '2px 8px',
+                                                borderRadius: '12px'
+                                            }}>
+                                                {t('active') || 'Active'}
                                             </span>
-                                        </h3>
-                                        <p>{t('issue')}: {journal.issue}</p>
-                                        <p>{t('date')}: {new Date(journal.date).toLocaleDateString()}</p>
-                                    </div>
-                                    <div className="journal-actions">
-                                        {activeJournal?.id === journal.id ? (
-                                            <span className="active-label">{t('active') || 'Active'}</span>
-                                        ) : (
-                                            user && (
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleSetActive(journal);
-                                                    }}
-                                                    className="btn btn-small btn-secondary"
-                                                >
-                                                    {t('setAsActive') || 'Set as Active'}
-                                                </button>
-                                            )
                                         )}
-                                        {user && user.role === 'admin' && (
-                                            <Link 
-                                                to={`/journals/edit/${journal.id}`}
-                                                className="btn btn-small btn-outline"
-                                                onClick={(e) => e.stopPropagation()}
-                                                style={{ marginLeft: '8px' }}
-                                            >
-                                                {t('edit') || 'Edit'}
-                                            </Link>
-                                        )}
+                                    </h3>
+                                    <div style={{ 
+                                        display: 'flex', 
+                                        marginTop: '8px',
+                                        color: 'var(--color-text-secondary)',
+                                        fontSize: 'var(--font-size-sm)'
+                                    }}>
+                                        <span style={{ marginRight: '16px' }}>{t('issue')}: {journal.issue}</span>
+                                        <span>{t('date')}: {new Date(journal.date).toLocaleDateString()}</span>
                                     </div>
                                 </div>
-                                
-                                {journal.isExpanded && (
-                                    <div className="journal-entries-section">
-                                        <h4>{t('entriesInJournal') || 'Entries in this journal'}</h4>
-                                        {journal.isLoading ? (
-                                            <div className="loading-small">{t('loadingEntries') || 'Loading entries...'}</div>
-                                        ) : journal.entries.length === 0 ? (
-                                            <div className="no-entries-message">
-                                                <p>{t('noEntriesInJournal') || 'No entries in this journal yet.'}</p>
-                                            </div>
-                                        ) : (
-                                            <div className="entries-list">
-                                                {journal.entries.map(entry => (
-                                                    <div key={entry.id} className="entry-item">
-                                                        <h5>{entry.title}</h5>
-                                                        <p className="entry-abstract">{entry.abstract}</p>
+                                <div className="journal-actions" style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}>
+                                    {activeJournal?.id !== journal.id && user && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleSetActive(journal);
+                                            }}
+                                            className="btn btn-small btn-secondary"
+                                            style={{ 
+                                                padding: '4px 12px',
+                                                fontSize: 'var(--font-size-sm)'
+                                            }}
+                                        >
+                                            {t('setAsActive') || 'Set as Active'}
+                                        </button>
+                                    )}
+                                    {user && user.role === 'admin' && (
+                                        <Link 
+                                            to={`/journals/edit/${journal.id}`}
+                                            className="btn btn-small btn-outline"
+                                            onClick={(e) => e.stopPropagation()}
+                                            style={{ 
+                                                padding: '4px 12px',
+                                                fontSize: 'var(--font-size-sm)'
+                                            }}
+                                        >
+                                            {t('edit') || 'Edit'}
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            <div className="accordion-content" style={{ 
+                                maxHeight: journal.isExpanded ? '2000px' : '0',
+                                opacity: journal.isExpanded ? '1' : '0',
+                                overflow: 'hidden',
+                                transition: 'all 0.3s ease',
+                                backgroundColor: 'var(--color-background-secondary)'
+                            }}>
+                                <div className="accordion-body" style={{ 
+                                    padding: '20px',
+                                    opacity: journal.isExpanded ? '1' : '0',
+                                    transition: 'opacity 0.3s ease'
+                                }}>
+                                    <h4 style={{ 
+                                        marginTop: 0, 
+                                        marginBottom: '16px', 
+                                        fontSize: 'var(--font-size-lg)',
+                                        color: 'var(--color-text-primary)',
+                                        borderBottom: '1px solid var(--color-border-light)',
+                                        paddingBottom: '8px'
+                                    }}>
+                                        {t('entriesInJournal') || 'Entries in this journal'}
+                                    </h4>
+                                    
+                                    {journal.isLoading ? (
+                                        <div className="loading-small" style={{ 
+                                            padding: '24px 0',
+                                            textAlign: 'center',
+                                            color: 'var(--color-text-secondary)'
+                                        }}>
+                                            {t('loadingEntries') || 'Loading entries...'}
+                                        </div>
+                                    ) : journal.entries.length === 0 ? (
+                                        <div className="no-entries-message" style={{ 
+                                            backgroundColor: 'var(--color-background-primary)',
+                                            borderRadius: '6px',
+                                            padding: '24px',
+                                            textAlign: 'center',
+                                            color: 'var(--color-text-secondary)'
+                                        }}>
+                                            <p>{t('noEntriesInJournal') || 'No entries in this journal yet.'}</p>
+                                        </div>
+                                    ) : (
+                                        <div className="entries-list" style={{ 
+                                            display: 'grid',
+                                            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                                            gap: '16px',
+                                            margin: '0'
+                                        }}>
+                                            {journal.entries.map(entry => (
+                                                <div key={entry.id} className="entry-item" style={{ 
+                                                    backgroundColor: 'var(--color-background-primary)',
+                                                    borderRadius: '6px',
+                                                    padding: '16px',
+                                                    boxShadow: 'var(--shadow-sm)',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    height: '100%',
+                                                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                                                }}>
+                                                    <h5 style={{ 
+                                                        marginTop: 0, 
+                                                        marginBottom: '8px',
+                                                        fontSize: 'var(--font-size-base)',
+                                                        color: 'var(--color-text-primary)'
+                                                    }}>{entry.title}</h5>
+                                                    
+                                                    <p className="entry-abstract" style={{ 
+                                                        color: 'var(--color-text-secondary)',
+                                                        fontSize: 'var(--font-size-sm)',
+                                                        marginBottom: '12px',
+                                                        flexGrow: 1,
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: 3,
+                                                        WebkitBoxOrient: 'vertical',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis'
+                                                    }}>{entry.abstract_tr}</p>
+                                                    
+                                                    <div className="entry-meta" style={{ 
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        marginBottom: '12px',
+                                                        fontSize: 'var(--font-size-xs)',
+                                                        color: 'var(--color-text-tertiary)'
+                                                    }}>
                                                         <div className="entry-date">
-                                                            {new Date(entry.created_at).toLocaleDateString()}
+                                                            {entry.date ? new Date(entry.date).toLocaleString() : new Date(entry.created_at).toLocaleString()}
                                                         </div>
-                                                        <Link to={`/entries/edit/${entry.id}`} className="btn btn-small btn-outline">
+                                                        {entry.status && (
+                                                            <div className="entry-status">
+                                                                <span className={`badge badge-${entry.status.toLowerCase()}`} style={{
+                                                                    padding: '2px 8px',
+                                                                    borderRadius: '12px',
+                                                                    fontSize: 'var(--font-size-xs)'
+                                                                }}>
+                                                                    {t(entry.status) || entry.status}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div style={{ textAlign: 'right' }}>
+                                                        <Link to={`/entries/edit/${entry.id}`} className="btn btn-small btn-outline" style={{
+                                                            padding: '4px 12px',
+                                                            fontSize: 'var(--font-size-sm)',
+                                                            borderRadius: '4px'
+                                                        }}>
                                                             {t('viewEdit') || 'View/Edit'}
                                                         </Link>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}

@@ -1,6 +1,8 @@
 import './App.css'
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Import page components
 import LoginPage from './pages/LoginPage';
@@ -11,7 +13,20 @@ import JournalsPage from './pages/JournalsPage';
 import JournalCreateFormPage from './pages/JournalCreateFormPage';
 import JournalEditFormPage from './pages/JournalEditFormPage';
 import AdminPage from './pages/AdminPage';
+import EditorPage from './pages/EditorPage';
+import EditorJournalsPage from './pages/EditorJournalsPage';
 import ArchivedJournalsPage from './pages/ArchivedJournalsPage';
+import JournalEntriesPage from './pages/JournalEntriesPage';
+import EditUserPage from './pages/EditUserPage';
+import CreateUserPage from './pages/CreateUserPage';
+import AutoLoginPage from './pages/AutoLoginPage';
+import UserProfilePage from './pages/UserProfilePage';
+import ProfileEditPage from './pages/ProfileEditPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import JournalEntryUpdateDetailsPage from './pages/JournalEntryUpdateDetailsPage';
+import AuthorUpdateFormPage from './pages/AuthorUpdateFormPage';
+import RefereeUpdateFormPage from './pages/RefereeUpdateFormPage';
 // Import other components as needed (e.g., JournalDetailPage, JournalCreatePage)
 
 // Import shared components
@@ -26,10 +41,40 @@ import Sidebar from './components/Sidebar';
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user } = useAuth();
   
-  if (!isAuthenticated || (user && user.role !== 'admin')) {
+  // Check if user is authenticated and has admin role
+  if (!isAuthenticated || !user || user.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
   
+  return <>{children}</>;
+};
+
+// Editor route wrapper component
+const EditorRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, user } = useAuth();
+  
+  // Check if user is authenticated and has editor or admin role
+  if (!isAuthenticated || !user || (user.role !== 'editor' && user.role !== 'admin')) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// User route wrapper component for protected user routes
+const UserRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  // If still loading auth state, show a loading spinner
+  if (isLoading) {
+    return <div className="loading-container"><div className="loading-spinner"></div></div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // If we have a user, render the protected content
   return <>{children}</>;
 };
 
@@ -44,11 +89,69 @@ function App() {
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auto-login" element={<AutoLoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
             {/* Protected Routes */}
-            <Route path="/entries/new" element={<JournalCreatePage />} />
-            <Route path="/entries/edit/:id" element={<JournalEditPage />} />
-            <Route path="/archive" element={<ArchivedJournalsPage />} />
+            <Route path="/entries/new" element={
+              <UserRoute>
+                <JournalCreatePage />
+              </UserRoute>
+            } />
+            <Route path="/entries/edit/:id" element={
+              <UserRoute>
+                <JournalEditPage />
+              </UserRoute>
+            } />
+            <Route path="/entries/:entryId/updates" element={
+              <UserRoute>
+                <JournalEntryUpdateDetailsPage />
+              </UserRoute>
+            } />
+            <Route path="/entries/:entryId/author-update/new" element={
+              <UserRoute>
+                <AuthorUpdateFormPage />
+              </UserRoute>
+            } />
+            <Route path="/entries/:entryId/referee-update/new" element={
+              <UserRoute>
+                <RefereeUpdateFormPage />
+              </UserRoute>
+            } />
+            <Route path="/archive" element={
+              <UserRoute>
+                <ArchivedJournalsPage />
+              </UserRoute>
+            } />
+            <Route path="/archive/journal/:journalId" element={
+              <UserRoute>
+                <JournalEntriesPage />
+              </UserRoute>
+            } />
+            <Route path="/profile" element={
+              <UserRoute>
+                <UserProfilePage />
+              </UserRoute>
+            } />
+            <Route path="/profile/edit" element={
+              <UserRoute>
+                <ProfileEditPage />
+              </UserRoute>
+            } />
+            
+            {/* Editor Routes */}
+            <Route path="/editor" element={
+              <EditorRoute>
+                <EditorPage />
+              </EditorRoute>
+            } />
+            
+            <Route path="/editor/journals" element={
+              <EditorRoute>
+                <EditorJournalsPage />
+              </EditorRoute>
+            } />
             
             {/* Admin Routes */}
             <Route path="/" element={
@@ -76,12 +179,28 @@ function App() {
                 <AdminPage />
               </AdminRoute>
             } />
+            <Route path="/admin/users/edit/:id" element={
+              <AdminRoute>
+                <EditUserPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/users/create" element={
+              <AdminRoute>
+                <CreateUserPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/users/profile/:id" element={
+              <AdminRoute>
+                <UserProfilePage />
+              </AdminRoute>
+            } />
             
             {/* Add a 404 Not Found route */}
             <Route path="*" element={<div style={{ padding: '2rem', textAlign: 'center' }}>Page Not Found</div>} />
           </Routes>
         </main>
       </div>
+      <ToastContainer position="top-right" autoClose={5000} />
     </div>
   )
 }

@@ -1,0 +1,245 @@
+:root {
+    --admin-bg-color: #ffffff;
+    --admin-text-color: #212529;
+    --admin-card-bg: #ffffff;
+    --admin-card-border: #e0e0e0;
+    --admin-header-bg: #f8f9fa;
+    --admin-header-hover-bg: #e9ecef;
+    --admin-table-bg: #ffffff;
+    --admin-table-border: #e0e0e0;
+    --admin-table-header-bg: #f3f3f3;
+    --admin-table-row-even-bg: #f9f9f9;
+    --admin-table-row-hover-bg: #f3f3f3;
+    --admin-badge-admin-bg: #dc3545;
+    --admin-badge-admin-text: white;
+    --admin-badge-editor-bg: #28a745;
+    --admin-badge-editor-text: white;
+    --admin-badge-referee-bg: #fd7e14;
+    --admin-badge-referee-text: white;
+    --admin-badge-author-bg: #0d6efd;
+    --admin-badge-author-text: white;
+    --admin-badge-pending-bg: #ffc107;
+    --admin-badge-pending-text: black;
+    --admin-badge-accepted-bg: #28a745;
+    --admin-badge-accepted-text: white;
+    --admin-badge-rejected-bg: #dc3545;
+    --admin-badge-rejected-text: white;
+    --admin-badge-published-bg: #0d6efd;
+    --admin-badge-published-text: white;
+    --admin-error-text-color: #dc3545;
+    --admin-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* AdminPage General Styles */
+.admin-page {
+    background-color: var(--admin-bg-color);
+    color: var(--admin-text-color);
+    padding: 1rem; /* Ensure padding for the page itself */
+}
+
+.admin-page .page-title {
+    color: var(--admin-text-color);
+}
+
+/* AdminPage Accordion Styles */
+.admin-page .accordion-section {
+    margin-bottom: 1rem;
+    border: 1px solid var(--admin-card-border);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: var(--admin-box-shadow);
+    background-color: var(--admin-card-bg);
+}
+
+.admin-page .accordion-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--admin-header-bg);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.admin-page .accordion-header:hover {
+    background-color: var(--admin-header-hover-bg);
+}
+
+.admin-page .accordion-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    color: var(--admin-text-color); /* Ensure header text inherits color */
+}
+
+.admin-page .accordion-icon {
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.admin-page .accordion-icon.open {
+    transform: rotate(0deg); /* This should likely be 90deg or similar for open state */
+}
+
+.admin-page .accordion-content {
+    padding: 1rem;
+    background: var(--admin-card-bg); /* Content background matches card */
+}
+
+/* Improve table styles */
+.admin-page .table-container {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.admin-page .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--admin-table-bg);
+}
+
+.admin-page .data-table th {
+    background-color: var(--admin-table-header-bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    color: var(--admin-text-color);
+}
+
+.admin-page .data-table th,
+.admin-page .data-table td {
+    padding: 0.5rem;
+    border: 1px solid var(--admin-table-border);
+    text-align: left;
+    color: var(--admin-text-color);
+}
+
+.admin-page .data-table tr:nth-child(even) {
+    background-color: var(--admin-table-row-even-bg);
+}
+
+.admin-page .data-table tr:hover {
+    background-color: var(--admin-table-row-hover-bg);
+}
+
+/* Badge styles */
+.admin-page .badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.admin-page .badge-admin {
+    background-color: var(--admin-badge-admin-bg);
+    color: var(--admin-badge-admin-text);
+}
+
+.admin-page .badge-editor {
+    background-color: var(--admin-badge-editor-bg);
+    color: var(--admin-badge-editor-text);
+}
+
+.admin-page .badge-referee {
+    background-color: var(--admin-badge-referee-bg);
+    color: var(--admin-badge-referee-text);
+}
+
+.admin-page .badge-author {
+    background-color: var(--admin-badge-author-bg);
+    color: var(--admin-badge-author-text);
+}
+
+.admin-page .badge-pending {
+    background-color: var(--admin-badge-pending-bg);
+    color: var(--admin-badge-pending-text);
+}
+
+.admin-page .badge-accepted {
+    background-color: var(--admin-badge-accepted-bg);
+    color: var(--admin-badge-accepted-text);
+}
+
+.admin-page .badge-rejected {
+    background-color: var(--admin-badge-rejected-bg);
+    color: var(--admin-badge-rejected-text);
+}
+
+.admin-page .badge-published {
+    background-color: var(--admin-badge-published-bg);
+    color: var(--admin-badge-published-text);
+}
+
+/* Loading and error states */
+.admin-page .loading-container,
+.admin-page .error-message {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--admin-text-color);
+}
+
+.admin-page .error-message {
+    color: var(--admin-error-text-color);
+}
+
+/* Edit button styles */
+.admin-page .edit-button {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background-color: #4caf50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-align: center;
+}
+
+.admin-page .edit-button:hover {
+    background-color: #43a047;
+}
+
+.admin-actions {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.admin-actions .btn {
+    margin-left: 0.5rem;
+}
+
+/* User email link styles */
+.admin-page .user-email-link {
+    color: #0d6efd;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.admin-page .user-email-link:hover {
+    color: #0a58ca;
+    text-decoration: underline;
+}
+
+.admin-page .back-button {
+    display: inline-block;
+    padding: 5px 10px;
+    margin-bottom: 1rem;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.admin-page .back-button:hover {
+    background-color: #5a6268;
+} 

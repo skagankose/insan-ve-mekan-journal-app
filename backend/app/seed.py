@@ -1,0 +1,664 @@
+from datetime import datetime
+from sqlalchemy.orm import Session
+from sqlmodel import SQLModel, create_engine
+from passlib.context import CryptContext
+import random
+import os
+from dotenv import load_dotenv
+import sys
+from sqlalchemy import text, inspect
+
+# Patch for bcrypt/__about__ issue
+import bcrypt
+if not hasattr(bcrypt, '__about__'):
+    bcrypt.__about__ = type('obj', (object,), {
+        '__version__': bcrypt.__version__
+    })
+
+from models import (
+    User, Journal, JournalEntry, AuthorUpdate, RefereeUpdate, Settings,
+    UserRole, JournalEntryStatus, ArticleType,
+    ArticleLanguage, JournalEditorLink, JournalEntryAuthorLink, JournalEntryRefereeLink
+)
+
+# Load environment variables from .env file
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable not set")
+
+# Connection parameters
+engine = create_engine(DATABASE_URL, echo=True)  # echo=True logs SQL queries for debugging
+
+# Setup password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Password hashing function
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+def seed_database():
+    # Create session
+    with Session(engine) as session:
+        # Using the actual database enum values (not the model enum values)
+        # Database has: SOCIAL_SCIENCES, NATURAL_SCIENCES, FORMAL_SCIENCES, APPLIED_SCIENCES, HUMANITIES
+        
+        science_branch_samples = [
+            "Educational Sciences", "Science and Mathematics", "Philology", "Fine Arts", "Law", "Theology",
+            "Architecture, Planning and Design", "Engineering", "Social, Human and Administrative Sciences",
+            "Social Sciences", "Applied Sciences", "Humanities", "Agriculture, Forestry and Aquaculture",
+            "Sports Sciences", "Health Sciences"
+        ]
+        
+        user_title_samples = [
+            "Prof. Dr.", "Assoc. prof.", "Faculty Member/Dr.", "Dr.",
+            "Instructor", "Dr. Lecturer", "Research Assistant Doctor", "Other"
+        ]
+
+        # Additional cities for more variety
+        cities = [
+            "Istanbul", "Ankara", "Izmir", "Bursa", "Antalya", "Adana", "Trabzon", "Konya", 
+            "Kayseri", "Mersin", "Eskişehir", "Diyarbakır", "Gaziantep", "Samsun", "Van", 
+            "Denizli", "Manisa", "Malatya", "Hatay", "Erzurum", "Çanakkale", "Edirne"
+        ]
+        
+        # Create admin users (2)
+        users = [
+            User(
+                id=i,
+                email=f"admin{i}@admin.com",
+                name=f"Admin User {i}",
+                title="Prof. Dr.",
+                bio="System administrator",
+                telephone=f"555-00{i}0",
+                science_branch="Social Sciences",
+                location=random.choice(cities),
+                yoksis_id=f"Y00000{i}",
+                orcid_id=f"0000-0000-0000-000{i}",
+                role=UserRole.admin,
+                is_auth=True,
+                hashed_password=get_password_hash(f"admin{i}password"),
+                confirmation_token=f"admin{i}_token",
+                confirmation_token_created_at=datetime.utcnow()
+            ) for i in range(2, 4)  # Now creating 2 admin users
+        ]
+        
+        # Editor users (10) - Doubled from 5
+        editors = []
+        for i in range(1, 11):
+            selected_title = random.choice(user_title_samples)
+            selected_bio_specialization = random.choice([
+                'Urban Studies', 'Architecture', 'Design', 'Cultural Studies', 'Social Sciences',
+                'Sustainable Design', 'Heritage Conservation', 'Urban Planning', 'Digital Architecture',
+                'Infrastructure Design', 'Interior Design', 'Landscape Architecture'
+            ])
+            selected_science_branch = random.choice(science_branch_samples)
+            selected_location = random.choice(cities)
+            
+            # ---- DEBUG PRINT ----
+            print(f"DEBUG: Creating editor {i} with science_branch='{selected_science_branch}' (type: {type(selected_science_branch)})")
+            # ---- END DEBUG PRINT ----
+
+            editor = User(
+                id=i+3,  # Start IDs at 4 (after 3 admins)
+                email=f"editor{i}@example.com",
+                name=f"Editor {i}",
+                title=selected_title,
+                bio=f"Editor specializing in {selected_bio_specialization}",
+                telephone=f"555-1{i}00",
+                science_branch=selected_science_branch,
+                location=selected_location,
+                yoksis_id=f"Y1234{i}",
+                orcid_id=f"0000-0001-1234-{i:03d}",
+                role=UserRole.editor,
+                is_auth=True,
+                hashed_password=get_password_hash(f"editor{i}password"),
+                confirmation_token=f"editor{i}_token",
+                confirmation_token_created_at=datetime.utcnow()
+            )
+            editors.append(editor)
+        users.extend(editors)
+        
+        # Author users (16) - Doubled from 8
+        authors = []
+        for i in range(1, 17):
+            selected_title = random.choice(user_title_samples)
+            selected_bio_specialization = random.choice([
+                'architecture', 'urban planning', 'design theory', 'social spaces', 'cultural heritage',
+                'landscape design', 'historical conservation', 'sustainable urban development', 
+                'architectural history', 'digital design', 'parametric design', 'spatial analysis',
+                'urban sociology', 'infrastructure planning', 'building materials', 'architectural acoustics'
+            ])
+            selected_science_branch = random.choice(science_branch_samples)
+            selected_location = random.choice(cities)
+
+            # ---- DEBUG PRINT ----
+            print(f"DEBUG: Creating author {i} with science_branch='{selected_science_branch}' (type: {type(selected_science_branch)})")
+            # ---- END DEBUG PRINT ----
+
+            author = User(
+                id=i+13,  # Start at 14 (after 3 admins + 10 editors)
+                email=f"author{i}@example.com",
+                name=f"Author {i}",
+                title=selected_title,
+                bio=f"Researcher in {selected_bio_specialization}",
+                telephone=f"555-2{i:02d}",
+                science_branch=selected_science_branch,
+                location=selected_location,
+                yoksis_id=f"Y2345{i:02d}",
+                orcid_id=f"0000-0002-2345-{i:03d}",
+                role=UserRole.author,
+                is_auth=True,
+                hashed_password=get_password_hash(f"author{i}password"),
+                confirmation_token=f"author{i}_token",
+                confirmation_token_created_at=datetime.utcnow()
+            )
+            authors.append(author)
+        users.extend(authors)
+        
+        # Referee users (10) - Doubled from 5
+        referees = []
+        for i in range(1, 11):
+            selected_title = random.choice(user_title_samples)
+            selected_bio_specialization = random.choice([
+                'urban planning', 'architecture history', 'construction', 'design theory', 'social spaces',
+                'urban design', 'historical preservation', 'sustainable construction', 'public spaces',
+                'design evaluation', 'architectural criticism', 'spatial analysis', 'urban infrastructure'
+            ])
+            selected_science_branch = random.choice(science_branch_samples)
+            selected_location = random.choice(cities)
+
+            # ---- DEBUG PRINT ----
+            print(f"DEBUG: Creating referee {i} with science_branch='{selected_science_branch}' (type: {type(selected_science_branch)})")
+            # ---- END DEBUG PRINT ----
+            
+            referee = User(
+                id=i+29,  # Start at 30 (after 3 admins + 10 editors + 16 authors)
+                email=f"referee{i}@example.com",
+                name=f"Referee {i}",
+                title=selected_title,
+                bio=f"Referee specialized in {selected_bio_specialization}",
+                telephone=f"555-3{i:02d}",
+                science_branch=selected_science_branch,
+                location=selected_location,
+                yoksis_id=f"Y3456{i:02d}",
+                orcid_id=f"0000-0003-3456-{i:03d}",
+                role=UserRole.referee,
+                is_auth=True,
+                hashed_password=get_password_hash(f"referee{i}password"),
+                confirmation_token=f"referee{i}_token",
+                confirmation_token_created_at=datetime.utcnow()
+            )
+            referees.append(referee)
+        users.extend(referees)
+        
+        # Add users to session
+        for user in users:
+            session.add(user)
+        
+        # Flush to get IDs
+        session.flush()
+        
+        # Create 12 journals (more than doubled from 5)
+        journals = [
+            Journal(
+                id=1,
+                title="Journal of Human and Space",
+                date=datetime(2023, 5, 1),
+                issue="Issue 1",
+                is_published=True,
+                publication_date=datetime(2023, 5, 5),
+                publication_place="Istanbul",
+                cover_photo="cover1.jpg",
+                meta_files="meta1.zip",
+                editor_notes="Notes for Human and Space",
+                full_pdf="humanspace_full.pdf",
+                editor_in_chief_id=4  # First editor
+            ),
+            Journal(
+                id=2,
+                title="Architecture Today",
+                date=datetime(2023, 6, 15),
+                issue="Volume 5, Issue 2",
+                is_published=True,
+                publication_date=datetime(2023, 6, 20),
+                publication_place="Ankara",
+                cover_photo="arch_cover.jpg",
+                meta_files="arch_meta.zip",
+                editor_notes="Notes for Architecture Today",
+                full_pdf="arch_full.pdf",
+                editor_in_chief_id=5  # Second editor
+            ),
+            Journal(
+                id=3,
+                title="Urban Design Quarterly",
+                date=datetime(2023, 7, 10),
+                issue="Summer Issue",
+                is_published=True,
+                publication_date=datetime(2023, 7, 15),
+                publication_place="Izmir",
+                cover_photo="urban_cover.jpg",
+                meta_files="urban_meta.zip",
+                editor_notes="Notes for Urban Design",
+                full_pdf="urban_full.pdf",
+                editor_in_chief_id=6  # Third editor
+            ),
+            Journal(
+                id=4,
+                title="Contemporary Spaces",
+                date=datetime(2023, 8, 5),
+                issue="Fall Collection",
+                is_published=False,
+                publication_date=None,
+                publication_place="Bursa",
+                cover_photo="spaces_cover.jpg",
+                meta_files="spaces_meta.zip",
+                editor_notes="Draft notes for Contemporary Spaces",
+                full_pdf=None,
+                editor_in_chief_id=7  # Fourth editor
+            ),
+            Journal(
+                id=5,
+                title="Heritage & Culture",
+                date=datetime(2023, 9, 1),
+                issue="Annual Edition",
+                is_published=False,
+                publication_date=None,
+                publication_place="Antalya",
+                cover_photo="heritage_cover.jpg",
+                meta_files="heritage_meta.zip",
+                editor_notes="Draft notes for Heritage",
+                full_pdf=None,
+                editor_in_chief_id=8  # Fifth editor
+            ),
+            # New journals
+            Journal(
+                id=6,
+                title="Sustainable Architecture Review",
+                date=datetime(2023, 10, 5),
+                issue="Volume 3, Issue 4",
+                is_published=True,
+                publication_date=datetime(2023, 10, 10),
+                publication_place="Adana",
+                cover_photo="sustain_cover.jpg",
+                meta_files="sustain_meta.zip",
+                editor_notes="Notes for Sustainable Architecture",
+                full_pdf="sustain_full.pdf",
+                editor_in_chief_id=9  # Sixth editor
+            ),
+            Journal(
+                id=7,
+                title="Public Space Quarterly",
+                date=datetime(2023, 11, 15),
+                issue="Winter Issue",
+                is_published=True,
+                publication_date=datetime(2023, 11, 20),
+                publication_place="Trabzon",
+                cover_photo="public_cover.jpg",
+                meta_files="public_meta.zip",
+                editor_notes="Notes for Public Space",
+                full_pdf="public_full.pdf",
+                editor_in_chief_id=10  # Seventh editor
+            ),
+            Journal(
+                id=8,
+                title="Digital Design Journal",
+                date=datetime(2023, 12, 10),
+                issue="Special Edition",
+                is_published=True,
+                publication_date=datetime(2023, 12, 15),
+                publication_place="Konya",
+                cover_photo="digital_cover.jpg",
+                meta_files="digital_meta.zip",
+                editor_notes="Notes for Digital Design",
+                full_pdf="digital_full.pdf",
+                editor_in_chief_id=11  # Eighth editor
+            ),
+            Journal(
+                id=9,
+                title="Urban Interventions",
+                date=datetime(2024, 1, 5),
+                issue="Volume 1, Issue 1",
+                is_published=False,
+                publication_date=None,
+                publication_place="Eskişehir",
+                cover_photo="urban_int_cover.jpg",
+                meta_files="urban_int_meta.zip",
+                editor_notes="Draft notes for Urban Interventions",
+                full_pdf=None,
+                editor_in_chief_id=12  # Ninth editor
+            ),
+            Journal(
+                id=10,
+                title="Historical Preservation Studies",
+                date=datetime(2024, 2, 10),
+                issue="Anniversary Issue",
+                is_published=False,
+                publication_date=None,
+                publication_place="Diyarbakır",
+                cover_photo="history_cover.jpg",
+                meta_files="history_meta.zip",
+                editor_notes="Draft notes for Historical Preservation",
+                full_pdf=None,
+                editor_in_chief_id=13  # Tenth editor
+            ),
+            Journal(
+                id=11,
+                title="Critical Architecture Review",
+                date=datetime(2024, 3, 15),
+                issue="Spring Edition",
+                is_published=False,
+                publication_date=None,
+                publication_place="Samsun",
+                cover_photo="critical_cover.jpg",
+                meta_files="critical_meta.zip",
+                editor_notes="Draft notes for Critical Architecture",
+                full_pdf=None,
+                editor_in_chief_id=4  # Reusing first editor
+            ),
+            Journal(
+                id=12,
+                title="Spatial Analytics Journal",
+                date=datetime(2024, 4, 20),
+                issue="Data Edition",
+                is_published=False,
+                publication_date=None,
+                publication_place="Çanakkale",
+                cover_photo="spatial_cover.jpg",
+                meta_files="spatial_meta.zip",
+                editor_notes="Draft notes for Spatial Analytics",
+                full_pdf=None,
+                editor_in_chief_id=5  # Reusing second editor
+            )
+        ]
+        
+        for journal in journals:
+            session.add(journal)
+        
+        session.flush()
+        
+        # Create journal editor links
+        # Each journal has its chief editor plus 2-3 additional editors
+        editor_links = []
+        
+        for j_id in range(1, 13):  # For each journal (now 12 journals)
+            # Add chief editor - chief editor IDs are mapped above in the journal creation
+            chief_editor_id = journals[j_id-1].editor_in_chief_id
+            editor_links.append(JournalEditorLink(journal_id=j_id, user_id=chief_editor_id))
+            
+            # Add 2-3 additional editors (randomly selected)
+            available_editors = [i for i in range(4, 14) if i != chief_editor_id]  # Editor IDs 4-13
+            additional_editors = random.sample(available_editors, k=random.randint(2, 3))
+            for e_id in additional_editors:
+                editor_links.append(JournalEditorLink(journal_id=j_id, user_id=e_id))
+        
+        for link in editor_links:
+            session.add(link)
+        
+        session.flush()
+        
+        # Create journal entries (increased to 8-10 per journal)
+        journal_entries = []
+        entry_id = 1
+        entry_authors_map = {}
+        entry_referees_map = {}
+        
+        article_themes = [
+            'Urban Spaces', 'Architecture', 'Design Theory', 'Cultural Heritage', 'Social Environments',
+            'Sustainable Design', 'Public Spaces', 'Digital Architecture', 'Historical Preservation',
+            'Urban Infrastructure', 'Social Housing', 'Architectural Education', 'Spatial Computing',
+            'Building Materials', 'Urban Ecology', 'Smart Cities', 'Architectural Psychology',
+            'Landscape Design', 'Cultural Spaces', 'Urban Mobility'
+        ]
+        
+        article_approaches = [
+            'Analysis of', 'Study on', 'Review of', 'Perspective on', 'Evaluation of', 
+            'Critical View of', 'Case Study on', 'Comparison of', 'Development in', 
+            'Survey of', 'Historical Analysis of', 'Methodology for', 'New Approaches to',
+            'Theoretical Framework for', 'Implementation of', 'Design Principles for'
+        ]
+        
+        for j_id in range(1, 13):  # For each journal (now 12 journals)
+            num_entries = random.randint(8, 10)  # Increased from 4-5 to 8-10
+            
+            for e in range(num_entries):
+                # Select 1-3 random authors from expanded author pool
+                author_count = random.randint(1, 3)
+                entry_authors = random.sample(range(14, 30), author_count)  # IDs 14-29 are authors
+                
+                # Select 1-3 random referees from expanded referee pool
+                referee_count = random.randint(0, 3)  # Increased max from 2 to 3
+                if referee_count > 0:
+                    entry_referees = random.sample(range(30, 40), referee_count)  # IDs 30-39 are referees
+                else:
+                    entry_referees = []
+
+                # Select random status
+                status = random.choice(list(JournalEntryStatus))
+                
+                # More varied keywords
+                keyword_options = [
+                    "urban", "architecture", "design", "culture", "heritage", "space", "environment", 
+                    "social", "planning", "theory", "sustainable", "digital", "historical", "public", 
+                    "infrastructure", "ecology", "smart", "mobility", "landscape", "conservation",
+                    "housing", "education", "material", "technology", "renovation", "restoration"
+                ]
+                
+                # More varied page numbers
+                start_page = random.randint(1, 150)
+                end_page = start_page + random.randint(5, 50)
+                
+                journal_entries.append(
+                    JournalEntry(
+                        id=entry_id,
+                        title=f"Article {entry_id}: {random.choice(article_approaches)} {random.choice(article_themes)}",
+                        date=datetime(random.choice([2023, 2024]), random.randint(1, 12), random.randint(1, 28)),
+                        abstract_tr=f"TR Abstract for article {entry_id} exploring important aspects of the subject matter with detailed methodology and findings.",
+                        abstract_en=f"EN Abstract for article {entry_id} with comprehensive analysis, methodology, and conclusions.",
+                        keywords=", ".join(random.sample(keyword_options, k=random.randint(3, 6))),
+                        page_number=f"{start_page}-{end_page}",
+                        article_type=random.choice(list(ArticleType)),
+                        language=random.choice(list(ArticleLanguage)),
+                        doi=f"10.1001/jhs.{random.choice([2023, 2024])}.{entry_id:03d}",
+                        file_path=f"articles/article_{entry_id}_original.pdf",
+                        download_count=random.randint(0, 250),  # Increased max from 100 to 250
+                        read_count=random.randint(50, 1000),  # Increased max from 500 to 1000
+                        status=status,
+                        created_at=datetime.utcnow(),
+                        updated_at=datetime.utcnow(),
+                        journal_id=j_id
+                    )
+                )
+                # Store author and referee IDs for later association
+                entry_authors_map[entry_id] = entry_authors
+                entry_referees_map[entry_id] = entry_referees
+                entry_id += 1
+        
+        for entry in journal_entries:
+            session.add(entry)
+        
+        session.flush()
+        
+        # Create the author and referee relationships after the entries exist
+        for entry in journal_entries:
+            # Add authors for this entry
+            if entry.id in entry_authors_map:
+                for author_id in entry_authors_map[entry.id]:
+                    author_link = JournalEntryAuthorLink(journal_entry_id=entry.id, user_id=author_id)
+                    session.add(author_link)
+            
+            # Add referees for this entry
+            if entry.id in entry_referees_map:
+                for referee_id in entry_referees_map[entry.id]:
+                    referee_link = JournalEntryRefereeLink(journal_entry_id=entry.id, user_id=referee_id)
+                    session.add(referee_link)
+        
+        session.flush()
+        
+        # Create author updates (2-4 per entry) - increased from 1-2
+        author_updates = []
+        author_update_id = 1
+        
+        update_notes = [
+            "Updates based on feedback for article.",
+            "Improved methodology section as requested.",
+            "Added new data analysis and updated conclusions.",
+            "Revised theoretical framework based on referee comments.",
+            "Extended literature review with additional sources.",
+            "Restructured argument and clarified key concepts.",
+            "Addressed reviewer concerns about methodology.",
+            "Added new case studies to support main arguments.",
+            "Improved visualization of data and research results.",
+            "Enhanced conclusion with implications for practice."
+        ]
+        
+        for je in journal_entries:
+            num_updates = random.randint(2, 4)  # Increased from 1-2 to 2-4
+            
+            for update_number in range(num_updates):
+                # Get author IDs for this entry
+                author_ids = [link.user_id for link in session.query(JournalEntryAuthorLink).filter(JournalEntryAuthorLink.journal_entry_id == je.id).all()]
+                
+                if author_ids:
+                    # Select random author from the entry's authors
+                    author_id = random.choice(author_ids)
+                    
+                    # Create more varied update metadata
+                    update_version = update_number + 2  # Versions start at v2
+                    
+                    # Add more specific update notes
+                    specific_note = random.choice(update_notes)
+                    
+                    author_updates.append(
+                        AuthorUpdate(
+                            id=author_update_id,
+                            title=f"Updated: {je.title}",
+                            abstract_en=f"Updated EN abstract version {update_version} with improved clarity and detail.",
+                            abstract_tr=f"TR özeti versiyon {update_version} - güncellenmiş ve genişletilmiştir.",
+                            keywords=je.keywords + f", updated-v{update_version}",
+                            file_path=f"entry{je.id}_v{update_version}.pdf",
+                            notes=f"{specific_note} (Update v{update_version})",
+                            created_date=datetime.utcnow(),
+                            entry_id=je.id,
+                            author_id=author_id
+                        )
+                    )
+                    author_update_id += 1
+        
+        for update in author_updates:
+            session.add(update)
+        
+        # Create referee updates (2-5 per entry) - increased from 1-3
+        referee_updates = []
+        referee_update_id = 1
+        
+        referee_feedback = [
+            "Please address methodology concerns.",
+            "Citation gaps need to be fixed.",
+            "Revise the conclusion section.",
+            "Improve data visualization.",
+            "Theoretical framework needs strengthening.",
+            "Literature review is incomplete.",
+            "Research questions need clarification.",
+            "Statistical analysis needs validation.",
+            "Ethical considerations should be expanded.",
+            "Contextualize findings in broader literature.",
+            "Historical background section needs expansion.",
+            "Clarify significance of research findings.",
+            "Implications for practice need development.",
+            "Diagrams and illustrations need improvement.",
+            "Research limitations should be acknowledged."
+        ]
+        
+        for je in journal_entries:
+            # Increased chance of having referee updates
+            if random.random() < 0.9:  # 90% chance to have updates (up from 80%)
+                num_updates = random.randint(2, 5)  # Increased from 1-3 to 2-5
+                
+                for update_idx in range(num_updates):
+                    # Get referee IDs for this entry
+                    referee_ids = [link.user_id for link in session.query(JournalEntryRefereeLink).filter(JournalEntryRefereeLink.journal_entry_id == je.id).all()]
+                    
+                    if referee_ids:
+                        # Select random referee from the entry's referees
+                        referee_id = random.choice(referee_ids)
+                    else:
+                        # Fallback to any referee
+                        referee_id = random.randint(30, 39)  # IDs 30-39 are referees
+                    
+                    # For variety, create review rounds
+                    review_round = update_idx + 1
+                    
+                    referee_updates.append(
+                        RefereeUpdate(
+                            id=referee_update_id,
+                            file_path=f"referee_review{je.id}_r{review_round}_{referee_update_id}.pdf",
+                            notes=f"Round {review_round}: {random.choice(referee_feedback)}",
+                            created_date=datetime.utcnow(),
+                            referee_id=referee_id,
+                            entry_id=je.id
+                        )
+                    )
+                    referee_update_id += 1
+        
+        for update in referee_updates:
+            session.add(update)
+        
+        '''
+        # Create settings (keep as is - single settings record)
+        settings = Settings(
+            id=1,
+            active_journal_id=1
+        )
+        
+        session.add(settings)
+        '''
+        # Commit all changes
+        session.commit()
+        
+        print("✅ Database seeded successfully.")
+
+        # Reset sequences to ensure future IDs are correct
+        reset_sequences(engine)
+        print("✅ Database sequences reset successfully.")
+
+def reset_sequences(engine):
+    """Reset the sequence counters in the database to match the maximum IDs."""
+    from sqlalchemy import text, inspect
+    
+    # First, get a list of actual sequences in the database
+    with engine.connect() as conn:
+        # This query gets all sequences from PostgreSQL
+        result = conn.execute(text("SELECT relname FROM pg_class WHERE relkind = 'S';"))
+        existing_sequences = [row[0] for row in result]
+        print(f"Found sequences in database: {existing_sequences}")
+        
+        # Tables to check
+        tables = [
+            "journalentry", "journal", "users", "settings",
+            "author_updates", "referee_updates"
+        ]
+        
+        # Process each table separately
+        for table in tables:
+            # Check if table exists
+            try:
+                # Try to reset sequence in a separate connection to avoid transaction issues
+                with engine.connect() as reset_conn:
+                    reset_conn.execute(text(f"SELECT 1 FROM {table} LIMIT 1"))
+                    
+                    # Check if sequence exists
+                    sequence_name = f"{table}_id_seq"
+                    if sequence_name in existing_sequences:
+                        reset_conn.execute(text(f"SELECT setval('{sequence_name}', (SELECT COALESCE(MAX(id), 1) FROM {table}), true)"))
+                        reset_conn.commit()
+                        print(f"INFO: Successfully reset sequence for {table}")
+                    else:
+                        print(f"INFO: Sequence {sequence_name} not found in database, skipping")
+            except Exception as e:
+                print(f"Warning: Could not reset sequence for {table}: {e}")
+
+if __name__ == "__main__":
+    seed_database()

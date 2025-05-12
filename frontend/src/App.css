@@ -30,37 +30,45 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: var(--spacing-2) 0;
+  padding: 0;
   border-bottom: 1px solid var(--color-border-light);
-  height: 80px; /* Set explicit height for navbar */
+  height: 80px; /* Increased height */
+  width: 100%;
 }
 
 .navbar-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-4);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
 .navbar-brand {
   display: flex;
   align-items: center;
+  padding-left: var(--spacing-4);
+  height: 100%;
 }
 
 .navbar-logo {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-2xl); /* Increased font size for text */
   font-weight: var(--font-weight-bold);
   color: rgb(106, 157, 161);
   text-decoration: none;
   display: flex;
   align-items: center;
+  height: 100%;
+  gap: var(--spacing-3); /* Added gap between logo and text */
 }
 
 .navbar-logo-image {
-  height: 70px;
+  height: 70px; /* Increased logo size */
+  width: auto; /* Maintain aspect ratio */
   margin-right: var(--spacing-2);
+  object-fit: contain; /* Ensure logo maintains its aspect ratio */
 }
 
 .navbar-menu {
@@ -127,13 +135,13 @@ body {
   width: 240px;
   background-color: var(--color-background-primary);
   border-right: 1px solid var(--color-border-light);
-  height: calc(100vh - 80px); /* Updated to match navbar height */
-  position: fixed; /* Change from sticky to fixed */
-  top: 80px; /* Updated to match navbar height */
-  left: 0; /* Position at the left edge */
+  height: calc(100vh - 80px); /* Updated to match new navbar height */
+  position: fixed;
+  top: 80px; /* Updated to match new navbar height */
+  left: 0;
   display: flex;
   flex-direction: column;
-  z-index: 50; /* Ensure sidebar appears above content if needed */
+  z-index: 50;
 }
 
 .sidebar-header {
@@ -202,8 +210,8 @@ body {
   background-color: var(--color-background-primary);
   border-radius: var(--border-radius-lg);
   margin: var(--spacing-4);
-  margin-left: 260px; /* Add left margin to accommodate fixed sidebar width (240px + some spacing) */
-  min-height: calc(100vh - 80px - var(--spacing-8)); /* Updated to match navbar height */
+  margin-left: 260px; /* Keep the same margin for sidebar spacing */
+  min-height: calc(100vh - 80px - var(--spacing-8)); /* Updated to match new navbar height */
   box-shadow: var(--shadow-sm);
   overflow-y: auto;
 }
@@ -736,31 +744,4 @@ body {
 
 .checkbox-label span {
   user-select: none;
-}
-
-/* Theme Toggle Button */
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: var(--border-radius-full);
-  background-color: var(--color-background-elevated);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-light);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 1.25rem;
-}
-
-.theme-toggle:hover {
-  background-color: var(--color-background-tertiary);
-  transform: scale(1.05);
-}
-
-.theme-toggle:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
 }

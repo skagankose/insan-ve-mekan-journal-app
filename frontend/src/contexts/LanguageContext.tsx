@@ -26,7 +26,14 @@ type TranslationKeys =
   | 'writer' | 'editor' | 'arbitrator' | 'admin'
   | 'publicationDate' | 'isPublished' | 'editJournal' | 'updateJournal' | 'accessDeniedAdminOnly'
   | 'theme' | 'lightMode' | 'darkMode' | 'switchToDark' | 'switchToLight'
-  | 'previousIssues' | 'publishedJournals' | 'completedEntries';
+  | 'previousIssues' | 'publishedJournals' | 'completedEntries'
+  | 'createUser' | 'userCreatedSuccessfully' | 'cancel' | 'editUser' | 'userUpdatedSuccessfully'
+  | 'directLogin' | 'directLoginDescription' | 'generateLoginLink' | 'copyLink' | 'linkCopied' | 'generating' | 'saveChanges'
+  | 'invalidLoginLink' | 'loginFailed' | 'autoLoginFailed' | 'autoLoginProcessing' | 'loginError' | 'goToLogin' | 'loginSuccessful' | 'redirecting'
+  | 'loginSuccessButUserInfoFailed'
+  | 'profile' | 'userProfile' | 'myJournalEntries' | 'noEntriesFound' | 'loadingUserData' | 'failedToLoadUserEntries'
+  | 'biography' | 'scienceBranch' | 'location' | 'telephone' | 'yoksisId' | 'orcidId' | 'journalId' | 'date'
+  | 'myRefereeEntries' | 'noRefereeEntriesFound' | 'myEditedJournals' | 'noEditedJournalsFound' | 'issue' | 'published';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -129,6 +136,55 @@ const translations: Record<Language, TranslationDictionary> = {
     'darkMode': 'Dark Mode',
     'switchToDark': 'Switch to dark mode',
     'switchToLight': 'Switch to light mode',
+
+    // Admin actions
+    'createUser': 'Create User',
+    'userCreatedSuccessfully': 'User created successfully!',
+    'editUser': 'Edit User',
+    'userUpdatedSuccessfully': 'User updated successfully!',
+    'cancel': 'Cancel',
+
+    // Login link feature
+    'directLogin': 'Direct Login Link',
+    'directLoginDescription': 'Generate a temporary link that will automatically log in this user without requiring a password.',
+    'generateLoginLink': 'Generate Login Link',
+    'copyLink': 'Copy Link',
+    'linkCopied': 'Link copied!',
+    'generating': 'Generating...',
+    'saveChanges': 'Save Changes',
+
+    // Auto-login page
+    'invalidLoginLink': 'Invalid login link. The link may have expired or been used already.',
+    'loginFailed': 'Login failed. Please try again or contact support.',
+    'autoLoginFailed': 'Automatic login failed. Please try logging in manually.',
+    'autoLoginProcessing': 'Processing login...',
+    'loginError': 'Login Error',
+    'goToLogin': 'Go to Login Page',
+    'loginSuccessful': 'Login Successful',
+    'redirecting': 'You are being redirected to the homepage...',
+    'loginSuccessButUserInfoFailed': 'Login successful but failed to retrieve user information. Please refresh the page.',
+    
+    // User Profile Page
+    'profile': 'Profile',
+    'userProfile': 'User Profile',
+    'myJournalEntries': 'My Journal Entries',
+    'noEntriesFound': 'No entries found.',
+    'loadingUserData': 'Loading user data...',
+    'failedToLoadUserEntries': 'Failed to load user entries.',
+    'biography': 'Biography',
+    'scienceBranch': 'Science Branch',
+    'location': 'Location',
+    'telephone': 'Telephone',
+    'yoksisId': 'YÖKSİS ID',
+    'orcidId': 'ORCID ID',
+    'journalId': 'Journal ID',
+    'date': 'Date',
+    'myRefereeEntries': 'Entries I Referee',
+    'noRefereeEntriesFound': 'No referee entries found.',
+    'myEditedJournals': 'Journals I Edit',
+    'noEditedJournalsFound': 'No journals found.',
+    'issue': 'Issue',
+    'published': 'Published',
   },
   tr: {
     // Navigation
@@ -227,6 +283,55 @@ const translations: Record<Language, TranslationDictionary> = {
     'darkMode': 'Koyu Tema',
     'switchToDark': 'Koyu temaya geç',
     'switchToLight': 'Açık temaya geç',
+
+    // Admin actions
+    'createUser': 'Kullanıcı Oluştur',
+    'userCreatedSuccessfully': 'Kullanıcı başarıyla oluşturuldu!',
+    'editUser': 'Kullanıcıyı Düzenle',
+    'userUpdatedSuccessfully': 'Kullanıcı başarıyla güncellendi!',
+    'cancel': 'İptal',
+
+    // Login link feature
+    'directLogin': 'Doğrudan Giriş Bağlantısı',
+    'directLoginDescription': 'Bu kullanıcının şifre gerektirmeden otomatik olarak giriş yapabileceği geçici bir bağlantı oluşturun.',
+    'generateLoginLink': 'Giriş Bağlantısı Oluştur',
+    'copyLink': 'Bağlantıyı Kopyala',
+    'linkCopied': 'Bağlantı kopyalandı!',
+    'generating': 'Oluşturuluyor...',
+    'saveChanges': 'Değişiklikleri Kaydet',
+
+    // Auto-login page
+    'invalidLoginLink': 'Geçersiz giriş bağlantısı. Bağlantı süresi dolmuş veya kullanılmış olabilir.',
+    'loginFailed': 'Giriş başarısız. Lütfen tekrar deneyin veya destek ile iletişime geçin.',
+    'autoLoginFailed': 'Otomatik giriş başarısız. Lütfen manuel olarak giriş yapmayı deneyin.',
+    'autoLoginProcessing': 'Giriş işleniyor...',
+    'loginError': 'Giriş Hatası',
+    'goToLogin': 'Giriş Sayfasına Git',
+    'loginSuccessful': 'Giriş Başarılı',
+    'redirecting': 'Ana sayfaya yönlendiriliyorsunuz...',
+    'loginSuccessButUserInfoFailed': 'Giriş başarılı ancak kullanıcı bilgileri alınırken hata oluştu. Lütfen sayfayı yenileyin.',
+    
+    // User Profile Page
+    'profile': 'Profil',
+    'userProfile': 'Kullanıcı Profili',
+    'myJournalEntries': 'Dergi Yazılarım',
+    'noEntriesFound': 'Herhangi bir yazı bulunamadı.',
+    'loadingUserData': 'Kullanıcı verileri yükleniyor...',
+    'failedToLoadUserEntries': 'Kullanıcı yazıları yüklenemedi.',
+    'biography': 'Biyografi',
+    'scienceBranch': 'Bilim Dalı',
+    'location': 'Konum',
+    'telephone': 'Telefon',
+    'yoksisId': 'YÖKSİS ID',
+    'orcidId': 'ORCID ID',
+    'journalId': 'Dergi ID',
+    'date': 'Tarih',
+    'myRefereeEntries': 'Hakem Olduğum Yazılar',
+    'noRefereeEntriesFound': 'Hakem olduğunuz yazı bulunamadı.',
+    'myEditedJournals': 'Editör Olduğum Dergiler',
+    'noEditedJournalsFound': 'Editör olduğunuz dergi bulunamadı.',
+    'issue': 'Sayı',
+    'published': 'Yayınlandı',
   }
 };
 

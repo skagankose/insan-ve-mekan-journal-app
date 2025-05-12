@@ -1,25 +1,35 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import JournalForm from '../components/JournalForm';
-import apiService from '../services/apiService';
+import JournalForm, { JournalFormData } from '../components/JournalForm';
+import * as apiService from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveJournal } from '../contexts/ActiveJournalContext';
-
-interface JournalFormData {
-    title: string;
-    content: string;
-    abstract: string;
-    journal_id?: number;
-}
 
 const JournalCreatePage: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth(); // Ensure user is authenticated
+    const { isAuthenticated, user } = useAuth(); // Ensure user is authenticated
     const { t } = useLanguage();
     const { activeJournal } = useActiveJournal();
+
+    // Memoize the initialData to prevent unnecessary re-renders of JournalForm
+    const initialFormData = useMemo(() => ({
+        title: '', 
+        abstract_tr: '',
+        abstract_en: '',
+        keywords: '',
+        page_number: '',
+        article_type: '',
+        language: '',
+        doi: '',
+        file_path: '',
+        status: '',
+        date: new Date().toISOString().split('T')[0],
+        authors_ids: [], // Initialize as empty array
+        referees_ids: []  // Initialize as empty array
+    }), []);
 
     const handleCreateSubmit = useCallback(async (formData: JournalFormData) => {
         if (!isAuthenticated) {
@@ -29,13 +39,44 @@ const JournalCreatePage: React.FC = () => {
         setIsSubmitting(true);
         setSubmitError(null);
         try {
+            // Create a new object to avoid modifying the original formData
+            const submitData: apiService.JournalEntryCreate = {
+                title: formData.title,
+                abstract_tr: formData.abstract_tr,
+                abstract_en: formData.abstract_en,
+                keywords: formData.keywords,
+                page_number: formData.page_number,
+                article_type: formData.article_type,
+                language: formData.language,
+                doi: formData.doi,
+                file_path: formData.file_path,
+                status: formData.status,
+                authors_ids: formData.authors_ids || [],
+                referees_ids: formData.referees_ids || []
+            };
+            
             // Add the journal_id if there's an active journal
             if (activeJournal) {
-                formData.journal_id = activeJournal.id;
+                submitData.journal_id = activeJournal.id;
             }
             
-            console.log("Creating entry:", formData);
-            await apiService.createEntry(formData);
+            // Add current user as author if not already in authors_ids
+            if (user && (!submitData.authors_ids || !submitData.authors_ids.includes(user.id))) {
+                submitData.authors_ids = [...(submitData.authors_ids || []), user.id];
+            }
+            
+            // Format date if provided
+            if (formData.date) {
+                submitData.date = new Date(formData.date).toISOString();
+            }
+            
+            // Make sure we never send an ID for a new entry
+            if ('id' in submitData) {
+                delete (submitData as any).id;
+            }
+            
+            // console.log("Creating entry:", submitData);
+            await apiService.createEntry(submitData);
             navigate('/'); // Navigate to Journals page after successful creation
         } catch (err: any) {
             console.error("Failed to create entry:", err);
@@ -43,7 +84,7 @@ const JournalCreatePage: React.FC = () => {
         } finally {
             setIsSubmitting(false);
         }
-    }, [isAuthenticated, navigate, activeJournal]);
+    }, [isAuthenticated, navigate, activeJournal, user]);
 
     return (
         <div className="form-container">
@@ -68,6 +109,7 @@ const JournalCreatePage: React.FC = () => {
             )}
             
             <JournalForm
+                initialData={initialFormData}
                 onSubmit={handleCreateSubmit}
                 isSubmitting={isSubmitting}
                 submitError={submitError}

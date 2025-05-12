@@ -1,6 +1,7 @@
 from sqlmodel import Session, select
 from datetime import datetime
 import secrets
+from typing import Optional
 
 from . import models
 from . import schemas
@@ -13,19 +14,76 @@ def get_entry(db: Session, entry_id: int) -> models.JournalEntry | None:
     return db.get(models.JournalEntry, entry_id)
 
 def get_entries_by_user(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> list[models.JournalEntry]:
-    """Get all journal entries for a specific user."""
-    statement = select(models.JournalEntry).where(models.JournalEntry.owner_id == user_id).offset(skip).limit(limit)
+    """Get all journal entries for a specific user as an author."""
+    # Join with the author link table to get entries where the user is an author
+    statement = select(models.JournalEntry).join(
+        models.JournalEntryAuthorLink, 
+        models.JournalEntry.id == models.JournalEntryAuthorLink.journal_entry_id
+    ).where(
+        models.JournalEntryAuthorLink.user_id == user_id
+    ).offset(skip).limit(limit)
+    
+    results = db.exec(statement)
+    return results.all()
+
+def get_entries_by_referee(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> list[models.JournalEntry]:
+    """Get all journal entries for a specific user as a referee."""
+    # Join with the referee link table to get entries where the user is a referee
+    statement = select(models.JournalEntry).join(
+        models.JournalEntryRefereeLink, 
+        models.JournalEntry.id == models.JournalEntryRefereeLink.journal_entry_id
+    ).where(
+        models.JournalEntryRefereeLink.user_id == user_id
+    ).offset(skip).limit(limit)
+    
+    results = db.exec(statement)
+    return results.all()
+
+def get_journals_by_editor(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> list[models.Journal]:
+    """Get all journals where a specific user is an editor."""
+    # Join with the editor link table to get journals where the user is an editor
+    statement = select(models.Journal).join(
+        models.JournalEditorLink, 
+        models.Journal.id == models.JournalEditorLink.journal_id
+    ).where(
+        models.JournalEditorLink.user_id == user_id
+    ).offset(skip).limit(limit)
+    
     results = db.exec(statement)
     return results.all()
 
 def create_entry(db: Session, entry: schemas.JournalEntryCreate, user_id: int) -> models.JournalEntry:
     """Create a new journal entry for a specific user."""
-    # Create a JournalEntry instance from the schema, adding the owner_id
-    db_entry = models.JournalEntry.model_validate(entry) # Use model_validate for Pydantic v2+
-    db_entry.owner_id = user_id
-    # created_at and updated_at are set by default in the model
-
+    # Create a JournalEntry instance from the schema
+    entry_data = entry.model_dump()
+    
+    # Remove ID if present to ensure auto-increment works
+    if 'id' in entry_data:
+        del entry_data['id']
+    
+    # Extract author_ids if present, otherwise use empty list
+    author_ids = entry_data.pop('authors_ids', []) if hasattr(entry, 'authors_ids') else []
+    
+    # Ensure the current user is included in authors
+    if user_id not in author_ids:
+        author_ids.append(user_id)
+    
+    # Create entry without authors first
+    db_entry = models.JournalEntry(**entry_data)
     db.add(db_entry)
+    db.flush()  # Flush to get the entry ID
+    
+    # Generate random token that includes the entry ID
+    db_entry.generate_random_token()
+    
+    # Add authors to the entry
+    for author_id in author_ids:
+        author_link = models.JournalEntryAuthorLink(
+            journal_entry_id=db_entry.id,
+            user_id=author_id
+        )
+        db.add(author_link)
+    
     db.commit()
     db.refresh(db_entry)
     return db_entry
@@ -39,12 +97,52 @@ def update_entry(db: Session, entry_id: int, entry_update: schemas.JournalEntryU
     # Get the update data, excluding unset fields to avoid overwriting with None
     update_data = entry_update.model_dump(exclude_unset=True)
 
+    # Extract authors_ids and referees_ids if present
+    authors_ids = update_data.pop('authors_ids', None)
+    referees_ids = update_data.pop('referees_ids', None)
+
     # Update fields
     for key, value in update_data.items():
         setattr(db_entry, key, value)
 
     # Update the updated_at timestamp
     db_entry.updated_at = datetime.utcnow()
+
+    # Update authors if authors_ids was provided
+    if authors_ids is not None:
+        # Clear existing author links
+        statement = select(models.JournalEntryAuthorLink).where(
+            models.JournalEntryAuthorLink.journal_entry_id == db_entry.id
+        )
+        existing_links = db.exec(statement).all()
+        for link in existing_links:
+            db.delete(link)
+        
+        # Add new author links
+        for author_id in authors_ids:
+            author_link = models.JournalEntryAuthorLink(
+                journal_entry_id=db_entry.id,
+                user_id=author_id
+            )
+            db.add(author_link)
+
+    # Update referees if referees_ids was provided
+    if referees_ids is not None:
+        # Clear existing referee links
+        statement = select(models.JournalEntryRefereeLink).where(
+            models.JournalEntryRefereeLink.journal_entry_id == db_entry.id
+        )
+        existing_links = db.exec(statement).all()
+        for link in existing_links:
+            db.delete(link)
+        
+        # Add new referee links
+        for referee_id in referees_ids:
+            referee_link = models.JournalEntryRefereeLink(
+                journal_entry_id=db_entry.id,
+                user_id=referee_id
+            )
+            db.add(referee_link)
 
     db.add(db_entry)
     db.commit()
@@ -68,17 +166,18 @@ def delete_entry(db: Session, entry_id: int) -> models.JournalEntry | None:
 def get_user(db: Session, user_id: int):
     return db.get(models.User, user_id)
 
-def get_user_by_username(db: Session, username: str):
-    statement = select(models.User).where(models.User.username == username)
-    return db.exec(statement).first()
-
 def get_user_by_email(db: Session, email: str):
     statement = select(models.User).where(models.User.email == email)
     return db.exec(statement).first()
 
-def get_user_by_token(db: Session, token: str):
-    """Get a user by their confirmation token."""
+def get_user_by_token(db: Session, token: str) -> Optional[models.User]:
+    """Get a user by confirmation token."""
     statement = select(models.User).where(models.User.confirmation_token == token)
+    return db.exec(statement).first()
+
+def get_user_by_reset_token(db: Session, token: str) -> Optional[models.User]:
+    """Get a user by password reset token."""
+    statement = select(models.User).where(models.User.reset_password_token == token)
     return db.exec(statement).first()
 
 def create_user(db: Session, user: schemas.UserCreate) -> models.User:
@@ -103,6 +202,155 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate) -> models.User | None:
+    """Update an existing user."""
+    db_user = get_user(db, user_id)
+    if not db_user:
+        return None
+
+    # Get the update data, excluding unset fields to avoid overwriting with None
+    update_data = user_update.model_dump(exclude_unset=True)
+
+    # Update fields
+    for key, value in update_data.items():
+        setattr(db_user, key, value)
+
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def delete_user(db: Session, user_id: int, transfer_to_user_id: int) -> bool:
+    """
+    Permanently delete a user and transfer all related objects to another user.
+    
+    Args:
+        db: Database session
+        user_id: ID of the user to delete
+        transfer_to_user_id: ID of the user to transfer relationships to
+        
+    Returns:
+        True if successful, False if either user not found
+    """
+    # Get both users
+    user_to_delete = get_user(db, user_id)
+    transfer_to_user = get_user(db, transfer_to_user_id)
+    
+    if not user_to_delete or not transfer_to_user:
+        return False
+    
+    # Transfer journal editor in chief relationships
+    for journal in user_to_delete.chief_of_journals:
+        journal.editor_in_chief_id = transfer_to_user_id
+        db.add(journal)
+    
+    # Transfer JournalEditorLink relationships
+    statement = select(models.JournalEditorLink).where(
+        models.JournalEditorLink.user_id == user_id
+    )
+    editor_links = db.exec(statement).all()
+    
+    for link in editor_links:
+        # Check if the transfer user already has this relationship
+        existing_link = db.exec(
+            select(models.JournalEditorLink).where(
+                models.JournalEditorLink.journal_id == link.journal_id,
+                models.JournalEditorLink.user_id == transfer_to_user_id
+            )
+        ).first()
+        
+        if not existing_link:
+            # Create new link with the transfer user
+            new_link = models.JournalEditorLink(
+                journal_id=link.journal_id,
+                user_id=transfer_to_user_id
+            )
+            db.add(new_link)
+        
+        # Delete the old link
+        db.delete(link)
+    
+    # Transfer JournalEntryAuthorLink relationships
+    statement = select(models.JournalEntryAuthorLink).where(
+        models.JournalEntryAuthorLink.user_id == user_id
+    )
+    author_links = db.exec(statement).all()
+    
+    for link in author_links:
+        # Check if the transfer user already has this relationship
+        existing_link = db.exec(
+            select(models.JournalEntryAuthorLink).where(
+                models.JournalEntryAuthorLink.journal_entry_id == link.journal_entry_id,
+                models.JournalEntryAuthorLink.user_id == transfer_to_user_id
+            )
+        ).first()
+        
+        if not existing_link:
+            # Create new link with the transfer user
+            new_link = models.JournalEntryAuthorLink(
+                journal_entry_id=link.journal_entry_id,
+                user_id=transfer_to_user_id
+            )
+            db.add(new_link)
+        
+        # Delete the old link
+        db.delete(link)
+    
+    # Transfer JournalEntryRefereeLink relationships
+    statement = select(models.JournalEntryRefereeLink).where(
+        models.JournalEntryRefereeLink.user_id == user_id
+    )
+    referee_links = db.exec(statement).all()
+    
+    for link in referee_links:
+        # Check if the transfer user already has this relationship
+        existing_link = db.exec(
+            select(models.JournalEntryRefereeLink).where(
+                models.JournalEntryRefereeLink.journal_entry_id == link.journal_entry_id,
+                models.JournalEntryRefereeLink.user_id == transfer_to_user_id
+            )
+        ).first()
+        
+        if not existing_link:
+            # Create new link with the transfer user
+            new_link = models.JournalEntryRefereeLink(
+                journal_entry_id=link.journal_entry_id,
+                user_id=transfer_to_user_id
+            )
+            db.add(new_link)
+        
+        # Delete the old link
+        db.delete(link)
+    
+    # Transfer AuthorUpdate relationships
+    statement = select(models.AuthorUpdate).where(
+        models.AuthorUpdate.author_id == user_id
+    )
+    author_updates = db.exec(statement).all()
+    
+    for update in author_updates:
+        update.author_id = transfer_to_user_id
+        db.add(update)
+    
+    # Transfer RefereeUpdate relationships
+    statement = select(models.RefereeUpdate).where(
+        models.RefereeUpdate.referee_id == user_id
+    )
+    referee_updates = db.exec(statement).all()
+    
+    for update in referee_updates:
+        update.referee_id = transfer_to_user_id
+        db.add(update)
+    
+    # Commit all the relationship transfers
+    db.flush()
+    
+    # Finally, delete the user
+    db.delete(user_to_delete)
+    db.commit()
+    
+    return True
 
 # We'll add create_user and password hashing later 
 
@@ -136,4 +384,50 @@ def update_settings(db: Session, settings_update: models.SettingsUpdate) -> mode
     db.add(db_settings)
     db.commit()
     db.refresh(db_settings)
-    return db_settings 
+    return db_settings
+
+def create_password_reset_token(db: Session, email: str) -> Optional[models.User]:
+    """Create a password reset token for a user and return the user object."""
+    # Find the user by email
+    user = get_user_by_email(db, email)
+    if not user:
+        return None
+    
+    # Generate reset token and set expiry time
+    reset_token = secrets.token_urlsafe(32)
+    reset_token_created_at = datetime.utcnow()
+    
+    # Update the user with the new token
+    user.reset_password_token = reset_token
+    user.reset_password_token_created_at = reset_token_created_at
+    
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    
+    return user
+
+def update_user_password(db: Session, user_id: int, new_password: str) -> models.User:
+    """Update a user's password and clear the reset token."""
+    from .security import get_password_hash  # Import here to avoid circular imports
+    
+    # Get the user
+    statement = select(models.User).where(models.User.id == user_id)
+    user = db.exec(statement).first()
+    
+    if not user:
+        raise ValueError(f"User with ID {user_id} not found")
+    
+    # Hash the new password
+    hashed_password = get_password_hash(new_password)
+    
+    # Update the user
+    user.hashed_password = hashed_password
+    user.reset_password_token = None
+    user.reset_password_token_created_at = None
+    
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    
+    return user 

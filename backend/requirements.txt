@@ -10,3 +10,4 @@ python-jose[cryptography]
 python-multipart
 alembic 
 sib-api-v3-sdk
+email-validator

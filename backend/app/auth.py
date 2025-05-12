@@ -14,9 +14,9 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-def authenticate_user(db: Session, username: str, password: str) -> models.User | None:
+def authenticate_user(db: Session, email: str, password: str) -> models.User | None:
     """Check if a user exists and the password is correct."""
-    user = crud.get_user_by_username(db, username=username)
+    user = crud.get_user_by_email(db, email=email)
     if not user:
         return None
     if not security.verify_password(password, user.hashed_password):
@@ -32,14 +32,14 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     )
     try:
         payload = jwt.decode(token, security.SECRET_KEY, algorithms=[security.ALGORITHM])
-        username: str | None = payload.get("sub") # "sub" is standard claim for subject (username)
-        if username is None:
+        email: str | None = payload.get("sub") # "sub" is standard claim for subject (now using email)
+        if email is None:
             raise credentials_exception
-        token_data = security.TokenData(username=username)
+        token_data = security.TokenData(email=email)
     except JWTError:
         raise credentials_exception
     
-    user = crud.get_user_by_username(db, username=token_data.username)
+    user = crud.get_user_by_email(db, email=token_data.email)
     if user is None:
         raise credentials_exception
     return user

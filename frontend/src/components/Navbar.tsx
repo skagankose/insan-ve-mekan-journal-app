@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'; // Use Link for client-sid
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageToggle from './LanguageToggle';
-import ThemeToggle from './ThemeToggle';
 
 const Navbar: React.FC = () => {
     const { isAuthenticated, user, logout, isLoading } = useAuth(); // Get auth state and functions
@@ -26,34 +25,30 @@ const Navbar: React.FC = () => {
                 <div className="navbar-brand">
                     <Link to="/" className="navbar-logo">
                         <img src="/logo.png" alt="Journal App Logo" className="navbar-logo-image" />
-                        {language === 'en' ? 'Human & Space' : 'İnsan & Mekan'}
+                        <span style={{ whiteSpace: 'nowrap', color: 'black' }}>
+                            {language === 'en' ? 'Human & Space' : 'İnsan & Mekan'}
+                        </span>
                     </Link>
                 </div>
                 
-                <div className="navbar-menu">
-                    <div className="navbar-start">
-                        {isAuthenticated && user && user.role === 'admin' && (
-                            <Link to="/" className="navbar-item">
-                                {t('journals')}
-                            </Link>
-                        )}
-                        {isAuthenticated && user && user.role === 'admin' && (
-                            <Link to="/admin" className="navbar-item">
-                                Admin
-                            </Link>
-                        )}
-                    </div>
-                    
+                <div className="navbar-menu" style={{ marginLeft: 'auto' }}>
                     <div className="navbar-end">
                         {isAuthenticated && user ? (
                             <>
                                 <div className="navbar-item navbar-user">
                                     <span className="user-greeting">{t('welcome')}, </span>
-                                    <span className="user-name">{user.username}</span>
+                                    <span className="user-name">{user.name}</span>
                                     {user.role === 'admin' && (
                                         <span className="badge badge-admin">Admin</span>
                                     )}
                                 </div>
+                                <Link 
+                                    to="/profile" 
+                                    className="btn btn-outline navbar-button"
+                                    style={{ marginRight: '10px' }}
+                                >
+                                    {t('profile') || 'Profile'}
+                                </Link>
                                 <button 
                                     onClick={handleLogout} 
                                     className="btn btn-outline navbar-button"
@@ -71,11 +66,6 @@ const Navbar: React.FC = () => {
                                 </Link>
                             </>
                         )}
-                        
-                        {/* Theme Toggle Button */}
-                        <div className="navbar-item">
-                            <ThemeToggle />
-                        </div>
                         
                         {/* Language Toggle Button */}
                         <div className="navbar-item">

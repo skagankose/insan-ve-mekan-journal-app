@@ -7,86 +7,237 @@ interface TokenResponse {
     token_type: string;
 }
 
-interface UserRead {
-    username: string;
+export interface UserRead {
     email: string;
     name: string;
-    title?: string;
+    title?: string; // Now a plain string
     bio?: string;
-    role: string;
+    telephone?: string;
+    science_branch?: string | undefined; // Now a plain string
+    location?: string;
+    yoksis_id?: string;
+    orcid_id?: string;
+    role: string; // Corresponds to UserRole enum
     id: number;
+    is_auth: boolean;
+    confirmation_token?: string;
+    confirmation_token_created_at?: string;
+    editor_in_chief_id?: number;
 }
 
 interface UserCreate {
-    username: string;
     email: string;
     name: string;
     title?: string;
     bio?: string;
+    telephone?: string;
+    science_branch?: string;
+    location?: string;
+    yoksis_id?: string;
+    orcid_id?: string;
     role?: string;
     password: string;
+    is_auth?: boolean;
 }
 
 // Add Journal Entry interfaces (matching backend schemas)
-interface JournalEntryRead {
+export interface JournalEntryRead {
     id: number;
     title: string;
-    content: string;
-    abstract: string;
-    file_path?: string;
+    date?: string; // ISO format string for datetime
+    abstract_tr: string;
+    abstract_en?: string;
+    keywords?: string;
+    page_number?: string;
+    article_type?: string; // Corresponds to ArticleType enum
+    language?: string; // Corresponds to ArticleLanguage enum
+    doi?: string;
+    random_token?: string; // Entry ID + 8 random uppercase letters/numbers
+    download_count: number;
+    read_count: number;
     created_at: string; // ISO format string
     updated_at: string; // ISO format string
-    owner_id: number;
-    status?: string; // Added status field, assuming backend can provide it
+    authors?: UserRead[];
+    referees?: UserRead[];
+    status?: string; // Added status field, assuming backend can provide it - Corresponds to JournalEntryStatus enum
+    journal_id?: number;
+    file_path?: string; // Added for JournalEditPage
 }
 
-interface JournalEntryCreate {
+export interface JournalEntryCreate {
     title: string;
-    content: string;
-    abstract: string;
+    abstract_tr: string;
+    abstract_en?: string;
+    keywords?: string;
+    page_number?: string;
+    article_type?: string;
+    language?: string;
+    doi?: string;
+    file_path?: string;
+    status?: string;
     journal_id?: number;
-    // owner_id is added by the backend based on the token
+    authors_ids?: number[];
+    referees_ids?: number[];
+    date?: string; // Add date field
 }
 
 interface JournalEntryUpdate {
     title?: string;
-    content?: string;
-    abstract?: string;
+    abstract_tr?: string;
+    abstract_en?: string;
+    keywords?: string;
+    page_number?: string;
+    article_type?: string;
+    language?: string;
+    doi?: string;
     file_path?: string;
     status?: string;
+    authors_ids?: number[];
+    referees_ids?: number[];
+    date?: string; // Add date field
 }
 
 // Add Journal interface
-interface Journal {
+interface Journal { // This will serve as JournalRead for admin purposes too
     id: number;
     title: string;
-    date: string;
+    date: string; // ISO format string for datetime
     issue: string;
     is_published: boolean;
-    publication_date: string | null;
+    publication_date?: string | null; // ISO format string for datetime
+    publication_place?: string;
+    cover_photo?: string;
+    meta_files?: string;
+    editor_notes?: string;
+    full_pdf?: string;
+    editor_in_chief_id?: number;
 }
 
 // Add JournalCreate interface
 interface JournalCreate {
     title: string;
     issue: string;
+    date?: string; // Add date field
     is_published: boolean;
-    publication_date: string | null;
+    publication_date?: string | null;
+    publication_place?: string;
+    cover_photo?: string;
+    meta_files?: string;
+    editor_notes?: string;
+    full_pdf?: string;
+    editor_in_chief_id?: number;
 }
 
 interface JournalUpdate {
     title?: string;
     issue?: string;
+    date?: string; // Add date field
     is_published?: boolean;
     publication_date?: string | null;
+    publication_place?: string;
+    cover_photo?: string;
+    meta_files?: string;
+    editor_notes?: string;
+    full_pdf?: string;
+    editor_in_chief_id?: number;
 }
 
-interface Settings {
+export interface Settings {
+    id: number; // Typically 1 for a single settings row
     active_journal_id: number | null;
 }
 
 interface SettingsUpdate {
     active_journal_id: number | null;
+}
+
+// --- New Interfaces for Admin Page ---
+interface AdminUserRead extends UserRead {
+    // Includes all fields from UserRead
+    // Add fields from User model in models.py that are safe for admin view
+    confirmation_token?: string;
+    confirmation_token_created_at?: string;
+}
+
+interface AdminJournalRead extends Journal {
+    // Includes all fields from Journal
+    // Potentially add editor_ids or entry_ids if backend provides them
+}
+
+interface AdminJournalEntryRead extends JournalEntryRead {
+    // Includes all fields from JournalEntryRead
+    // Potentially add progress_record_ids, author_update_ids, referee_update_ids if backend provides
+}
+
+interface AuthorUpdateRead {
+    id: number;
+    title?: string;
+    abstract_en?: string;
+    abstract_tr?: string;
+    keywords?: string;
+    file_path?: string;
+    notes?: string;
+    created_date: string; // ISO format string for datetime
+    entry_id: number;
+    author_id: number;
+}
+
+interface AuthorUpdateCreate {
+    title?: string;
+    abstract_en?: string;
+    abstract_tr?: string;
+    keywords?: string;
+    file_path?: string;
+    notes?: string;
+}
+
+interface RefereeUpdateRead {
+    id: number;
+    file_path?: string;
+    notes?: string;
+    created_date: string; // ISO format string for datetime
+    referee_id: number;
+    entry_id: number;
+}
+
+interface RefereeUpdateCreate {
+    file_path?: string;
+    notes?: string;
+}
+
+/* interface JournalEntryProgressRead {
+    id: number;
+    owner_id?: number; // This refers to a User ID
+    journal_entry_id: number;
+} */
+
+interface JournalEditorLinkRead {
+    journal_id: number;
+    user_id: number;
+}
+
+interface JournalEntryAuthorLinkRead {
+    journal_entry_id: number;
+    user_id: number;
+}
+
+interface JournalEntryRefereeLinkRead {
+    journal_entry_id: number;
+    user_id: number;
+}
+
+interface UserUpdate {
+    email?: string;
+    name?: string;
+    title?: string;
+    bio?: string;
+    telephone?: string;
+    science_branch?: string;
+    location?: string;
+    yoksis_id?: string;
+    orcid_id?: string;
+    role?: string;
+    is_auth?: boolean;
 }
 
 // Create an Axios instance
@@ -115,14 +266,14 @@ apiClient.interceptors.request.use(
 
 // --- Authentication API Calls --- 
 
-const login = async (username: string, password: string): Promise<TokenResponse> => {
+const login = async (email: string, password: string): Promise<TokenResponse> => {
     // FastAPI's OAuth2PasswordRequestForm expects form data
     const params = new URLSearchParams();
-    params.append('username', username);
+    params.append('username', email); // Keep 'username' as param name for OAuth2 compatibility
     params.append('password', password);
 
     const response = await apiClient.post<TokenResponse>(
-        '/token', // Backend endpoint
+        '/token',
         params, 
         {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -138,6 +289,20 @@ const register = async (userData: UserCreate): Promise<UserRead> => {
 
 const getCurrentUser = async (): Promise<UserRead> => {
     const response = await apiClient.get<UserRead>('/users/me');
+    return response.data;
+};
+
+const forgotPassword = async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post('/forgot-password', { 
+        email 
+    });
+    return response.data;
+};
+
+const resetPassword = async (token: string, password: string): Promise<{ message: string }> => {
+    const response = await apiClient.post(`/reset-password/${token}`, { 
+        password 
+    });
     return response.data;
 };
 
@@ -196,36 +361,99 @@ const updateJournal = async (journalId: number, journalData: JournalUpdate): Pro
 
 // --- Admin API Calls ---
 
-const getAllUsers = async (skip: number = 0, limit: number = 100): Promise<UserRead[]> => {
-    const response = await apiClient.get<UserRead[]>('/admin/users', {
+const getAllUsers = async (skip: number = 0, limit: number = 100): Promise<AdminUserRead[]> => {
+    const response = await apiClient.get<AdminUserRead[]>('/admin/users', {
         params: { skip, limit }
     });
     return response.data;
 };
 
-const getAllJournals = async (skip: number = 0, limit: number = 100) => {
-    const response = await apiClient.get('/admin/journals', {
+const getAllJournals = async (skip: number = 0, limit: number = 100): Promise<AdminJournalRead[]> => {
+    const response = await apiClient.get<AdminJournalRead[]>('/journals/', {
         params: { skip, limit }
     });
     return response.data;
 };
 
-const getAllJournalEntries = async (skip: number = 0, limit: number = 100) => {
-    const response = await apiClient.get('/admin/journal-entries', {
+const getAllJournalEntries = async (skip: number = 0, limit: number = 100): Promise<AdminJournalEntryRead[]> => {
+    const response = await apiClient.get<AdminJournalEntryRead[]>('/admin/journal-entries', {
         params: { skip, limit }
     });
     return response.data;
 };
 
-const getAllJournalEntryProgress = async (skip: number = 0, limit: number = 100) => {
-    const response = await apiClient.get('/admin/journal-entry-progress', {
+/* const getAllJournalEntryProgress = async (skip: number = 0, limit: number = 100): Promise<JournalEntryProgressRead[]> => {
+    const response = await apiClient.get<JournalEntryProgressRead[]>('/admin/journal-entry-progress', {
         params: { skip, limit }
     });
     return response.data;
-};
+}; */
 
 const updateSettings = async (settingsData: SettingsUpdate): Promise<Settings> => {
     const response = await apiClient.put<Settings>('/admin/settings', settingsData);
+    return response.data;
+};
+
+// --- New Admin API functions ---
+const getSettings = async (): Promise<Settings> => {
+    const response = await apiClient.get<Settings>('/admin/settings');
+    return response.data;
+};
+
+const getAllAuthorUpdates = async (skip: number = 0, limit: number = 100): Promise<AuthorUpdateRead[]> => {
+    const response = await apiClient.get<AuthorUpdateRead[]>('/admin/author-updates', {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+// Add new method to get author updates for a specific entry
+const getEntryAuthorUpdates = async (entryId: number): Promise<AuthorUpdateRead[]> => {
+    const response = await apiClient.get<AuthorUpdateRead[]>(`/entries/${entryId}/author-updates`);
+    return response.data;
+};
+
+const getAllRefereeUpdates = async (skip: number = 0, limit: number = 100): Promise<RefereeUpdateRead[]> => {
+    const response = await apiClient.get<RefereeUpdateRead[]>('/admin/referee-updates', {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+// Add new method to get referee updates for a specific entry
+const getEntryRefereeUpdates = async (entryId: number): Promise<RefereeUpdateRead[]> => {
+    const response = await apiClient.get<RefereeUpdateRead[]>(`/entries/${entryId}/referee-updates`);
+    return response.data;
+};
+
+const createAuthorUpdate = async (entryId: number, authorUpdateData: AuthorUpdateCreate): Promise<AuthorUpdateRead> => {
+    const response = await apiClient.post<AuthorUpdateRead>(`/entries/${entryId}/author-updates`, authorUpdateData);
+    return response.data;
+};
+
+const createRefereeUpdate = async (entryId: number, refereeUpdateData: RefereeUpdateCreate): Promise<RefereeUpdateRead> => {
+    const response = await apiClient.post<RefereeUpdateRead>(`/entries/${entryId}/referee-updates`, refereeUpdateData);
+    return response.data;
+};
+
+const getAllJournalEditorLinks = async (skip: number = 0, limit: number = 100): Promise<JournalEditorLinkRead[]> => {
+    const response = await apiClient.get<JournalEditorLinkRead[]>('/admin/journal-editor-links', {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+const getAllJournalEntryAuthorLinks = async (skip: number = 0, limit: number = 100): Promise<JournalEntryAuthorLinkRead[]> => {
+    const response = await apiClient.get<JournalEntryAuthorLinkRead[]>('/admin/journal-entry-author-links', {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+const getAllJournalEntryRefereeLinks = async (skip: number = 0, limit: number = 100): Promise<JournalEntryRefereeLinkRead[]> => {
+    const response = await apiClient.get<JournalEntryRefereeLinkRead[]>('/admin/journal-entry-referee-links', {
+        params: { skip, limit }
+    });
     return response.data;
 };
 
@@ -245,29 +473,231 @@ const getPublishedJournalEntries = async (journalId: number, skip: number = 0, l
     return response.data;
 };
 
-export type { JournalEntryRead, JournalEntryCreate, JournalEntryUpdate, Journal };
+// Add function to update user
+const updateUser = async (userId: number, userData: UserUpdate): Promise<UserRead> => {
+    const response = await apiClient.put<UserRead>(`/admin/users/${userId}`, userData);
+    return response.data;
+};
 
-export default {
+// Add function to generate auto-login token for a user
+const generateUserLoginToken = async (userId: number): Promise<string> => {
+    const response = await apiClient.post<{token: string}>(`/admin/users/${userId}/login-token`);
+    return response.data.token;
+};
+
+// Add function to login with a token
+const loginWithToken = async (token: string, userId: number): Promise<TokenResponse> => {
+    const response = await apiClient.post<TokenResponse>('/token/login-with-token', {
+        token,
+        user_id: userId
+    });
+    return response.data;
+};
+
+// Add function to send login link via email
+const sendLoginLinkEmail = async (userId: number, loginLink: string, emailAddress?: string): Promise<void> => {
+    const response = await apiClient.post(`/admin/users/${userId}/send-login-link`, {
+        login_link: loginLink,
+        email_address: emailAddress
+    });
+    return response.data;
+};
+
+const deleteUser = async (userId: number, transferToUserId: number): Promise<void> => {
+    await apiClient.delete(`/admin/users/${userId}`, { 
+        data: { transfer_to_user_id: transferToUserId }
+    });
+};
+
+// Add function to get entries for the currently authenticated user
+const getMyJournalEntries = async (skip: number = 0, limit: number = 100): Promise<JournalEntryRead[]> => {
+    const response = await apiClient.get<JournalEntryRead[]>('/users/me/entries', {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+// Add function to get entries where the current user is a referee
+const getMyRefereeEntries = async (skip: number = 0, limit: number = 100): Promise<JournalEntryRead[]> => {
+    const response = await apiClient.get<JournalEntryRead[]>('/users/me/referee-entries', {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+// Add function to get journals where the current user is an editor
+const getMyEditedJournals = async (skip: number = 0, limit: number = 100): Promise<Journal[]> => {
+    const response = await apiClient.get<Journal[]>('/users/me/edited-journals', {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+// Add function to get user by ID (for admin)
+const getUserById = async (userId: string): Promise<UserRead> => {
+    const response = await apiClient.get<UserRead>(`/admin/users/${userId}/details`);
+    return response.data;
+};
+
+// Add a function to get basic user information by ID (accessible to all authenticated users)
+const getUserBasicInfo = async (userId: string): Promise<UserRead> => {
+    const response = await apiClient.get<UserRead>(`/users/${userId}/basic-info`);
+    return response.data;
+};
+
+// Add function to get journal entries for a specific user (for admin)
+const getUserJournalEntries = async (userId: string, skip: number = 0, limit: number = 100): Promise<JournalEntryRead[]> => {
+    const response = await apiClient.get<JournalEntryRead[]>(`/admin/users/${userId}/author-entries`, {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+// Add function to get referee entries for a specific user (for admin)
+const getUserRefereeEntries = async (userId: string, skip: number = 0, limit: number = 100): Promise<JournalEntryRead[]> => {
+    const response = await apiClient.get<JournalEntryRead[]>(`/admin/users/${userId}/referee-entries`, {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+// Add function to get journals edited by a specific user (for admin)
+const getUserEditedJournals = async (userId: string, skip: number = 0, limit: number = 100): Promise<Journal[]> => {
+    const response = await apiClient.get<Journal[]>(`/admin/users/${userId}/edited-journals`, {
+        params: { skip, limit }
+    });
+    return response.data;
+};
+
+// Add function to update the current user's profile
+const updateMyProfile = async (userData: UserUpdate): Promise<UserRead> => {
+    const response = await apiClient.put<UserRead>('/users/me', userData);
+    return response.data;
+};
+
+// --- Editor Specific Endpoints ---
+
+// Fetch journals the current editor is assigned to
+export const getEditorJournals = async (): Promise<Journal[]> => {
+    const response = await apiClient.get<Journal[]>('/editors/journals');
+    return response.data;
+};
+
+// Fetch journal entries related to the journals the current editor manages
+export const getEditorJournalEntries = async (): Promise<JournalEntryRead[]> => {
+    const response = await apiClient.get<JournalEntryRead[]>('/editors/journal_entries');
+    return response.data;
+};
+
+// Fetch users data for editor dashboard
+export const getEditorUsers = async (): Promise<UserRead[]> => {
+    const response = await apiClient.get<UserRead[]>('/editors/users');
+    return response.data;
+};
+
+// Fetch journal-editor links for the editor dashboard
+export const getEditorJournalEditorLinks = async (): Promise<JournalEditorLinkRead[]> => {
+    const response = await apiClient.get<JournalEditorLinkRead[]>('/editors/journal_editor_links');
+    return response.data;
+};
+
+// Fetch journal entry-author links for the editor dashboard
+export const getEditorJournalEntryAuthorLinks = async (): Promise<JournalEntryAuthorLinkRead[]> => {
+    const response = await apiClient.get<JournalEntryAuthorLinkRead[]>('/editors/journal_entry_author_links');
+    return response.data;
+};
+
+// Fetch journal entry-referee links for the editor dashboard
+export const getEditorJournalEntryRefereeLinks = async (): Promise<JournalEntryRefereeLinkRead[]> => {
+    const response = await apiClient.get<JournalEntryRefereeLinkRead[]>('/editors/journal_entry_referee_links');
+    return response.data;
+};
+
+// Fetch author updates related to the journals the current editor manages
+export const getEditorAuthorUpdates = async (): Promise<AuthorUpdateRead[]> => {
+    const response = await apiClient.get<AuthorUpdateRead[]>('/editors/author_updates');
+    return response.data;
+};
+
+// Fetch referee updates related to the journals the current editor manages
+export const getEditorRefereeUpdates = async (): Promise<RefereeUpdateRead[]> => {
+    const response = await apiClient.get<RefereeUpdateRead[]>('/editors/referee_updates');
+    return response.data;
+};
+
+export {
+    // List all functions that are *not* individually exported with 'export const'
     login,
     register,
     getCurrentUser,
-    // Export journal functions
+    forgotPassword,
+    resetPassword,
     getEntries,
+    getEntriesByJournal,
     getEntryById,
     createEntry,
     updateEntry,
     deleteEntry,
-    getJournals,
     createJournal,
     updateJournal,
-    getEntriesByJournal,
-    getPublishedJournals,
-    getPublishedJournalEntries,
-    // Admin functions
+    getJournals,
     getAllUsers,
     getAllJournals,
     getAllJournalEntries,
-    getAllJournalEntryProgress,
     updateSettings,
-    // apiClient, // Optionally export the instance if needed elsewhere
+    getSettings,
+    getAllAuthorUpdates,
+    getAllRefereeUpdates,
+    getEntryAuthorUpdates,
+    getEntryRefereeUpdates,
+    createAuthorUpdate,
+    createRefereeUpdate,
+    getAllJournalEditorLinks,
+    getAllJournalEntryAuthorLinks,
+    getAllJournalEntryRefereeLinks,
+    getPublishedJournals,
+    getPublishedJournalEntries,
+    updateUser,
+    generateUserLoginToken,
+    loginWithToken,
+    sendLoginLinkEmail,
+    deleteUser,
+    getMyJournalEntries,
+    getMyRefereeEntries,
+    getMyEditedJournals,
+    getUserById,
+    getUserBasicInfo,
+    getUserJournalEntries,
+    getUserRefereeEntries,
+    getUserEditedJournals,
+    updateMyProfile,
+    // Note: getEditorJournals, getEditorJournalEntries, 
+    // getEditorAuthorUpdates, getEditorRefereeUpdates are intentionally omitted 
+    // because they use 'export const' above.
+};
+
+export type {
+    // These interfaces are already exported directly above
+    // TokenResponse,
+    // UserRead, 
+    // UserCreate,
+    // JournalEntryRead,
+    // JournalEntryCreate,
+    JournalEntryUpdate,
+    Journal,
+    JournalCreate,
+    JournalUpdate,
+    // Settings,
+    SettingsUpdate,
+    AdminUserRead,
+    AdminJournalRead,
+    AdminJournalEntryRead,
+    AuthorUpdateRead,
+    AuthorUpdateCreate,
+    RefereeUpdateRead,
+    RefereeUpdateCreate,
+    JournalEditorLinkRead,
+    JournalEntryAuthorLinkRead,
+    JournalEntryRefereeLinkRead,
+    UserUpdate // Add this export
 }; 

@@ -10,6 +10,7 @@ from .routers import entries # Import the entries router
 from .routers import auth # Import auth router
 from .routers import admin # Import admin router
 from .routers import journals # Import journals router
+from .routers import editors # Import editors router
 from . import crud
 from .security import get_password_hash
 
@@ -26,15 +27,14 @@ async def lifecycle(app: FastAPI):
     # Create default admin user if it doesn't exist
     with Session(engine) as session:
         # Check if admin user already exists
-        admin_user = crud.get_user_by_username(session, "admin")
+        admin_user = crud.get_user_by_email(session, "admin@admin.com")
         if not admin_user:
             print("Creating default admin user...")
             # Create admin user
             admin_user = models.User(
-                username="admin",
                 email="admin@admin.com",
                 name="Administrator",
-                role=models.UserRole.ADMIN,
+                role=models.UserRole.admin,
                 hashed_password=get_password_hash("admin")
             )
             session.add(admin_user)
@@ -78,6 +78,7 @@ app.include_router(entries.router) # Include the entries router
 app.include_router(auth.router) # Include auth router
 app.include_router(admin.router) # Include admin router
 app.include_router(journals.router) # Include journals router
+app.include_router(editors.router) # Include editors router
 
 # Public endpoint for published journals (no auth required)
 @app.get("/public/journals", response_model=list[models.Journal])
@@ -118,7 +119,7 @@ def get_published_journal_entries(
     # Get entries for this journal
     entries_statement = select(models.JournalEntry).where(
         models.JournalEntry.journal_id == journal_id,
-        models.JournalEntry.status == "COMPLETED"  # Only return completed entries
+        models.JournalEntry.status == "completed"  # Changed from "COMPLETED" to "completed"
     ).offset(skip).limit(limit)
     
     entries = db.exec(entries_statement).all()

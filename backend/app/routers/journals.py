@@ -22,7 +22,7 @@ def create_journal(
     Create a new journal. Only authenticated users can create journals.
     """
     # Verify user has proper role (optional, uncomment if needed)
-    # if current_user.role not in [models.UserRole.ADMIN, models.UserRole.EDITOR]:
+    # if current_user.role not in [models.UserRole.admin, models.UserRole.editor]:
     #     raise HTTPException(
     #         status_code=status.HTTP_403_FORBIDDEN,
     #         detail="Insufficient permissions. Editor or Admin role required to create journals."
@@ -63,7 +63,7 @@ def update_journal(
     Update a journal by ID. Only authenticated admin users can update journals.
     """
     # Check admin role
-    if current_user.role != models.UserRole.ADMIN:
+    if current_user.role != models.UserRole.admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Insufficient permissions. Admin role required to update journals."

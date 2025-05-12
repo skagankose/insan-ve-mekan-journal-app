@@ -12,7 +12,7 @@ if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable not set")
 
 # Connection parameters
-engine = create_engine(DATABASE_URL, echo=True)  # echo=True logs SQL queries for debugging
+engine = create_engine(DATABASE_URL, echo=False)  # echo=False disables SQL query logging
 
 def create_db_and_tables():
     """

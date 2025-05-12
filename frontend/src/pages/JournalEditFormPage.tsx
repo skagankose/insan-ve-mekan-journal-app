@@ -1,14 +1,20 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
-import apiService from '../services/apiService';
 
 interface JournalFormData {
     title: string;
     issue: string;
     is_published: boolean;
-    publication_date: string | null;
+    date: string | undefined;
+    publication_date: string | undefined;
+    publication_place: string | undefined;
+    cover_photo: string | undefined;
+    meta_files: string | undefined;
+    editor_notes: string | undefined;
+    full_pdf: string | undefined;
 }
 
 const JournalEditFormPage: React.FC = () => {
@@ -19,7 +25,13 @@ const JournalEditFormPage: React.FC = () => {
         title: '',
         issue: '',
         is_published: false,
-        publication_date: null
+        date: undefined,
+        publication_date: undefined,
+        publication_place: undefined,
+        cover_photo: undefined,
+        meta_files: undefined,
+        editor_notes: undefined,
+        full_pdf: undefined
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,17 +44,22 @@ const JournalEditFormPage: React.FC = () => {
 
     // Fetch journal data
     useEffect(() => {
-        if (!isAuthenticated || !id || isNaN(journalId)) {
-            setError("Invalid journal ID or not authenticated.");
-            setIsLoading(false);
-            return;
-        }
-
         const fetchJournal = async () => {
+            if (!id || isNaN(journalId)) {
+                setError("Invalid journal ID.");
+                setIsLoading(false);
+                return;
+            }
+
+            if (!isAuthenticated) {
+                setError("You must be logged in to edit journals.");
+                setIsLoading(false);
+                return;
+            }
             setIsLoading(true);
             setError(null);
             try {
-                // Need to implement this function in apiService
+                // Get all journals and find the one with the matching ID
                 const journals = await apiService.getJournals();
                 const journal = journals.find(j => j.id === journalId);
                 
@@ -55,10 +72,16 @@ const JournalEditFormPage: React.FC = () => {
                     title: journal.title,
                     issue: journal.issue,
                     is_published: journal.is_published,
-                    publication_date: journal.publication_date
+                    date: journal.date ? journal.date.slice(0, 16) : undefined, // Format for datetime-local (YYYY-MM-DDTHH:MM)
+                    publication_date: journal.publication_date || undefined,
+                    publication_place: journal.publication_place || undefined,
+                    cover_photo: journal.cover_photo || undefined,
+                    meta_files: journal.meta_files || undefined,
+                    editor_notes: journal.editor_notes || undefined,
+                    full_pdf: journal.full_pdf || undefined
                 });
             } catch (err: any) {
-                console.error("Failed to fetch journal:", err);
+                console.error("Failed to fetch journal for editing:", err);
                 setError(err.response?.data?.detail || "Failed to load journal data.");
             } finally {
                 setIsLoading(false);
@@ -101,8 +124,17 @@ const JournalEditFormPage: React.FC = () => {
         setSubmitError(null);
         
         try {
+            // Create a copy of formData with properly formatted date
+            const submitData = { ...formData };
+            
+            // Convert date string to full ISO string if it exists
+            if (submitData.date) {
+                // Add time portion to make it a complete ISO string
+                submitData.date = new Date(submitData.date).toISOString();
+            }
+            
             // Need to implement this function in apiService
-            await apiService.updateJournal(journalId, formData);
+            await apiService.updateJournal(journalId, submitData);
             navigate('/journals'); // Navigate back to journals list after update
         } catch (err: any) {
             console.error("Failed to update journal:", err);
@@ -166,6 +198,20 @@ const JournalEditFormPage: React.FC = () => {
                 </div>
 
                 <div className="form-group">
+                    <label htmlFor="date" className="form-label">{t('date') || 'Date and Time'}</label>
+                    <input
+                        type="datetime-local"
+                        id="date"
+                        name="date"
+                        className="form-input"
+                        value={formData.date || ''}
+                        onChange={handleChange}
+                        placeholder={t('enterDate') || 'Enter date and time'}
+                        disabled={isSubmitting || (user ? user.role !== 'admin' : true)}
+                    />
+                </div>
+
+                <div className="form-group">
                     <label htmlFor="publication_date" className="form-label">{t('publicationDate') || 'Publication Date'}</label>
                     <input
                         type="datetime-local"
@@ -174,6 +220,76 @@ const JournalEditFormPage: React.FC = () => {
                         className="form-input"
                         value={formData.publication_date || ''}
                         onChange={handleChange}
+                        disabled={isSubmitting || (user ? user.role !== 'admin' : true)}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="publication_place" className="form-label">{t('publicationPlace') || 'Publication Place'}</label>
+                    <input
+                        type="text"
+                        id="publication_place"
+                        name="publication_place"
+                        className="form-input"
+                        value={formData.publication_place || ''}
+                        onChange={handleChange}
+                        placeholder={t('enterPublicationPlace') || 'Enter publication place'}
+                        disabled={isSubmitting || (user ? user.role !== 'admin' : true)}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="cover_photo" className="form-label">{t('coverPhoto') || 'Cover Photo Path'}</label>
+                    <input
+                        type="text"
+                        id="cover_photo"
+                        name="cover_photo"
+                        className="form-input"
+                        value={formData.cover_photo || ''}
+                        onChange={handleChange}
+                        placeholder={t('enterCoverPhotoPath') || 'Enter cover photo path'}
+                        disabled={isSubmitting || (user ? user.role !== 'admin' : true)}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="meta_files" className="form-label">{t('metaFiles') || 'Meta Files Path'}</label>
+                    <input
+                        type="text"
+                        id="meta_files"
+                        name="meta_files"
+                        className="form-input"
+                        value={formData.meta_files || ''}
+                        onChange={handleChange}
+                        placeholder={t('enterMetaFilesPath') || 'Enter meta files path'}
+                        disabled={isSubmitting || (user ? user.role !== 'admin' : true)}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="editor_notes" className="form-label">{t('editorNotes') || 'Editor Notes Path'}</label>
+                    <input
+                        type="text"
+                        id="editor_notes"
+                        name="editor_notes"
+                        className="form-input"
+                        value={formData.editor_notes || ''}
+                        onChange={handleChange}
+                        placeholder={t('enterEditorNotesPath') || 'Enter editor notes path'}
+                        disabled={isSubmitting || (user ? user.role !== 'admin' : true)}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="full_pdf" className="form-label">{t('fullPdf') || 'Full PDF Path'}</label>
+                    <input
+                        type="text"
+                        id="full_pdf"
+                        name="full_pdf"
+                        className="form-input"
+                        value={formData.full_pdf || ''}
+                        onChange={handleChange}
+                        placeholder={t('enterFullPdfPath') || 'Enter full PDF path'}
                         disabled={isSubmitting || (user ? user.role !== 'admin' : true)}
                     />
                 </div>

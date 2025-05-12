@@ -5,12 +5,16 @@ import { useAuth } from '../contexts/AuthContext'; // Use the Auth context
 import { useLanguage } from '../contexts/LanguageContext';
 
 const RegisterPage: React.FC = () => {
-    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [title, setTitle] = useState('');
     const [bio, setBio] = useState('');
-    const [role, setRole] = useState('writer');  // Default to writer
+    const [telephone, setTelephone] = useState('');
+    const [scienceBranch, setScienceBranch] = useState('');
+    const [location, setLocation] = useState('');
+    const [yoksisId, setYoksisId] = useState('');
+    const [orcidId, setOrcidId] = useState('');
+    const [role, setRole] = useState('author');  // Default to author
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -24,22 +28,28 @@ const RegisterPage: React.FC = () => {
         setError(null);
         setSuccess(null);
         setIsSubmitting(true);
-        console.log("Register attempt:", { username, email, name, title, bio, role });
+        // console.log("Register attempt:", { email, name, title, bio, telephone, scienceBranch, location, yoksisId, orcidId, role });
 
         try {
             const userData = { 
-                username, 
                 email, 
                 name,
                 title: title || undefined,
                 bio: bio || undefined,
+                telephone: telephone || undefined,
+                science_branch: scienceBranch || undefined,
+                location: location || undefined,
+                yoksis_id: yoksisId || undefined,
+                orcid_id: orcidId || undefined,
                 role,
                 password 
             };
             await register(userData); // Call register from context
             setSuccess('Registration successful! Redirecting to login...');
             // Clear form
-            setUsername(''); setEmail(''); setName(''); setTitle(''); setBio(''); setRole('writer'); setPassword('');
+            setEmail(''); setName(''); setTitle(''); setBio(''); 
+            setTelephone(''); setScienceBranch(''); setLocation(''); 
+            setYoksisId(''); setOrcidId(''); setRole('author'); setPassword('');
             // Redirect to login after a short delay
             setTimeout(() => {
                 navigate('/login');
@@ -62,19 +72,6 @@ const RegisterPage: React.FC = () => {
             {success && <div className="success-message">{success}</div>}
             
             <form onSubmit={handleSubmit} className="card">
-                <div className="form-group">
-                    <label htmlFor="username" className="form-label">{t('username')}</label>
-                    <input
-                        type="text"
-                        id="username"
-                        className="form-input"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                        disabled={isSubmitting}
-                    />
-                </div>
-                
                 <div className="form-group">
                     <label htmlFor="email" className="form-label">{t('email')}</label>
                     <input
@@ -126,6 +123,66 @@ const RegisterPage: React.FC = () => {
                 </div>
                 
                 <div className="form-group">
+                    <label htmlFor="telephone" className="form-label">{t('telephone') || 'Phone Number'} (Optional)</label>
+                    <input
+                        type="text"
+                        id="telephone"
+                        className="form-input"
+                        value={telephone}
+                        onChange={(e) => setTelephone(e.target.value)}
+                        disabled={isSubmitting}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="scienceBranch" className="form-label">{t('scienceBranch') || 'Science Branch'} (Optional)</label>
+                    <input
+                        type="text"
+                        id="scienceBranch"
+                        className="form-input"
+                        value={scienceBranch}
+                        onChange={(e) => setScienceBranch(e.target.value)}
+                        disabled={isSubmitting}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="location" className="form-label">{t('location') || 'Location'} (Optional)</label>
+                    <input
+                        type="text"
+                        id="location"
+                        className="form-input"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        disabled={isSubmitting}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="yoksisId" className="form-label">{t('yoksisId') || 'YÖKSİS ID'} (Optional)</label>
+                    <input
+                        type="text"
+                        id="yoksisId"
+                        className="form-input"
+                        value={yoksisId}
+                        onChange={(e) => setYoksisId(e.target.value)}
+                        disabled={isSubmitting}
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="orcidId" className="form-label">{t('orcidId') || 'ORCID ID'} (Optional)</label>
+                    <input
+                        type="text"
+                        id="orcidId"
+                        className="form-input"
+                        value={orcidId}
+                        onChange={(e) => setOrcidId(e.target.value)}
+                        disabled={isSubmitting}
+                    />
+                </div>
+                
+                <div className="form-group">
                     <label htmlFor="role" className="form-label">{t('role')}</label>
                     <select
                         id="role"
@@ -134,9 +191,9 @@ const RegisterPage: React.FC = () => {
                         onChange={(e) => setRole(e.target.value)}
                         disabled={isSubmitting}
                     >
-                        <option value="writer">{t('writer') || 'Writer'}</option>
+                        <option value="author">{t('writer') || 'Writer'}</option>
                         <option value="editor">{t('editor') || 'Editor'}</option>
-                        <option value="arbitrator">{t('arbitrator') || 'Arbitrator'}</option>
+                        <option value="referee">{t('arbitrator') || 'Arbitrator'}</option>
                         <option value="admin">{t('admin') || 'Admin'}</option>
                     </select>
                 </div>

@@ -39,7 +39,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 43200
 
 # Pydantic model for token data (the payload/claims)
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    email: Optional[str] = None
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

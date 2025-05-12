@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const LoginPage: React.FC = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -20,7 +20,7 @@ const LoginPage: React.FC = () => {
         setError(null);
 
         try {
-            await login(username, password);
+            await login(email, password);
             navigate(from, { replace: true });
         } catch (err: any) {
             console.error("Login failed:", err);
@@ -45,16 +45,16 @@ const LoginPage: React.FC = () => {
             
             <form onSubmit={handleSubmit} className="card">
                 <div className="form-group">
-                    <label htmlFor="username" className="form-label">{t('username')}</label>
+                    <label htmlFor="email" className="form-label">{t('email')}</label>
                     <input
-                        type="text"
-                        id="username"
+                        type="email"
+                        id="email"
                         className="form-input"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                         disabled={isLoading}
-                        placeholder={t('enterUsername')}
+                        placeholder={t('enterEmail')}
                     />
                 </div>
                 
@@ -70,6 +70,11 @@ const LoginPage: React.FC = () => {
                         disabled={isLoading}
                         placeholder={t('enterPassword')}
                     />
+                    <div className="form-helper-text" style={{ textAlign: 'right', marginTop: '4px' }}>
+                        <Link to="/forgot-password" className="forgot-password-link">
+                            {t('forgotPassword')}
+                        </Link>
+                    </div>
                 </div>
                 
                 <div className="form-group" style={{ marginTop: 'var(--spacing-6)' }}>
