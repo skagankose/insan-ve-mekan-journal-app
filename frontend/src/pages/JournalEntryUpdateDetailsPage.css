@@ -46,11 +46,12 @@
   letter-spacing: 1px;
 }
 
-.badge-waiting_for_payment { background-color: #ffd700; color: #333; }
-.badge-waiting_for_writer { background-color: #ffb74d; color: #333; }
-.badge-waiting_for_arbitrator { background-color: #f48fb1; color: #333; }
-.badge-waiting_for_editor { background-color: #90caf9; color: #333; }
-.badge-completed { background-color: #81c784; color: #333; }
+.badge-waiting_for_payment { background-color: #ffec59; color: #333; }
+.badge-waiting_for_authors { background-color: #ffb74d; color: #333; }
+.badge-waiting_for_referees { background-color: #f48fb1; color: #333; }
+.badge-waiting_for_editors { background-color: #90caf9; color: #333; }
+.badge-accepted { background-color: #81c784; color: #333; }
+.badge-not_accepted { background-color: #ef5350; color: #fff; }
 
 .back-button {
   padding: 8px 15px;
@@ -303,4 +304,35 @@
 
 .update-notes p {
   margin-top: 5px;
+}
+
+.delete-update-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #d32f2f;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  margin-left: 8px;
+}
+
+.delete-update-button:hover {
+  background-color: rgba(211, 47, 47, 0.1);
+}
+
+.delete-icon {
+  font-weight: bold;
+}
+
+.deletion-window-indicator {
+  margin-left: 8px;
+  font-size: 14px;
+  opacity: 0.7;
+  cursor: help;
 } 

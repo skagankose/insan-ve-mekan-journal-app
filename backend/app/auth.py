@@ -3,12 +3,13 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlmodel import Session
 from pydantic import BaseModel
+from typing import Optional
 
 from . import crud, models, schemas, security
 from .database import get_session
 
 # This tells FastAPI where to look for the token (the '/token' endpoint we'll create)
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token", auto_error=False)
 
 class Token(BaseModel):
     access_token: str
@@ -42,6 +43,26 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user = crud.get_user_by_email(db, email=token_data.email)
     if user is None:
         raise credentials_exception
+    return user
+
+def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme), db: Session = Depends(get_session)) -> Optional[models.User]:
+    """
+    Dependency to get the current user from a token, but returns None if no valid token is provided.
+    This is useful for endpoints that should work for both authenticated and unauthenticated users.
+    """
+    if token is None:
+        return None
+    
+    try:
+        payload = jwt.decode(token, security.SECRET_KEY, algorithms=[security.ALGORITHM])
+        email: str | None = payload.get("sub")
+        if email is None:
+            return None
+        token_data = security.TokenData(email=email)
+    except JWTError:
+        return None
+    
+    user = crud.get_user_by_email(db, email=token_data.email)
     return user
 
 def get_current_active_user(current_user: models.User = Depends(get_current_user)) -> models.User:

@@ -7,8 +7,7 @@ import './UserProfilePage.css';
 
 // Define interface for grouped entries
 interface GroupedEntries {
-    [journalId: string]: {
-        journal: apiService.Journal | null;
+    [key: string]: {
         entries: apiService.JournalEntryRead[];
         isExpanded: boolean;
     };
@@ -22,48 +21,55 @@ const UserProfilePage: React.FC = () => {
     const [userEntries, setUserEntries] = useState<apiService.JournalEntryRead[]>([]);
     const [refereeEntries, setRefereeEntries] = useState<apiService.JournalEntryRead[]>([]);
     const [editedJournals, setEditedJournals] = useState<apiService.Journal[]>([]);
-    const [allJournals, setAllJournals] = useState<apiService.Journal[]>([]);
+    const [editorInChiefJournals, setEditorInChiefJournals] = useState<apiService.Journal[]>([]);
     const [groupedUserEntries, setGroupedUserEntries] = useState<GroupedEntries>({});
     const [groupedRefereeEntries, setGroupedRefereeEntries] = useState<GroupedEntries>({});
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [profileUser, setProfileUser] = useState<apiService.UserRead | null>(null);
+    const [showRejectedUserEntries, setShowRejectedUserEntries] = useState<boolean>(false);
+    const [showRejectedRefereeEntries, setShowRejectedRefereeEntries] = useState<boolean>(false);
     
-    // Group entries by journal ID
-    const groupEntriesByJournal = (entries: apiService.JournalEntryRead[]): GroupedEntries => {
+    // Group entries by status and filter out rejected entries
+    const groupEntriesByStatus = (entries: apiService.JournalEntryRead[]): GroupedEntries => {
         const grouped: GroupedEntries = {};
         
         entries.forEach(entry => {
-            // Handle entries without a journal
-            const journalIdKey = entry.journal_id?.toString() || 'noJournal';
+            // Skip rejected entries since we'll handle them separately
+            if (entry.status === 'not_accepted') {
+                return;
+            }
             
-            if (!grouped[journalIdKey]) {
-                const journal = entry.journal_id
-                    ? allJournals.find(j => j.id === entry.journal_id) || null
-                    : null;
-                
-                grouped[journalIdKey] = {
-                    journal: journal,
+            // Use the status as the key, or 'unknown' if status is missing
+            const statusKey = entry.status || 'unknown';
+            
+            if (!grouped[statusKey]) {
+                grouped[statusKey] = {
                     entries: [],
                     isExpanded: false
                 };
             }
             
-            grouped[journalIdKey].entries.push(entry);
+            grouped[statusKey].entries.push(entry);
         });
         
         return grouped;
     };
+
+    // Get rejected entries separately
+    const getRejectedEntries = (entries: apiService.JournalEntryRead[]): apiService.JournalEntryRead[] => {
+        return entries.filter(entry => entry.status === 'not_accepted');
+    };
     
-    // Toggle the expanded state of a journal group
-    const toggleJournalGroup = (journalId: string, isUserEntries: boolean) => {
+    // Toggle the expanded state of a status group
+    const toggleStatusGroup = (status: string, isUserEntries: boolean) => {
         if (isUserEntries) {
             setGroupedUserEntries(prevGroups => {
                 const newGroups = {...prevGroups};
-                if (newGroups[journalId]) {
-                    newGroups[journalId] = {
-                        ...newGroups[journalId],
-                        isExpanded: !newGroups[journalId].isExpanded
+                if (newGroups[status]) {
+                    newGroups[status] = {
+                        ...newGroups[status],
+                        isExpanded: !newGroups[status].isExpanded
                     };
                 }
                 return newGroups;
@@ -71,10 +77,10 @@ const UserProfilePage: React.FC = () => {
         } else {
             setGroupedRefereeEntries(prevGroups => {
                 const newGroups = {...prevGroups};
-                if (newGroups[journalId]) {
-                    newGroups[journalId] = {
-                        ...newGroups[journalId],
-                        isExpanded: !newGroups[journalId].isExpanded
+                if (newGroups[status]) {
+                    newGroups[status] = {
+                        ...newGroups[status],
+                        isExpanded: !newGroups[status].isExpanded
                     };
                 }
                 return newGroups;
@@ -91,7 +97,6 @@ const UserProfilePage: React.FC = () => {
             try {
                 // Fetch all journals to map journal_id to journal title
                 const journals = await apiService.getAllJournals();
-                setAllJournals(journals);
                 
                 // First, determine if we're viewing our own profile or someone else's
                 if (!userId) {
@@ -113,6 +118,12 @@ const UserProfilePage: React.FC = () => {
                         setUserEntries(entries);
                         setRefereeEntries(refEntries);
                         setEditedJournals(editedJournals);
+                        
+                        // Find journals where current user is editor-in-chief
+                        const editorInChiefJournalsList = journals.filter(
+                            journal => journal.editor_in_chief_id === user.id
+                        );
+                        setEditorInChiefJournals(editorInChiefJournalsList);
                     } catch (err: any) {
                         console.error("Failed to fetch user data:", err);
                         setError("Failed to load your profile data.");
@@ -168,6 +179,12 @@ const UserProfilePage: React.FC = () => {
                                 editorLinks.some(link => link.journal_id === journal.id)
                             );
                             setEditedJournals(userEditedJournals);
+                            
+                            // 7. Find journals where user is editor-in-chief
+                            const userEditorInChiefJournals = journals.filter(
+                                journal => journal.editor_in_chief_id === Number(userId)
+                            );
+                            setEditorInChiefJournals(userEditorInChiefJournals);
                         } else {
                             setError('User not found');
                         }
@@ -187,13 +204,11 @@ const UserProfilePage: React.FC = () => {
         fetchAllData();
     }, [userId, user, navigate]);
 
-    // Group entries whenever userEntries, refereeEntries, or allJournals change
+    // Group entries whenever userEntries, refereeEntries change or toggle state changes
     useEffect(() => {
-        if (allJournals.length > 0) {
-            setGroupedUserEntries(groupEntriesByJournal(userEntries));
-            setGroupedRefereeEntries(groupEntriesByJournal(refereeEntries));
-        }
-    }, [userEntries, refereeEntries, allJournals]);
+        setGroupedUserEntries(groupEntriesByStatus(userEntries));
+        setGroupedRefereeEntries(groupEntriesByStatus(refereeEntries));
+    }, [userEntries, refereeEntries, showRejectedUserEntries, showRejectedRefereeEntries]);
 
     if (loading) {
         return <div className="loading">{t('loadingUserData') || 'Loading user data...'}</div>;
@@ -210,40 +225,45 @@ const UserProfilePage: React.FC = () => {
     // Helper function to render entry item
     const renderEntryItem = (entry: apiService.JournalEntryRead) => {
         return (
-            <div key={entry.id} className="entry-item">
-                <h4 className="entry-title">{entry.title}</h4>
-                <p className="entry-abstract">{entry.abstract_tr}</p>
-                <div className="entry-meta">
-                    <span className="entry-date">
-                        {t('date') || 'Date'}: {entry.date ? new Date(entry.date).toLocaleString() : new Date(entry.updated_at).toLocaleString()}
-                    </span>
-                    {entry.status && (
-                        <span className="entry-status">
-                            <span className={`badge badge-${entry.status.toLowerCase()}`}>
-                                {t(entry.status) || entry.status}
-                            </span>
+            <Link key={entry.id} to={`/entries/${entry.id}`} className="entry-link">
+                <div className="entry-item">
+                    <h4 className="entry-title">{entry.title}</h4>
+                    <p className="entry-abstract">{entry.abstract_tr}</p>
+                    <div className="entry-meta">
+                        <span className="entry-date">
+                            {t('date') || 'Date'}: {entry.date ? new Date(entry.date).toLocaleString() : new Date(entry.updated_at).toLocaleString()}
                         </span>
-                    )}
+                        {entry.status && (
+                            <span className="entry-status">
+                                <span className={`badge badge-${entry.status.toLowerCase()}`}>
+                                    {t(entry.status) || entry.status}
+                                </span>
+                            </span>
+                        )}
+                    </div>
+                    <div className="entry-actions" onClick={(e) => e.stopPropagation()}>
+                    </div>
                 </div>
-                <div className="entry-actions">
-                    {(user?.role === 'admin' || user?.role === 'editor') && (
-                        <Link to={`/entries/edit/${entry.id}`} className="view-entry-btn">
-                            {t('viewEdit') || 'View/Edit'}
-                        </Link>
-                    )}
-                    <Link to={`/entries/${entry.id}/updates`} className="view-updates-btn">
-                        {t('viewUpdates') || 'View Updates'}
-                    </Link>
-                </div>
-            </div>
+            </Link>
         );
     };
 
-    // Helper function to render grouped entries
-    const renderGroupedEntries = (groupedEntries: GroupedEntries, emptyMessage: string, isUserEntries: boolean) => {
-        const journalIds = Object.keys(groupedEntries);
+    // Helper function to render grouped entries with toggle button for rejected entries
+    const renderGroupedEntries = (
+        groupedEntries: GroupedEntries, 
+        allEntries: apiService.JournalEntryRead[],
+        emptyMessage: string, 
+        isUserEntries: boolean, 
+        showRejected: boolean,
+        setShowRejected: React.Dispatch<React.SetStateAction<boolean>>
+    ) => {
+        const statuses = Object.keys(groupedEntries);
         
-        if (journalIds.length === 0) {
+        // Get rejected entries
+        const rejectedEntries = getRejectedEntries(allEntries);
+        const rejectedCount = rejectedEntries.length;
+        
+        if (statuses.length === 0 && rejectedCount === 0) {
             return (
                 <div className="empty-state">
                     <div className="empty-state-icon">📝</div>
@@ -252,43 +272,38 @@ const UserProfilePage: React.FC = () => {
             );
         }
         
-        // Sort journals: first by those with titles, then by date (newest first)
-        const sortedJournalIds = journalIds.sort((a, b) => {
-            const journalA = groupedEntries[a].journal;
-            const journalB = groupedEntries[b].journal;
-            
-            // If one has a journal and the other doesn't, prioritize the one with a journal
-            if (journalA && !journalB) return -1;
-            if (!journalA && journalB) return 1;
-            
-            // If both have journals, sort by date (newest first)
-            if (journalA && journalB) {
-                return new Date(journalB.date).getTime() - new Date(journalA.date).getTime();
-            }
-            
-            return 0;
+        // Sort statuses by priority: submitted, under_review, revisions_requested, accepted, published
+        const statusOrder: { [key: string]: number } = {
+            'submitted': 1,
+            'under_review': 2,
+            'revisions_requested': 3,
+            'accepted': 4,
+            'published': 5,
+            'unknown': 6
+        };
+        
+        const sortedStatuses = statuses.sort((a, b) => {
+            return (statusOrder[a] || 999) - (statusOrder[b] || 999);
         });
         
         return (
             <div className="entries-accordion">
-                {sortedJournalIds.map(journalId => {
-                    const group = groupedEntries[journalId];
-                    const journalName = group.journal 
-                        ? group.journal.title 
-                        : (t('noJournal') || 'No Journal');
-                    const issueInfo = group.journal 
-                        ? `${t('issue') || 'Issue'}: ${group.journal.issue}` 
-                        : '';
+                {sortedStatuses.map(status => {
+                    const group = groupedEntries[status];
+                    const statusDisplay = t(status) || status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
                     
                     return (
-                        <div key={journalId} className="journal-group">
+                        <div key={status} className="status-group">
                             <div 
-                                className={`journal-group-header ${group.isExpanded ? 'expanded' : ''}`}
-                                onClick={() => toggleJournalGroup(journalId, isUserEntries)}
+                                className={`status-group-header ${group.isExpanded ? 'expanded' : ''}`}
+                                onClick={() => toggleStatusGroup(status, isUserEntries)}
                             >
-                                <div className="journal-group-title">
-                                    <h3>{journalName}</h3>
-                                    {issueInfo && <span className="journal-issue">{issueInfo}</span>}
+                                <div className="status-group-title">
+                                    <h3>
+                                        <span className={`badge badge-${status.toLowerCase()}`}>
+                                            {statusDisplay}
+                                        </span>
+                                    </h3>
                                     <span className="entry-count">
                                         {group.entries.length} {group.entries.length === 1 
                                             ? (t('entry') || 'entry') 
@@ -301,13 +316,35 @@ const UserProfilePage: React.FC = () => {
                             </div>
                             
                             {group.isExpanded && (
-                                <div className="journal-group-content">
+                                <div className="status-group-content">
                                     {group.entries.map(entry => renderEntryItem(entry))}
                                 </div>
                             )}
                         </div>
                     );
                 })}
+                
+                {/* Rejected entries section */}
+                {rejectedCount > 0 && (
+                    <div className="rejected-entries-section">
+                        <div className="rejected-entries-toggle">
+                            <button 
+                                onClick={() => setShowRejected(!showRejected)}
+                                className="toggle-rejected-btn"
+                            >
+                                {showRejected 
+                                    ? (t('hideRejectedEntries') || 'Hide Not Accepted Entries') 
+                                    : (t('showRejectedEntries') || `Show Not Accepted Entries (${rejectedCount})`)}
+                            </button>
+                        </div>
+                        
+                        {showRejected && (
+                            <div className="rejected-entries-content">
+                                {rejectedEntries.map(entry => renderEntryItem(entry))}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         );
     };
@@ -326,24 +363,26 @@ const UserProfilePage: React.FC = () => {
         return (
             <div className="journals-list">
                 {journals.map(journal => (
-                    <div key={journal.id} className="journal-card">
-                        <h3 className="journal-title">{journal.title}</h3>
-                        <div className="journal-meta">
-                            <span className="journal-issue">
-                                {t('issue') || 'Issue'}: {journal.issue}
-                            </span>
-                            <span className="journal-date">
-                                {t('date') || 'Date'}: {new Date(journal.date).toLocaleDateString()}
-                            </span>
-                            {journal.is_published && (
-                                <span className="journal-published">
-                                    <span className="badge badge-published">
-                                        {t('published') || 'Published'}
-                                    </span>
+                    <Link key={journal.id} to={`/journals/${journal.id}`} className="journal-link">
+                        <div className="journal-card">
+                            <h3 className="journal-title">{journal.title}</h3>
+                            <div className="journal-meta">
+                                <span className="journal-issue">
+                                    {t('issue') || 'Issue'}: {journal.issue}
                                 </span>
-                            )}
+                                <span className="journal-date">
+                                    {t('date') || 'Date'}: {new Date(journal.date).toLocaleDateString()}
+                                </span>
+                                {journal.is_published && (
+                                    <span className="journal-published">
+                                        <span className="badge badge-published">
+                                            {t('published') || 'Published'}
+                                        </span>
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         );
@@ -356,8 +395,8 @@ const UserProfilePage: React.FC = () => {
                     {userId ? `${t('userProfile') || 'User Profile'}: ${profileUser.name}` : t('userProfile') || 'User Profile'}
                 </h1>
                 <div className="profile-actions">
-                    {/* Edit Profile button shown only when viewing own profile */}
-                    {!userId && user && (
+                    {/* Edit Profile button shown only when viewing own profile and not an editor or referee */}
+                    {!userId && user && user.role !== 'editor' && user.role !== 'referee' && (
                         <button 
                             onClick={() => navigate(`/profile/edit`)} 
                             className="edit-profile-btn"
@@ -366,7 +405,7 @@ const UserProfilePage: React.FC = () => {
                         </button>
                     )}
                     {/* Admin actions for other user profiles */}
-                    {userId && user?.role === 'admin' && (
+                    {userId && (user?.role === 'admin' || user?.role === 'owner') && (
                         <div className="admin-profile-actions">
                             <button 
                                 onClick={() => navigate(`/admin/users/edit/${userId}`)} 
@@ -388,19 +427,38 @@ const UserProfilePage: React.FC = () => {
             <div className="profile-card">
                 <div className="profile-info">
                     <h2>{profileUser.name}</h2>
-                    {profileUser.role && (
-                        <span className={`badge badge-${profileUser.role.toLowerCase()}`}>
-                            {profileUser.role}
-                        </span>
+                    {/* Admin Badge */}
+                    {profileUser.role === 'admin' && (
+                      <span className="badge badge-admin">{t('admin')}</span>
                     )}
                     
-                    {profileUser.title && (
+                    {/* Owner Badge */}
+                    {profileUser.role === 'owner' && (
+                      <span className="badge badge-owner">{t('owner')}</span>
+                    )}
+                    
+                    {/* Editor Badge */}
+                    {(profileUser.role === 'editor' || profileUser.role === 'admin' || profileUser.role === 'owner') && (
+                      <span className="badge badge-editor">{t('editor')}</span>
+                    )}
+                    
+                    {/* Author Badge */}
+                    {(profileUser.role === 'author' || profileUser.role === 'admin' || profileUser.role === 'owner') && (
+                      <span className="badge badge-author">{t('author')}</span>
+                    )}
+                    
+                    {/* Referee Badge */}
+                    {(profileUser.role === 'referee' || profileUser.role === 'admin' || profileUser.role === 'owner') && (
+                      <span className="badge badge-referee">{t('referee')}</span>
+                    )}
+                    
+                    {profileUser.title && profileUser.role !== 'editor' && profileUser.role !== 'referee' && (
                         <div className="profile-title">
                             <p>{profileUser.title}</p>
                         </div>
                     )}
                     
-                    {profileUser.bio && (
+                    {profileUser.bio && profileUser.role !== 'editor' && profileUser.role !== 'referee' && (
                         <div className="bio-section">
                             <h3>{t('biography') || 'Biography'}</h3>
                             <p>{profileUser.bio}</p>
@@ -409,8 +467,16 @@ const UserProfilePage: React.FC = () => {
                 </div>
             </div>
 
+            {/* Show editor-in-chief journals - only for admin users */}
+            {(profileUser.role === 'admin' || profileUser.role === 'owner') && (
+                <div className="editor-in-chief-journals-section">
+                    <h2>{userId ? `${t('editorInChiefJournals') || 'Editor-in-Chief Journals'}` : t('myEditorInChiefJournals') || 'Journals I Lead as Editor-in-Chief'}</h2>
+                    {renderJournalsList(editorInChiefJournals, t('noEditorInChiefJournalsFound') || 'No editor-in-chief journals found.')}
+                </div>
+            )}
+
             {/* Show edited journals if user is an editor or admin */}
-            {(profileUser.role === 'editor' || profileUser.role === 'admin') && (
+            {(profileUser.role === 'editor' || profileUser.role === 'admin' || profileUser.role === 'owner') && (
                 <div className="edited-journals-section">
                     <h2>{userId ? `${t('editedJournals') || 'Edited Journals'}` : t('myEditedJournals') || 'Journals I Edit'}</h2>
                     {renderJournalsList(editedJournals, t('noEditedJournalsFound') || 'No journals found.')}
@@ -418,18 +484,32 @@ const UserProfilePage: React.FC = () => {
             )}
 
             {/* Show journal entries if user is an author or admin */}
-            {(profileUser.role === 'author' || profileUser.role === 'admin' || profileUser.role === 'editor') && (
+            {(profileUser.role === 'author' || profileUser.role === 'admin' || profileUser.role === 'owner') && (
                 <div className="user-entries-section">
                     <h2>{userId ? `${t('journalEntries') || 'Journal Entries'}` : t('myJournalEntries') || 'My Journal Entries'}</h2>
-                    {renderGroupedEntries(groupedUserEntries, t('noEntriesFound') || 'No entries found.', true)}
+                    {renderGroupedEntries(
+                        groupedUserEntries,
+                        userEntries,
+                        t('noEntriesFound') || 'No entries found.', 
+                        true,
+                        showRejectedUserEntries,
+                        setShowRejectedUserEntries
+                    )}
                 </div>
             )}
 
             {/* Show referee entries if user is a referee or admin */}
-            {(profileUser.role === 'referee' || profileUser.role === 'admin') && (
+            {(profileUser.role === 'referee' || profileUser.role === 'admin' || profileUser.role === 'owner') && (
                 <div className="referee-entries-section">
                     <h2>{userId ? `${t('refereeEntries') || 'Referee Entries'}` : t('myRefereeEntries') || 'Entries I Referee'}</h2>
-                    {renderGroupedEntries(groupedRefereeEntries, t('noRefereeEntriesFound') || 'No referee entries found.', false)}
+                    {renderGroupedEntries(
+                        groupedRefereeEntries,
+                        refereeEntries,
+                        t('noRefereeEntriesFound') || 'No referee entries found.', 
+                        false,
+                        showRejectedRefereeEntries,
+                        setShowRejectedRefereeEntries
+                    )}
                 </div>
             )}
         </div>

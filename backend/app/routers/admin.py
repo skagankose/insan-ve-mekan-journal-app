@@ -19,10 +19,10 @@ router = APIRouter(
 
 # Helper function to check admin role
 def get_current_admin_user(current_user: models.User = Depends(auth.get_current_active_user)):
-    if current_user.role != models.UserRole.admin:
+    if current_user.role not in [models.UserRole.admin, models.UserRole.owner]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions. Admin role required.",
+            detail="Insufficient permissions. Admin or owner role required.",
         )
     return current_user
 
@@ -382,10 +382,11 @@ def delete_user(
             detail=f"User with ID {user_id} not found"
         )
     
-    if user_to_delete.role == models.UserRole.admin and user_to_delete.id != current_user.id:
+    # Check if the user to delete is an admin/owner (can't delete other admins/owners)
+    if (user_to_delete.role in [models.UserRole.admin, models.UserRole.owner]) and user_to_delete.id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cannot delete another admin user"
+            detail="Cannot delete another admin or owner user"
         )
     
     # Call the CRUD function to delete the user and transfer relationships
@@ -398,4 +399,309 @@ def delete_user(
         )
     
     # Return 204 No Content
+    return None
+
+@router.get("/users/role/{role}", response_model=List[models.UserRead])
+def get_users_by_role(
+    role: str,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_admin_user),
+    skip: int = 0,
+    limit: int = 100,
+):
+    """
+    Get users with a specific role. Only accessible to admin users.
+    """
+    try:
+        # Validate that the role is a valid UserRole enum value
+        role_enum = models.UserRole(role)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid role: {role}. Valid roles are: {[r.value for r in models.UserRole]}"
+        )
+    
+    # Query users with the specified role
+    statement = select(models.User).where(models.User.role == role_enum).offset(skip).limit(limit)
+    users = db.exec(statement).all()
+    
+    return users
+
+@router.put("/journals/{journal_id}/editor-in-chief", response_model=models.Journal)
+def set_journal_editor_in_chief(
+    journal_id: int,
+    data: schemas.EditorInChiefUpdate,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_admin_user),
+):
+    """
+    Set the editor-in-chief for a specific journal. Only accessible to admin users.
+    """
+    # Get the journal
+    journal = db.get(models.Journal, journal_id)
+    if not journal:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Journal with ID {journal_id} not found"
+        )
+    
+    # Check if the editor_in_chief_id is valid
+    if data.editor_in_chief_id:
+        editor_in_chief = db.get(models.User, data.editor_in_chief_id)
+        if not editor_in_chief:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with ID {data.editor_in_chief_id} not found"
+            )
+        
+        # Verify editor_in_chief has correct role (admin, owner, or editor)
+        if editor_in_chief.role not in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Editor in chief must have admin, owner, or editor role"
+            )
+    
+    # Update the journal
+    journal.editor_in_chief_id = data.editor_in_chief_id
+    db.add(journal)
+    db.commit()
+    db.refresh(journal)
+    
+    return journal
+
+@router.post("/journals/{journal_id}/editors", response_model=models.JournalEditorLink)
+def add_journal_editor(
+    journal_id: int,
+    data: schemas.EditorAdd,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_admin_user),
+):
+    """
+    Add an editor to a journal. Only accessible to admin users.
+    """
+    # Get the journal
+    journal = db.get(models.Journal, journal_id)
+    if not journal:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Journal with ID {journal_id} not found"
+        )
+    
+    # Check if the user exists and has editor role
+    editor = db.get(models.User, data.user_id)
+    if not editor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {data.user_id} not found"
+        )
+    
+    if editor.role != models.UserRole.editor:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User must have editor role to be added as an editor"
+        )
+    
+    # Check if the link already exists
+    statement = select(models.JournalEditorLink).where(
+        models.JournalEditorLink.journal_id == journal_id,
+        models.JournalEditorLink.user_id == data.user_id
+    )
+    existing_link = db.exec(statement).first()
+    
+    if existing_link:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User with ID {data.user_id} is already an editor for this journal"
+        )
+    
+    # Create the link
+    link = models.JournalEditorLink(journal_id=journal_id, user_id=data.user_id)
+    db.add(link)
+    db.commit()
+    
+    return link
+
+@router.delete("/journals/{journal_id}/editors/{editor_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_journal_editor(
+    journal_id: int,
+    editor_id: int,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_admin_user),
+):
+    """
+    Remove an editor from a journal. Only accessible to admin users.
+    """
+    # Check if the link exists
+    statement = select(models.JournalEditorLink).where(
+        models.JournalEditorLink.journal_id == journal_id,
+        models.JournalEditorLink.user_id == editor_id
+    )
+    link = db.exec(statement).first()
+    
+    if not link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Editor with ID {editor_id} is not an editor for journal with ID {journal_id}"
+        )
+    
+    # Delete the link
+    db.delete(link)
+    db.commit()
+    
+    return None
+
+@router.post("/entries/{entry_id}/authors", response_model=models.JournalEntryAuthorLink)
+def add_entry_author(
+    entry_id: int,
+    data: schemas.EntryUserAdd,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_admin_user),
+):
+    """
+    Add an author to a journal entry. Only accessible to admin users.
+    """
+    # Get the entry
+    entry = db.get(models.JournalEntry, entry_id)
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Journal entry with ID {entry_id} not found"
+        )
+    
+    # Check if the user exists
+    author = db.get(models.User, data.user_id)
+    if not author:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {data.user_id} not found"
+        )
+    
+    # Check if the link already exists
+    statement = select(models.JournalEntryAuthorLink).where(
+        models.JournalEntryAuthorLink.journal_entry_id == entry_id,
+        models.JournalEntryAuthorLink.user_id == data.user_id
+    )
+    existing_link = db.exec(statement).first()
+    
+    if existing_link:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User with ID {data.user_id} is already an author for this entry"
+        )
+    
+    # Create the link
+    link = models.JournalEntryAuthorLink(journal_entry_id=entry_id, user_id=data.user_id)
+    db.add(link)
+    db.commit()
+    
+    return link
+
+@router.delete("/entries/{entry_id}/authors/{author_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_entry_author(
+    entry_id: int,
+    author_id: int,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_admin_user),
+):
+    """
+    Remove an author from a journal entry. Only accessible to admin users.
+    """
+    # Check if the link exists
+    statement = select(models.JournalEntryAuthorLink).where(
+        models.JournalEntryAuthorLink.journal_entry_id == entry_id,
+        models.JournalEntryAuthorLink.user_id == author_id
+    )
+    link = db.exec(statement).first()
+    
+    if not link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Author with ID {author_id} is not an author for entry with ID {entry_id}"
+        )
+    
+    # Delete the link
+    db.delete(link)
+    db.commit()
+    
+    return None
+
+@router.post("/entries/{entry_id}/referees", response_model=models.JournalEntryRefereeLink)
+def add_entry_referee(
+    entry_id: int,
+    data: schemas.EntryUserAdd,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_admin_user),
+):
+    """
+    Add a referee to a journal entry. Only accessible to admin users.
+    """
+    # Get the entry
+    entry = db.get(models.JournalEntry, entry_id)
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Journal entry with ID {entry_id} not found"
+        )
+    
+    # Check if the user exists and has referee role
+    referee = db.get(models.User, data.user_id)
+    if not referee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {data.user_id} not found"
+        )
+    
+    if referee.role != models.UserRole.referee:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User must have referee role to be added as a referee"
+        )
+    
+    # Check if the link already exists
+    statement = select(models.JournalEntryRefereeLink).where(
+        models.JournalEntryRefereeLink.journal_entry_id == entry_id,
+        models.JournalEntryRefereeLink.user_id == data.user_id
+    )
+    existing_link = db.exec(statement).first()
+    
+    if existing_link:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User with ID {data.user_id} is already a referee for this entry"
+        )
+    
+    # Create the link
+    link = models.JournalEntryRefereeLink(journal_entry_id=entry_id, user_id=data.user_id)
+    db.add(link)
+    db.commit()
+    
+    return link
+
+@router.delete("/entries/{entry_id}/referees/{referee_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_entry_referee(
+    entry_id: int,
+    referee_id: int,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_admin_user),
+):
+    """
+    Remove a referee from a journal entry. Only accessible to admin users.
+    """
+    # Check if the link exists
+    statement = select(models.JournalEntryRefereeLink).where(
+        models.JournalEntryRefereeLink.journal_entry_id == entry_id,
+        models.JournalEntryRefereeLink.user_id == referee_id
+    )
+    link = db.exec(statement).first()
+    
+    if not link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Referee with ID {referee_id} is not a referee for entry with ID {entry_id}"
+        )
+    
+    # Delete the link
+    db.delete(link)
+    db.commit()
+    
     return None 

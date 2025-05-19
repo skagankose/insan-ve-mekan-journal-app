@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Form, UploadFile, File
 from sqlmodel import Session, select
-from typing import List
+from typing import List, Optional
 from datetime import datetime
+import os
 
 from .. import crud, models, schemas, auth, notification_utils
 from ..database import get_session
+from ..file_utils import save_upload_file, delete_upload_file
 
 router = APIRouter(
     prefix="/entries",
     tags=["entries"],
-    dependencies=[Depends(auth.get_current_active_user)],
-    responses={404: {"description": "Not found"}},
 )
 
 
@@ -80,16 +80,16 @@ def read_single_journal_entry(
     if db_entry is None:
         raise HTTPException(status_code=404, detail="Journal entry not found")
     
-    # Check if current user is an author of this entry
+    # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
-    
-    # Check if current user is a referee of this entry
     is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
     
-    # Allow admin, editor, referee, or the entry's author to access
-    if current_user.role not in [models.UserRole.admin, models.UserRole.editor] and not is_author and not is_referee:
-        # Although the get_entries_by_user filters, this adds direct access protection
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this entry")
+    if not is_admin_or_editor and not is_author and not is_referee:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to access this entry."
+        )
     
     # Generate a random token if one doesn't exist
     if not db_entry.random_token:
@@ -117,12 +117,16 @@ def update_journal_entry(
     if db_entry is None:
         raise HTTPException(status_code=404, detail="Journal entry not found")
     
-    # Check if current user is an author of this entry
+    # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
+    is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
     
-    # Allow admin, editor, or the entry's author to update
-    if current_user.role not in [models.UserRole.admin, models.UserRole.editor] and not is_author:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this entry")
+    if not is_admin_or_editor and not is_author:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to update this entry."
+        )
     
     updated_entry = crud.update_entry(db=db, entry_id=entry_id, entry_update=entry)
     # crud.update_entry should technically not return None if the check above passed,
@@ -149,12 +153,16 @@ def delete_journal_entry(
         # raise HTTPException(status_code=404, detail="Journal entry not found")
         return
     
-    # Check if current user is an author of this entry
+    # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
+    is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
     
-    # Allow admin, editor, or the entry's author to delete
-    if current_user.role not in [models.UserRole.admin, models.UserRole.editor] and not is_author:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this entry")
+    if not is_admin_or_editor and not is_author:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to delete this entry."
+        )
     
     crud.delete_entry(db=db, entry_id=entry_id)
     # No response body needed for 204
@@ -204,14 +212,15 @@ def get_entry_author_updates(
     if db_entry is None:
         raise HTTPException(status_code=404, detail="Journal entry not found")
     
-    # Check if user has access to this entry
+    # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
     is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
     
-    if not (is_author or is_referee or current_user.role in [models.UserRole.admin, models.UserRole.editor]):
+    if not is_admin_or_editor and not is_author and not is_referee:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Not authorized to access updates for this entry"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to access updates for this entry."
         )
     
     # Get author updates for this entry
@@ -238,18 +247,122 @@ def create_author_update(
     if db_entry is None:
         raise HTTPException(status_code=404, detail="Journal entry not found")
     
-    # Check if user is an author of this entry or has admin/editor role
+    # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
+    is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
     
-    if not (is_author or current_user.role in [models.UserRole.admin, models.UserRole.editor]):
+    if not is_admin_or_editor and not is_author:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Not authorized to create author updates for this entry"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to create author updates for this entry."
         )
     
     # Create new author update with the current user as author
     db_author_update = models.AuthorUpdate(
         **author_update.dict(),
+        entry_id=entry_id,
+        author_id=current_user.id,
+        created_date=datetime.utcnow()
+    )
+    
+    db.add(db_author_update)
+    db.commit()
+    db.refresh(db_author_update)
+    
+    # Send email notifications to referees and editors
+    try:
+        notification_utils.notify_on_author_update(
+            db=db,
+            author_id=current_user.id,
+            entry_id=entry_id,
+            author_update_id=db_author_update.id
+        )
+    except Exception as e:
+        # Log the error but don't fail the request if notification fails
+        print(f"Failed to send notifications for author update: {e}")
+    
+    return db_author_update
+
+
+@router.post("/{entry_id}/author-updates/upload", response_model=models.AuthorUpdate, status_code=status.HTTP_201_CREATED)
+async def create_author_update_with_file(
+    entry_id: int,
+    file: Optional[UploadFile] = File(None, description="Upload a .docx file. It will be automatically converted to PDF."),
+    title: Optional[str] = Form(None),
+    abstract_en: Optional[str] = Form(None),
+    abstract_tr: Optional[str] = Form(None),
+    keywords: Optional[str] = Form(None),
+    notes: Optional[str] = Form(None),
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Create a new author update for a specific journal entry with file upload.
+    Only .docx files are accepted and will be automatically converted to PDF.
+    """
+    # Check if entry exists
+    db_entry = crud.get_entry(db, entry_id=entry_id)
+    if db_entry is None:
+        raise HTTPException(status_code=404, detail="Journal entry not found")
+    
+    # Check if the user has permissions to access this entry
+    is_author = any(author.id == current_user.id for author in db_entry.authors)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    
+    if not is_admin_or_editor and not is_author:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to create author updates for this entry."
+        )
+    
+    # Make sure at least one field is filled or a file is uploaded
+    if not title and not abstract_en and not abstract_tr and not keywords and not notes and not file:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="At least one field must be filled or a file must be uploaded."
+        )
+    
+    # Create a file path if a file is uploaded
+    file_path = None
+    pdf_path = None
+    if file:
+        # Save the file in a folder structure based on entry id
+        folder = f"entries/{entry_id}/author_updates"
+        file_path = save_upload_file(file, folder)
+        
+        # Generate PDF path based on the original file path
+        if file_path.lower().endswith('.docx'):
+            pdf_path = file_path[:-5] + '.pdf'  # Replace .docx with .pdf
+    
+    # Create author update data with both file paths
+    author_update_data = models.AuthorUpdateCreate(
+        title=title,
+        abstract_en=abstract_en,
+        abstract_tr=abstract_tr,
+        keywords=keywords,
+        notes=notes,
+        file_path=file_path
+    )
+    
+    # INFO: Disable PDF file notes
+    '''
+    # Add notes about PDF file if it was created
+    notes_with_pdf = notes or ""
+    if pdf_path:
+        pdf_filename = os.path.basename(pdf_path)
+        if notes_with_pdf:
+            notes_with_pdf += f"\n\nPDF version available at: {pdf_filename}"
+        else:
+            notes_with_pdf = f"PDF version available at: {pdf_filename}"
+    
+    # Update the notes field to include PDF information
+    author_update_data.notes = notes_with_pdf
+    '''
+
+    # Create new author update with the current user as author
+    db_author_update = models.AuthorUpdate(
+        **author_update_data.dict(),
         entry_id=entry_id,
         author_id=current_user.id,
         created_date=datetime.utcnow()
@@ -288,14 +401,15 @@ def get_entry_referee_updates(
     if db_entry is None:
         raise HTTPException(status_code=404, detail="Journal entry not found")
     
-    # Check if user has access to this entry
+    # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
     is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
     
-    if not (is_author or is_referee or current_user.role in [models.UserRole.admin, models.UserRole.editor]):
+    if not is_admin_or_editor and not is_author and not is_referee:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Not authorized to access updates for this entry"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to access updates for this entry."
         )
     
     # Get referee updates for this entry
@@ -322,13 +436,14 @@ def create_referee_update(
     if db_entry is None:
         raise HTTPException(status_code=404, detail="Journal entry not found")
     
-    # Check if user is a referee of this entry or has admin/editor role
+    # Check if the user has permissions to access this entry
     is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
     
-    if not (is_referee or current_user.role in [models.UserRole.admin, models.UserRole.editor]):
+    if not is_admin_or_editor and not is_referee:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="Not authorized to create referee updates for this entry"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to create referee updates for this entry."
         )
     
     # Create new referee update with the current user as referee
@@ -355,4 +470,214 @@ def create_referee_update(
         # Log the error but don't fail the request if notification fails
         print(f"Failed to send notifications for referee update: {e}")
     
-    return db_referee_update 
+    return db_referee_update
+
+
+@router.post("/{entry_id}/referee-updates/upload", response_model=models.RefereeUpdate, status_code=status.HTTP_201_CREATED)
+async def create_referee_update_with_file(
+    entry_id: int,
+    file: Optional[UploadFile] = File(None, description="Upload a .docx file. It will be automatically converted to PDF."),
+    notes: Optional[str] = Form(None),
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Create a new referee update for a specific journal entry with file upload.
+    Only .docx files are accepted and will be automatically converted to PDF.
+    """
+    # Check if entry exists
+    db_entry = crud.get_entry(db, entry_id=entry_id)
+    if db_entry is None:
+        raise HTTPException(status_code=404, detail="Journal entry not found")
+    
+    # Check if the user has permissions to access this entry
+    is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    
+    if not is_admin_or_editor and not is_referee:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to create referee updates for this entry."
+        )
+    
+    # Make sure at least one field is filled or a file is uploaded
+    if not notes and not file:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="At least one field must be filled or a file must be uploaded."
+        )
+    
+    # Create a file path if a file is uploaded
+    file_path = None
+    pdf_path = None
+    if file:
+        # Save the file in a folder structure based on entry id
+        folder = f"entries/{entry_id}/referee_updates"
+        file_path = save_upload_file(file, folder)
+        
+        # Generate PDF path based on the original file path
+        if file_path.lower().endswith('.docx'):
+            pdf_path = file_path[:-5] + '.pdf'  # Replace .docx with .pdf
+    
+    # Create referee update data with file path
+    referee_update_data = models.RefereeUpdateCreate(
+        notes=notes,
+        file_path=file_path
+    )
+    
+    # Create new referee update with the current user as referee
+    db_referee_update = models.RefereeUpdate(
+        **referee_update_data.dict(),
+        entry_id=entry_id,
+        referee_id=current_user.id,
+        created_date=datetime.utcnow()
+    )
+    
+    db.add(db_referee_update)
+    db.commit()
+    db.refresh(db_referee_update)
+    
+    # Send email notifications to authors and editors
+    try:
+        notification_utils.notify_on_referee_update(
+            db=db,
+            referee_id=current_user.id,
+            entry_id=entry_id,
+            referee_update_id=db_referee_update.id
+        )
+    except Exception as e:
+        # Log the error but don't fail the request if notification fails
+        print(f"Failed to send notifications for referee update: {e}")
+    
+    return db_referee_update
+
+
+@router.delete("/author-updates/{update_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_author_update(
+    update_id: int,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Delete an author update by its ID.
+    Only the author who created the update, or users with admin/owner roles can delete it.
+    """
+    # Find the author update
+    statement = select(models.AuthorUpdate).where(models.AuthorUpdate.id == update_id)
+    db_update = db.exec(statement).first()
+    
+    if not db_update:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Author update with ID {update_id} not found"
+        )
+    
+    # Check permission: only the author who created the update or admin/owner can delete
+    is_author = db_update.author_id == current_user.id
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
+    
+    if not is_author and not is_admin_or_owner:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to delete this author update."
+        )
+    
+    # Delete the uploaded file if it exists
+    if db_update.file_path:
+        delete_upload_file(db_update.file_path)
+    
+    # Delete the update
+    db.delete(db_update)
+    db.commit()
+    
+    return None
+
+
+@router.delete("/referee-updates/{update_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_referee_update(
+    update_id: int,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Delete a referee update by its ID.
+    Only the referee who created the update, or users with admin/owner roles can delete it.
+    """
+    # Find the referee update
+    statement = select(models.RefereeUpdate).where(models.RefereeUpdate.id == update_id)
+    db_update = db.exec(statement).first()
+    
+    if not db_update:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Referee update with ID {update_id} not found"
+        )
+    
+    # Check permission: only the referee who created the update or admin/owner can delete
+    is_referee = db_update.referee_id == current_user.id
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
+    
+    if not is_referee and not is_admin_or_owner:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to delete this referee update."
+        )
+    
+    # Delete the uploaded file if it exists
+    if db_update.file_path:
+        print(f"Attempting to delete file at path: {db_update.file_path}")
+        try:
+            delete_upload_file(db_update.file_path)
+            print("File deletion completed")
+        except Exception as e:
+            print(f"Error deleting file: {str(e)}")
+    else:
+        print("No file path found for this update")
+    
+    # Delete the update
+    db.delete(db_update)
+    db.commit()
+    
+    return None
+
+
+@router.post("/{entry_id}/upload", response_model=models.JournalEntry)
+async def upload_entry_file(
+    entry_id: int,
+    file: UploadFile = File(..., description="Upload a PDF file."),
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Upload a file for a journal entry. Only PDF files are allowed.
+    """
+    # Check if entry exists
+    db_entry = crud.get_entry(db, entry_id=entry_id)
+    if db_entry is None:
+        raise HTTPException(status_code=404, detail="Journal entry not found")
+    
+    # Check if the user has permissions to access this entry
+    is_author = any(author.id == current_user.id for author in db_entry.authors)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    
+    if not is_admin_or_editor and not is_author:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to upload files for this entry."
+        )
+    
+    # Delete previous file if exists
+    if db_entry.file_path:
+        delete_upload_file(db_entry.file_path)
+    
+    # Save the new file
+    folder = f"entries/{entry_id}"
+    file_path = save_upload_file(file, folder)
+    db_entry.file_path = file_path
+    
+    # Save changes
+    db.add(db_entry)
+    db.commit()
+    db.refresh(db_entry)
+    
+    return db_entry 

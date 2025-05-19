@@ -1,0 +1,320 @@
+.journal-entry-details-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 2rem;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.back-button {
+  font-weight: 500;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  margin-bottom: 25px;
+}
+
+.journal-info {
+  margin-bottom: 25px;
+}
+
+.journal-info h3 {
+  margin-top: 0;
+  color: #555;
+}
+
+.empty-state {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 10px;
+  text-align: center;
+  color: #777;
+}
+
+.entry-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.meta-item {
+  flex-basis: calc(33.333% - 15px);
+  min-width: 200px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-left: 5px;
+}
+
+.badge-published {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.badge-approved {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.abstract-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.abstract {
+  margin-bottom: 20px;
+}
+
+.abstract h3 {
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.abstract p {
+  margin-top: 0;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.keywords-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.keywords-section h3 {
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.authors-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.authors-section h3 {
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.authors-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.author-card {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 15px;
+  min-width: 200px;
+  flex: 1;
+}
+
+.author-card h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.author-card p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.file-section {
+  margin-bottom: 25px;
+}
+
+.file-section h3 {
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.referees-section {
+  margin-top: 40px;
+}
+
+.referees-section h3 {
+  margin-bottom: 20px;
+  color: #555;
+}
+
+.referees-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.referee-card {
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  padding: 15px;
+  min-width: 200px;
+  flex: 1;
+}
+
+.referee-card h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.referee-card p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #eee;
+}
+
+/* Checkbox and radio styles */
+.checkbox-group, .radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkbox-item, .radio-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.checkbox-item:hover, .radio-item:hover {
+  background-color: #f5f5f5;
+}
+
+.checkbox-item input, .radio-item input {
+  margin-right: 10px;
+}
+
+.checkbox-item label, .radio-item label {
+  cursor: pointer;
+  flex-grow: 1;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .page-title {
+    text-align: left;
+    margin: 15px 0;
+  }
+  
+  .meta-item {
+    flex-basis: 100%;
+  }
+  
+  .author-card, .referee-card {
+    min-width: 100%;
+  }
+} 

@@ -57,7 +57,7 @@ const EditUserPage: React.FC = () => {
             return;
         }
 
-        if (currentUser?.role !== 'admin') {
+        if (currentUser?.role !== 'admin' && currentUser?.role !== 'owner') {
             navigate('/');
             return;
         }
@@ -434,6 +434,7 @@ const EditUserPage: React.FC = () => {
                     >
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
+                        <option value="owner">Owner</option>
                         <option value="editor">Editor</option>
                         <option value="referee">Referee</option>
                         <option value="author">Author</option>

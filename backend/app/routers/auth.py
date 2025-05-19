@@ -115,11 +115,11 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Check if user is authenticated via email, unless they are an admin
-    if user.role != models.UserRole.admin and not user.is_auth:
+    # Regular users need email verification, but admins and owners don't
+    if user.role not in [models.UserRole.admin, models.UserRole.owner] and not user.is_auth:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Please confirm your email address to login.",
+            detail="Please confirm your email address to login."
         )
 
     access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)

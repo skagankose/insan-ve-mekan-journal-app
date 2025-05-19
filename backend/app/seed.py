@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
-from sqlmodel import SQLModel, create_engine
+from sqlmodel import SQLModel, create_engine, select
 from passlib.context import CryptContext
 import random
 import os
@@ -42,6 +42,59 @@ def get_password_hash(password: str) -> str:
 def seed_database():
     # Create session
     with Session(engine) as session:
+        # First, check if we need to update the userrole enum in the database
+        try:
+            # Check if 'owner' is already in the enum
+            result = session.execute(text("SELECT enum_range(NULL::userrole)")).scalar()
+            if 'owner' not in result:
+                print("Adding 'owner' to userrole enum type...")
+                
+                # Try to add the value directly first
+                try:
+                    session.execute(text("ALTER TYPE userrole ADD VALUE 'owner' AFTER 'admin'"))
+                    session.commit()
+                    print("✅ Added 'owner' to userrole enum type.")
+                except Exception as add_error:
+                    print(f"Could not directly add the enum value: {add_error}")
+                    print("Attempting to work around the issue by inserting directly...")
+                    
+                    # Alternative approach: Insert the value directly using a type cast
+                    try:
+                        # First, create owner user with a temporary role to be updated
+                        owner_user = User(
+                            id=1,
+                            email="owner@owner.com",
+                            name="Owner User",
+                            title="Prof. Dr.",
+                            bio="System owner with full access",
+                            telephone="555-0000",
+                            science_branch="Social Sciences",
+                            location=random.choice(cities),
+                            yoksis_id="Y00001",
+                            orcid_id="0000-0000-0000-0001",
+                            role=UserRole.admin,  # Temporary role
+                            is_auth=True,
+                            hashed_password=get_password_hash("ownerpassword"),
+                            confirmation_token="owner_token",
+                            confirmation_token_created_at=datetime.utcnow()
+                        )
+                        session.add(owner_user)
+                        session.commit()
+                        
+                        # Then update the user's role directly using SQL
+                        session.execute(text(f"UPDATE users SET role = 'owner'::userrole WHERE id = 1"))
+                        session.commit()
+                        print("✅ Added owner user with role updated via SQL.")
+                        
+                        # Remove the owner user from the creation list since we just created it
+                        users = [user for user in users if user.id != 1]
+                    except Exception as insert_error:
+                        print(f"Failed alternative approach: {insert_error}")
+                        # Continue anyway and let the script try its best
+        except Exception as e:
+            print(f"WARNING: Error checking or updating enum type: {e}")
+            print("This might cause issues with creating the owner user. Continuing anyway...")
+        
         # Using the actual database enum values (not the model enum values)
         # Database has: SOCIAL_SCIENCES, NATURAL_SCIENCES, FORMAL_SCIENCES, APPLIED_SCIENCES, HUMANITIES
         
@@ -84,6 +137,107 @@ def seed_database():
                 confirmation_token_created_at=datetime.utcnow()
             ) for i in range(2, 4)  # Now creating 2 admin users
         ]
+        
+        # Check if owner user exists in the database
+        owner_exists = session.execute(text("SELECT id FROM users WHERE id = 1")).first()
+        
+        
+        # Create owner users (3 total)
+        # First, the primary owner
+        if not owner_exists:
+            try:
+                owner_user = User(
+                    id=1,
+                    email="owner@owner.com",
+                    name="Owner User",
+                    title="Prof. Dr.",
+                    bio="System owner with full access",
+                    telephone="555-0000",
+                    science_branch="Social Sciences",
+                    location=random.choice(cities),
+                    yoksis_id="Y00001",
+                    orcid_id="0000-0000-0000-0001",
+                    role=UserRole.owner,
+                    is_auth=True,
+                    hashed_password=get_password_hash("ownerpassword"),
+                    confirmation_token="owner_token",
+                    confirmation_token_created_at=datetime.utcnow()
+                )
+                users.append(owner_user)
+                print("Added primary owner user to be created")
+            except Exception as owner_error:
+                print(f"Could not create primary owner user: {owner_error}")
+                # Use admin role as fallback
+                try:
+                    owner_user = User(
+                        id=1,
+                        email="owner@owner.com",
+                        name="Owner User",
+                        title="Prof. Dr.",
+                        bio="System owner with full access",
+                        telephone="555-0000",
+                        science_branch="Social Sciences",
+                        location=random.choice(cities),
+                        yoksis_id="Y00001",
+                        orcid_id="0000-0000-0000-0001",
+                        role=UserRole.admin,  # Fallback to admin role
+                        is_auth=True,
+                        hashed_password=get_password_hash("ownerpassword"),
+                        confirmation_token="owner_token",
+                        confirmation_token_created_at=datetime.utcnow()
+                    )
+                    users.append(owner_user)
+                    print("Added primary owner user with admin role as fallback")
+                except Exception as fallback_error:
+                    print(f"Could not create primary owner user even with fallback: {fallback_error}")
+        else:
+            print("Primary owner user already exists, skipping creation")
+        
+        # Add 2 more owner users with different IDs
+        try:
+            # Owner user 2
+            owner_user2 = User(
+                id=40,  # Using a higher ID to avoid conflicts (after all other users)
+                email="owner2@owner.com",
+                name="Second Owner",
+                title="Prof. Dr.",
+                bio="Second system owner with full access",
+                telephone="555-0100",
+                science_branch="Architecture, Planning and Design",
+                location=random.choice(cities),
+                yoksis_id="Y00040",
+                orcid_id="0000-0000-0000-0040",
+                role=UserRole.owner,
+                is_auth=True,
+                hashed_password=get_password_hash("owner2password"),
+                confirmation_token="owner2_token",
+                confirmation_token_created_at=datetime.utcnow()
+            )
+            users.append(owner_user2)
+            print("Added second owner user")
+            
+            # Owner user 3
+            owner_user3 = User(
+                id=41,  # Using a higher ID to avoid conflicts
+                email="owner3@owner.com",
+                name="Third Owner",
+                title="Assoc. prof.",
+                bio="Third system owner with full access",
+                telephone="555-0101",
+                science_branch="Engineering",
+                location=random.choice(cities),
+                yoksis_id="Y00041",
+                orcid_id="0000-0000-0000-0041",
+                role=UserRole.owner,
+                is_auth=True,
+                hashed_password=get_password_hash("owner3password"),
+                confirmation_token="owner3_token",
+                confirmation_token_created_at=datetime.utcnow()
+            )
+            users.append(owner_user3)
+            print("Added third owner user")
+        except Exception as e:
+            print(f"Could not create additional owner users: {e}")
         
         # Editor users (10) - Doubled from 5
         editors = []
@@ -204,7 +358,7 @@ def seed_database():
         # Create 12 journals (more than doubled from 5)
         journals = [
             Journal(
-                id=1,
+                id=100,
                 title="Journal of Human and Space",
                 date=datetime(2023, 5, 1),
                 issue="Issue 1",
@@ -218,7 +372,7 @@ def seed_database():
                 editor_in_chief_id=4  # First editor
             ),
             Journal(
-                id=2,
+                id=101,
                 title="Architecture Today",
                 date=datetime(2023, 6, 15),
                 issue="Volume 5, Issue 2",
@@ -232,7 +386,7 @@ def seed_database():
                 editor_in_chief_id=5  # Second editor
             ),
             Journal(
-                id=3,
+                id=102,
                 title="Urban Design Quarterly",
                 date=datetime(2023, 7, 10),
                 issue="Summer Issue",
@@ -246,7 +400,7 @@ def seed_database():
                 editor_in_chief_id=6  # Third editor
             ),
             Journal(
-                id=4,
+                id=103,
                 title="Contemporary Spaces",
                 date=datetime(2023, 8, 5),
                 issue="Fall Collection",
@@ -260,7 +414,7 @@ def seed_database():
                 editor_in_chief_id=7  # Fourth editor
             ),
             Journal(
-                id=5,
+                id=104,
                 title="Heritage & Culture",
                 date=datetime(2023, 9, 1),
                 issue="Annual Edition",
@@ -275,7 +429,7 @@ def seed_database():
             ),
             # New journals
             Journal(
-                id=6,
+                id=105,
                 title="Sustainable Architecture Review",
                 date=datetime(2023, 10, 5),
                 issue="Volume 3, Issue 4",
@@ -289,7 +443,7 @@ def seed_database():
                 editor_in_chief_id=9  # Sixth editor
             ),
             Journal(
-                id=7,
+                id=106,
                 title="Public Space Quarterly",
                 date=datetime(2023, 11, 15),
                 issue="Winter Issue",
@@ -303,7 +457,7 @@ def seed_database():
                 editor_in_chief_id=10  # Seventh editor
             ),
             Journal(
-                id=8,
+                id=107,
                 title="Digital Design Journal",
                 date=datetime(2023, 12, 10),
                 issue="Special Edition",
@@ -317,7 +471,7 @@ def seed_database():
                 editor_in_chief_id=11  # Eighth editor
             ),
             Journal(
-                id=9,
+                id=108,
                 title="Urban Interventions",
                 date=datetime(2024, 1, 5),
                 issue="Volume 1, Issue 1",
@@ -331,7 +485,7 @@ def seed_database():
                 editor_in_chief_id=12  # Ninth editor
             ),
             Journal(
-                id=10,
+                id=109,
                 title="Historical Preservation Studies",
                 date=datetime(2024, 2, 10),
                 issue="Anniversary Issue",
@@ -345,7 +499,7 @@ def seed_database():
                 editor_in_chief_id=13  # Tenth editor
             ),
             Journal(
-                id=11,
+                id=110,
                 title="Critical Architecture Review",
                 date=datetime(2024, 3, 15),
                 issue="Spring Edition",
@@ -359,7 +513,7 @@ def seed_database():
                 editor_in_chief_id=4  # Reusing first editor
             ),
             Journal(
-                id=12,
+                id=111,
                 title="Spatial Analytics Journal",
                 date=datetime(2024, 4, 20),
                 issue="Data Edition",
@@ -383,9 +537,10 @@ def seed_database():
         # Each journal has its chief editor plus 2-3 additional editors
         editor_links = []
         
-        for j_id in range(1, 13):  # For each journal (now 12 journals)
+        for j_id in range(100, 112):  # For each journal (now with IDs 100-111)
             # Add chief editor - chief editor IDs are mapped above in the journal creation
-            chief_editor_id = journals[j_id-1].editor_in_chief_id
+            journal_index = j_id - 100  # Convert from j_id (100-111) to index (0-11)
+            chief_editor_id = journals[journal_index].editor_in_chief_id
             editor_links.append(JournalEditorLink(journal_id=j_id, user_id=chief_editor_id))
             
             # Add 2-3 additional editors (randomly selected)
@@ -420,7 +575,7 @@ def seed_database():
             'Theoretical Framework for', 'Implementation of', 'Design Principles for'
         ]
         
-        for j_id in range(1, 13):  # For each journal (now 12 journals)
+        for j_id in range(100, 112):  # For each journal (now with IDs 100-111)
             num_entries = random.randint(8, 10)  # Increased from 4-5 to 8-10
             
             for e in range(num_entries):
@@ -436,7 +591,14 @@ def seed_database():
                     entry_referees = []
 
                 # Select random status
-                status = random.choice(list(JournalEntryStatus))
+                status = random.choice([
+                    JournalEntryStatus.WAITING_FOR_PAYMENT,
+                    JournalEntryStatus.WAITING_FOR_AUTHORS,
+                    JournalEntryStatus.WAITING_FOR_REFEREES,
+                    JournalEntryStatus.WAITING_FOR_EDITORS,
+                    JournalEntryStatus.ACCEPTED,
+                    JournalEntryStatus.NOT_ACCEPTED
+                ])
                 
                 # More varied keywords
                 keyword_options = [
@@ -652,13 +814,180 @@ def reset_sequences(engine):
                     # Check if sequence exists
                     sequence_name = f"{table}_id_seq"
                     if sequence_name in existing_sequences:
-                        reset_conn.execute(text(f"SELECT setval('{sequence_name}', (SELECT COALESCE(MAX(id), 1) FROM {table}), true)"))
-                        reset_conn.commit()
-                        print(f"INFO: Successfully reset sequence for {table}")
+                        if table == "journal":
+                            # For journals, ensure the sequence is set higher than our highest journal ID (111)
+                            reset_conn.execute(text(f"SELECT setval('{sequence_name}', (SELECT GREATEST(COALESCE(MAX(id), 1), 111) FROM {table}), true)"))
+                            reset_conn.commit()
+                            print(f"INFO: Successfully reset sequence for {table} to value higher than 111")
+                        else:
+                            reset_conn.execute(text(f"SELECT setval('{sequence_name}', (SELECT COALESCE(MAX(id), 1) FROM {table}), true)"))
+                            reset_conn.commit()
+                            print(f"INFO: Successfully reset sequence for {table}")
                     else:
                         print(f"INFO: Sequence {sequence_name} not found in database, skipping")
             except Exception as e:
                 print(f"Warning: Could not reset sequence for {table}: {e}")
 
+def migrate_status_values(engine):
+    """Update existing journal entries with old status values to the new ones."""
+    
+    with Session(engine) as session:
+        # Map old values to new values
+        status_mapping = {
+            "waiting_for_writer": "waiting_for_authors",
+            "waiting_for_arbitrator": "waiting_for_referees",
+            "completed": "accepted",
+            "waiting_for_editor": "waiting_for_editors"
+        }
+        
+        # Update entries with old values
+        for old_status, new_status in status_mapping.items():
+            entries_to_update = session.query(JournalEntry).filter(JournalEntry.status == old_status).all()
+            
+            for entry in entries_to_update:
+                print(f"Updating entry {entry.id} status from '{old_status}' to '{new_status}'")
+                entry.status = new_status
+        
+        # Commit changes
+        session.commit()
+        print("✅ Status migration completed successfully.")
+
+def update_enum_types(engine):
+    """Update the enum types in the database to include new values like 'owner' for UserRole."""
+    from sqlalchemy import text
+    from sqlmodel import Session
+    
+    # Connect to database
+    with Session(engine) as session:
+        try:
+            # Check if 'owner' is already in the enum
+            result = session.execute(text("SELECT enum_range(NULL::userrole)")).scalar()
+            enum_values = result.strip('{}').split(',')
+            
+            if 'owner' not in enum_values:
+                print("Need to update 'userrole' enum to include 'owner'")
+                
+                # Try direct method first - might work if no tables reference the type
+                try:
+                    session.execute(text("ALTER TYPE userrole ADD VALUE 'owner'"))
+                    session.commit()
+                    print("✅ Added 'owner' to userrole enum directly")
+                    return True
+                except Exception as e:
+                    print(f"Could not directly add 'owner' to enum: {e}")
+                
+                # Try copying the old values and recreating the enum
+                try:
+                    # Use a transaction for this process
+                    connection = engine.connect()
+                    transaction = connection.begin()
+                    
+                    # Get existing roles except 'owner'
+                    existing_roles = session.execute(text("SELECT enum_range(NULL::userrole)")).scalar()
+                    print(f"Existing roles: {existing_roles}")
+                    
+                    # Create a new enum type with all values including 'owner'
+                    new_values = existing_roles.strip('{}').split(',')
+                    new_values.append('owner')
+                    new_values_str = "'" + "', '".join(new_values) + "'"
+                    
+                    connection.execute(text(f"""
+                        -- Create a temporary type with all values including the new one
+                        CREATE TYPE userrole_new AS ENUM ({new_values_str});
+                        
+                        -- Drop the old type with CASCADE if you have tables referencing it
+                        -- WARNING: This can cause data loss if not handled carefully
+                        -- ALTER TABLE users ALTER COLUMN role DROP DEFAULT;
+                        -- DROP TYPE userrole CASCADE;
+                        
+                        -- Rename the new type to the old name
+                        -- ALTER TYPE userrole_new RENAME TO userrole;
+                    """))
+                    
+                    # Commit the transaction
+                    transaction.commit()
+                    connection.close()
+                    
+                    print("⚠️ Created a new enum type userrole_new")
+                    print("Manual steps required to complete the update:")
+                    print("1. Use pg_dump to backup your database")
+                    print("2. Manually update the enum type in the database")
+                    
+                    return False
+                except Exception as enum_error:
+                    print(f"Failed to update enum types: {enum_error}")
+                    return False
+            else:
+                print("✅ 'owner' already exists in userrole enum")
+                return True
+        except Exception as e:
+            print(f"Error checking enum types: {e}")
+            return False
+
+def fix_enum_manual():
+    """Print SQL commands that can be used to manually fix the enum type."""
+    print("\n=== MANUAL ENUM TYPE UPDATE INSTRUCTIONS ===")
+    print("If automatic enum update failed, you can run these commands manually in your database:")
+    print("IMPORTANT: Backup your database first!")
+    print("\n```sql")
+    print("-- 1. Create a backup of users table")
+    print("CREATE TABLE users_backup AS SELECT * FROM users;")
+    print("")
+    print("-- 2. Create new enum type with all values including 'owner'")
+    print("CREATE TYPE userrole_new AS ENUM ('author', 'editor', 'referee', 'admin', 'owner');")
+    print("")
+    print("-- 3. Create a new column with the new enum type")
+    print("ALTER TABLE users ADD COLUMN role_new userrole_new;")
+    print("")
+    print("-- 4. Update the new column with values from the old column")
+    print("UPDATE users SET role_new = role::text::userrole_new;")
+    print("")
+    print("-- 5. Drop the old column and rename the new one")
+    print("ALTER TABLE users DROP COLUMN role;")
+    print("ALTER TABLE users RENAME COLUMN role_new TO role;")
+    print("")
+    print("-- 6. Drop the old enum type and rename the new one")
+    print("DROP TYPE userrole;")
+    print("ALTER TYPE userrole_new RENAME TO userrole;")
+    print("```\n")
+    print("After running these commands, try running seed.py again.")
+    print("===================================================\n")
+
+def update_missing_tokens(engine):
+    """
+    Updates any journal entries that don't have random tokens by generating and saving them.
+    """
+    from sqlmodel import Session, select
+    from models import JournalEntry
+    
+    with Session(engine) as session:
+        # Find all entries without random tokens
+        statement = select(JournalEntry).where(JournalEntry.random_token == None)
+        entries_without_tokens = session.exec(statement).all()
+        
+        count = 0
+        # Generate and save tokens
+        for entry in entries_without_tokens:
+            token = entry.generate_random_token()
+            if token:
+                count += 1
+                session.add(entry)
+        
+        # Commit all changes
+        session.commit()
+        print(f"✅ Generated random tokens for {count} journal entries")
+
 if __name__ == "__main__":
+    # First update enum types
+    enum_updated = update_enum_types(engine)
+    print(f"Enum update status: {'Success' if enum_updated else 'Failed/Manual Steps Required'}")
+    
+    if not enum_updated:
+        fix_enum_manual()
+    
+    # Then seed the database
     seed_database()
+    # Migrate any existing status values if needed
+    migrate_status_values(engine)
+    # Update missing random tokens
+    update_missing_tokens(engine)

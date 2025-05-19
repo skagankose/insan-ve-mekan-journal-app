@@ -80,7 +80,10 @@ const JournalEntriesPage: React.FC = () => {
             ) : (
                 <div className="entries-list">
                     {entries.map(entry => (
-                        <div key={entry.id} className="entry-card">
+                        <div key={entry.id} className="entry-card" 
+                            onClick={() => navigate(`/entries/${entry.id}`)}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <h3 className="entry-title">{entry.title}</h3>
                             <p className="entry-abstract">{entry.abstract_tr}</p>
                             <div className="entry-meta">

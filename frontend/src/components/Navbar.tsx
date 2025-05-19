@@ -41,6 +41,9 @@ const Navbar: React.FC = () => {
                                     {user.role === 'admin' && (
                                         <span className="badge badge-admin">Admin</span>
                                     )}
+                                    {user.role === 'owner' && (
+                                        <span className="badge badge-owner">Owner</span>
+                                    )}
                                 </div>
                                 <Link 
                                     to="/profile" 
@@ -49,6 +52,16 @@ const Navbar: React.FC = () => {
                                 >
                                     {t('profile') || 'Profile'}
                                 </Link>
+                                {/* Admin/Owner dashboard link */}
+                                {(user.role === 'admin' || user.role === 'owner') && (
+                                    <Link 
+                                        to="/admin" 
+                                        className="btn btn-outline navbar-button"
+                                        style={{ marginRight: '10px' }}
+                                    >
+                                        {t('adminDashboard')}
+                                    </Link>
+                                )}
                                 <button 
                                     onClick={handleLogout} 
                                     className="btn btn-outline navbar-button"

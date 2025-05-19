@@ -12,16 +12,32 @@ interface JournalWithEntries extends Journal {
     isLoading: boolean;
 }
 
+const styles = `
+    .hover-effect:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+`;
+
 const EditorJournalsPage: React.FC = () => {
     const [journalsWithEntries, setJournalsWithEntries] = useState<JournalWithEntries[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const { isAuthenticated, isLoading: authLoading, user } = useAuth();
     const { t } = useLanguage();
-    const { activeJournal, setActiveJournal } = useActiveJournal();
+    const { activeJournal } = useActiveJournal();
 
     useEffect(() => {
-        if (!authLoading && isAuthenticated && user && (user.role === 'editor' || user.role === 'admin')) {
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = styles;
+        document.head.appendChild(styleSheet);
+        return () => {
+            document.head.removeChild(styleSheet);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!authLoading && isAuthenticated && user && (user.role === 'editor' || user.role === 'admin' || user.role === 'owner')) {
             const fetchEditorJournals = async () => {
                 setLoading(true);
                 setError(null);
@@ -58,19 +74,6 @@ const EditorJournalsPage: React.FC = () => {
             setJournalsWithEntries([]);
         }
     }, [isAuthenticated, authLoading, user]);
-
-    const handleSetActive = async (journal: Journal) => {
-        try {
-            // Update settings in the backend
-            await apiService.updateSettings({ active_journal_id: journal.id });
-            // Update local state
-            setActiveJournal(journal);
-        } catch (err: any) {
-            console.error("Failed to set active journal:", err);
-            // Optionally show an error message to the user
-            setError(err.response?.data?.detail || 'Failed to set active journal.');
-        }
-    };
 
     const toggleJournalExpansion = async (journalId: number) => {
         setJournalsWithEntries(prevJournals => {
@@ -144,7 +147,7 @@ const EditorJournalsPage: React.FC = () => {
     }
     
     // Not authenticated or not an editor state
-    if (!isAuthenticated || !user || (user.role !== 'editor' && user.role !== 'admin')) {
+    if (!isAuthenticated || !user || (user.role !== 'editor' && user.role !== 'admin' && user.role !== 'owner')) {
         return (
             <div className="card">
                 <p>{t('editorAccessRequired')}</p>
@@ -252,23 +255,9 @@ const EditorJournalsPage: React.FC = () => {
                                     alignItems: 'center',
                                     gap: '8px'
                                 }}>
-                                    {activeJournal?.id !== journal.id && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleSetActive(journal);
-                                            }}
-                                            className="btn btn-small btn-secondary"
-                                            style={{ 
-                                                padding: '4px 12px',
-                                                fontSize: 'var(--font-size-sm)'
-                                            }}
-                                        >
-                                            {t('setAsActive') || 'Set as Active'}
-                                        </button>
-                                    )}
+                                    
                                     <Link 
-                                        to={`/entries/edit/${journal.id}`}
+                                        to={`/journals/${journal.id}`}
                                         className="btn btn-small btn-outline"
                                         onClick={(e) => e.stopPropagation()}
                                         style={{ 
@@ -330,16 +319,24 @@ const EditorJournalsPage: React.FC = () => {
                                             margin: '0'
                                         }}>
                                             {journal.entries.map(entry => (
-                                                <div key={entry.id} className="entry-item" style={{ 
-                                                    backgroundColor: 'var(--color-background-primary)',
-                                                    borderRadius: '6px',
-                                                    padding: '16px',
-                                                    boxShadow: 'var(--shadow-sm)',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    height: '100%',
-                                                    transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                                                }}>
+                                                <Link 
+                                                    key={entry.id} 
+                                                    to={`/entries/${entry.id}`}
+                                                    className="entry-item hover-effect" 
+                                                    style={{ 
+                                                        backgroundColor: 'var(--color-background-primary)',
+                                                        borderRadius: '6px',
+                                                        padding: '16px',
+                                                        boxShadow: 'var(--shadow-sm)',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        height: '100%',
+                                                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                                                        cursor: 'pointer',
+                                                        textDecoration: 'none',
+                                                        color: 'inherit'
+                                                    }}
+                                                >
                                                     <h5 style={{ 
                                                         marginTop: 0, 
                                                         marginBottom: '8px',
@@ -382,17 +379,7 @@ const EditorJournalsPage: React.FC = () => {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    
-                                                    <div style={{ textAlign: 'right' }}>
-                                                        <Link to={`/entries/edit/${entry.id}`} className="btn btn-small btn-outline" style={{
-                                                            padding: '4px 12px',
-                                                            fontSize: 'var(--font-size-sm)',
-                                                            borderRadius: '4px'
-                                                        }}>
-                                                            {t('viewEdit') || 'View/Edit'}
-                                                        </Link>
-                                                    </div>
-                                                </div>
+                                                </Link>
                                             ))}
                                         </div>
                                     )}

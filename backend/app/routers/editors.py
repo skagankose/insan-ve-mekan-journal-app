@@ -5,6 +5,7 @@ from datetime import datetime
 
 from .. import models, auth, crud
 from ..database import get_session
+from ..schemas import EntryUserAdd
 
 # Create a dependency for editor authentication
 def get_current_editor_user(
@@ -13,10 +14,10 @@ def get_current_editor_user(
     """
     Validate that the current user has editor or admin role.
     """
-    if current_user.role not in [models.UserRole.editor, models.UserRole.admin]:
+    if current_user.role not in [models.UserRole.editor, models.UserRole.admin, models.UserRole.owner]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized. Editor role required."
+            detail="Editor, admin, or owner role required."
         )
     return current_user
 
@@ -39,8 +40,8 @@ def get_editor_users(
     This includes authors and referees of entries in those journals,
     and other editors of those journals.
     """
-    # If admin, get all users
-    if current_user.role == models.UserRole.admin:
+    # If admin or owner, get all users
+    if current_user.role in [models.UserRole.admin, models.UserRole.owner]:
         statement = select(models.User).offset(skip).limit(limit)
         users = db.exec(statement).all()
         return users
@@ -133,14 +134,25 @@ def get_editor_journals(
     """
     Get all journals that the current editor is assigned to.
     """
-    # If admin, get all journals
-    if current_user.role == models.UserRole.admin:
-        statement = select(models.Journal).offset(skip).limit(limit)
-        journals = db.exec(statement).all()
-        return journals
+    # Filter journals based on user role
+    if current_user.role in [models.UserRole.admin, models.UserRole.owner]:
+        # Admin/owner can see all journals
+        statement = select(models.Journal).order_by(models.Journal.date.desc())
+    else:
+        # Editor can only see journals where they are editor or editor-in-chief
+        statement = select(models.Journal).where(
+            # Either the user is the editor in chief
+            ((models.Journal.editor_in_chief_id == current_user.id) |
+             # Or the user is among the journal's editors
+             (models.Journal.id.in_(
+                 select(models.JournalEditorLink.journal_id).where(
+                     models.JournalEditorLink.user_id == current_user.id
+                 )
+             )))
+        ).order_by(models.Journal.date.desc())
     
-    # For editors, get only journals they are assigned to
-    return crud.get_journals_by_editor(db, user_id=current_user.id, skip=skip, limit=limit)
+    journals = db.exec(statement).all()
+    return journals
 
 @router.get("/journal_entries", response_model=List[models.JournalEntry])
 def get_editor_journal_entries(
@@ -152,24 +164,25 @@ def get_editor_journal_entries(
     """
     Get all journal entries from journals that the current editor is assigned to.
     """
-    # If admin, get all entries
-    if current_user.role == models.UserRole.admin:
-        statement = select(models.JournalEntry).offset(skip).limit(limit)
-        entries = db.exec(statement).all()
-        return entries
-    
-    # For editors, get entries from journals they're assigned to
-    # First get the journals
-    editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
-    journal_ids = [j.id for j in editor_journals]
-    
-    if not journal_ids:
-        return []
-    
-    # Then get entries from those journals
-    statement = select(models.JournalEntry).where(
-        models.JournalEntry.journal_id.in_(journal_ids)
-    ).offset(skip).limit(limit)
+    # Filter entries based on user role
+    if current_user.role in [models.UserRole.admin, models.UserRole.owner]:
+        # Admin/owner can see all entries
+        statement = select(models.JournalEntry).order_by(models.JournalEntry.date.desc())
+    else:
+        # Get journals where the user is editor or editor-in-chief
+        user_journals = select(models.Journal.id).where(
+            (models.Journal.editor_in_chief_id == current_user.id) |
+            (models.Journal.id.in_(
+                select(models.JournalEditorLink.journal_id).where(
+                    models.JournalEditorLink.user_id == current_user.id
+                )
+            ))
+        )
+        
+        # Get entries for those journals
+        statement = select(models.JournalEntry).where(
+            models.JournalEntry.journal_id.in_(user_journals)
+        ).order_by(models.JournalEntry.date.desc())
     
     entries = db.exec(statement).all()
     return entries
@@ -184,8 +197,8 @@ def get_editor_author_updates(
     """
     Get all author updates for entries in journals that the current editor is assigned to.
     """
-    # If admin, get all author updates
-    if current_user.role == models.UserRole.admin:
+    # If admin or owner, get all author updates
+    if current_user.role in [models.UserRole.admin, models.UserRole.owner]:
         statement = select(models.AuthorUpdate).offset(skip).limit(limit)
         updates = db.exec(statement).all()
         return updates
@@ -232,8 +245,8 @@ def get_editor_referee_updates(
     """
     Get all referee updates for entries in journals that the current editor is assigned to.
     """
-    # If admin, get all referee updates
-    if current_user.role == models.UserRole.admin:
+    # If admin or owner, get all referee updates
+    if current_user.role in [models.UserRole.admin, models.UserRole.owner]:
         statement = select(models.RefereeUpdate).offset(skip).limit(limit)
         updates = db.exec(statement).all()
         return updates
@@ -280,8 +293,8 @@ def get_editor_journal_editor_links(
     """
     Get journal-editor links for journals the editor manages.
     """
-    # If admin, get all links
-    if current_user.role == models.UserRole.admin:
+    # If admin or owner, get all links
+    if current_user.role in [models.UserRole.admin, models.UserRole.owner]:
         statement = select(models.JournalEditorLink).offset(skip).limit(limit)
         links = db.exec(statement).all()
         return links
@@ -311,8 +324,8 @@ def get_editor_journal_entry_author_links(
     """
     Get author links for entries in journals the editor manages.
     """
-    # If admin, get all links
-    if current_user.role == models.UserRole.admin:
+    # If admin or owner, get all links
+    if current_user.role in [models.UserRole.admin, models.UserRole.owner]:
         statement = select(models.JournalEntryAuthorLink).offset(skip).limit(limit)
         links = db.exec(statement).all()
         return links
@@ -358,8 +371,8 @@ def get_editor_journal_entry_referee_links(
     """
     Get referee links for entries in journals the editor manages.
     """
-    # If admin, get all links
-    if current_user.role == models.UserRole.admin:
+    # If admin or owner, get all links
+    if current_user.role in [models.UserRole.admin, models.UserRole.owner]:
         statement = select(models.JournalEntryRefereeLink).offset(skip).limit(limit)
         links = db.exec(statement).all()
         return links
@@ -393,4 +406,252 @@ def get_editor_journal_entry_referee_links(
     ).offset(skip).limit(limit)
     
     links = db.exec(statement).all()
-    return links 
+    return links
+
+@router.post("/entries/{entry_id}/authors", response_model=models.JournalEntryAuthorLink)
+def add_entry_author_as_editor(
+    entry_id: int,
+    data: EntryUserAdd,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_editor_user),
+):
+    """
+    Add an author to a journal entry. Only accessible to editors of the journal containing the entry.
+    """
+    # Get the entry
+    entry = db.get(models.JournalEntry, entry_id)
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Journal entry with ID {entry_id} not found"
+        )
+    
+    # Check if the editor has access to the journal
+    if current_user.role not in [models.UserRole.admin, models.UserRole.owner]:
+        # Check if the entry belongs to a journal that the editor manages
+        if not entry.journal_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Journal entry is not associated with any journal"
+            )
+        
+        # Get journals the editor manages
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        
+        if entry.journal_id not in journal_ids:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to manage this entry"
+            )
+    
+    # Check if the user exists
+    author = db.get(models.User, data.user_id)
+    if not author:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {data.user_id} not found"
+        )
+    
+    # Check if the link already exists
+    statement = select(models.JournalEntryAuthorLink).where(
+        models.JournalEntryAuthorLink.journal_entry_id == entry_id,
+        models.JournalEntryAuthorLink.user_id == data.user_id
+    )
+    existing_link = db.exec(statement).first()
+    
+    if existing_link:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User with ID {data.user_id} is already an author for this entry"
+        )
+    
+    # Create the link
+    link = models.JournalEntryAuthorLink(journal_entry_id=entry_id, user_id=data.user_id)
+    db.add(link)
+    db.commit()
+    
+    return link
+
+@router.delete("/entries/{entry_id}/authors/{author_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_entry_author_as_editor(
+    entry_id: int,
+    author_id: int,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_editor_user),
+):
+    """
+    Remove an author from a journal entry. Only accessible to editors of the journal containing the entry.
+    """
+    # Get the entry
+    entry = db.get(models.JournalEntry, entry_id)
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Journal entry with ID {entry_id} not found"
+        )
+    
+    # Check if the editor has access to the journal
+    if current_user.role not in [models.UserRole.admin, models.UserRole.owner]:
+        # Check if the entry belongs to a journal that the editor manages
+        if not entry.journal_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Journal entry is not associated with any journal"
+            )
+        
+        # Get journals the editor manages
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        
+        if entry.journal_id not in journal_ids:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to manage this entry"
+            )
+    
+    # Check if the link exists
+    statement = select(models.JournalEntryAuthorLink).where(
+        models.JournalEntryAuthorLink.journal_entry_id == entry_id,
+        models.JournalEntryAuthorLink.user_id == author_id
+    )
+    link = db.exec(statement).first()
+    
+    if not link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Author with ID {author_id} is not an author for entry with ID {entry_id}"
+        )
+    
+    # Delete the link
+    db.delete(link)
+    db.commit()
+    
+    return None
+
+@router.post("/entries/{entry_id}/referees", response_model=models.JournalEntryRefereeLink)
+def add_entry_referee_as_editor(
+    entry_id: int,
+    data: EntryUserAdd,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_editor_user),
+):
+    """
+    Add a referee to a journal entry. Only accessible to editors of the journal containing the entry.
+    """
+    # Get the entry
+    entry = db.get(models.JournalEntry, entry_id)
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Journal entry with ID {entry_id} not found"
+        )
+    
+    # Check if the editor has access to the journal
+    if current_user.role not in [models.UserRole.admin, models.UserRole.owner]:
+        # Check if the entry belongs to a journal that the editor manages
+        if not entry.journal_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Journal entry is not associated with any journal"
+            )
+        
+        # Get journals the editor manages
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        
+        if entry.journal_id not in journal_ids:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to manage this entry"
+            )
+    
+    # Check if the user exists and has referee role
+    referee = db.get(models.User, data.user_id)
+    if not referee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with ID {data.user_id} not found"
+        )
+    
+    if referee.role != models.UserRole.referee:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User must have referee role to be added as a referee"
+        )
+    
+    # Check if the link already exists
+    statement = select(models.JournalEntryRefereeLink).where(
+        models.JournalEntryRefereeLink.journal_entry_id == entry_id,
+        models.JournalEntryRefereeLink.user_id == data.user_id
+    )
+    existing_link = db.exec(statement).first()
+    
+    if existing_link:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User with ID {data.user_id} is already a referee for this entry"
+        )
+    
+    # Create the link
+    link = models.JournalEntryRefereeLink(journal_entry_id=entry_id, user_id=data.user_id)
+    db.add(link)
+    db.commit()
+    
+    return link
+
+@router.delete("/entries/{entry_id}/referees/{referee_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_entry_referee_as_editor(
+    entry_id: int,
+    referee_id: int,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(get_current_editor_user),
+):
+    """
+    Remove a referee from a journal entry. Only accessible to editors of the journal containing the entry.
+    """
+    # Get the entry
+    entry = db.get(models.JournalEntry, entry_id)
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Journal entry with ID {entry_id} not found"
+        )
+    
+    # Check if the editor has access to the journal
+    if current_user.role not in [models.UserRole.admin, models.UserRole.owner]:
+        # Check if the entry belongs to a journal that the editor manages
+        if not entry.journal_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Journal entry is not associated with any journal"
+            )
+        
+        # Get journals the editor manages
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        
+        if entry.journal_id not in journal_ids:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to manage this entry"
+            )
+    
+    # Check if the link exists
+    statement = select(models.JournalEntryRefereeLink).where(
+        models.JournalEntryRefereeLink.journal_entry_id == entry_id,
+        models.JournalEntryRefereeLink.user_id == referee_id
+    )
+    link = db.exec(statement).first()
+    
+    if not link:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Referee with ID {referee_id} is not a referee for entry with ID {entry_id}"
+        )
+    
+    # Delete the link
+    db.delete(link)
+    db.commit()
+    
+    return None 

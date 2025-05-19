@@ -22,6 +22,8 @@ type CombinedUpdate = {
   notes?: string;
   canViewNotes: boolean;
   canViewFile: boolean;
+  canDelete: boolean;
+  isWithinDeletionWindow: boolean;
 };
 
 const JournalEntryUpdateDetailsPage: React.FC = () => {
@@ -51,20 +53,18 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
         const entryData = await apiService.getEntryById(parseInt(entryId));
         setEntry(entryData);
         
-        // Extract authors and referees from the entry data
-        // The entry should come with the full user objects thanks to the response model in the backend
-        if (entryData.authors) {
-          setAuthors(entryData.authors);
-        }
+        // Set authors from entry data, ensuring it's an array
+        setAuthors(entryData.authors || []);
         
-        // Ensure unique referees by ID
+        // Set referees from entry data, ensuring uniqueness and it's an array
         if (entryData.referees) {
-          // Use a Map to deduplicate referees by ID
           const uniqueRefereesMap = new Map();
           entryData.referees.forEach(referee => {
             uniqueRefereesMap.set(referee.id, referee);
           });
           setReferees(Array.from(uniqueRefereesMap.values()));
+        } else {
+          setReferees([]);
         }
         
         // Fetch author and referee updates for this entry
@@ -72,51 +72,6 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
           apiService.getEntryAuthorUpdates(parseInt(entryId)),
           apiService.getEntryRefereeUpdates(parseInt(entryId))
         ]);
-        
-        // If we have referees but don't have their full data in the original entry,
-        // we need to fetch them separately
-        if (refereeUpdatesData.length > 0) {
-          // Create a set of all referee IDs from the updates
-          const refereeIds = new Set(refereeUpdatesData.map(update => update.referee_id));
-          
-          // Filter out referees we already have
-          const existingRefereeIds = new Set(entryData.referees?.map(ref => ref.id) || []);
-          const missingRefereeIds = [...refereeIds].filter(id => !existingRefereeIds.has(id));
-          
-          // If there are missing referees, try to fetch them individually
-          if (missingRefereeIds.length > 0) {
-            try {
-              // Fetch each missing referee
-              const missingReferees = await Promise.all(
-                missingRefereeIds.map(async (id) => {
-                  try {
-                    return await apiService.getUserBasicInfo(id.toString());
-                  } catch (error) {
-                    console.error(`Failed to fetch referee with ID ${id}:`, error);
-                    return null;
-                  }
-                })
-              );
-              
-              // Add the successfully fetched referees to our list
-              const validReferees = missingReferees.filter(referee => referee !== null);
-              
-              // Combine existing and new referees, ensuring uniqueness
-              setReferees(prevReferees => {
-                const allReferees = [...prevReferees, ...validReferees];
-                const uniqueRefereesMap = new Map();
-                allReferees.forEach(referee => {
-                  if (referee) {
-                    uniqueRefereesMap.set(referee.id, referee);
-                  }
-                });
-                return Array.from(uniqueRefereesMap.values());
-              });
-            } catch (error) {
-              console.error('Failed to fetch missing referees:', error);
-            }
-          }
-        }
         
         setAuthorUpdates(authorUpdatesData);
         setRefereeUpdates(refereeUpdatesData);
@@ -132,15 +87,28 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
     fetchData();
   }, [entryId]);
 
+  // Add this function to check if an update is within the deletion window
+  const isWithinDeletionWindow = (createdDate: string) => {
+    const createdTime = new Date(createdDate).getTime();
+    const currentTime = new Date().getTime();
+    const oneMinuteInMs = (60 * 1000); // 1 minutes
+    return currentTime - createdTime <= oneMinuteInMs;
+  };
+
   // Combine and sort updates for chat display
   useEffect(() => {
-    const isAdmin = user?.role === 'admin';
+    const isAdmin = user?.role === 'admin' || user?.role === 'owner';
     const isEditor = user?.role === 'editor';
+    const isAdminOrEditor = isAdmin || isEditor;
     const isAuthorForEntry = authors.some(author => author.id === user?.id);
     
     // Convert author updates to combined format
     const authorUpdatesCombined = authorUpdates.map(update => {
       const updateAuthor = authors.find(a => a.id === update.author_id);
+      const isWithinWindow = isWithinDeletionWindow(update.created_date);
+      // User can delete if they're admin/owner or if they're the author and within the time window
+      const canDelete = isAdmin || (update.author_id === user?.id && isWithinWindow);
+      
       return {
         id: update.id,
         type: 'author' as const,
@@ -154,7 +122,9 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
         file_path: update.file_path,
         notes: update.notes,
         canViewNotes: true, // Author notes are always visible
-        canViewFile: true // Author files are always visible
+        canViewFile: true, // Author files are always visible
+        canDelete,
+        isWithinDeletionWindow: isWithinWindow
       };
     });
 
@@ -162,7 +132,9 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
     const refereeUpdatesCombined = refereeUpdates.map(update => {
       const updateReferee = referees.find(r => r.id === update.referee_id);
       // Allow admins, editors, authors, and the referee who wrote the update to see it
-      const canViewUpdate = isAdmin || isEditor || isAuthorForEntry || update.referee_id === user?.id;
+      const canViewUpdate = isAdminOrEditor || isAuthorForEntry || update.referee_id === user?.id;
+      // User can delete if they're admin/owner or are the referee who created the update
+      const canDelete = isAdmin || update.referee_id === user?.id;
       
       return {
         id: update.id,
@@ -173,7 +145,9 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
         file_path: update.file_path,
         notes: update.notes,
         canViewNotes: canViewUpdate,
-        canViewFile: canViewUpdate // Apply the same visibility rule to files as notes
+        canViewFile: canViewUpdate, // Apply the same visibility rule to files as notes
+        canDelete,
+        isWithinDeletionWindow: false // Referee updates don't have a deletion window
       };
     });
 
@@ -198,6 +172,25 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
       }
       return newExpandedUpdates;
     });
+  };
+  
+  const handleDeleteUpdate = async (update: CombinedUpdate) => {
+    if (!window.confirm(t('confirmDeleteUpdate') || 'Are you sure you want to delete this update?')) {
+      return;
+    }
+    
+    try {
+      if (update.type === 'author') {
+        await apiService.deleteAuthorUpdate(update.id);
+        setAuthorUpdates(prev => prev.filter(item => item.id !== update.id));
+      } else {
+        await apiService.deleteRefereeUpdate(update.id);
+        setRefereeUpdates(prev => prev.filter(item => item.id !== update.id));
+      }
+    } catch (err) {
+      console.error('Error deleting update:', err);
+      alert(t('deleteUpdateError') || 'Failed to delete the update');
+    }
   };
   
   // Check if the current user is an author or referee for this entry
@@ -226,11 +219,6 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
               {t(entry.status || '') || entry.status}
             </span>
           </span>
-          {entry.random_token && (
-            <span className="entry-token">
-              {t('referenceToken') || 'Reference Token'}: <strong>{entry.random_token}</strong>
-            </span>
-          )}
           <button onClick={() => navigate(-1)} className="back-button">
             {t('back') || 'Back'}
           </button>
@@ -303,7 +291,19 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                     <span className="message-sender">
                       {update.type === 'author' ? update.authorName : update.refereeName}
                     </span>
-                    <span className="message-date">{formatDate(update.created_date)}</span>
+                    <span className="message-date">
+                      {formatDate(update.created_date)}
+                    </span>
+                    
+                    {update.canDelete && (
+                      <button 
+                        className="delete-update-button" 
+                        onClick={() => handleDeleteUpdate(update)}
+                        aria-label={t('deleteUpdate') || 'Delete Update'}
+                      >
+                        <span className="delete-icon">×</span>
+                      </button>
+                    )}
                   </div>
                   
                   <div className="chat-message-content">
@@ -371,7 +371,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                                 : (t('reviewFile') || 'Review File')
                               }: 
                             </strong>
-                            <a href={update.file_path} target="_blank" rel="noopener noreferrer">
+                            <a href={`/api${update.file_path}`} target="_blank" rel="noopener noreferrer">
                               {t('viewFile') || 'View File'}
                             </a>
                           </div>
@@ -392,19 +392,19 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
       
       {/* Actions Section (Add new update, etc.) */}
       <div className="entry-actions">
-        {isAuthorForEntry && (
+        {(isAuthorForEntry || user?.role === 'owner' || user?.role === 'admin') && (
           <Link to={`/entries/${entryId}/author-update/new`} className="action-button">
             {t('addAuthorUpdate') || 'Add Author Update'}
           </Link>
         )}
         
-        {isRefereeForEntry && (
+        {(isRefereeForEntry || user?.role === 'owner' || user?.role === 'admin') && (
           <Link to={`/entries/${entryId}/referee-update/new`} className="action-button">
             {t('addRefereeUpdate') || 'Add Referee Update'}
           </Link>
         )}
         
-        {(user?.role === 'admin' || user?.role === 'editor') && (
+        {(user?.role === 'admin' || user?.role === 'editor' || user?.role === 'owner') && (
           <Link to={`/entries/edit/${entryId}`} className="action-button secondary">
             {t('editEntry') || 'Edit Entry'}
           </Link>

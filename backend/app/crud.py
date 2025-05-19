@@ -2,9 +2,11 @@ from sqlmodel import Session, select
 from datetime import datetime
 import secrets
 from typing import Optional
+import os
 
 from . import models
 from . import schemas
+from .file_utils import delete_upload_file, delete_upload_directory
 
 # --- Journal Entry CRUD --- #
 
@@ -101,7 +103,12 @@ def update_entry(db: Session, entry_id: int, entry_update: schemas.JournalEntryU
     authors_ids = update_data.pop('authors_ids', None)
     referees_ids = update_data.pop('referees_ids', None)
 
-    # Update fields
+    # Handle journal_id explicitly to allow setting it to None
+    journal_id = update_data.pop('journal_id', None) if 'journal_id' in update_data else None
+    if journal_id is not None:  # This will be true even if journal_id is explicitly set to None
+        db_entry.journal_id = journal_id
+
+    # Update other fields
     for key, value in update_data.items():
         setattr(db_entry, key, value)
 
@@ -155,15 +162,44 @@ def delete_entry(db: Session, entry_id: int) -> models.JournalEntry | None:
     if not db_entry:
         return None
 
+    # Delete all author updates for this entry
+    statement = select(models.AuthorUpdate).where(models.AuthorUpdate.entry_id == entry_id)
+    author_updates = db.exec(statement).all()
+    for update in author_updates:
+        if update.file_path:
+            delete_upload_file(update.file_path)
+        db.delete(update)
+
+    # Delete all referee updates for this entry
+    statement = select(models.RefereeUpdate).where(models.RefereeUpdate.entry_id == entry_id)
+    referee_updates = db.exec(statement).all()
+    for update in referee_updates:
+        if update.file_path:
+            delete_upload_file(update.file_path)
+        db.delete(update)
+    
+    # Delete the entry's file if it exists
+    if db_entry.file_path:
+        delete_upload_file(db_entry.file_path)
+    
+    # Delete the entry's folder and all its contents
+    entry_folder = f"entries/{entry_id}"
+    delete_upload_directory(entry_folder)
+    
+    # Flush to ensure updates are deleted before deleting the entry
+    db.flush()
+
+    # Finally delete the entry itself
     db.delete(db_entry)
     db.commit()
+    
     # After deletion, the object is expired, so we return the original (now detached) object
-    # Or you could return True/False or the id
     return db_entry
 
 # --- User CRUD (Placeholder - will be expanded in Phase 3) --- #
 
-def get_user(db: Session, user_id: int):
+def get_user(db: Session, user_id: int) -> models.User | None:
+    """Get a user by ID."""
     return db.get(models.User, user_id)
 
 def get_user_by_email(db: Session, email: str):
@@ -241,9 +277,17 @@ def delete_user(db: Session, user_id: int, transfer_to_user_id: int) -> bool:
         return False
     
     # Transfer journal editor in chief relationships
-    for journal in user_to_delete.chief_of_journals:
+    statement = select(models.Journal).where(
+        models.Journal.editor_in_chief_id == user_id
+    )
+    journals_as_chief = db.exec(statement).all()
+    
+    for journal in journals_as_chief:
         journal.editor_in_chief_id = transfer_to_user_id
         db.add(journal)
+    
+    # Flush to ensure editor-in-chief changes are committed
+    db.flush()
     
     # Transfer JournalEditorLink relationships
     statement = select(models.JournalEditorLink).where(
@@ -430,4 +474,38 @@ def update_user_password(db: Session, user_id: int, new_password: str) -> models
     db.commit()
     db.refresh(user)
     
-    return user 
+    return user
+
+def delete_journal(db: Session, journal_id: int) -> models.Journal | None:
+    """Delete a journal and all its related data."""
+    db_journal = db.get(models.Journal, journal_id)
+    if not db_journal:
+        return None
+
+    # Get all entries for this journal
+    statement = select(models.JournalEntry).where(models.JournalEntry.journal_id == journal_id)
+    entries = db.exec(statement).all()
+    
+    # Delete each entry and its related data
+    for entry in entries:
+        delete_entry(db, entry.id)
+    
+    # Delete journal's files if they exist
+    if db_journal.cover_photo:
+        delete_upload_file(db_journal.cover_photo)
+    if db_journal.meta_files:
+        delete_upload_file(db_journal.meta_files)
+    if db_journal.editor_notes:
+        delete_upload_file(db_journal.editor_notes)
+    if db_journal.full_pdf:
+        delete_upload_file(db_journal.full_pdf)
+    
+    # Delete the journal's folder and all its contents
+    journal_folder = f"journals/{journal_id}"
+    delete_upload_directory(journal_folder)
+    
+    # Delete the journal itself
+    db.delete(db_journal)
+    db.commit()
+    
+    return db_journal 

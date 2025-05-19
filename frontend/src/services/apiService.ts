@@ -69,16 +69,11 @@ export interface JournalEntryCreate {
     abstract_tr: string;
     abstract_en?: string;
     keywords?: string;
-    page_number?: string;
     article_type?: string;
     language?: string;
-    doi?: string;
-    file_path?: string;
-    status?: string;
     journal_id?: number;
     authors_ids?: number[];
     referees_ids?: number[];
-    date?: string; // Add date field
 }
 
 interface JournalEntryUpdate {
@@ -86,15 +81,11 @@ interface JournalEntryUpdate {
     abstract_tr?: string;
     abstract_en?: string;
     keywords?: string;
-    page_number?: string;
     article_type?: string;
     language?: string;
-    doi?: string;
-    file_path?: string;
-    status?: string;
     authors_ids?: number[];
     referees_ids?: number[];
-    date?: string; // Add date field
+    journal_id?: number | null;
 }
 
 // Add Journal interface
@@ -117,7 +108,6 @@ interface Journal { // This will serve as JournalRead for admin purposes too
 interface JournalCreate {
     title: string;
     issue: string;
-    date?: string; // Add date field
     is_published: boolean;
     publication_date?: string | null;
     publication_place?: string;
@@ -145,10 +135,12 @@ interface JournalUpdate {
 export interface Settings {
     id: number; // Typically 1 for a single settings row
     active_journal_id: number | null;
+    about: string | null;
 }
 
 interface SettingsUpdate {
-    active_journal_id: number | null;
+    active_journal_id?: number | null;
+    about?: string | null;
 }
 
 // --- New Interfaces for Admin Page ---
@@ -238,6 +230,13 @@ interface UserUpdate {
     orcid_id?: string;
     role?: string;
     is_auth?: boolean;
+}
+
+// Add search results interface
+export interface SearchResults {
+    users: UserRead[];
+    journals: Journal[];
+    entries: JournalEntryRead[];
 }
 
 // Create an Axios instance
@@ -334,6 +333,11 @@ const getEntryById = async (entryId: number): Promise<JournalEntryRead> => {
     return response.data;
 };
 
+const getPublicEntryById = async (entryId: number): Promise<JournalEntryRead> => {
+    const response = await axios.get<JournalEntryRead>(`/api/public/entries/${entryId}`);
+    return response.data;
+};
+
 const createEntry = async (entryData: JournalEntryCreate): Promise<JournalEntryRead> => {
     const response = await apiClient.post<JournalEntryRead>('/entries/', entryData);
     return response.data;
@@ -357,6 +361,11 @@ const createJournal = async (journalData: JournalCreate): Promise<Journal> => {
 const updateJournal = async (journalId: number, journalData: JournalUpdate): Promise<Journal> => {
     const response = await apiClient.put<Journal>(`/journals/${journalId}`, journalData);
     return response.data;
+};
+
+// Add function to delete a journal
+const deleteJournal = async (journalId: number): Promise<void> => {
+    await apiClient.delete(`/journals/${journalId}`);
 };
 
 // --- Admin API Calls ---
@@ -431,8 +440,28 @@ const createAuthorUpdate = async (entryId: number, authorUpdateData: AuthorUpdat
     return response.data;
 };
 
+// Add function to create author update with file upload
+const createAuthorUpdateWithFile = async (entryId: number, formData: FormData): Promise<AuthorUpdateRead> => {
+    const response = await apiClient.post<AuthorUpdateRead>(`/entries/${entryId}/author-updates/upload`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+
 const createRefereeUpdate = async (entryId: number, refereeUpdateData: RefereeUpdateCreate): Promise<RefereeUpdateRead> => {
     const response = await apiClient.post<RefereeUpdateRead>(`/entries/${entryId}/referee-updates`, refereeUpdateData);
+    return response.data;
+};
+
+// Add function to create referee update with file upload
+const createRefereeUpdateWithFile = async (entryId: number, formData: FormData): Promise<RefereeUpdateRead> => {
+    const response = await apiClient.post<RefereeUpdateRead>(`/entries/${entryId}/referee-updates/upload`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
     return response.data;
 };
 
@@ -465,7 +494,25 @@ const getPublishedJournals = async (skip: number = 0, limit: number = 100): Prom
     return response.data;
 };
 
-// Add a function to get entries for a published journal (no auth required)
+// Add a function to get a journal by ID regardless of publication status
+const getJournalById = async (journalId: number): Promise<Journal> => {
+    const response = await axios.get<Journal>(`/api/public/journals/${journalId}`);
+    return response.data;
+};
+
+// Add a function to get journal editors for a specific journal
+export const getPublicJournalEditors = async (journalId: number): Promise<JournalEditorLinkRead[]> => {
+    const response = await axios.get<JournalEditorLinkRead[]>(`/api/public/journals/${journalId}/editors`);
+    return response.data;
+};
+
+// Add a function to get public user information without authentication
+export const getPublicUserInfo = async (userId: string): Promise<UserRead> => {
+    const response = await axios.get<UserRead>(`/api/public/users/${userId}`);
+    return response.data;
+};
+
+// Add function to get published journal entries
 const getPublishedJournalEntries = async (journalId: number, skip: number = 0, limit: number = 100): Promise<JournalEntryRead[]> => {
     const response = await axios.get<JournalEntryRead[]>(`/api/public/journals/${journalId}/entries`, {
         params: { skip, limit }
@@ -625,6 +672,141 @@ export const getEditorRefereeUpdates = async (): Promise<RefereeUpdateRead[]> =>
     return response.data;
 };
 
+// Add function to set editor-in-chief for a journal
+export const setJournalEditorInChief = async (journalId: number, editorInChiefId: number): Promise<Journal> => {
+    const response = await apiClient.put<Journal>(`/admin/journals/${journalId}/editor-in-chief`, { editor_in_chief_id: editorInChiefId });
+    return response.data;
+};
+
+// Add function to add editor to a journal
+export const addJournalEditor = async (journalId: number, editorId: number): Promise<JournalEditorLinkRead> => {
+    const response = await apiClient.post<JournalEditorLinkRead>(`/admin/journals/${journalId}/editors`, { user_id: editorId });
+    return response.data;
+};
+
+// Add function to remove editor from a journal
+export const removeJournalEditor = async (journalId: number, editorId: number): Promise<void> => {
+    await apiClient.delete(`/admin/journals/${journalId}/editors/${editorId}`);
+};
+
+// Get users with admin role
+export const getAdminUsers = async (): Promise<UserRead[]> => {
+    const response = await apiClient.get<UserRead[]>('/admin/users/role/admin');
+    return response.data;
+};
+
+// Get users with editor role
+export const getEditorRoleUsers = async (): Promise<UserRead[]> => {
+    const response = await apiClient.get<UserRead[]>('/admin/users/role/editor');
+    return response.data;
+};
+
+// Get users with author role
+export const getAuthorUsers = async (): Promise<UserRead[]> => {
+    const response = await apiClient.get<UserRead[]>('/admin/users/role/author');
+    return response.data;
+};
+
+// Get users with referee role
+export const getRefereeUsers = async (): Promise<UserRead[]> => {
+    const response = await apiClient.get<UserRead[]>('/admin/users/role/referee');
+    return response.data;
+};
+
+// Add author to an entry
+export const addEntryAuthor = async (entryId: number, authorId: number): Promise<JournalEntryAuthorLinkRead> => {
+    // Try the admin endpoint first, and if it fails, try the editor endpoint
+    try {
+        const response = await apiClient.post<JournalEntryAuthorLinkRead>(
+            `/admin/entries/${entryId}/authors`, 
+            { user_id: authorId }
+        );
+        return response.data;
+    } catch (error) {
+        // Try the editor endpoint
+        const response = await apiClient.post<JournalEntryAuthorLinkRead>(
+            `/editors/entries/${entryId}/authors`, 
+            { user_id: authorId }
+        );
+        return response.data;
+    }
+};
+
+// Remove author from an entry
+export const removeEntryAuthor = async (entryId: number, authorId: number): Promise<void> => {
+    try {
+        // Try the admin endpoint first
+        await apiClient.delete(`/admin/entries/${entryId}/authors/${authorId}`);
+    } catch (error) {
+        // Try the editor endpoint
+        await apiClient.delete(`/editors/entries/${entryId}/authors/${authorId}`);
+    }
+};
+
+// Add referee to an entry
+export const addEntryReferee = async (entryId: number, refereeId: number): Promise<JournalEntryRefereeLinkRead> => {
+    // Try the admin endpoint first, and if it fails, try the editor endpoint
+    try {
+        const response = await apiClient.post<JournalEntryRefereeLinkRead>(
+            `/admin/entries/${entryId}/referees`, 
+            { user_id: refereeId }
+        );
+        return response.data;
+    } catch (error) {
+        // Try the editor endpoint
+        const response = await apiClient.post<JournalEntryRefereeLinkRead>(
+            `/editors/entries/${entryId}/referees`, 
+            { user_id: refereeId }
+        );
+        return response.data;
+    }
+};
+
+// Remove referee from an entry
+export const removeEntryReferee = async (entryId: number, refereeId: number): Promise<void> => {
+    try {
+        // Try the admin endpoint first
+        await apiClient.delete(`/admin/entries/${entryId}/referees/${refereeId}`);
+    } catch (error) {
+        // Try the editor endpoint
+        await apiClient.delete(`/editors/entries/${entryId}/referees/${refereeId}`);
+    }
+};
+
+const deleteAuthorUpdate = async (updateId: number): Promise<void> => {
+    await apiClient.delete(`/entries/author-updates/${updateId}`);
+};
+
+const deleteRefereeUpdate = async (updateId: number): Promise<void> => {
+    await apiClient.delete(`/entries/referee-updates/${updateId}`);
+};
+
+// Add the search function
+const searchAll = async (query: string): Promise<SearchResults> => {
+    const response = await apiClient.get<SearchResults>(`/public/search`, {
+        params: { q: query }
+    });
+    return response.data;
+};
+
+const uploadJournalFiles = async (journalId: number, formData: FormData): Promise<Journal> => {
+    const response = await apiClient.post<Journal>(`/journals/${journalId}/upload`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+
+const uploadEntryFile = async (entryId: number, formData: FormData): Promise<JournalEntryRead> => {
+    const response = await apiClient.post<JournalEntryRead>(`/entries/${entryId}/upload`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+
 export {
     // List all functions that are *not* individually exported with 'export const'
     login,
@@ -635,11 +817,13 @@ export {
     getEntries,
     getEntriesByJournal,
     getEntryById,
+    getPublicEntryById,
     createEntry,
     updateEntry,
     deleteEntry,
     createJournal,
     updateJournal,
+    deleteJournal,
     getJournals,
     getAllUsers,
     getAllJournals,
@@ -651,7 +835,11 @@ export {
     getEntryAuthorUpdates,
     getEntryRefereeUpdates,
     createAuthorUpdate,
+    createAuthorUpdateWithFile,
     createRefereeUpdate,
+    createRefereeUpdateWithFile,
+    deleteAuthorUpdate,
+    deleteRefereeUpdate,
     getAllJournalEditorLinks,
     getAllJournalEntryAuthorLinks,
     getAllJournalEntryRefereeLinks,
@@ -674,6 +862,22 @@ export {
     // Note: getEditorJournals, getEditorJournalEntries, 
     // getEditorAuthorUpdates, getEditorRefereeUpdates are intentionally omitted 
     // because they use 'export const' above.
+    getJournalById,
+    // The following functions are already exported with 'export const'
+    // setJournalEditorInChief,
+    // addJournalEditor,
+    // removeJournalEditor,
+    // getAdminUsers,
+    // getEditorRoleUsers,
+    // getAuthorUsers,
+    // getRefereeUsers,
+    // addEntryAuthor,
+    // removeEntryAuthor,
+    // addEntryReferee,
+    // removeEntryReferee,
+    searchAll,
+    uploadJournalFiles,
+    uploadEntryFile,
 };
 
 export type {
@@ -699,5 +903,5 @@ export type {
     JournalEditorLinkRead,
     JournalEntryAuthorLinkRead,
     JournalEntryRefereeLinkRead,
-    UserUpdate // Add this export
+    UserUpdate
 }; 

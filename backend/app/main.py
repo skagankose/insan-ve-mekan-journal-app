@@ -1,7 +1,18 @@
 from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session, select
+import os
+from pathlib import Path
+from datetime import datetime
+
+# Patch for bcrypt/__about__ issue
+import bcrypt
+if not hasattr(bcrypt, '__about__'):
+    bcrypt.__about__ = type('obj', (object,), {
+        '__version__': bcrypt.__version__
+    })
 
 # Import models here to ensure they are registered with SQLModel metadata
 from . import models # This line is important
@@ -11,8 +22,10 @@ from .routers import auth # Import auth router
 from .routers import admin # Import admin router
 from .routers import journals # Import journals router
 from .routers import editors # Import editors router
+from .routers import public # Import public router
 from . import crud
 from .security import get_password_hash
+from .file_utils import UPLOAD_DIR
 
 @asynccontextmanager
 async def lifecycle(app: FastAPI):
@@ -24,33 +37,109 @@ async def lifecycle(app: FastAPI):
     create_db_and_tables()
     print("Database and tables created.")
     
-    # Create default admin user if it doesn't exist
-    with Session(engine) as session:
-        # Check if admin user already exists
-        admin_user = crud.get_user_by_email(session, "admin@admin.com")
-        if not admin_user:
-            print("Creating default admin user...")
-            # Create admin user
-            admin_user = models.User(
-                email="admin@admin.com",
-                name="Administrator",
-                role=models.UserRole.admin,
-                hashed_password=get_password_hash("admin")
-            )
-            session.add(admin_user)
-            session.commit()
-            print("Default admin user created.")
-        else:
-            print("Admin user already exists.")
+    # Create admin user if it doesn't exist and ADMIN creds are provided
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@admin.com")  # Default admin email
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin")      # Default admin password
+    
+    # Create an admin account regardless of environment variables
+    from passlib.context import CryptContext
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    # Check if admin exists
+    with Session(engine) as db:
+        admin = db.exec(select(models.User).where(models.User.email == admin_email)).first()
         
-        # Create initial settings if they don't exist
-        settings = crud.get_settings(session)
+        if not admin:
+            # Create admin user
+            admin = models.User(
+                email=admin_email,
+                name="Admin User",
+                hashed_password=pwd_context.hash(admin_password),
+                role=models.UserRole.admin,
+                is_auth=True  # Auto-authenticate admin
+            )
+            db.add(admin)
+            db.commit()
+            print(f"✅ Admin user created: {admin_email} with password: {admin_password}")
+        else:
+            print(f"✅ Admin user already exists: {admin_email}")
+    
+    # Create owner user if it doesn't exist and OWNER creds are provided
+    owner_email = os.getenv("OWNER_EMAIL")
+    owner_password = os.getenv("OWNER_PASSWORD")
+    
+    if owner_email and owner_password:
+        from passlib.context import CryptContext
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        
+        # Check if owner exists
+        with Session(engine) as db:
+            owner = db.exec(select(models.User).where(models.User.email == owner_email)).first()
+            
+            if not owner:
+                # Create owner user
+                owner = models.User(
+                    email=owner_email,
+                    name="Owner User",
+                    hashed_password=pwd_context.hash(owner_password),
+                    role=models.UserRole.owner,
+                    is_auth=True  # Auto-authenticate owner
+                )
+                db.add(owner)
+                db.commit()
+                print(f"✅ Owner user created: {owner_email}")
+    
+    # Create initial settings if they don't exist
+    with Session(engine) as db_session:
+        settings = crud.get_settings(db_session)
         if not settings:
             print("Creating initial settings...")
-            settings = crud.create_settings(session)
+            settings = crud.create_settings(db_session)
             print("Initial settings created.")
         else:
             print("Settings already exist.")
+        
+        # Check if "Henüz Bir Dergiye Atanmamıştır" journal exists
+        unassigned_journal = db_session.exec(
+            select(models.Journal).where(models.Journal.title == "Henüz Bir Dergiye Atanmamıştır")
+        ).first()
+        
+        if not unassigned_journal:
+            # Find an admin user for editor_in_chief
+            admin_user = db_session.exec(
+                select(models.User).where(models.User.role == models.UserRole.admin)
+            ).first()
+            
+            # Create the unassigned journal
+            unassigned_journal = models.Journal(
+                title="Henüz Bir Dergiye Atanmamıştır",
+                date=datetime.utcnow(),
+                issue="-",
+                is_published=False,
+                editor_in_chief_id=admin_user.id if admin_user else None
+            )
+            db_session.add(unassigned_journal)
+            db_session.commit()
+            db_session.refresh(unassigned_journal)
+            print(f"✅ Created journal: 'Henüz Bir Dergiye Atanmamıştır'")
+        else:
+            print(f"✅ Journal 'Henüz Bir Dergiye Atanmamıştır' already exists")
+        
+        # Set the unassigned journal as active
+        unassigned_journal = db_session.exec(
+            select(models.Journal).where(models.Journal.title == "Henüz Bir Dergiye Atanmamıştır")
+        ).first()
+        
+        if unassigned_journal:
+            # Update settings to set this journal as active
+            about_text = """
+            İnsan ve Mekân” dergisine ait bu logo, insanın zaman ve kültür boyunca mekânla kurduğu çok katmanlı ilişkiyi simgesel bir bütünlük içinde yansıtmaktadır. Logo dış hatlarıyla kemer ya da mihrabı andıran bir formda tasarlanmıştır; bu, hem İslam mimarisine özgü geleneksel bir yapı öğesi olarak hem de insanın yönelişini ve kutsala dair mekânsal aidiyetini ifade eden anlamlı bir çerçevedir. Bu yapısal çerçeve, logonun içerdiği simgeleri bir araya getirerek, onları tarihsel ve kültürel bir bağlam içine yerleştirir.
+Logonun solunda yer alan kale burcu, geçmişin savunmacı kent yapısını, medeniyetin tarihsel sürekliliğini ve korunaklılığını simgelerken; ortadaki cami formu ve minare, İslam kültürünün mekân anlayışını, maneviyatı ve insanın kutsal ile ilişkisini temsil eder. Sağda bulunan modern gökdelen ise çağdaş kent yaşamını, teknolojiyi ve modern insanın ürettiği yeni yaşam alanlarını ima eder. Bu üç yapı bir araya geldiğinde, insanın tarihsel, kültürel ve manevi yönleriyle farklı dönemlerde inşa ettiği mekânları bütünlüklü bir şekilde simgelemiş olur.
+Üst kısımda yer alan “JHS” harfleri ise bu mimari simgelerin üzerinde yer alarak kurumsal bir referans sunar ve tüm anlatının bir kurum çatısı altında toplandığını işaret eder. Geleneksel ve modern öğelerin aynı çerçeve içerisinde yer alması, geçmişle gelecek arasında kurulan sürekliliği ve insanın bu iki kutup arasında sürdürdüğü mekânsal yolculuğu ifade eder. Böylece logo, sadece mimari birer sembolü değil, aynı zamanda insanın mekânla olan anlam dolu ilişkisini, zamana yayılan bir düşünsel derinlikle yansıtan bütünlüklü bir tasarım sunar.
+            """
+            settings_update = models.SettingsUpdate(active_journal_id=unassigned_journal.id, about=about_text)
+            updated_settings = crud.update_settings(db_session, settings_update)
+            print(f"✅ Set journal 'Henüz Bir Dergiye Atanmamıştır' as active")
     
     yield
     
@@ -58,6 +147,14 @@ async def lifecycle(app: FastAPI):
     print("Shutting down...")
 
 app = FastAPI(lifespan=lifecycle)
+
+# Create uploads directory if it doesn't exist
+upload_dir = Path(UPLOAD_DIR)
+if not upload_dir.exists():
+    upload_dir.mkdir(parents=True)
+
+# Mount static file server for uploaded files
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 # CORS configuration
 origins = [
@@ -79,51 +176,7 @@ app.include_router(auth.router) # Include auth router
 app.include_router(admin.router) # Include admin router
 app.include_router(journals.router) # Include journals router
 app.include_router(editors.router) # Include editors router
-
-# Public endpoint for published journals (no auth required)
-@app.get("/public/journals", response_model=list[models.Journal])
-def get_published_journals(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_session)
-):
-    """
-    Get all published journals. This endpoint is publicly accessible without authentication.
-    """
-    statement = select(models.Journal).where(models.Journal.is_published == True).offset(skip).limit(limit)
-    journals = db.exec(statement).all()
-    return journals
-
-# Public endpoint for entries of a published journal (no auth required)
-@app.get("/public/journals/{journal_id}/entries", response_model=list[models.JournalEntry])
-def get_published_journal_entries(
-    journal_id: int,
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_session)
-):
-    """
-    Get entries for a published journal. This endpoint is publicly accessible without authentication.
-    """
-    # First verify the journal exists and is published
-    journal_statement = select(models.Journal).where(
-        models.Journal.id == journal_id,
-        models.Journal.is_published == True
-    )
-    journal = db.exec(journal_statement).first()
-    
-    if not journal:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail="Published journal not found")
-    
-    # Get entries for this journal
-    entries_statement = select(models.JournalEntry).where(
-        models.JournalEntry.journal_id == journal_id,
-        models.JournalEntry.status == "completed"  # Changed from "COMPLETED" to "completed"
-    ).offset(skip).limit(limit)
-    
-    entries = db.exec(entries_statement).all()
-    return entries
+app.include_router(public.router) # Include public router
 
 @app.get("/")
 def read_root():

@@ -44,13 +44,13 @@ const CreateUserPage: React.FC = () => {
     });
 
     useEffect(() => {
-        // Ensure only admin users can access this page
+        // Ensure only admin or owner users can access this page
         if (!isAuthenticated) {
             navigate('/login');
             return;
         }
 
-        if (currentUser?.role !== 'admin') {
+        if (currentUser?.role !== 'admin' && currentUser?.role !== 'owner') {
             navigate('/');
             return;
         }
@@ -258,6 +258,7 @@ const CreateUserPage: React.FC = () => {
                     >
                         <option value="author">Author</option>
                         <option value="admin">Admin</option>
+                        <option value="owner">Owner</option>
                         <option value="editor">Editor</option>
                         <option value="referee">Referee</option>
                     </select>

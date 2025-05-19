@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as apiService from '../services/apiService';
@@ -17,14 +17,57 @@ const AuthorUpdateFormPage: React.FC = () => {
     abstract_tr: '',
     keywords: '',
     notes: '',
-    file_path: '',
   });
   
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchEntryData = async () => {
+      if (!entryId) {
+        toast.error(t('entryIdNotFound') || 'Entry ID not found');
+        return;
+      }
+      
+      try {
+        setIsLoading(true);
+        const entryData = await apiService.getEntryById(parseInt(entryId));
+        
+        // Pre-fill form data with entry information
+        setFormData({
+          title: entryData.title || '',
+          abstract_en: entryData.abstract_en || '',
+          abstract_tr: entryData.abstract_tr || '',
+          keywords: entryData.keywords || '',
+          notes: '', // Keep notes empty as requested
+        });
+      } catch (error) {
+        console.error('Error fetching entry data:', error);
+        toast.error(t('errorFetchingEntry') || 'Error fetching entry data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchEntryData();
+  }, [entryId, t]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (!file.name.toLowerCase().endsWith('.docx')) {
+        toast.error(t('onlyDocxAllowed') || 'Only .docx files are allowed');
+        e.target.value = '';
+        return;
+      }
+      setSelectedFile(file);
+    }
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,9 +78,9 @@ const AuthorUpdateFormPage: React.FC = () => {
       return;
     }
     
-    // Make sure at least one field is filled
+    // Make sure at least one field is filled or a file is selected
     if (!formData.title && !formData.abstract_en && !formData.abstract_tr && 
-        !formData.keywords && !formData.notes && !formData.file_path) {
+        !formData.keywords && !formData.notes && !selectedFile) {
       toast.error(t('pleaseCompleteAtLeastOneField') || 'Please complete at least one field');
       return;
     }
@@ -45,8 +88,48 @@ const AuthorUpdateFormPage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      console.log('Submitting author update with data:', formData);
-      await apiService.createAuthorUpdate(parseInt(entryId), formData);
+      // Create FormData object for file upload
+      const uploadData = new FormData();
+      
+      // Add form fields to FormData
+      Object.entries(formData).forEach(([key, value]) => {
+        uploadData.append(key, value);
+      });
+      
+      // Add file if selected
+      if (selectedFile) {
+        uploadData.append('file', selectedFile);
+      }
+      
+      // First, create the author update
+      console.log('Submitting author update with data:', formData, 'and file:', selectedFile?.name);
+      await apiService.createAuthorUpdateWithFile(parseInt(entryId), uploadData);
+      
+      // Then, update the entry itself with the same information
+      const entryUpdateData = {
+        title: formData.title || undefined,
+        abstract_en: formData.abstract_en || undefined,
+        abstract_tr: formData.abstract_tr || undefined,
+        keywords: formData.keywords || undefined,
+      };
+      
+      // Only include fields that have values to avoid overwriting with empty strings
+      const filteredEntryUpdateData = Object.fromEntries(
+        Object.entries(entryUpdateData).filter(([_, value]) => value !== undefined)
+      );
+      
+      // Update the entry if there are any fields to update
+      if (Object.keys(filteredEntryUpdateData).length > 0) {
+        await apiService.updateEntry(parseInt(entryId), filteredEntryUpdateData);
+      }
+      
+      // If there's a file, update the entry's file as well
+      if (selectedFile) {
+        const fileFormData = new FormData();
+        fileFormData.append('file', selectedFile);
+        await apiService.uploadEntryFile(parseInt(entryId), fileFormData);
+      }
+      
       toast.success(t('authorUpdateSubmitted') || 'Author update submitted successfully');
       navigate(`/entries/${entryId}/updates`);
     } catch (error: unknown) {
@@ -62,11 +145,15 @@ const AuthorUpdateFormPage: React.FC = () => {
     }
   };
   
+  if (isLoading) {
+    return <div className="loading">{t('loading') || 'Loading...'}</div>;
+  }
+  
   return (
     <div className="form-container">
       <h1>{t('addAuthorUpdate') || 'Add Author Update'}</h1>
       
-      <form onSubmit={handleSubmit} className="update-form">
+      <form onSubmit={handleSubmit} className="update-form" encType="multipart/form-data">
         <div className="form-group">
           <label htmlFor="title">{t('title') || 'Title'} *</label>
           <input
@@ -130,19 +217,18 @@ const AuthorUpdateFormPage: React.FC = () => {
         </div>
         
         <div className="form-group">
-          <label htmlFor="file_path">{t('filePath') || 'File Reference'} *</label>
+          <label htmlFor="file">{t('fileUpload') || 'Upload File'} *</label>
           <input
-            type="text"
-            id="file_path"
-            name="file_path"
-            value={formData.file_path}
-            onChange={handleChange}
+            type="file"
+            id="file"
+            name="file"
+            onChange={handleFileChange}
             className="form-control"
-            placeholder={t('enterFilePath') || 'Enter file path or URL'}
-            required
+            accept=".docx"
+            required={!formData.title}
           />
           <small className="text-muted">
-            {t('enterFileReference') || 'Enter a reference to your file (URL, DOI, or file name)'}
+            {t('uploadFileDescription') || 'Upload a .docx file'}
           </small>
         </div>
         

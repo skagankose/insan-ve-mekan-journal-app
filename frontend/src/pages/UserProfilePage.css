@@ -116,12 +116,66 @@
 }
 
 .badge-waiting_for_payment,
-.badge-waiting_for_writer,
-.badge-waiting_for_arbitrator,
-.badge-waiting_for_editor {
-    background-color: #fff8e1;
-    color: #e65100;
-    border: 1px solid #ffecb3;
+.badge-waiting_for_authors,
+.badge-waiting_for_referees,
+.badge-waiting_for_editors {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.badge-waiting_for_payment {
+    background-color: #ffec59;
+    color: #333;
+}
+
+.badge-waiting_for_authors {
+    background-color: #ffb74d;
+    color: #333;
+}
+
+.badge-waiting_for_referees {
+    background-color: #f48fb1;
+    color: #333;
+}
+
+.badge-waiting_for_editors {
+    background-color: #90caf9;
+    color: #333;
+}
+
+.badge-accepted {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    background-color: #81c784;
+    color: #333;
+}
+
+.badge-not_accepted {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    background-color: #ef5350;
+    color: #fff;
 }
 
 .badge-completed {
@@ -147,12 +201,14 @@
 }
 
 /* Journal sections */
+.editor-in-chief-journals-section,
 .edited-journals-section,
 .user-entries-section,
 .referee-entries-section {
     margin-bottom: 2.5rem;
 }
 
+.editor-in-chief-journals-section h2,
 .edited-journals-section h2,
 .user-entries-section h2,
 .referee-entries-section h2 {
@@ -293,8 +349,10 @@
 
 /* Entry item */
 .entry-item {
-    padding: 1rem;
-    border-bottom: 1px solid #eaeaea;
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .entry-item:last-child {
@@ -428,4 +486,27 @@
 .admin-profile-actions {
     display: flex;
     gap: 0.5rem;
+}
+
+.entry-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.entry-link .entry-item {
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.entry-link .entry-item:hover {
+    background-color: #f9f9f9;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.badge-owner {
+    background-color: #f1c40f;
+    color: #7d6608;
+    border: 1px solid #f9e79f;
 } 

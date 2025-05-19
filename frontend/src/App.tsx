@@ -9,14 +9,14 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import JournalCreatePage from './pages/JournalCreatePage';
 import JournalEditPage from './pages/JournalEditPage';
-import JournalsPage from './pages/JournalsPage';
 import JournalCreateFormPage from './pages/JournalCreateFormPage';
 import JournalEditFormPage from './pages/JournalEditFormPage';
 import AdminPage from './pages/AdminPage';
-import EditorPage from './pages/EditorPage';
 import EditorJournalsPage from './pages/EditorJournalsPage';
 import ArchivedJournalsPage from './pages/ArchivedJournalsPage';
 import JournalEntriesPage from './pages/JournalEntriesPage';
+import JournalDetailsPage from './pages/JournalDetailsPage';
+import JournalEntryDetailsPage from './pages/JournalEntryDetailsPage';
 import EditUserPage from './pages/EditUserPage';
 import CreateUserPage from './pages/CreateUserPage';
 import AutoLoginPage from './pages/AutoLoginPage';
@@ -41,8 +41,8 @@ import Sidebar from './components/Sidebar';
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user } = useAuth();
   
-  // Check if user is authenticated and has admin role
-  if (!isAuthenticated || !user || user.role !== 'admin') {
+  // Check if user is authenticated and has admin or owner role
+  if (!isAuthenticated || !user || (user.role !== 'admin' && user.role !== 'owner')) {
     return <Navigate to="/" replace />;
   }
   
@@ -53,8 +53,8 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 const EditorRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user } = useAuth();
   
-  // Check if user is authenticated and has editor or admin role
-  if (!isAuthenticated || !user || (user.role !== 'editor' && user.role !== 'admin')) {
+  // Check if user is authenticated and has editor, admin, or owner role
+  if (!isAuthenticated || !user || (user.role !== 'editor' && user.role !== 'admin' && user.role !== 'owner')) {
     return <Navigate to="/" replace />;
   }
   
@@ -109,6 +109,7 @@ function App() {
                 <JournalEntryUpdateDetailsPage />
               </UserRoute>
             } />
+            <Route path="/entries/:entryId" element={<JournalEntryDetailsPage />} />
             <Route path="/entries/:entryId/author-update/new" element={
               <UserRoute>
                 <AuthorUpdateFormPage />
@@ -119,16 +120,8 @@ function App() {
                 <RefereeUpdateFormPage />
               </UserRoute>
             } />
-            <Route path="/archive" element={
-              <UserRoute>
-                <ArchivedJournalsPage />
-              </UserRoute>
-            } />
-            <Route path="/archive/journal/:journalId" element={
-              <UserRoute>
-                <JournalEntriesPage />
-              </UserRoute>
-            } />
+            <Route path="/archive" element={<ArchivedJournalsPage />} />
+            <Route path="/archive/journal/:journalId" element={<JournalEntriesPage />} />
             <Route path="/profile" element={
               <UserRoute>
                 <UserProfilePage />
@@ -140,30 +133,21 @@ function App() {
               </UserRoute>
             } />
             
-            {/* Editor Routes */}
-            <Route path="/editor" element={
-              <EditorRoute>
-                <EditorPage />
-              </EditorRoute>
-            } />
-            
             <Route path="/editor/journals" element={
               <EditorRoute>
                 <EditorJournalsPage />
               </EditorRoute>
             } />
             
+            <Route path="/journals/:journalId" element={<JournalDetailsPage />} />
+            
             {/* Admin Routes */}
             <Route path="/" element={
               <AdminRoute>
-                <JournalsPage />
+                <AdminPage />
               </AdminRoute>
             } />
-            <Route path="/journals" element={
-              <AdminRoute>
-                <JournalsPage />
-              </AdminRoute>
-            } />
+            
             <Route path="/journals/new" element={
               <AdminRoute>
                 <JournalCreateFormPage />

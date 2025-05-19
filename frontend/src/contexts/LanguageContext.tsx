@@ -23,17 +23,19 @@ type TranslationKeys =
   | 'language' | 'turkish' | 'english'
   | 'abstract' | 'enterAbstract' | 'type' | 'submitted' | 'reviewed' | 'isAccepted'
   | 'name' | 'bio' | 'role' | 'loading' | 'adminDashboard' | 'userManagement' | 'totalUsers'
-  | 'writer' | 'editor' | 'arbitrator' | 'admin'
+  | 'writer' | 'editor' | 'arbitrator' | 'admin' | 'owner'
   | 'publicationDate' | 'isPublished' | 'editJournal' | 'updateJournal' | 'accessDeniedAdminOnly'
   | 'theme' | 'lightMode' | 'darkMode' | 'switchToDark' | 'switchToLight'
-  | 'previousIssues' | 'publishedJournals' | 'completedEntries'
+  | 'previousIssues' | 'publishedJournals' | 'acceptedEntries'
   | 'createUser' | 'userCreatedSuccessfully' | 'cancel' | 'editUser' | 'userUpdatedSuccessfully'
   | 'directLogin' | 'directLoginDescription' | 'generateLoginLink' | 'copyLink' | 'linkCopied' | 'generating' | 'saveChanges'
   | 'invalidLoginLink' | 'loginFailed' | 'autoLoginFailed' | 'autoLoginProcessing' | 'loginError' | 'goToLogin' | 'loginSuccessful' | 'redirecting'
   | 'loginSuccessButUserInfoFailed'
   | 'profile' | 'userProfile' | 'myJournalEntries' | 'noEntriesFound' | 'loadingUserData' | 'failedToLoadUserEntries'
   | 'biography' | 'scienceBranch' | 'location' | 'telephone' | 'yoksisId' | 'orcidId' | 'journalId' | 'date'
-  | 'myRefereeEntries' | 'noRefereeEntriesFound' | 'myEditedJournals' | 'noEditedJournalsFound' | 'issue' | 'published';
+  | 'myRefereeEntries' | 'noRefereeEntriesFound' | 'myEditedJournals' | 'noEditedJournalsFound' | 'issue' | 'published'
+  | 'statusWaitingForPayment' | 'statusWaitingForAuthors' | 'statusWaitingForReferees' | 'statusWaitingForEditors' 
+  | 'statusAccepted' | 'statusNotAccepted';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -92,7 +94,15 @@ const translations: Record<Language, TranslationDictionary> = {
     'loginText': 'Log in',
     'pleaseLogin': 'Please log in to view your journal entries.',
     'loadingEntries': 'Loading your journal entries...',
-    'completedEntries': 'Completed Entries',
+    'acceptedEntries': 'Accepted Entries',
+    
+    // Status labels
+    'statusWaitingForPayment': 'Waiting for Payment',
+    'statusWaitingForAuthors': 'Waiting for Authors',
+    'statusWaitingForReferees': 'Waiting for Referees',
+    'statusWaitingForEditors': 'Waiting for Editors',
+    'statusAccepted': 'Accepted',
+    'statusNotAccepted': 'Not Accepted',
     
     // Placeholders
     'enterTitle': 'Enter a title for your journal entry',
@@ -109,7 +119,7 @@ const translations: Record<Language, TranslationDictionary> = {
 
     // Admin page
     'adminDashboard': 'Admin Dashboard',
-    'userManagement': 'User Management',
+    'userManagement': 'Users',
     'totalUsers': 'Total users',
 
     // Language
@@ -122,6 +132,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'editor': 'Editor',
     'arbitrator': 'Arbitrator',
     'admin': 'Admin',
+    'owner': 'Owner',
 
     // New translations
     'publicationDate': 'Publication Date',
@@ -239,7 +250,15 @@ const translations: Record<Language, TranslationDictionary> = {
     'loginText': 'Giriş yap',
     'pleaseLogin': 'Günlük kayıtlarınızı görmek için lütfen giriş yapın.',
     'loadingEntries': 'Günlük kayıtlarınız yükleniyor...',
-    'completedEntries': 'Tamamlanmış Kayıtlar',
+    'acceptedEntries': 'Kabul Edilen Kayıtlar',
+    
+    // Status labels
+    'statusWaitingForPayment': 'Ödeme Bekliyor',
+    'statusWaitingForAuthors': 'Yazarları Bekliyor',
+    'statusWaitingForReferees': 'Hakemleri Bekliyor',
+    'statusWaitingForEditors': 'Editörleri Bekliyor',
+    'statusAccepted': 'Kabul Edildi',
+    'statusNotAccepted': 'Kabul Edilmedi',
     
     // Placeholders
     'enterTitle': 'Günlük kaydınız için bir başlık girin',
@@ -256,7 +275,7 @@ const translations: Record<Language, TranslationDictionary> = {
 
     // Admin page
     'adminDashboard': 'Yönetici Paneli',
-    'userManagement': 'Kullanıcı Yönetimi',
+    'userManagement': 'Kullanıcılar',
     'totalUsers': 'Toplam kullanıcı',
 
     // Language
@@ -269,6 +288,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'editor': 'Editör',
     'arbitrator': 'Hakem',
     'admin': 'Yönetici',
+    'owner': 'Sahip',
 
     // New translations
     'publicationDate': 'Yayın Tarihi',

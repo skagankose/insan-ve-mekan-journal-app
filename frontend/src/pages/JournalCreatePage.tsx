@@ -10,25 +10,19 @@ const JournalCreatePage: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const navigate = useNavigate();
-    const { isAuthenticated, user } = useAuth(); // Ensure user is authenticated
+    const { isAuthenticated, user } = useAuth();
     const { t } = useLanguage();
     const { activeJournal } = useActiveJournal();
 
-    // Memoize the initialData to prevent unnecessary re-renders of JournalForm
     const initialFormData = useMemo(() => ({
         title: '', 
         abstract_tr: '',
         abstract_en: '',
         keywords: '',
-        page_number: '',
         article_type: '',
         language: '',
-        doi: '',
-        file_path: '',
-        status: '',
-        date: new Date().toISOString().split('T')[0],
-        authors_ids: [], // Initialize as empty array
-        referees_ids: []  // Initialize as empty array
+        authors_ids: [],
+        referees_ids: []
     }), []);
 
     const handleCreateSubmit = useCallback(async (formData: JournalFormData) => {
@@ -39,45 +33,27 @@ const JournalCreatePage: React.FC = () => {
         setIsSubmitting(true);
         setSubmitError(null);
         try {
-            // Create a new object to avoid modifying the original formData
             const submitData: apiService.JournalEntryCreate = {
                 title: formData.title,
                 abstract_tr: formData.abstract_tr,
                 abstract_en: formData.abstract_en,
                 keywords: formData.keywords,
-                page_number: formData.page_number,
                 article_type: formData.article_type,
                 language: formData.language,
-                doi: formData.doi,
-                file_path: formData.file_path,
-                status: formData.status,
                 authors_ids: formData.authors_ids || [],
                 referees_ids: formData.referees_ids || []
             };
             
-            // Add the journal_id if there's an active journal
             if (activeJournal) {
                 submitData.journal_id = activeJournal.id;
             }
             
-            // Add current user as author if not already in authors_ids
             if (user && (!submitData.authors_ids || !submitData.authors_ids.includes(user.id))) {
                 submitData.authors_ids = [...(submitData.authors_ids || []), user.id];
             }
             
-            // Format date if provided
-            if (formData.date) {
-                submitData.date = new Date(formData.date).toISOString();
-            }
-            
-            // Make sure we never send an ID for a new entry
-            if ('id' in submitData) {
-                delete (submitData as any).id;
-            }
-            
-            // console.log("Creating entry:", submitData);
             await apiService.createEntry(submitData);
-            navigate('/'); // Navigate to Journals page after successful creation
+            navigate('/');
         } catch (err: any) {
             console.error("Failed to create entry:", err);
             setSubmitError(err.response?.data?.detail || "Failed to create entry.");
@@ -89,16 +65,10 @@ const JournalCreatePage: React.FC = () => {
     return (
         <div className="form-container">
             <div className="page-header">
-                <h1 className="page-title">{t('createNewEntry')}</h1>
+                <h1 className="page-title">{t('createNewEntry') || 'Create New Journal Entry'}</h1>
             </div>
             
-            {activeJournal ? (
-                <div className="active-journal-badge">
-                    <span>{t('submittingTo') || 'Submitting to journal'}:</span> 
-                    <strong>{activeJournal.title}</strong> 
-                    <span>({t('issue') || 'Issue'}: {activeJournal.issue})</span>
-                </div>
-            ) : (
+            {!activeJournal && (
                 <div className="warning-message" style={{ marginBottom: 'var(--spacing-4)' }}>
                     <p>
                         {t('noActiveJournal') || 'No active journal selected. '} 

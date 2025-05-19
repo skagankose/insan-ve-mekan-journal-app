@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import SearchBox from './SearchBox';
 
 const Sidebar: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -14,51 +15,29 @@ const Sidebar: React.FC = () => {
         <h2 className="sidebar-title">{t('navigation')}</h2>
       </div>
       
+      {/* Add the SearchBox component */}
+      <SearchBox />
+      
       <nav className="sidebar-nav">
         <ul className="sidebar-menu">
-          {/* Admin navigation items */}
-          {isAuthenticated && user && user.role === 'admin' && (
-            <li className="sidebar-menu-item">
-              <Link to="/" className="sidebar-link">
-                <i className="sidebar-icon">📚</i>
-                <span>{t('journals')}</span>
-              </Link>
-            </li>
-          )}
+          {/* Removed profile button */}
           
-          {isAuthenticated && user && user.role === 'admin' && (
-            <li className="sidebar-menu-item">
-              <Link to="/admin" className="sidebar-link">
-                <i className="sidebar-icon">⚙️</i>
-                <span>Admin</span>
-              </Link>
-            </li>
-          )}
+          {/* Removed admin dashboard button */}
           
-          {isAuthenticated && user && (user.role === 'editor' || user.role === 'admin') && (
-            <li className="sidebar-menu-item">
-              <Link to="/editor" className="sidebar-link">
-                <i className="sidebar-icon">✏️</i>
-                <span>{t('editor') || 'Editor'}</span>
-              </Link>
-            </li>
-          )}
-          
-          {isAuthenticated && user && (user.role === 'editor' || user.role === 'admin') && (
+          {isAuthenticated && user && (user.role === 'editor' || user.role === 'admin' || user.role === 'owner') && (
             <li className="sidebar-menu-item">
               <Link to="/editor/journals" className="sidebar-link">
                 <i className="sidebar-icon">📓</i>
-                <span>{t('editorJournals') || 'My Journals'}</span>
+                <span>{t('editorJournals') || 'Editor Journals'}</span>
               </Link>
             </li>
           )}
           
-          {/* Show New Entry link only for authenticated users */}
-          {isAuthenticated && (
+          {isAuthenticated && user && user.role !== 'editor' && user.role !== 'referee' && (
             <li className="sidebar-menu-item">
               <Link to="/entries/new" className="sidebar-link">
                 <i className="sidebar-icon">✏️</i>
-                <span>{t('newEntry')}</span>
+                <span>{t('submitPaper')}</span>
               </Link>
             </li>
           )}
@@ -67,7 +46,7 @@ const Sidebar: React.FC = () => {
           <li className="sidebar-menu-item">
             <Link to="/archive" className="sidebar-link">
               <i className="sidebar-icon">🗄️</i> 
-              <span>{t('previousIssues')}</span>
+              <span>{t('publishedIssues')}</span>
             </Link>
           </li>
         </ul>

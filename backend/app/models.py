@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional, Literal
 from enum import Enum
 import random
 import string
+import pytz
 
 from sqlmodel import Field, Relationship, SQLModel
 from sqlalchemy import Enum as SAEnum, Column, Text, JSON
@@ -13,6 +14,7 @@ class UserRole(str, Enum):
     editor = "editor"
     referee = "referee"
     admin = "admin"
+    owner = "owner"
 
 
 # Journal Entry Type enumeration
@@ -24,10 +26,11 @@ class JournalEntryType(str, Enum):
 # Journal Entry Status enumeration
 class JournalEntryStatus(str, Enum):
     WAITING_FOR_PAYMENT = "waiting_for_payment"
-    WAITING_FOR_WRITER = "waiting_for_writer"
-    WAITING_FOR_ARBITRATOR = "waiting_for_arbitrator"
-    WAITING_FOR_EDITOR = "waiting_for_editor"
-    COMPLETED = "completed"
+    WAITING_FOR_AUTHORS = "waiting_for_authors"
+    WAITING_FOR_REFEREES = "waiting_for_referees"
+    WAITING_FOR_EDITORS = "waiting_for_editors"
+    ACCEPTED = "accepted"
+    NOT_ACCEPTED = "not_accepted"
 
 
 # Article Type enumeration
@@ -149,7 +152,7 @@ class UserUpdate(SQLModel):
 
 class JournalBase(SQLModel):
     title: str = Field(index=True)
-    date: datetime = Field(default_factory=datetime.utcnow)
+    date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
     issue: str
     is_published: bool = Field(default=False)
     publication_date: Optional[datetime] = Field(default=None)  # Manually set publication date
@@ -175,8 +178,16 @@ class JournalRead(JournalBase):
     id: int
 
 
-class JournalCreate(JournalBase):
-    pass
+class JournalCreate(SQLModel):
+    title: str
+    issue: str
+    is_published: bool = False
+    publication_date: Optional[datetime] = None
+    publication_place: Optional[str] = None
+    cover_photo: Optional[str] = None
+    meta_files: Optional[str] = None
+    editor_notes: Optional[str] = None
+    full_pdf: Optional[str] = None
 
 
 class JournalUpdate(SQLModel):
@@ -197,7 +208,7 @@ class JournalUpdate(SQLModel):
 # Define a base JournalEntry model
 class JournalEntryBase(SQLModel):
     title: str = Field(index=True)
-    date: datetime = Field(default_factory=datetime.utcnow)
+    date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
     abstract_tr: str
     abstract_en: Optional[str] = None
     keywords: Optional[str] = None
@@ -266,6 +277,7 @@ class JournalEntryUpdate(SQLModel):
     status: Optional[str] = None
     authors_ids: Optional[List[int]] = None
     referees_ids: Optional[List[int]] = None
+    journal_id: Optional[int] = None
 
 
 # --------------------- Author Update Models ---------------------
@@ -329,6 +341,7 @@ class RefereeUpdate(RefereeUpdateBase, table=True):
 # Define a base Settings model
 class SettingsBase(SQLModel):
     active_journal_id: Optional[int] = Field(default=None, foreign_key="journal.id")
+    about: Optional[str] = Field(default=None, max_length=5000)
 
 
 # Define the Settings model for database table creation
@@ -345,6 +358,7 @@ class SettingsRead(SettingsBase):
 # Define a Settings model for updating
 class SettingsUpdate(SQLModel):
     active_journal_id: Optional[int] = None
+    about: Optional[str] = None
 
 
 # Link models now that they are all defined

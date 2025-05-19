@@ -19,24 +19,19 @@ export interface JournalFormData {
     abstract_tr: string;
     abstract_en?: string;
     keywords?: string;
-    page_number?: string;
     article_type?: string;
     language?: string;
-    doi?: string;
-    file_path?: string;
-    status?: string;
     journal_id?: number;
     authors_ids?: number[];
     referees_ids?: number[];
-    date?: string;
 }
 
 interface JournalFormProps {
-    initialData?: JournalFormData; // Optional: for editing existing entries
-    onSubmit: (data: JournalFormData) => Promise<void>; // Function to handle submission (create or update)
-    isSubmitting: boolean; // To disable button during submission
-    submitError: string | null; // To display submission errors
-    submitButtonText?: string; // e.g., "Create Entry" or "Update Entry"
+    initialData?: JournalFormData;
+    onSubmit: (data: JournalFormData) => Promise<void>;
+    isSubmitting: boolean;
+    submitError: string | null;
+    submitButtonText?: string;
 }
 
 const JournalForm: React.FC<JournalFormProps> = ({
@@ -45,14 +40,9 @@ const JournalForm: React.FC<JournalFormProps> = ({
         abstract_tr: '',
         abstract_en: '',
         keywords: '',
-        page_number: '',
         article_type: '',
-        language: '',
-        doi: '',
-        file_path: '',
-        status: '',
-        date: new Date().toISOString().split('T')[0]
-    }, // Default for new entry
+        language: ''
+    },
     onSubmit,
     isSubmitting,
     submitError,
@@ -61,33 +51,22 @@ const JournalForm: React.FC<JournalFormProps> = ({
     const [formData, setFormData] = useState<JournalFormData>(initialData);
     const { t } = useLanguage();
 
-    // Update form if initialData changes (e.g., when switching to edit mode)
-    // Only update if the incoming initialData values are actually different 
-    // from the current formData to avoid unnecessary resets and input clearing issues.
     useEffect(() => {
         const titleChanged = initialData.title !== formData.title;
         const abstractTrChanged = initialData.abstract_tr !== formData.abstract_tr;
         const abstractEnChanged = initialData.abstract_en !== formData.abstract_en;
         const keywordsChanged = initialData.keywords !== formData.keywords;
-        const pageNumberChanged = initialData.page_number !== formData.page_number;
         const articleTypeChanged = initialData.article_type !== formData.article_type;
         const languageChanged = initialData.language !== formData.language;
-        const doiChanged = initialData.doi !== formData.doi;
-        const filePathChanged = initialData.file_path !== formData.file_path;
-        const statusChanged = initialData.status !== formData.status;
-        const dateChanged = initialData.date !== formData.date;
         const journalIdChanged = initialData.journal_id !== formData.journal_id;
         const authorsIdsChanged = !arraysEqual(initialData.authors_ids, formData.authors_ids);
         const refereesIdsChanged = !arraysEqual(initialData.referees_ids, formData.referees_ids);
 
         if (titleChanged || abstractTrChanged || abstractEnChanged || 
-            keywordsChanged || pageNumberChanged || articleTypeChanged || languageChanged || 
-            doiChanged || filePathChanged || statusChanged || dateChanged || journalIdChanged || 
-            authorsIdsChanged || refereesIdsChanged) {
-            // Only update state if the initialData values are different from current form state
+            keywordsChanged || articleTypeChanged || languageChanged || 
+            journalIdChanged || authorsIdsChanged || refereesIdsChanged) {
             setFormData(initialData);
         }
-        // Depend on the specific values from initialData, not the object reference itself.
     }, [initialData]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -119,20 +98,6 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     onChange={handleChange}
                     placeholder={t('enterTitle')}
                     required
-                    disabled={isSubmitting}
-                />
-            </div>
-            
-            <div className="form-group">
-                <label htmlFor="date" className="form-label">{t('date') || 'Date'}</label>
-                <input
-                    type="datetime-local"
-                    id="date"
-                    name="date"
-                    className="form-input"
-                    value={formData.date || ''}
-                    onChange={handleChange}
-                    placeholder={t('enterDate') || 'Enter date'}
                     disabled={isSubmitting}
                 />
             </div>
@@ -175,21 +140,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     className="form-input"
                     value={formData.keywords || ''}
                     onChange={handleChange}
-                    placeholder={t('enterKeywords') || 'Enter keywords separated by commas'}
-                    disabled={isSubmitting}
-                />
-            </div>
-            
-            <div className="form-group">
-                <label htmlFor="page_number" className="form-label">{t('pageNumber') || 'Page Number'}</label>
-                <input
-                    type="text"
-                    id="page_number"
-                    name="page_number"
-                    className="form-input"
-                    value={formData.page_number || ''}
-                    onChange={handleChange}
-                    placeholder={t('enterPageNumber') || 'Enter page number'}
+                    placeholder={t('enterKeywords') || 'Enter keywords, separated by commas...'}
                     disabled={isSubmitting}
                 />
             </div>
@@ -223,53 +174,6 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     <option value="">{t('selectLanguage') || '-- Select Language --'}</option>
                     <option value="tr">{t('turkish') || 'Turkish'}</option>
                     <option value="en">{t('english') || 'English'}</option>
-                </select>
-            </div>
-            
-            <div className="form-group">
-                <label htmlFor="doi" className="form-label">{t('doi') || 'DOI'}</label>
-                <input
-                    type="text"
-                    id="doi"
-                    name="doi"
-                    className="form-input"
-                    value={formData.doi || ''}
-                    onChange={handleChange}
-                    placeholder={t('enterDoi') || 'Enter DOI'}
-                    disabled={isSubmitting}
-                />
-            </div>
-            
-            <div className="form-group">
-                <label htmlFor="file_path" className="form-label">{t('filePath') || 'File Path'}</label>
-                <input
-                    type="text"
-                    id="file_path"
-                    name="file_path"
-                    className="form-input"
-                    value={formData.file_path || ''}
-                    onChange={handleChange}
-                    placeholder={t('enterFilePath') || 'Enter file path'}
-                    disabled={isSubmitting}
-                />
-            </div>
-
-            <div className="form-group">
-                <label htmlFor="status" className="form-label">{t('status') || 'Status'}</label>
-                <select
-                    id="status"
-                    name="status"
-                    className="form-select"
-                    value={formData.status || ''}
-                    onChange={handleChange}
-                    disabled={isSubmitting}
-                >
-                    <option value="">{t('selectStatus') || '-- Select Status --'}</option>
-                    <option value="waiting_for_payment">{t('statusWaitingForPayment') || 'Waiting for Payment'}</option>
-                    <option value="waiting_for_writer">{t('statusWaitingForWriter') || 'Waiting for Writer'}</option>
-                    <option value="waiting_for_arbitrator">{t('statusWaitingForArbitrator') || 'Waiting for Arbitrator'}</option>
-                    <option value="waiting_for_editor">{t('statusWaitingForEditor') || 'Waiting for Editor'}</option>
-                    <option value="completed">{t('statusCompleted') || 'Completed'}</option>
                 </select>
             </div>
             

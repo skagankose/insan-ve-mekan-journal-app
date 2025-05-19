@@ -10,9 +10,11 @@ from .models import (
 # You can add more specific API-only schemas here if needed later
 # For example, schemas that combine data from multiple models 
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, validator
 from typing import Optional, List
+from enum import Enum
 from datetime import datetime
+import re
 
 # User schemas
 
@@ -52,5 +54,33 @@ class UserDelete(BaseModel):
     transfer_to_user_id: int
 
 
+class EditorInChiefUpdate(BaseModel):
+    editor_in_chief_id: Optional[int] = None
+
+
+class EditorAdd(BaseModel):
+    user_id: int
+
+
+class EntryUserAdd(BaseModel):
+    user_id: int
+
+
 class TokenData(BaseModel):
-    username: Optional[str] = None 
+    username: Optional[str] = None
+
+
+class SearchResults(BaseModel):
+    """Schema for search results combining users, journals, and entries."""
+    users: List[UserRead] = []
+    journals: List[JournalRead] = []
+    entries: List[JournalEntryRead] = []
+
+# Define __all__ to explicitly export the schemas
+__all__ = [
+    'User', 'UserCreate', 'UserRead', 'UserRole', 'UserUpdate',
+    'Journal', 'JournalCreate', 'JournalRead',
+    'JournalEntry', 'JournalEntryCreate', 'JournalEntryRead', 'JournalEntryUpdate',
+    'UserBase', 'UserDelete', 'EditorInChiefUpdate', 'EditorAdd', 'EntryUserAdd', 'TokenData',
+    'SearchResults'
+] 
