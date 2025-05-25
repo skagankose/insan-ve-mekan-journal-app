@@ -113,7 +113,7 @@ async def lifecycle(app: FastAPI):
             # Create the unassigned journal
             unassigned_journal = models.Journal(
                 title="Henüz Bir Dergiye Atanmamıştır",
-                date=datetime.utcnow(),
+                created_date=datetime.utcnow(),
                 issue="-",
                 is_published=False,
                 editor_in_chief_id=admin_user.id if admin_user else None

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
@@ -15,7 +15,7 @@ const JournalCreateFormPage: React.FC = () => {
     const [formData, setFormData] = useState<JournalFormData>({
         title: '',
         issue: '',
-        is_published: false,
+        is_published: false
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
@@ -44,11 +44,12 @@ const JournalCreateFormPage: React.FC = () => {
         setSubmitError(null);
 
         try {
+            // Create the journal
             await apiService.createJournal(formData);
             navigate('/journals');
-        } catch (error: any) {
-            console.error('Failed to create journal:', error);
-            setSubmitError(error.response?.data?.detail || 'Failed to create journal');
+        } catch (err: any) {
+            console.error('Error creating journal:', err);
+            setSubmitError(err.message || 'Failed to create journal');
         } finally {
             setIsSubmitting(false);
         }
@@ -62,7 +63,7 @@ const JournalCreateFormPage: React.FC = () => {
         <div className="form-page">
             <div className="form-container">
                 <h1>{t('createNewJournal') || 'Create New Journal'}</h1>
-                
+            
                 {submitError && (
                     <div className="error-message">
                         {submitError}
@@ -82,9 +83,10 @@ const JournalCreateFormPage: React.FC = () => {
                             placeholder={t('enterTitle') || 'Enter title'}
                             required
                             disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
+                            maxLength={200}
                         />
                     </div>
-                
+                    
                     <div className="form-group">
                         <label htmlFor="issue" className="form-label">{t('issue') || 'Issue'}</label>
                         <input
@@ -97,6 +99,7 @@ const JournalCreateFormPage: React.FC = () => {
                             placeholder={t('enterIssueNumber') || 'Enter issue number'}
                             required
                             disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
+                            maxLength={200}
                         />
                     </div>
                     

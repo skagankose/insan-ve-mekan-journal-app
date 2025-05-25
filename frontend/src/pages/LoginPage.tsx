@@ -55,6 +55,7 @@ const LoginPage: React.FC = () => {
                         required
                         disabled={isLoading}
                         placeholder={t('enterEmail')}
+                        maxLength={200}
                     />
                 </div>
                 
@@ -69,6 +70,7 @@ const LoginPage: React.FC = () => {
                         required
                         disabled={isLoading}
                         placeholder={t('enterPassword')}
+                        maxLength={100}
                     />
                     <div className="form-helper-text" style={{ textAlign: 'right', marginTop: '4px' }}>
                         <Link to="/forgot-password" className="forgot-password-link">

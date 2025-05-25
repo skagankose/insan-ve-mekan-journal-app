@@ -88,7 +88,7 @@ const JournalEntriesPage: React.FC = () => {
                             <p className="entry-abstract">{entry.abstract_tr}</p>
                             <div className="entry-meta">
                                 <span className="entry-date">
-                                    {t('date') || 'Date'}: {entry.date ? new Date(entry.date).toLocaleString() : new Date(entry.updated_at).toLocaleString()}
+                                    {t('date') || 'Date'}: {entry.publication_date ? new Date(entry.publication_date).toLocaleString() : '-'}
                                 </span>
                                 {entry.status && (
                                     <span className="entry-status">

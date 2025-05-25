@@ -10,13 +10,15 @@ interface JournalFormData {
     title: string;
     issue: string;
     is_published: boolean;
-    date: string | undefined;
+    created_date: string | undefined;
     publication_date: string | undefined;
     publication_place: string | undefined;
     cover_photo: string | undefined;
     meta_files: string | undefined;
     editor_notes: string | undefined;
     full_pdf: string | undefined;
+    index_section: string | undefined;
+    file_path: string | undefined;
 }
 
 const JournalEditFormPage: React.FC = () => {
@@ -27,13 +29,15 @@ const JournalEditFormPage: React.FC = () => {
         title: '',
         issue: '',
         is_published: false,
-        date: undefined,
+        created_date: undefined,
         publication_date: undefined,
         publication_place: undefined,
         cover_photo: undefined,
         meta_files: undefined,
         editor_notes: undefined,
-        full_pdf: undefined
+        full_pdf: undefined,
+        index_section: undefined,
+        file_path: undefined
     });
 
     const [selectedFiles, setSelectedFiles] = useState<{
@@ -41,6 +45,8 @@ const JournalEditFormPage: React.FC = () => {
         meta_files?: File;
         editor_notes?: File;
         full_pdf?: File;
+        index_section?: File;
+        file_path?: File;
     }>({});
 
     const [isLoading, setIsLoading] = useState(true);
@@ -83,13 +89,15 @@ const JournalEditFormPage: React.FC = () => {
                     title: journal.title,
                     issue: journal.issue,
                     is_published: journal.is_published,
-                    date: journal.date ? journal.date.slice(0, 16) : undefined,
+                    created_date: journal.created_date ? journal.created_date.slice(0, 16) : undefined,
                     publication_date: journal.publication_date || undefined,
                     publication_place: journal.publication_place || undefined,
                     cover_photo: journal.cover_photo || undefined,
                     meta_files: journal.meta_files || undefined,
                     editor_notes: journal.editor_notes || undefined,
-                    full_pdf: journal.full_pdf || undefined
+                    full_pdf: journal.full_pdf || undefined,
+                    index_section: journal.index_section || undefined,
+                    file_path: journal.file_path || undefined
                 });
             } catch (err: any) {
                 console.error("Failed to fetch journal for editing:", err);
@@ -168,6 +176,20 @@ const JournalEditFormPage: React.FC = () => {
                     formData.append('full_pdf', selectedFiles.full_pdf);
                 }
 
+                if (selectedFiles.index_section) {
+                    if (!validateFileType(selectedFiles.index_section, ['docx'])) {
+                        throw new Error('Index section must be a DOCX file');
+                    }
+                    formData.append('index_section', selectedFiles.index_section);
+                }
+
+                if (selectedFiles.file_path) {
+                    if (!validateFileType(selectedFiles.file_path, ['docx'])) {
+                        throw new Error('File path must be a DOCX file');
+                    }
+                    formData.append('file_path', selectedFiles.file_path);
+                }
+
                 // Upload the files
                 await apiService.uploadJournalFiles(journalId, formData);
             }
@@ -236,6 +258,7 @@ const JournalEditFormPage: React.FC = () => {
                         onChange={handleChange}
                         required
                         disabled={isSubmitting}
+                        maxLength={200}
                     />
                 </div>
                 
@@ -250,17 +273,18 @@ const JournalEditFormPage: React.FC = () => {
                         onChange={handleChange}
                         required
                         disabled={isSubmitting}
+                        maxLength={100}
                     />
                 </div>
                 
                 <div className="form-group">
-                    <label htmlFor="date" className="form-label">{t('date') || 'Date'}</label>
+                    <label htmlFor="created_date" className="form-label">{t('createdDate') || 'Created Date'}</label>
                     <input
                         type="datetime-local"
-                        id="date"
-                        name="date"
+                        id="created_date"
+                        name="created_date"
                         className="form-input"
-                        value={formData.date || ''}
+                        value={formData.created_date || ''}
                         onChange={handleChange}
                         disabled={isSubmitting}
                     />
@@ -395,6 +419,52 @@ const JournalEditFormPage: React.FC = () => {
                     />
                     <small className="text-muted">
                         {t('fullPdfDescription') || 'Upload a PDF file'}
+                    </small>
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="index_section" className="form-label">{t('indexSection') || 'Index Section'}</label>
+                    {formData.index_section && (
+                        <div className="current-file">
+                            <a href={`/api${formData.index_section}`} target="_blank" rel="noopener noreferrer">
+                                {t('currentIndexSection') || 'Current Index Section'}
+                            </a>
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        id="index_section"
+                        name="index_section"
+                        className="form-input"
+                        onChange={handleFileChange}
+                        accept=".docx"
+                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
+                    />
+                    <small className="text-muted">
+                        {t('indexSectionDescription') || 'Upload a DOCX file'}
+                    </small>
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="file_path" className="form-label">{t('filePath') || 'File Path'}</label>
+                    {formData.file_path && (
+                        <div className="current-file">
+                            <a href={`/api${formData.file_path}`} target="_blank" rel="noopener noreferrer">
+                                {t('currentFilePath') || 'Current File Path'}
+                            </a>
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        id="file_path"
+                        name="file_path"
+                        className="form-input"
+                        onChange={handleFileChange}
+                        accept=".docx"
+                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
+                    />
+                    <small className="text-muted">
+                        {t('filePathDescription') || 'Upload a DOCX file'}
                     </small>
                 </div>
                 

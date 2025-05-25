@@ -286,7 +286,7 @@ const JournalDetailsPage: React.FC = () => {
                         <strong>{t('issue') || 'Issue'}:</strong> {journal.issue}
                     </div>
                     <div>
-                        <strong>{t('date') || 'Date'}:</strong> {new Date(journal.date).toLocaleDateString()}
+                        <strong>{t('createdDate') || 'Created Date'}:</strong> {new Date(journal.created_date).toLocaleDateString()}
                     </div>
                     {isEditorOrAdmin && (
                         <div>
@@ -358,6 +358,16 @@ const JournalDetailsPage: React.FC = () => {
                                 {t('viewFullPdf') || 'View Full PDF'}
                             </a>
                         )}
+                        {journal.index_section && (
+                            <a href={`/api${journal.index_section}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+                                {t('viewIndexSection') || 'View Index Section'}
+                            </a>
+                        )}
+                        {journal.file_path && (
+                            <a href={`/api${journal.file_path}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+                                {t('viewFilePath') || 'View File'}
+                            </a>
+                        )}
                     </div>
                 </div>
             </div>
@@ -410,7 +420,7 @@ const JournalDetailsPage: React.FC = () => {
                                     marginBottom: '15px'
                                 }}>
                                     <span className="entry-date">
-                                        {entry.date ? new Date(entry.date).toLocaleDateString() : new Date(entry.updated_at).toLocaleDateString()}
+                                        {entry.publication_date ? new Date(entry.publication_date).toLocaleDateString() : '-'}
                                     </span>
                                     {isEditorOrAdmin && entry.status && (
                                         <span className={`badge badge-${entry.status.toLowerCase()}`}>

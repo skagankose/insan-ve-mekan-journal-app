@@ -88,6 +88,7 @@ const ResetPasswordPage: React.FC = () => {
                             disabled={isSubmitting}
                             placeholder={t('enterNewPassword')}
                             minLength={8}
+                            maxLength={100}
                         />
                     </div>
                     
@@ -103,6 +104,7 @@ const ResetPasswordPage: React.FC = () => {
                             disabled={isSubmitting}
                             placeholder={t('confirmNewPassword')}
                             minLength={8}
+                            maxLength={100}
                         />
                     </div>
                     

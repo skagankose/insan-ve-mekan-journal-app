@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import './EditUserPage.css'; // Reuse the same styling
+import ReCAPTCHA from 'react-google-recaptcha';
 
 interface UserForm {
     email: string;
@@ -28,6 +29,7 @@ const CreateUserPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<boolean>(false);
+    const [captchaValue, setCaptchaValue] = useState<string | null>(null);
     const [formData, setFormData] = useState<UserForm>({
         email: '',
         name: '',
@@ -73,9 +75,23 @@ const CreateUserPage: React.FC = () => {
         }
     };
 
+    const handleCaptchaChange = (value: string | null) => {
+        setCaptchaValue(value);
+        if (!value) {
+            setError(t('captchaExpired') || 'CAPTCHA verification expired. Please verify again.');
+        } else {
+            setError(null);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
+        if (!captchaValue) {
+            setError(t('pleaseVerifyCaptcha') || 'Please verify that you are human');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -94,7 +110,8 @@ const CreateUserPage: React.FC = () => {
                 orcid_id: formData.orcid_id || undefined,
                 role: formData.role,
                 password: formData.password,
-                is_auth: formData.is_auth
+                is_auth: formData.is_auth,
+                recaptcha_token: captchaValue
             });
             
             setSuccess(true);
@@ -113,11 +130,12 @@ const CreateUserPage: React.FC = () => {
                 password: '',
                 is_auth: true
             });
+            setCaptchaValue(null);
             
             // Navigate back to admin page after a short delay
             setTimeout(() => {
                 navigate('/admin');
-            }, 2000);
+            }, 10);
             
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to create user');
@@ -143,6 +161,7 @@ const CreateUserPage: React.FC = () => {
                         value={formData.email}
                         onChange={handleInputChange}
                         required
+                        maxLength={200}
                     />
                 </div>
                 
@@ -155,6 +174,7 @@ const CreateUserPage: React.FC = () => {
                         value={formData.name}
                         onChange={handleInputChange}
                         required
+                        maxLength={200}
                     />
                 </div>
                 
@@ -167,6 +187,8 @@ const CreateUserPage: React.FC = () => {
                         value={formData.password}
                         onChange={handleInputChange}
                         required
+                        minLength={8}
+                        maxLength={100}
                     />
                 </div>
                 
@@ -178,6 +200,7 @@ const CreateUserPage: React.FC = () => {
                         name="title"
                         value={formData.title}
                         onChange={handleInputChange}
+                        maxLength={200}
                     />
                 </div>
                 
@@ -188,7 +211,8 @@ const CreateUserPage: React.FC = () => {
                         name="bio"
                         value={formData.bio}
                         onChange={handleInputChange}
-                        rows={4}
+                        rows={3}
+                        maxLength={400}
                     />
                 </div>
                 
@@ -200,6 +224,7 @@ const CreateUserPage: React.FC = () => {
                         name="telephone"
                         value={formData.telephone}
                         onChange={handleInputChange}
+                        maxLength={100}
                     />
                 </div>
                 
@@ -211,6 +236,7 @@ const CreateUserPage: React.FC = () => {
                         name="science_branch"
                         value={formData.science_branch}
                         onChange={handleInputChange}
+                        maxLength={300}
                     />
                 </div>
                 
@@ -222,6 +248,7 @@ const CreateUserPage: React.FC = () => {
                         name="location"
                         value={formData.location}
                         onChange={handleInputChange}
+                        maxLength={100}
                     />
                 </div>
                 
@@ -233,6 +260,7 @@ const CreateUserPage: React.FC = () => {
                         name="yoksis_id"
                         value={formData.yoksis_id}
                         onChange={handleInputChange}
+                        maxLength={100}
                     />
                 </div>
                 
@@ -244,6 +272,7 @@ const CreateUserPage: React.FC = () => {
                         name="orcid_id"
                         value={formData.orcid_id}
                         onChange={handleInputChange}
+                        maxLength={100}
                     />
                 </div>
                 
@@ -276,6 +305,13 @@ const CreateUserPage: React.FC = () => {
                         {t('isAuth')}
                     </label>
                 </div>
+
+                <div className="form-group" style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', marginBottom: '20px' }}>
+                    <ReCAPTCHA
+                        sitekey="6Lc0kEYrAAAAACSgj_HzCdsBIdsl60GEN8uv7m43"
+                        onChange={handleCaptchaChange}
+                    />
+                </div>
                 
                 <div className="form-buttons">
                     <button 
@@ -289,7 +325,7 @@ const CreateUserPage: React.FC = () => {
                     <button 
                         type="submit" 
                         className="btn btn-primary" 
-                        disabled={loading}
+                        disabled={loading || !captchaValue}
                     >
                         {loading ? t('saving') : t('createUser')}
                     </button>

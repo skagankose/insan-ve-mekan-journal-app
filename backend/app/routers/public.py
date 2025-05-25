@@ -185,22 +185,6 @@ async def search(
     # Use % for wildcard matching and ilike for case-insensitive search
     search_pattern = f"%{q}%"
     
-    # Very detailed debug information
-    print("==== SEARCH DEBUG INFO ====")
-    print(f"Is current_user None? {current_user is None}")
-    if current_user:
-        print(f"User role: {current_user.role}")
-        print(f"User role type: {type(current_user.role)}")
-        print(f"Admin enum value: {UserRole.admin}")
-        print(f"Editor enum value: {UserRole.editor}")
-        print(f"Owner enum value: {UserRole.owner}")
-        print(f"Is user.role == UserRole.admin? {current_user.role == UserRole.admin}")
-        print(f"Is user.role == UserRole.editor? {current_user.role == UserRole.editor}")
-        print(f"Is user.role == UserRole.owner? {current_user.role == UserRole.owner}")
-        print(f"Is user.role != UserRole.admin? {current_user.role != UserRole.admin}")
-        print(f"Is user.role != UserRole.editor? {current_user.role != UserRole.editor}")
-        print(f"Is user.role != UserRole.owner? {current_user.role != UserRole.owner}")
-    
     # Determine if user has limited access (not logged in or author/referee)
     has_limited_access = (
         current_user is None or 
@@ -209,27 +193,15 @@ async def search(
          current_user.role != UserRole.owner)
     )
     
-    print(f"Has limited access: {has_limited_access}")
-    print("==== END DEBUG INFO ====")
-    
     # Search users by name (case-insensitive)
     if len(q) >= 3:  # Only search if query is at least 3 characters
-        if has_limited_access:
-            # For limited access, only show author users
-            users_statement = select(models.User).where(
-                and_(
-                    models.User.name.ilike(search_pattern),
-                    models.User.role == UserRole.author
-                )
-            ).limit(limit)
-        else:
-            # For admin/editor/owner, show all users
+        # Only search for users if the current user is an admin or owner
+        if current_user and (current_user.role == UserRole.admin or current_user.role == UserRole.owner):
             users_statement = select(models.User).where(
                 models.User.name.ilike(search_pattern)
             ).limit(limit)
-        
-        users = db.exec(users_statement).all()
-        results.users = users
+            users = db.exec(users_statement).all()
+            results.users = users
     
     # Search journals by title (case-insensitive)
     if has_limited_access:

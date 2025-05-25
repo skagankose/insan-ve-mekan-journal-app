@@ -17,8 +17,9 @@ interface JournalFormData {
     language?: string;
     doi?: string;
     file_path?: string;
+    full_pdf?: string;
     status?: string;
-    date?: string;
+    publication_date?: string;
     authors_ids?: number[];
     referees_ids?: number[];
 }
@@ -40,12 +41,17 @@ const JournalEditPage: React.FC = () => {
         language: '',
         doi: '',
         file_path: '',
+        full_pdf: '',
         status: 'waiting_for_payment',
         authors_ids: [],
         referees_ids: []
     });
 
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [selectedFiles, setSelectedFiles] = useState<{
+        file_path?: File;
+        full_pdf?: File;
+    }>({});
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -76,10 +82,11 @@ const JournalEditPage: React.FC = () => {
                     language: entry.language,
                     doi: entry.doi,
                     file_path: entry.file_path,
+                    full_pdf: entry.full_pdf,
                     status: entry.status,
                     authors_ids: entry.authors?.map((author: apiService.UserRead) => author.id),
                     referees_ids: entry.referees?.map((referee: apiService.UserRead) => referee.id),
-                    date: entry.date ? new Date(entry.date).toISOString().slice(0, 16) : ''
+                    publication_date: entry.publication_date ? new Date(entry.publication_date).toISOString().slice(0, 16) : ''
                 });
             } catch (err: any) {
                 console.error("Failed to fetch entry for editing:", err);
@@ -98,14 +105,18 @@ const JournalEditPage: React.FC = () => {
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
-            const file = e.target.files[0];
-            if (!validateFileType(file, ['pdf'])) {
-                toast.error(t('onlyPdfAllowed') || 'Only PDF files are allowed');
+        const { name, files } = e.target;
+        if (files && files.length > 0) {
+            const file = files[0];
+            if (!validateFileType(file, ['docx'])) {
+                toast.error(t('onlyDocxAllowed') || 'Only DOCX files are allowed');
                 e.target.value = '';
-            return;
+                return;
             }
-            setSelectedFile(file);
+            setSelectedFiles(prev => ({
+                ...prev,
+                [name]: file
+            }));
         }
     };
         
@@ -118,10 +129,18 @@ const JournalEditPage: React.FC = () => {
             // First update the entry data
             await apiService.updateEntry(Number(id), formData);
 
-            // Then handle file upload if a file was selected
-            if (selectedFile) {
+            // Then handle file uploads if any files were selected
+            if (Object.keys(selectedFiles).length > 0) {
                 const uploadData = new FormData();
-                uploadData.append('file', selectedFile);
+                
+                if (selectedFiles.file_path) {
+                    uploadData.append('file', selectedFiles.file_path);
+                }
+                
+                if (selectedFiles.full_pdf) {
+                    uploadData.append('full_pdf', selectedFiles.full_pdf);
+                }
+                
                 await apiService.uploadEntryFile(Number(id), uploadData);
             }
 
@@ -204,15 +223,15 @@ const JournalEditPage: React.FC = () => {
                 </div>
                 
                 <div className="form-group">
-                    <label htmlFor="date" className="form-label">{t('date') || 'Date'}</label>
+                    <label htmlFor="publication_date" className="form-label">{t('publicationDate') || 'Publication Date'}</label>
                     <input
                         type="datetime-local"
-                        id="date"
-                        name="date"
+                        id="publication_date"
+                        name="publication_date"
                         className="form-input"
-                        value={formData.date || ''}
-                        onChange={(e) => setFormData({...formData, date: e.target.value})}
-                        placeholder={t('enterDate') || 'Enter date'}
+                        value={formData.publication_date || ''}
+                        onChange={(e) => setFormData({...formData, publication_date: e.target.value})}
+                        placeholder={t('enterPublicationDate') || 'Enter publication date'}
                         disabled={isSubmitting}
                     />
                 </div>
@@ -306,7 +325,7 @@ const JournalEditPage: React.FC = () => {
                 </div>
                 
                 <div className="form-group">
-                    <label htmlFor="doi" className="form-label">DOI</label>
+                    <label htmlFor="doi" className="form-label">{t('doi') || 'DOI'}</label>
                     <input
                         type="text"
                         id="doi"
@@ -314,35 +333,49 @@ const JournalEditPage: React.FC = () => {
                         className="form-input"
                         value={formData.doi || ''}
                         onChange={(e) => setFormData({...formData, doi: e.target.value})}
-                        placeholder={t('enterDOI') || 'Enter DOI'}
+                        placeholder={t('enterDoi') || 'Enter DOI'}
                         disabled={isSubmitting}
                     />
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="file" className="form-label">{t('file') || 'File'}</label>
-                    <div className="file-input-container">
-                        {formData.file_path && (
-                            <div className="current-file">
-                                <span>{t('currentFile') || 'Current file'}: </span>
-                                <a href={`/api${formData.file_path}`} target="_blank" rel="noopener noreferrer">
-                                    {t('viewFile') || 'View file'}
-                                </a>
-                            </div>
-                        )}
-                        <input
-                            type="file"
-                            id="file"
-                            name="file"
-                            accept=".pdf"
-                            onChange={handleFileChange}
-                            disabled={isSubmitting}
-                            className="form-input"
-                        />
-                        <small className="file-help-text">
-                            {t('onlyPdfAllowed') || 'Only PDF files are allowed'}
-                        </small>
-                    </div>
+                    <label htmlFor="file_path" className="form-label">{t('file') || 'File'}</label>
+                    <input
+                        type="file"
+                        id="file_path"
+                        name="file_path"
+                        className="form-input"
+                        onChange={handleFileChange}
+                        accept=".docx"
+                        disabled={isSubmitting}
+                    />
+                    {formData.file_path && (
+                        <div className="current-file">
+                            <a href={`/api${formData.file_path}`} target="_blank" rel="noopener noreferrer">
+                                {t('currentFile') || 'Current File'}
+                            </a>
+                        </div>
+                    )}
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="full_pdf" className="form-label">{t('fullPdf') || 'Full PDF'}</label>
+                    <input
+                        type="file"
+                        id="full_pdf"
+                        name="full_pdf"
+                        className="form-input"
+                        onChange={handleFileChange}
+                        accept=".pdf"
+                        disabled={isSubmitting}
+                    />
+                    {formData.full_pdf && (
+                        <div className="current-file">
+                            <a href={`/api${formData.full_pdf}`} target="_blank" rel="noopener noreferrer">
+                                {t('currentFullPdf') || 'Current Full PDF'}
+                            </a>
+                        </div>
+                    )}
                 </div>
                 
                 {isEditorOrAdmin && (

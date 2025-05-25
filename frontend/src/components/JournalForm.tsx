@@ -99,6 +99,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     placeholder={t('enterTitle')}
                     required
                     disabled={isSubmitting}
+                    maxLength={300}
                 />
             </div>
             
@@ -114,6 +115,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     rows={3}
                     required
                     disabled={isSubmitting}
+                    maxLength={500}
                 />
             </div>
             
@@ -128,6 +130,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     placeholder={t('enterAbstractEn') || 'Enter a brief summary in English...'}
                     rows={3}
                     disabled={isSubmitting}
+                    maxLength={500}
                 />
             </div>
             
@@ -142,6 +145,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     onChange={handleChange}
                     placeholder={t('enterKeywords') || 'Enter keywords, separated by commas...'}
                     disabled={isSubmitting}
+                    maxLength={100}
                 />
             </div>
             

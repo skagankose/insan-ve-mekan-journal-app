@@ -41,6 +41,9 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   const [authors, setAuthors] = useState<apiService.UserRead[]>([]);
   const [referees, setReferees] = useState<apiService.UserRead[]>([]);
   const [expandedUpdates, setExpandedUpdates] = useState<Set<string>>(new Set());
+  const [isJournalEditor, setIsJournalEditor] = useState<boolean>(false);
+  const [authorNamesMap, setAuthorNamesMap] = useState<Map<number, string>>(new Map());
+  const [refereeNamesMap, setRefereeNamesMap] = useState<Map<number, string>>(new Map());
   
   useEffect(() => {
     const fetchData = async () => {
@@ -67,6 +70,13 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
           setReferees([]);
         }
         
+        // Check if the current user is an editor of the journal
+        if (user && entryData.journal_id) {
+          const journalEditors = await apiService.getJournalEditors(entryData.journal_id);
+          const isEditor = journalEditors.some((editor: apiService.JournalEditorLink) => editor.user_id === user.id);
+          setIsJournalEditor(isEditor);
+        }
+        
         // Fetch author and referee updates for this entry
         const [authorUpdatesData, refereeUpdatesData] = await Promise.all([
           apiService.getEntryAuthorUpdates(parseInt(entryId)),
@@ -85,7 +95,63 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
     };
     
     fetchData();
-  }, [entryId]);
+  }, [entryId, user]);
+
+  // Fetch missing author and referee names
+  useEffect(() => {
+    const fetchMissingUserNames = async () => {
+      const currentAuthorIds = new Set(authors.map(author => author.id));
+      const currentRefereeIds = new Set(referees.map(referee => referee.id));
+      const missingAuthorIds = new Set<number>();
+      const missingRefereeIds = new Set<number>();
+      
+      // Collect all author IDs from updates that aren't in current authors
+      authorUpdates.forEach(update => {
+        if (!currentAuthorIds.has(update.author_id)) {
+          missingAuthorIds.add(update.author_id);
+        }
+      });
+
+      // Collect all referee IDs from updates that aren't in current referees
+      refereeUpdates.forEach(update => {
+        if (!currentRefereeIds.has(update.referee_id)) {
+          missingRefereeIds.add(update.referee_id);
+        }
+      });
+
+      // Fetch missing author names
+      const newAuthorNamesMap = new Map(authorNamesMap);
+      await Promise.all(
+        Array.from(missingAuthorIds).map(async (authorId) => {
+          try {
+            const authorInfo = await apiService.getUserBasicInfo(authorId.toString());
+            newAuthorNamesMap.set(authorId, authorInfo.name);
+          } catch (error) {
+            console.error(`Failed to fetch author info for ID ${authorId}:`, error);
+            newAuthorNamesMap.set(authorId, 'Unknown Author');
+          }
+        })
+      );
+      setAuthorNamesMap(newAuthorNamesMap);
+
+      // Fetch missing referee names
+      const newRefereeNamesMap = new Map(refereeNamesMap);
+      await Promise.all(
+        Array.from(missingRefereeIds).map(async (refereeId) => {
+          try {
+            const refereeInfo = await apiService.getUserBasicInfo(refereeId.toString());
+            newRefereeNamesMap.set(refereeId, refereeInfo.name);
+          } catch (error) {
+            console.error(`Failed to fetch referee info for ID ${refereeId}:`, error);
+            newRefereeNamesMap.set(refereeId, 'Unknown Referee');
+          }
+        })
+      );
+      setRefereeNamesMap(newRefereeNamesMap);
+    };
+
+    fetchMissingUserNames();
+  }, [authors, referees, authorUpdates, refereeUpdates]);
 
   // Add this function to check if an update is within the deletion window
   const isWithinDeletionWindow = (createdDate: string) => {
@@ -105,6 +171,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
     // Convert author updates to combined format
     const authorUpdatesCombined = authorUpdates.map(update => {
       const updateAuthor = authors.find(a => a.id === update.author_id);
+      const authorName = updateAuthor?.name || authorNamesMap.get(update.author_id) || 'Unknown Author';
       const isWithinWindow = isWithinDeletionWindow(update.created_date);
       // User can delete if they're admin/owner or if they're the author and within the time window
       const canDelete = isAdmin || (update.author_id === user?.id && isWithinWindow);
@@ -114,7 +181,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
         type: 'author' as const,
         created_date: update.created_date,
         authorId: update.author_id,
-        authorName: updateAuthor?.name || 'Unknown Author',
+        authorName,
         title: update.title,
         abstract_tr: update.abstract_tr,
         abstract_en: update.abstract_en,
@@ -131,6 +198,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
     // Convert referee updates to combined format
     const refereeUpdatesCombined = refereeUpdates.map(update => {
       const updateReferee = referees.find(r => r.id === update.referee_id);
+      const refereeName = updateReferee?.name || refereeNamesMap.get(update.referee_id) || 'Unknown Referee';
       // Allow admins, editors, authors, and the referee who wrote the update to see it
       const canViewUpdate = isAdminOrEditor || isAuthorForEntry || update.referee_id === user?.id;
       // User can delete if they're admin/owner or are the referee who created the update
@@ -141,7 +209,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
         type: 'referee' as const,
         created_date: update.created_date,
         refereeId: update.referee_id,
-        refereeName: updateReferee ? updateReferee.name : `Referee ID: ${update.referee_id}`,
+        refereeName,
         file_path: update.file_path,
         notes: update.notes,
         canViewNotes: canViewUpdate,
@@ -156,7 +224,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
       .sort((a, b) => new Date(a.created_date).getTime() - new Date(b.created_date).getTime());
     
     setCombinedUpdates(combined);
-  }, [authorUpdates, refereeUpdates, authors, referees, user]);
+  }, [authorUpdates, refereeUpdates, authors, referees, user, authorNamesMap, refereeNamesMap]);
   
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
@@ -212,6 +280,9 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   return (
     <div className="entry-updates-container">
       <div className="entry-header">
+        <button onClick={() => navigate(-1)} className="back-button">
+          {t('back') || 'Back'}
+        </button>
         <h1>{entry.title}</h1>
         <div className="entry-meta">
           <span className="entry-status">
@@ -219,9 +290,6 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
               {t(entry.status || '') || entry.status}
             </span>
           </span>
-          <button onClick={() => navigate(-1)} className="back-button">
-            {t('back') || 'Back'}
-          </button>
         </div>
       </div>
       
@@ -392,19 +460,19 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
       
       {/* Actions Section (Add new update, etc.) */}
       <div className="entry-actions">
-        {(isAuthorForEntry || user?.role === 'owner' || user?.role === 'admin') && (
+        {(isAuthorForEntry || user?.role === 'owner' || user?.role === 'admin' || isJournalEditor) && (
           <Link to={`/entries/${entryId}/author-update/new`} className="action-button">
             {t('addAuthorUpdate') || 'Add Author Update'}
           </Link>
         )}
         
-        {(isRefereeForEntry || user?.role === 'owner' || user?.role === 'admin') && (
+        {(isRefereeForEntry || user?.role === 'owner' || user?.role === 'admin' || isJournalEditor) && (
           <Link to={`/entries/${entryId}/referee-update/new`} className="action-button">
             {t('addRefereeUpdate') || 'Add Referee Update'}
           </Link>
         )}
         
-        {(user?.role === 'admin' || user?.role === 'editor' || user?.role === 'owner') && (
+        {(user?.role === 'admin' || user?.role === 'editor' || user?.role === 'owner' || isJournalEditor) && (
           <Link to={`/entries/edit/${entryId}`} className="action-button secondary">
             {t('editEntry') || 'Edit Entry'}
           </Link>

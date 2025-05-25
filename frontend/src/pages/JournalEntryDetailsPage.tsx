@@ -372,7 +372,7 @@ const JournalEntryDetailsPage: React.FC = () => {
       <div className="entry-details card">
         <div className="entry-meta">
           <div className="meta-item">
-            <strong>{t('date') || 'Date'}:</strong> {formatDate(entry.date) || formatDate(entry.updated_at)}
+            <strong>{t('date') || 'Date'}:</strong> {formatDate(entry.publication_date)}
           </div>
           {entry.page_number && (
             <div className="meta-item">

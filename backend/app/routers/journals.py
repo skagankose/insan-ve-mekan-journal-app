@@ -47,6 +47,8 @@ async def upload_journal_files(
     meta_files: Optional[UploadFile] = File(None),
     editor_notes: Optional[UploadFile] = File(None),
     full_pdf: Optional[UploadFile] = File(None),
+    index_section: Optional[UploadFile] = File(None),
+    file_path: Optional[UploadFile] = File(None),
     db: Session = Depends(get_session),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
@@ -56,6 +58,8 @@ async def upload_journal_files(
     - meta_files: Must be .docx
     - editor_notes: Must be .docx
     - full_pdf: Must be .pdf
+    - index_section: Must be .docx
+    - file_path: Must be .docx
     """
     # Check user permissions
     if current_user.role not in [models.UserRole.admin, models.UserRole.owner]:
@@ -110,6 +114,24 @@ async def upload_journal_files(
         folder = f"journals/{journal_id}/pdf"
         file_path = save_upload_file(full_pdf, folder, validate_pdf)
         db_journal.full_pdf = file_path
+
+    if index_section:
+        # Delete previous index section if exists
+        if db_journal.index_section:
+            delete_upload_file(db_journal.index_section)
+        
+        folder = f"journals/{journal_id}/index"
+        file_path = save_upload_file(index_section, folder, validate_docx)
+        db_journal.index_section = file_path
+
+    if file_path:
+        # Delete previous file if exists
+        if db_journal.file_path:
+            delete_upload_file(db_journal.file_path)
+        
+        folder = f"journals/{journal_id}/file"
+        file_path = save_upload_file(file_path, folder, validate_docx)
+        db_journal.file_path = file_path
     
     # Save changes
     db.add(db_journal)

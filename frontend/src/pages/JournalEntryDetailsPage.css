@@ -18,6 +18,9 @@
   font-size: 2rem;
   flex-grow: 1;
   text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .back-button {
@@ -116,7 +119,10 @@
 .abstract p {
   margin-top: 0;
   line-height: 1.6;
-  white-space: pre-line;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .keywords-section {
@@ -158,11 +164,19 @@
 .author-card h4 {
   margin-top: 0;
   margin-bottom: 10px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  white-space: pre-wrap;
 }
 
 .author-card p {
   margin: 5px 0;
   font-size: 0.9rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  white-space: pre-wrap;
 }
 
 .file-section {
@@ -200,11 +214,18 @@
 .referee-card h4 {
   margin-top: 0;
   margin-bottom: 10px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .referee-card p {
   margin: 5px 0;
   font-size: 0.9rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  white-space: pre-wrap;
 }
 
 /* Modal styles */

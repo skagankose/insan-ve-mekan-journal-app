@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlmodel import SQLModel, create_engine, select
 from passlib.context import CryptContext
@@ -7,6 +7,7 @@ import os
 from dotenv import load_dotenv
 import sys
 from sqlalchemy import text, inspect
+import pytz
 
 # Patch for bcrypt/__about__ issue
 import bcrypt
@@ -360,7 +361,7 @@ def seed_database():
             Journal(
                 id=100,
                 title="Journal of Human and Space",
-                date=datetime(2023, 5, 1),
+                created_date=datetime(2023, 5, 1),
                 issue="Issue 1",
                 is_published=True,
                 publication_date=datetime(2023, 5, 5),
@@ -374,7 +375,7 @@ def seed_database():
             Journal(
                 id=101,
                 title="Architecture Today",
-                date=datetime(2023, 6, 15),
+                created_date=datetime(2023, 6, 15),
                 issue="Volume 5, Issue 2",
                 is_published=True,
                 publication_date=datetime(2023, 6, 20),
@@ -388,7 +389,7 @@ def seed_database():
             Journal(
                 id=102,
                 title="Urban Design Quarterly",
-                date=datetime(2023, 7, 10),
+                created_date=datetime(2023, 7, 10),
                 issue="Summer Issue",
                 is_published=True,
                 publication_date=datetime(2023, 7, 15),
@@ -402,7 +403,7 @@ def seed_database():
             Journal(
                 id=103,
                 title="Contemporary Spaces",
-                date=datetime(2023, 8, 5),
+                created_date=datetime(2023, 8, 5),
                 issue="Fall Collection",
                 is_published=False,
                 publication_date=None,
@@ -416,7 +417,7 @@ def seed_database():
             Journal(
                 id=104,
                 title="Heritage & Culture",
-                date=datetime(2023, 9, 1),
+                created_date=datetime(2023, 9, 1),
                 issue="Annual Edition",
                 is_published=False,
                 publication_date=None,
@@ -431,7 +432,7 @@ def seed_database():
             Journal(
                 id=105,
                 title="Sustainable Architecture Review",
-                date=datetime(2023, 10, 5),
+                created_date=datetime(2023, 10, 5),
                 issue="Volume 3, Issue 4",
                 is_published=True,
                 publication_date=datetime(2023, 10, 10),
@@ -445,7 +446,7 @@ def seed_database():
             Journal(
                 id=106,
                 title="Public Space Quarterly",
-                date=datetime(2023, 11, 15),
+                created_date=datetime(2023, 11, 15),
                 issue="Winter Issue",
                 is_published=True,
                 publication_date=datetime(2023, 11, 20),
@@ -459,7 +460,7 @@ def seed_database():
             Journal(
                 id=107,
                 title="Digital Design Journal",
-                date=datetime(2023, 12, 10),
+                created_date=datetime(2023, 12, 10),
                 issue="Special Edition",
                 is_published=True,
                 publication_date=datetime(2023, 12, 15),
@@ -473,7 +474,7 @@ def seed_database():
             Journal(
                 id=108,
                 title="Urban Interventions",
-                date=datetime(2024, 1, 5),
+                created_date=datetime(2024, 1, 5),
                 issue="Volume 1, Issue 1",
                 is_published=False,
                 publication_date=None,
@@ -487,7 +488,7 @@ def seed_database():
             Journal(
                 id=109,
                 title="Historical Preservation Studies",
-                date=datetime(2024, 2, 10),
+                created_date=datetime(2024, 2, 10),
                 issue="Anniversary Issue",
                 is_published=False,
                 publication_date=None,
@@ -501,7 +502,7 @@ def seed_database():
             Journal(
                 id=110,
                 title="Critical Architecture Review",
-                date=datetime(2024, 3, 15),
+                created_date=datetime(2024, 3, 15),
                 issue="Spring Edition",
                 is_published=False,
                 publication_date=None,
@@ -515,7 +516,7 @@ def seed_database():
             Journal(
                 id=111,
                 title="Spatial Analytics Journal",
-                date=datetime(2024, 4, 20),
+                created_date=datetime(2024, 4, 20),
                 issue="Data Edition",
                 is_published=False,
                 publication_date=None,
@@ -611,12 +612,18 @@ def seed_database():
                 # More varied page numbers
                 start_page = random.randint(1, 150)
                 end_page = start_page + random.randint(5, 50)
+
+                # Generate random dates for created_date and publication_date
+                created_date = datetime(random.choice([2023, 2024]), random.randint(1, 12), random.randint(1, 28))
+                # publication_date will be after created_date
+                publication_date = created_date + timedelta(days=random.randint(30, 180))
                 
                 journal_entries.append(
                     JournalEntry(
                         id=entry_id,
                         title=f"Article {entry_id}: {random.choice(article_approaches)} {random.choice(article_themes)}",
-                        date=datetime(random.choice([2023, 2024]), random.randint(1, 12), random.randint(1, 28)),
+                        created_date=created_date,
+                        publication_date=publication_date,
                         abstract_tr=f"TR Abstract for article {entry_id} exploring important aspects of the subject matter with detailed methodology and findings.",
                         abstract_en=f"EN Abstract for article {entry_id} with comprehensive analysis, methodology, and conclusions.",
                         keywords=", ".join(random.sample(keyword_options, k=random.randint(3, 6))),
@@ -628,8 +635,6 @@ def seed_database():
                         download_count=random.randint(0, 250),  # Increased max from 100 to 250
                         read_count=random.randint(50, 1000),  # Increased max from 500 to 1000
                         status=status,
-                        created_at=datetime.utcnow(),
-                        updated_at=datetime.utcnow(),
                         journal_id=j_id
                     )
                 )
@@ -702,7 +707,7 @@ def seed_database():
                             keywords=je.keywords + f", updated-v{update_version}",
                             file_path=f"entry{je.id}_v{update_version}.pdf",
                             notes=f"{specific_note} (Update v{update_version})",
-                            created_date=datetime.utcnow(),
+                            created_date=datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None),
                             entry_id=je.id,
                             author_id=author_id
                         )
@@ -756,11 +761,11 @@ def seed_database():
                     referee_updates.append(
                         RefereeUpdate(
                             id=referee_update_id,
-                            file_path=f"referee_review{je.id}_r{review_round}_{referee_update_id}.pdf",
-                            notes=f"Round {review_round}: {random.choice(referee_feedback)}",
-                            created_date=datetime.utcnow(),
-                            referee_id=referee_id,
-                            entry_id=je.id
+                            file_path=f"entry{je.id}_referee_v{update_version}.pdf",
+                            notes=f"{specific_note} (Referee Update v{update_version})",
+                            created_date=datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None),
+                            entry_id=je.id,
+                            referee_id=referee_id
                         )
                     )
                     referee_update_id += 1

@@ -13,3 +13,4 @@ sib-api-v3-sdk
 email-validator
 pypandoc
 pytz
+requests

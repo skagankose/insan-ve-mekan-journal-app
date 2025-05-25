@@ -34,6 +34,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    recaptcha_token: str
 
 
 class UserUpdate(BaseModel):

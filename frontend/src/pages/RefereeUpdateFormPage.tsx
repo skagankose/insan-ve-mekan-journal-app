@@ -95,6 +95,7 @@ const RefereeUpdateFormPage: React.FC = () => {
             onChange={handleChange}
             className="form-control"
             rows={6}
+            maxLength={1000}
           />
         </div>
         

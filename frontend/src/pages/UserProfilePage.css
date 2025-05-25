@@ -72,6 +72,9 @@
 .profile-info h2 {
     font-size: 1.8rem;
     margin: 0 0 1rem 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
 }
 
 .badge {
@@ -190,6 +193,14 @@
     color: #555;
 }
 
+.profile-title p {
+    margin: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    white-space: pre-wrap;
+}
+
 .bio-section {
     margin-top: 1.5rem;
     line-height: 1.6;
@@ -198,6 +209,14 @@
 .bio-section h3 {
     font-size: 1.2rem;
     margin-bottom: 0.5rem;
+}
+
+.bio-section p {
+    margin: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    white-space: pre-wrap;
 }
 
 /* Journal sections */
@@ -227,22 +246,49 @@
     gap: 1.5rem;
 }
 
-.journal-card {
+.journal-item {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
     transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
 }
 
-.journal-card:hover {
+.journal-item:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-.journal-title {
+.journal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.journal-header h3 {
+    margin: 0;
     font-size: 1.2rem;
-    margin: 0 0 1rem 0;
+    color: #333;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.journal-issue {
+    font-size: 0.9rem;
+    color: #666;
+    background-color: #f5f5f5;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    display: inline-block;
+    max-width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    box-sizing: border-box;
 }
 
 .journal-meta {
@@ -310,11 +356,10 @@
     margin: 0;
     font-weight: 500;
     color: #444;
-}
-
-.journal-issue {
-    font-size: 0.85rem;
-    color: #777;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    white-space: pre-wrap;
 }
 
 .entry-count {
@@ -364,6 +409,10 @@
     margin: 0 0 0.5rem 0;
     color: #333;
     font-weight: 500;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    white-space: pre-wrap;
 }
 
 .entry-abstract {
@@ -371,6 +420,10 @@
     color: #777;
     margin-bottom: 0.8rem;
     line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    white-space: pre-wrap;
 }
 
 .entry-meta {

@@ -44,9 +44,9 @@ const EditorJournalsPage: React.FC = () => {
                 try {
                     // Use the editor-specific endpoint to get only related journals
                     const fetchedJournals = await apiService.getEditorJournals();
-                    // Sort journals by date in descending order (newest first)
+                    // Sort journals by date in descending order
                     const sortedJournals = [...fetchedJournals].sort((a, b) => 
-                        new Date(b.date).getTime() - new Date(a.date).getTime()
+                        new Date(b.created_date).getTime() - new Date(a.created_date).getTime()
                     );
                     // Initialize journals with empty entries array and collapsed state
                     const journalsData = sortedJournals.map(journal => ({
@@ -179,7 +179,7 @@ const EditorJournalsPage: React.FC = () => {
                     maxWidth: '100%',
                     margin: '0 auto'
                 }}>
-                    {journalsWithEntries.map((journal, _index) => (
+                    {journalsWithEntries.sort((a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime()).map((journal, _index) => (
                         <div key={journal.id} className="accordion-item" style={{ 
                             marginBottom: '8px',
                             borderRadius: '8px',
@@ -247,7 +247,7 @@ const EditorJournalsPage: React.FC = () => {
                                         fontSize: 'var(--font-size-sm)'
                                     }}>
                                         <span style={{ marginRight: '16px' }}>{t('issue')}: {journal.issue}</span>
-                                        <span>{t('date')}: {new Date(journal.date).toLocaleDateString()}</span>
+                                        <span>{t('date')}: {new Date(journal.created_date).toLocaleDateString()}</span>
                                     </div>
                                 </div>
                                 <div className="journal-actions" style={{ 
@@ -341,7 +341,11 @@ const EditorJournalsPage: React.FC = () => {
                                                         marginTop: 0, 
                                                         marginBottom: '8px',
                                                         fontSize: 'var(--font-size-base)',
-                                                        color: 'var(--color-text-primary)'
+                                                        color: 'var(--color-text-primary)',
+                                                        wordWrap: 'break-word',
+                                                        overflowWrap: 'break-word',
+                                                        maxWidth: '100%',
+                                                        whiteSpace: 'pre-wrap'
                                                     }}>{entry.title}</h5>
                                                     
                                                     <p className="entry-abstract" style={{ 
@@ -365,7 +369,7 @@ const EditorJournalsPage: React.FC = () => {
                                                         color: 'var(--color-text-tertiary)'
                                                     }}>
                                                         <div className="entry-date">
-                                                            {entry.date ? new Date(entry.date).toLocaleString() : new Date(entry.created_at).toLocaleString()}
+                                                            {new Date(entry.created_date).toLocaleString()}
                                                         </div>
                                                         {entry.status && (
                                                             <div className="entry-status">

@@ -7,6 +7,7 @@ from sqlalchemy import select
 from jose import jwt, JWTError
 from pydantic import BaseModel, EmailStr
 import os
+import requests
 
 from .. import crud, schemas, models, auth, security
 from ..database import get_session
@@ -15,15 +16,47 @@ from ..email_utils import send_confirmation_email, send_password_reset_email
 # Your Brevo API Key - consider moving to environment variables for production
 # BREVO_API_KEY = "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"
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
+# RECAPTCHA_SECRET_KEY = "6Lc0kEYrAAAAACYXOmcyvtXYvt4vXaibHBKQo1Hz"
 
 router = APIRouter()
 
+async def verify_recaptcha(token: str) -> bool:
+    """Verify reCAPTCHA token with Google's API"""
+    if not RECAPTCHA_SECRET_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="reCAPTCHA secret key not configured"
+        )
+    
+    try:
+        response = requests.post(
+            "https://www.google.com/recaptcha/api/siteverify",
+            data={
+                "secret": RECAPTCHA_SECRET_KEY,
+                "response": token
+            }
+        )
+        result = response.json()
+        return result.get("success", False)
+    except Exception as e:
+        print(f"reCAPTCHA verification failed: {e}")
+        return False
+
 @router.post("/users/", response_model=schemas.UserRead, status_code=status.HTTP_201_CREATED, tags=["auth"])
-def register_user(user: schemas.UserCreate, db: Session = Depends(get_session)):
-    print(f"Received user data for registration: {user.model_dump_json(indent=2)}")
+async def register_user(user: schemas.UserCreate, db: Session = Depends(get_session)):
     """
     Register a new user and send a confirmation email.
     """
+    # Verify reCAPTCHA first
+    if not await verify_recaptcha(user.recaptcha_token):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="reCAPTCHA verification failed"
+        )
+
+    print(f"Received user data for registration: {user.model_dump_json(indent=2)}")
+    
     db_user_by_email = crud.get_user_by_email(db, email=user.email)
     if db_user_by_email:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -337,3 +370,30 @@ def get_user_basic_info(
     
     # Return the user's basic information
     return db_user 
+
+# Schema for change password request
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+@router.post("/users/me/change-password", status_code=status.HTTP_200_OK, tags=["auth"])
+def change_password(
+    request: ChangePasswordRequest,
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Change the password of the currently authenticated user.
+    Requires the current password for verification.
+    """
+    # Verify current password
+    if not security.verify_password(request.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Current password is incorrect"
+        )
+    
+    # Update the password
+    crud.update_user_password(db, current_user.id, request.new_password)
+    
+    return {"message": "Password has been successfully updated."} 

@@ -25,6 +25,14 @@ const ProfileEditPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<boolean>(false);
     
+    // Password change state
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [passwordSuccess, setPasswordSuccess] = useState<boolean>(false);
+    const [isChangingPassword, setIsChangingPassword] = useState<boolean>(false);
+    
     const [formData, setFormData] = useState<UserForm>({
         name: '',
         title: '',
@@ -56,6 +64,33 @@ const ProfileEditPage: React.FC = () => {
         
         setLoading(false);
     }, [user, navigate]);
+
+    const validatePassword = (password: string): boolean => {
+        const minLength = 8;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumbers = /\d/.test(password);
+
+        if (password.length < minLength) {
+            setPasswordError(t('passwordMinLength'));
+            return false;
+        }
+        if (!hasUpperCase || !hasLowerCase) {
+            setPasswordError(t('passwordCase'));
+            return false;
+        }
+        if (!hasNumbers) {
+            setPasswordError(t('passwordNumber'));
+            return false;
+        }
+        if (password !== confirmNewPassword) {
+            setPasswordError(t('passwordMatch'));
+            return false;
+        }
+
+        setPasswordError(null);
+        return true;
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -112,6 +147,37 @@ const ProfileEditPage: React.FC = () => {
         }
     };
 
+    const handlePasswordChange = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (!validatePassword(newPassword)) {
+            return;
+        }
+
+        try {
+            setIsChangingPassword(true);
+            setPasswordError(null);
+            setPasswordSuccess(false);
+
+            await apiService.changePassword(currentPassword, newPassword);
+            
+            setPasswordSuccess(true);
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmNewPassword('');
+
+            // Clear success message after a delay
+            setTimeout(() => {
+                setPasswordSuccess(false);
+            }, 3000);
+
+        } catch (err: any) {
+            setPasswordError(err.response?.data?.detail || 'Failed to update password');
+        } finally {
+            setIsChangingPassword(false);
+        }
+    };
+
     if (loading && !user) {
         return <div className="loading">{t('loading') || 'Loading...'}</div>;
     }
@@ -148,6 +214,7 @@ const ProfileEditPage: React.FC = () => {
                             onChange={handleInputChange}
                             className="form-control"
                             required
+                            maxLength={200}
                         />
                     </div>
 
@@ -160,6 +227,7 @@ const ProfileEditPage: React.FC = () => {
                             value={formData.title}
                             onChange={handleInputChange}
                             className="form-control"
+                            maxLength={200}
                         />
                     </div>
 
@@ -172,6 +240,7 @@ const ProfileEditPage: React.FC = () => {
                             onChange={handleInputChange}
                             className="form-control"
                             rows={5}
+                            maxLength={400}
                         />
                     </div>
                 </div>
@@ -188,6 +257,7 @@ const ProfileEditPage: React.FC = () => {
                             value={formData.telephone}
                             onChange={handleInputChange}
                             className="form-control"
+                            maxLength={100}
                         />
                     </div>
 
@@ -200,6 +270,7 @@ const ProfileEditPage: React.FC = () => {
                             value={formData.location}
                             onChange={handleInputChange}
                             className="form-control"
+                            maxLength={100}
                         />
                     </div>
                 </div>
@@ -216,6 +287,7 @@ const ProfileEditPage: React.FC = () => {
                             value={formData.science_branch}
                             onChange={handleInputChange}
                             className="form-control"
+                            maxLength={300}
                         />
                     </div>
 
@@ -228,6 +300,7 @@ const ProfileEditPage: React.FC = () => {
                             value={formData.yoksis_id}
                             onChange={handleInputChange}
                             className="form-control"
+                            maxLength={100}
                         />
                     </div>
 
@@ -240,6 +313,7 @@ const ProfileEditPage: React.FC = () => {
                             value={formData.orcid_id}
                             onChange={handleInputChange}
                             className="form-control"
+                            maxLength={100}
                         />
                     </div>
                 </div>
@@ -260,6 +334,94 @@ const ProfileEditPage: React.FC = () => {
                     >
                         {loading ? (t('saving') || 'Saving...') : (t('saveChanges') || 'Save Changes')}
                     </button>
+                </div>
+            </form>
+
+            {/* Password Change Section */}
+            <form className="edit-user-form" onSubmit={handlePasswordChange} style={{ marginTop: '2rem' }}>
+                <div className="form-section">
+                    <h2>{t('changePassword') || 'Change Password'}</h2>
+
+                    {passwordError && (
+                        <div className="alert alert-danger">
+                            {passwordError}
+                        </div>
+                    )}
+
+                    {passwordSuccess && (
+                        <div className="alert alert-success">
+                            {t('passwordUpdated') || 'Password updated successfully!'}
+                        </div>
+                    )}
+
+                    <div className="form-group">
+                        <label htmlFor="currentPassword">{t('currentPassword') || 'Current Password'}</label>
+                        <input
+                            type="password"
+                            id="currentPassword"
+                            value={currentPassword}
+                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            className="form-control"
+                            required
+                            disabled={isChangingPassword}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="newPassword">{t('newPassword') || 'New Password'}</label>
+                        <input
+                            type="password"
+                            id="newPassword"
+                            value={newPassword}
+                            onChange={(e) => {
+                                setNewPassword(e.target.value);
+                                if (confirmNewPassword) {
+                                    validatePassword(e.target.value);
+                                }
+                            }}
+                            className="form-control"
+                            required
+                            disabled={isChangingPassword}
+                            minLength={8}
+                        />
+                        <small className="form-text text-muted">
+                            {t('passwordRequirements')}
+                            <ul style={{ marginTop: '0.5rem', marginLeft: '1.5rem' }}>
+                                <li>{t('passwordMinLength')}</li>
+                                <li>{t('passwordCase')}</li>
+                                <li>{t('passwordNumber')}</li>
+                            </ul>
+                        </small>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="confirmNewPassword">{t('confirmPassword') || 'Confirm New Password'}</label>
+                        <input
+                            type="password"
+                            id="confirmNewPassword"
+                            value={confirmNewPassword}
+                            onChange={(e) => {
+                                setConfirmNewPassword(e.target.value);
+                                if (newPassword) {
+                                    validatePassword(newPassword);
+                                }
+                            }}
+                            className="form-control"
+                            required
+                            disabled={isChangingPassword}
+                            minLength={8}
+                        />
+                    </div>
+
+                    <div className="form-actions">
+                        <button 
+                            type="submit" 
+                            className="btn btn-primary"
+                            disabled={isChangingPassword}
+                        >
+                            {isChangingPassword ? (t('changingPassword') || 'Changing Password...') : (t('changePassword') || 'Change Password')}
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 from typing import List, Optional
 from datetime import datetime
 import os
+import pytz
 
 from .. import crud, models, schemas, auth, notification_utils
 from ..database import get_session
@@ -263,7 +264,7 @@ def create_author_update(
         **author_update.dict(),
         entry_id=entry_id,
         author_id=current_user.id,
-        created_date=datetime.utcnow()
+        created_date=datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None)
     )
     
     db.add(db_author_update)
@@ -365,7 +366,7 @@ async def create_author_update_with_file(
         **author_update_data.dict(),
         entry_id=entry_id,
         author_id=current_user.id,
-        created_date=datetime.utcnow()
+        created_date=datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None)
     )
     
     db.add(db_author_update)
@@ -451,7 +452,7 @@ def create_referee_update(
         **referee_update.dict(),
         entry_id=entry_id,
         referee_id=current_user.id,
-        created_date=datetime.utcnow()
+        created_date=datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None)
     )
     
     db.add(db_referee_update)
@@ -530,7 +531,7 @@ async def create_referee_update_with_file(
         **referee_update_data.dict(),
         entry_id=entry_id,
         referee_id=current_user.id,
-        created_date=datetime.utcnow()
+        created_date=datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None)
     )
     
     db.add(db_referee_update)

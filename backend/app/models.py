@@ -152,7 +152,7 @@ class UserUpdate(SQLModel):
 
 class JournalBase(SQLModel):
     title: str = Field(index=True)
-    date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
+    created_date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
     issue: str
     is_published: bool = Field(default=False)
     publication_date: Optional[datetime] = Field(default=None)  # Manually set publication date
@@ -161,6 +161,8 @@ class JournalBase(SQLModel):
     meta_files: Optional[str] = None  # Path to .pdf, .doc, or .docx file
     editor_notes: Optional[str] = None  # Path to .pdf, .doc, or .docx file
     full_pdf: Optional[str] = None  # Path to .pdf, .doc, or .docx file
+    index_section: Optional[str] = None  # Path to .docx file
+    file_path: Optional[str] = None  # Path to .docx file
 
 
 # Define the Journal model for database table creation
@@ -188,12 +190,14 @@ class JournalCreate(SQLModel):
     meta_files: Optional[str] = None
     editor_notes: Optional[str] = None
     full_pdf: Optional[str] = None
+    index_section: Optional[str] = None
+    file_path: Optional[str] = None
 
 
 class JournalUpdate(SQLModel):
     title: Optional[str] = None
     issue: Optional[str] = None
-    date: Optional[datetime] = None
+    created_date: Optional[datetime] = None
     is_published: Optional[bool] = None
     publication_date: Optional[datetime] = None
     publication_place: Optional[str] = None
@@ -201,6 +205,8 @@ class JournalUpdate(SQLModel):
     meta_files: Optional[str] = None
     editor_notes: Optional[str] = None
     full_pdf: Optional[str] = None
+    index_section: Optional[str] = None
+    file_path: Optional[str] = None
 
 
 # --------------------- Journal Entry Models ---------------------
@@ -208,7 +214,8 @@ class JournalUpdate(SQLModel):
 # Define a base JournalEntry model
 class JournalEntryBase(SQLModel):
     title: str = Field(index=True)
-    date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
+    created_date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
+    publication_date: Optional[datetime] = Field(default=None)  # Manually set publication date
     abstract_tr: str
     abstract_en: Optional[str] = None
     keywords: Optional[str] = None
@@ -218,11 +225,10 @@ class JournalEntryBase(SQLModel):
     doi: Optional[str] = None
     random_token: Optional[str] = None  # 8 random uppercase letters/numbers, prefixed with entry ID
     file_path: Optional[str] = None
+    full_pdf: Optional[str] = None  # Path to .pdf file
     download_count: int = Field(default=0)
     read_count: int = Field(default=0)
     status: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     journal_id: Optional[int] = Field(default=None, foreign_key="journal.id")
 
 
@@ -263,7 +269,7 @@ class JournalEntryCreate(JournalEntryBase):
 # Define a JournalEntry model for updating
 class JournalEntryUpdate(SQLModel):
     title: Optional[str] = None
-    date: Optional[datetime] = None
+    created_date: Optional[datetime] = None
     abstract_tr: Optional[str] = None
     abstract_en: Optional[str] = None
     keywords: Optional[str] = None
@@ -283,13 +289,13 @@ class JournalEntryUpdate(SQLModel):
 # --------------------- Author Update Models ---------------------
 class AuthorUpdateBase(SQLModel):
     title: Optional[str] = None
-    abstract_en: Optional[str] = Field(default=None, sa_column=Column(Text))
-    abstract_tr: Optional[str] = Field(default=None, sa_column=Column(Text))
-    keywords: Optional[str] = Field(default=None, sa_column=Column(Text))
+    abstract_en: Optional[str] = None
+    abstract_tr: Optional[str] = None
+    keywords: Optional[str] = None
     file_path: Optional[str] = None
     notes: Optional[str] = Field(default=None, sa_column=Column(Text))
-    created_date: datetime = Field(default_factory=datetime.utcnow)
-    
+    created_date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
+
     entry_id: int = Field(foreign_key="journalentry.id")
     author_id: int = Field(foreign_key="users.id")
 
@@ -316,7 +322,7 @@ class AuthorUpdate(AuthorUpdateBase, table=True):
 class RefereeUpdateBase(SQLModel):
     file_path: Optional[str] = None
     notes: Optional[str] = Field(default=None, sa_column=Column(Text))
-    created_date: datetime = Field(default_factory=datetime.utcnow)
+    created_date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
 
     referee_id: int = Field(foreign_key="users.id")
     entry_id: int = Field(foreign_key="journalentry.id")

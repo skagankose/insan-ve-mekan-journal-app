@@ -33,9 +33,11 @@ type TranslationKeys =
   | 'loginSuccessButUserInfoFailed'
   | 'profile' | 'userProfile' | 'myJournalEntries' | 'noEntriesFound' | 'loadingUserData' | 'failedToLoadUserEntries'
   | 'biography' | 'scienceBranch' | 'location' | 'telephone' | 'yoksisId' | 'orcidId' | 'journalId' | 'date'
-  | 'myRefereeEntries' | 'noRefereeEntriesFound' | 'myEditedJournals' | 'noEditedJournalsFound' | 'issue' | 'published'
-  | 'statusWaitingForPayment' | 'statusWaitingForAuthors' | 'statusWaitingForReferees' | 'statusWaitingForEditors' 
-  | 'statusAccepted' | 'statusNotAccepted';
+  | 'myRefereeEntries' | 'noRefereeEntriesFound' | 'myEditedJournals' | 'noEditedJournalsFound' | 'issue'
+  | 'passwordRequirements' | 'passwordMinLength' | 'passwordCase' | 'passwordNumber' | 'passwordMatch' | 'confirmPassword'
+  | 'changePassword' | 'currentPassword' | 'newPassword' | 'passwordUpdated' | 'changingPassword'
+  | 'statusWaitingForPayment' | 'statusWaitingForAuthors' | 'statusWaitingForReferees' | 'statusWaitingForEditors' | 'statusAccepted' | 'statusNotAccepted'
+  | 'published';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -196,6 +198,21 @@ const translations: Record<Language, TranslationDictionary> = {
     'noEditedJournalsFound': 'No journals found.',
     'issue': 'Issue',
     'published': 'Published',
+
+    // Password requirements
+    'passwordRequirements': 'Password must meet the following requirements:',
+    'passwordMinLength': 'Must be at least 8 characters long',
+    'passwordCase': 'Must contain both uppercase and lowercase letters',
+    'passwordNumber': 'Must contain at least one number',
+    'passwordMatch': 'Passwords must match',
+    'confirmPassword': 'Confirm Password',
+
+    // Password change
+    'changePassword': 'Change Password',
+    'currentPassword': 'Current Password',
+    'newPassword': 'New Password',
+    'passwordUpdated': 'Password updated successfully!',
+    'changingPassword': 'Changing Password...',
   },
   tr: {
     // Navigation
@@ -352,6 +369,21 @@ const translations: Record<Language, TranslationDictionary> = {
     'noEditedJournalsFound': 'Editör olduğunuz dergi bulunamadı.',
     'issue': 'Sayı',
     'published': 'Yayınlandı',
+
+    // Password requirements
+    'passwordRequirements': 'Şifre aşağıdaki gereksinimleri karşılamalıdır:',
+    'passwordMinLength': 'En az 8 karakter uzunluğunda olmalı',
+    'passwordCase': 'Büyük ve küçük harf içermeli',
+    'passwordNumber': 'En az bir rakam içermeli',
+    'passwordMatch': 'Şifreler eşleşmeli',
+    'confirmPassword': 'Şifreyi Onayla',
+
+    // Password change
+    'changePassword': 'Şifre Değiştir',
+    'currentPassword': 'Mevcut Şifre',
+    'newPassword': 'Yeni Şifre',
+    'passwordUpdated': 'Şifre başarıyla güncellendi!',
+    'changingPassword': 'Şifre Değiştiriliyor...',
   }
 };
 

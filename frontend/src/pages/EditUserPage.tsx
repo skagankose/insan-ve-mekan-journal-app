@@ -211,7 +211,7 @@ const EditUserPage: React.FC = () => {
             // Reset email sent success message after a few seconds
             setTimeout(() => {
                 setEmailSent(false);
-            }, 3000);
+            }, 10);
             
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to send login link via email');
@@ -247,7 +247,7 @@ const EditUserPage: React.FC = () => {
             // Navigate back to admin page after short delay
             setTimeout(() => {
                 navigate('/admin');
-            }, 2000);
+            }, 10);
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to delete user');
             setDeleting(false);
@@ -331,6 +331,7 @@ const EditUserPage: React.FC = () => {
                         value={formData.email}
                         onChange={handleInputChange}
                         required
+                        maxLength={200}
                     />
                 </div>
                 
@@ -343,6 +344,7 @@ const EditUserPage: React.FC = () => {
                         value={formData.name}
                         onChange={handleInputChange}
                         required
+                        maxLength={200}
                     />
                 </div>
                 
@@ -354,6 +356,7 @@ const EditUserPage: React.FC = () => {
                         name="title"
                         value={formData.title}
                         onChange={handleInputChange}
+                        maxLength={200}
                     />
                 </div>
                 
@@ -364,7 +367,8 @@ const EditUserPage: React.FC = () => {
                         name="bio"
                         value={formData.bio}
                         onChange={handleInputChange}
-                        rows={4}
+                        rows={3}
+                        maxLength={400}
                     />
                 </div>
                 
@@ -376,6 +380,7 @@ const EditUserPage: React.FC = () => {
                         name="telephone"
                         value={formData.telephone}
                         onChange={handleInputChange}
+                        maxLength={100}
                     />
                 </div>
                 
@@ -387,6 +392,7 @@ const EditUserPage: React.FC = () => {
                         name="science_branch"
                         value={formData.science_branch}
                         onChange={handleInputChange}
+                        maxLength={300}
                     />
                 </div>
                 
@@ -398,6 +404,7 @@ const EditUserPage: React.FC = () => {
                         name="location"
                         value={formData.location}
                         onChange={handleInputChange}
+                        maxLength={100}
                     />
                 </div>
                 
@@ -409,6 +416,7 @@ const EditUserPage: React.FC = () => {
                         name="yoksis_id"
                         value={formData.yoksis_id}
                         onChange={handleInputChange}
+                        maxLength={100}
                     />
                 </div>
                 
@@ -420,6 +428,7 @@ const EditUserPage: React.FC = () => {
                         name="orcid_id"
                         value={formData.orcid_id}
                         onChange={handleInputChange}
+                        maxLength={100}
                     />
                 </div>
                 

@@ -112,9 +112,6 @@ def update_entry(db: Session, entry_id: int, entry_update: schemas.JournalEntryU
     for key, value in update_data.items():
         setattr(db_entry, key, value)
 
-    # Update the updated_at timestamp
-    db_entry.updated_at = datetime.utcnow()
-
     # Update authors if authors_ids was provided
     if authors_ids is not None:
         # Clear existing author links
@@ -182,6 +179,10 @@ def delete_entry(db: Session, entry_id: int) -> models.JournalEntry | None:
     if db_entry.file_path:
         delete_upload_file(db_entry.file_path)
     
+    # Delete the full_pdf file if it exists
+    if db_entry.full_pdf:
+        delete_upload_file(db_entry.full_pdf)
+    
     # Delete the entry's folder and all its contents
     entry_folder = f"entries/{entry_id}"
     delete_upload_directory(entry_folder)
@@ -221,7 +222,7 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     from .security import get_password_hash # Import here to avoid circular imports
 
     hashed_password = get_password_hash(user.password)
-    user_data = user.model_dump(exclude={"password"})
+    user_data = user.model_dump(exclude={"password", "recaptcha_token"})
     
     # Generate confirmation token
     confirmation_token = secrets.token_urlsafe(32)
@@ -499,6 +500,10 @@ def delete_journal(db: Session, journal_id: int) -> models.Journal | None:
         delete_upload_file(db_journal.editor_notes)
     if db_journal.full_pdf:
         delete_upload_file(db_journal.full_pdf)
+    if db_journal.index_section:
+        delete_upload_file(db_journal.index_section)
+    if db_journal.file_path:
+        delete_upload_file(db_journal.file_path)
     
     # Delete the journal's folder and all its contents
     journal_folder = f"journals/{journal_id}"

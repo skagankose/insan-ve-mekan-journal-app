@@ -23,9 +23,9 @@ const ArchivedJournalsPage: React.FC = () => {
             try {
                 const fetchedJournals = await apiService.getPublishedJournals();
                 
-                // Sort journals by publication date in descending order
+                // Sort journals by date in descending order
                 const sortedJournals = [...fetchedJournals].sort((a, b) => 
-                    new Date(b.publication_date || b.date).getTime() - new Date(a.publication_date || a.date).getTime()
+                    new Date(b.created_date).getTime() - new Date(a.created_date).getTime()
                 );
                 
                 // Initialize journals with empty entries array and collapsed state
@@ -136,7 +136,7 @@ const ArchivedJournalsPage: React.FC = () => {
                     maxWidth: '100%',
                     margin: '0 auto'
                 }}>
-                    {journalsWithEntries.map((journal) => (
+                    {journalsWithEntries.sort((a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime()).map((journal) => (
                         <div key={journal.id} className="accordion-item" style={{ 
                             marginBottom: '8px',
                             borderRadius: '8px',
@@ -283,7 +283,11 @@ const ArchivedJournalsPage: React.FC = () => {
                                                         marginTop: 0, 
                                                         marginBottom: '8px',
                                                         fontSize: 'var(--font-size-base)',
-                                                        color: 'var(--color-text-primary)'
+                                                        color: 'var(--color-text-primary)',
+                                                        wordWrap: 'break-word',
+                                                        overflowWrap: 'break-word',
+                                                        maxWidth: '100%',
+                                                        whiteSpace: 'pre-wrap'
                                                     }}>{entry.title}</h5>
                                                     
                                                     <p className="entry-abstract" style={{ 
@@ -307,7 +311,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                         color: 'var(--color-text-tertiary)'
                                                     }}>
                                                         <div className="entry-date">
-                                                            {entry.date ? new Date(entry.date).toLocaleString() : new Date(entry.created_at).toLocaleString()}
+                                                            {new Date(entry.created_date).toLocaleString()}
                                                         </div>
                                                     </div>
                                                 </Link>

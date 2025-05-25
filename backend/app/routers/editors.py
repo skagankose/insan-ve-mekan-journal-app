@@ -137,7 +137,7 @@ def get_editor_journals(
     # Filter journals based on user role
     if current_user.role in [models.UserRole.admin, models.UserRole.owner]:
         # Admin/owner can see all journals
-        statement = select(models.Journal).order_by(models.Journal.date.desc())
+        statement = select(models.Journal).order_by(models.Journal.created_date.desc())
     else:
         # Editor can only see journals where they are editor or editor-in-chief
         statement = select(models.Journal).where(
@@ -149,7 +149,7 @@ def get_editor_journals(
                      models.JournalEditorLink.user_id == current_user.id
                  )
              )))
-        ).order_by(models.Journal.date.desc())
+        ).order_by(models.Journal.created_date.desc())
     
     journals = db.exec(statement).all()
     return journals
@@ -167,7 +167,7 @@ def get_editor_journal_entries(
     # Filter entries based on user role
     if current_user.role in [models.UserRole.admin, models.UserRole.owner]:
         # Admin/owner can see all entries
-        statement = select(models.JournalEntry).order_by(models.JournalEntry.date.desc())
+        statement = select(models.JournalEntry).order_by(models.JournalEntry.created_date.desc())
     else:
         # Get journals where the user is editor or editor-in-chief
         user_journals = select(models.Journal.id).where(
@@ -182,7 +182,7 @@ def get_editor_journal_entries(
         # Get entries for those journals
         statement = select(models.JournalEntry).where(
             models.JournalEntry.journal_id.in_(user_journals)
-        ).order_by(models.JournalEntry.date.desc())
+        ).order_by(models.JournalEntry.created_date.desc())
     
     entries = db.exec(statement).all()
     return entries

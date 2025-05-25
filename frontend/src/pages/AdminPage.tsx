@@ -751,78 +751,72 @@ const AdminPage: React.FC = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {journals.length > 0 ? (
-                                            journals.map((item) => {
-                                                return (
-                                                    <tr 
-                                                        key={item.id}
-                                                        onClick={() => navigate(`/journals/${item.id}`)}
-                                                        className="clickable-row"
-                                                        style={{ cursor: 'pointer' }}
-                                                    >
-                                                        <td>{renderCell(item.id)}</td>
-                                                        <td>{renderCell(item.title)}</td>
-                                                        <td>{renderCell(item.date ? new Date(item.date).toLocaleDateString() : '-')}</td>
-                                                        <td>{renderCell(item.issue)}</td>
-                                                        <td>{renderCell(item.is_published)}</td>
-                                                        <td>{item.publication_date ? renderCell(new Date(item.publication_date).toLocaleDateString()) : '-'}</td>
-                                                        <td>{renderCell(item.publication_place)}</td>
-                                                        <td>
-                                                            {item.cover_photo ? (
-                                                                <a 
-                                                                    href={item.cover_photo} 
-                                                                    target="_blank" 
-                                                                    rel="noopener noreferrer"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                >
-                                                                    {t('viewFile')}
-                                                                </a>
-                                                            ) : '-'}
-                                                        </td>
-                                                        <td>
-                                                            {item.meta_files ? (
-                                                                <a 
-                                                                    href={item.meta_files} 
-                                                                    target="_blank" 
-                                                                    rel="noopener noreferrer"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                >
-                                                                    {t('viewFile')}
-                                                                </a>
-                                                            ) : '-'}
-                                                        </td>
-                                                        <td>
-                                                            {item.editor_notes ? (
-                                                                <a 
-                                                                    href={item.editor_notes} 
-                                                                    target="_blank" 
-                                                                    rel="noopener noreferrer"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                >
-                                                                    {t('viewFile')}
-                                                                </a>
-                                                            ) : '-'}
-                                                        </td>
-                                                        <td>
-                                                            {item.full_pdf ? (
-                                                                <a 
-                                                                    href={item.full_pdf} 
-                                                                    target="_blank" 
-                                                                    rel="noopener noreferrer"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                >
-                                                                    {t('viewFile')}
-                                                                </a>
-                                                            ) : '-'}
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })
-                                        ) : (
-                                            <tr>
-                                                <td colSpan={11} style={{ textAlign: 'center' }}>No journals found</td>
-                                            </tr>
-                                        )}
+                                        {journals.sort((a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime()).map((item) => {
+                                            return (
+                                                <tr 
+                                                    key={item.id}
+                                                    onClick={() => navigate(`/journals/${item.id}`)}
+                                                    className="clickable-row"
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    <td>{renderCell(item.id)}</td>
+                                                    <td>{renderCell(item.title)}</td>
+                                                    <td>{renderCell(item.created_date ? new Date(item.created_date).toLocaleDateString() : '-')}</td>
+                                                    <td>{renderCell(item.issue)}</td>
+                                                    <td>{renderCell(item.is_published)}</td>
+                                                    <td>{item.publication_date ? renderCell(new Date(item.publication_date).toLocaleDateString()) : '-'}</td>
+                                                    <td>{renderCell(item.publication_place)}</td>
+                                                    <td>
+                                                        {item.cover_photo ? (
+                                                            <a 
+                                                                href={item.cover_photo} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {t('viewFile')}
+                                                            </a>
+                                                        ) : '-'}
+                                                    </td>
+                                                    <td>
+                                                        {item.meta_files ? (
+                                                            <a 
+                                                                href={item.meta_files} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {t('viewFile')}
+                                                            </a>
+                                                        ) : '-'}
+                                                    </td>
+                                                    <td>
+                                                        {item.editor_notes ? (
+                                                            <a 
+                                                                href={item.editor_notes} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {t('viewFile')}
+                                                            </a>
+                                                        ) : '-'}
+                                                    </td>
+                                                    <td>
+                                                        {item.full_pdf ? (
+                                                            <a 
+                                                                href={item.full_pdf} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {t('viewFile')}
+                                                            </a>
+                                                        ) : '-'}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                                 <Pagination 
@@ -850,7 +844,6 @@ const AdminPage: React.FC = () => {
                                             <th>{t('title')}</th>
                                             <th>{t('date')}</th>
                                             <th>{t('createdAt')}</th>
-                                            <th>{t('updatedAt')}</th>
                                             <th>{t('abstractTr')}</th>
                                             <th>{t('abstractEn')}</th>
                                             <th>{t('keywords')}</th>
@@ -876,9 +869,8 @@ const AdminPage: React.FC = () => {
                                                     >
                                                         <td>{renderCell(item.id)}</td>
                                                         <td>{renderCell(item.title)}</td>
-                                                        <td>{renderCell(item.date ? new Date(item.date).toLocaleDateString() : '-')}</td>
-                                                        <td>{renderCell(new Date(item.created_at).toLocaleDateString())}</td>
-                                                        <td>{renderCell(new Date(item.updated_at).toLocaleDateString())}</td>
+                                                        <td>{renderCell(item.publication_date ? new Date(item.publication_date).toLocaleDateString() : '-')}</td>
+                                                        <td>{renderCell(new Date(item.created_date).toLocaleDateString())}</td>
                                                         <td>{item.abstract_tr ? `${renderCell(item.abstract_tr.substring(0,50))}...` : '-'}</td>
                                                         <td>{item.abstract_en ? `${renderCell(item.abstract_en.substring(0,50))}...` : '-'}</td>
                                                         <td>{renderCell(item.keywords)}</td>

@@ -231,7 +231,7 @@ const UserProfilePage: React.FC = () => {
                     <p className="entry-abstract">{entry.abstract_tr}</p>
                     <div className="entry-meta">
                         <span className="entry-date">
-                            {t('date') || 'Date'}: {entry.date ? new Date(entry.date).toLocaleString() : new Date(entry.updated_at).toLocaleString()}
+                            {t('date') || 'Date'}: {new Date(entry.created_date).toLocaleString()}
                         </span>
                         {entry.status && (
                             <span className="entry-status">
@@ -352,37 +352,21 @@ const UserProfilePage: React.FC = () => {
     // Helper function to render journals list
     const renderJournalsList = (journals: apiService.Journal[], emptyMessage: string) => {
         if (journals.length === 0) {
-            return (
-                <div className="empty-state">
-                    <div className="empty-state-icon">📚</div>
-                    <h3>{emptyMessage}</h3>
-                </div>
-            );
+            return <div className="empty-state">{emptyMessage}</div>;
         }
-        
         return (
             <div className="journals-list">
                 {journals.map(journal => (
-                    <Link key={journal.id} to={`/journals/${journal.id}`} className="journal-link">
-                        <div className="journal-card">
-                            <h3 className="journal-title">{journal.title}</h3>
-                            <div className="journal-meta">
-                                <span className="journal-issue">
-                                    {t('issue') || 'Issue'}: {journal.issue}
-                                </span>
-                                <span className="journal-date">
-                                    {t('date') || 'Date'}: {new Date(journal.date).toLocaleDateString()}
-                                </span>
-                                {journal.is_published && (
-                                    <span className="journal-published">
-                                        <span className="badge badge-published">
-                                            {t('published') || 'Published'}
-                                        </span>
-                                    </span>
-                                )}
-                            </div>
+                    <div key={journal.id} className="journal-item" onClick={() => navigate(`/journals/${journal.id}`)}>
+                        <div className="journal-header">
+                            <h3>{journal.title}</h3>
                         </div>
-                    </Link>
+                        <div className="journal-issue">{t('issue')}: {journal.issue}</div>
+                        <div className="journal-meta">
+                            <span>{t('createdDate')}: {new Date(journal.created_date).toLocaleDateString()}</span>
+                            <span>{t('status')}: {journal.is_published ? t('published') : t('notPublished')}</span>
+                        </div>
+                    </div>
                 ))}
             </div>
         );
@@ -479,7 +463,7 @@ const UserProfilePage: React.FC = () => {
             {(profileUser.role === 'editor' || profileUser.role === 'admin' || profileUser.role === 'owner') && (
                 <div className="edited-journals-section">
                     <h2>{userId ? `${t('editedJournals') || 'Edited Journals'}` : t('myEditedJournals') || 'Journals I Edit'}</h2>
-                    {renderJournalsList(editedJournals, t('noEditedJournalsFound') || 'No journals found.')}
+                    {renderJournalsList(editedJournals.sort((a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime()), t('noEditedJournalsFound') || 'No journals found.')}
                 </div>
             )}
 

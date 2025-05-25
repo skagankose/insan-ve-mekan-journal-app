@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchAll, SearchResults } from '../services/apiService';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/SearchBox.css';
 
 const SearchBox: React.FC = () => {
@@ -12,6 +13,7 @@ const SearchBox: React.FC = () => {
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -90,6 +92,9 @@ const SearchBox: React.FC = () => {
         break;
     }
   };
+
+  // Check if user has permission to see user search results
+  const canViewUsers = user?.role === 'admin' || user?.role === 'owner';
   
   return (
     <div className="search-box" ref={searchRef}>
@@ -113,8 +118,8 @@ const SearchBox: React.FC = () => {
       
       {showResults && results && (
         <div className="search-results">
-          {/* Users section */}
-          {results.users.length > 0 && (
+          {/* Users section - only show for admin and owner */}
+          {canViewUsers && results.users.length > 0 && (
             <div className="search-section">
               <h3 className="search-section-title">Users</h3>
               <ul className="search-result-list">
@@ -171,7 +176,9 @@ const SearchBox: React.FC = () => {
           )}
           
           {/* No results message */}
-          {results.users.length === 0 && results.journals.length === 0 && results.entries.length === 0 && (
+          {(!canViewUsers || results.users.length === 0) && 
+           results.journals.length === 0 && 
+           results.entries.length === 0 && (
             <div className="no-results">No results found</div>
           )}
         </div>

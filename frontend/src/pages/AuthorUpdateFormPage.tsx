@@ -164,6 +164,7 @@ const AuthorUpdateFormPage: React.FC = () => {
             onChange={handleChange}
             className="form-control"
             required
+            maxLength={300}
           />
         </div>
         
@@ -176,6 +177,7 @@ const AuthorUpdateFormPage: React.FC = () => {
             onChange={handleChange}
             className="form-control"
             rows={4}
+            maxLength={500}
           />
         </div>
         
@@ -188,6 +190,7 @@ const AuthorUpdateFormPage: React.FC = () => {
             onChange={handleChange}
             className="form-control"
             rows={4}
+            maxLength={500}
           />
         </div>
         
@@ -201,6 +204,7 @@ const AuthorUpdateFormPage: React.FC = () => {
             onChange={handleChange}
             className="form-control"
             placeholder={t('keywordsSeparatedByCommas') || 'Separate keywords with commas'}
+            maxLength={100}
           />
         </div>
         
@@ -213,6 +217,7 @@ const AuthorUpdateFormPage: React.FC = () => {
             onChange={handleChange}
             className="form-control"
             rows={4}
+            maxLength={1000}
           />
         </div>
         

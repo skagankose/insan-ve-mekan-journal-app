@@ -38,13 +38,15 @@ interface UserCreate {
     role?: string;
     password: string;
     is_auth?: boolean;
+    recaptcha_token: string;
 }
 
 // Add Journal Entry interfaces (matching backend schemas)
 export interface JournalEntryRead {
     id: number;
     title: string;
-    date?: string; // ISO format string for datetime
+    created_date: string; // ISO format string for datetime
+    publication_date?: string; // ISO format string for datetime
     abstract_tr: string;
     abstract_en?: string;
     keywords?: string;
@@ -55,13 +57,12 @@ export interface JournalEntryRead {
     random_token?: string; // Entry ID + 8 random uppercase letters/numbers
     download_count: number;
     read_count: number;
-    created_at: string; // ISO format string
-    updated_at: string; // ISO format string
     authors?: UserRead[];
     referees?: UserRead[];
     status?: string; // Added status field, assuming backend can provide it - Corresponds to JournalEntryStatus enum
     journal_id?: number;
     file_path?: string; // Added for JournalEditPage
+    full_pdf?: string; // Path to full PDF file
 }
 
 export interface JournalEntryCreate {
@@ -92,7 +93,7 @@ interface JournalEntryUpdate {
 interface Journal { // This will serve as JournalRead for admin purposes too
     id: number;
     title: string;
-    date: string; // ISO format string for datetime
+    created_date: string; // ISO format string for datetime
     issue: string;
     is_published: boolean;
     publication_date?: string | null; // ISO format string for datetime
@@ -102,6 +103,8 @@ interface Journal { // This will serve as JournalRead for admin purposes too
     editor_notes?: string;
     full_pdf?: string;
     editor_in_chief_id?: number;
+    index_section?: string;
+    file_path?: string;
 }
 
 // Add JournalCreate interface
@@ -116,12 +119,14 @@ interface JournalCreate {
     editor_notes?: string;
     full_pdf?: string;
     editor_in_chief_id?: number;
+    index_section?: string;
+    file_path?: string;
 }
 
 interface JournalUpdate {
     title?: string;
     issue?: string;
-    date?: string; // Add date field
+    created_date?: string; // Changed from date to created_date
     is_published?: boolean;
     publication_date?: string | null;
     publication_place?: string;
@@ -130,6 +135,8 @@ interface JournalUpdate {
     editor_notes?: string;
     full_pdf?: string;
     editor_in_chief_id?: number;
+    index_section?: string;
+    file_path?: string;
 }
 
 export interface Settings {
@@ -237,6 +244,13 @@ export interface SearchResults {
     users: UserRead[];
     journals: Journal[];
     entries: JournalEntryRead[];
+}
+
+// Add interface for JournalEditorLink
+export interface JournalEditorLink {
+  id: number;
+  journal_id: number;
+  user_id: number;
 }
 
 // Create an Axios instance
@@ -807,6 +821,21 @@ const uploadEntryFile = async (entryId: number, formData: FormData): Promise<Jou
     return response.data;
 };
 
+// Add function to change user's password
+const changePassword = async (currentPassword: string, newPassword: string): Promise<{ message: string }> => {
+    const response = await apiClient.post('/users/me/change-password', {
+        current_password: currentPassword,
+        new_password: newPassword
+    });
+    return response.data;
+};
+
+// Add the getJournalEditors function
+export const getJournalEditors = async (journalId: number): Promise<JournalEditorLink[]> => {
+  const response = await apiClient.get<JournalEditorLink[]>(`/public/journals/${journalId}/editors`);
+  return response.data;
+};
+
 export {
     // List all functions that are *not* individually exported with 'export const'
     login,
@@ -878,6 +907,7 @@ export {
     searchAll,
     uploadJournalFiles,
     uploadEntryFile,
+    changePassword,
 };
 
 export type {
