@@ -114,6 +114,8 @@ class User(UserBase, table=True):
     confirmation_token_created_at: Optional[datetime] = Field(default=None)
     reset_password_token: Optional[str] = Field(default=None, index=True, unique=True)
     reset_password_token_created_at: Optional[datetime] = Field(default=None)
+    tutorial_done: bool = Field(default=False)
+    marked_for_deletion: bool = Field(default=False)
 
     chief_of_journals: List["Journal"] = Relationship(back_populates="editor_in_chief")
     editing_journals: List["Journal"] = Relationship(back_populates="editors", link_model=JournalEditorLink)
@@ -126,6 +128,8 @@ class User(UserBase, table=True):
 # Define a User model for reading from API (excluding password)
 class UserRead(UserBase):
     id: int
+    marked_for_deletion: bool = Field(default=False)
+    tutorial_done: bool = Field(default=False)
 
 
 # Define a User model for creation (including password)

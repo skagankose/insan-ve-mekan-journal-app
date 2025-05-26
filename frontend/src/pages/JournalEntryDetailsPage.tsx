@@ -15,6 +15,7 @@ const JournalEntryDetailsPage: React.FC = () => {
   const [journal, setJournal] = useState<apiService.Journal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isJournalHovered, setIsJournalHovered] = useState(false);
   const isAdmin = isAuthenticated && user && (user.role === 'admin' || user.role === 'owner');
   const isOwner = isAuthenticated && user && user.role === 'owner';
   const isEditor = isAuthenticated && user && user.role === 'editor';
@@ -347,10 +348,26 @@ const JournalEntryDetailsPage: React.FC = () => {
           )}
         </div>
         {journal ? (
-          <p>
-            <strong>{journal.title}</strong> - {t('issue')}: {journal.issue} 
-            {journal.publication_date ? ` ${t('published')}: ${formatDate(journal.publication_date)}` : ''}
-          </p>
+          <div 
+            onClick={() => navigate(`/journals/${journal.id}`)}
+            onMouseEnter={() => setIsJournalHovered(true)}
+            onMouseLeave={() => setIsJournalHovered(false)}
+            style={{ 
+              cursor: 'pointer',
+              padding: '10px',
+              margin: '-10px',
+              borderRadius: '4px',
+              transition: 'background-color 0.2s ease',
+              backgroundColor: isJournalHovered ? 'rgba(13, 110, 253, 0.05)' : 'transparent'
+            }}
+            role="link"
+            aria-label={`View details for journal: ${journal.title}`}
+          >
+            <p>
+              <strong>{journal.title}</strong> - {t('issue')}: {journal.issue} 
+              {journal.publication_date ? ` ${t('published')}: ${formatDate(journal.publication_date)}` : ''}
+            </p>
+          </div>
         ) : (
           <div className="empty-state">
             <p>{t('notAssignedToJournal') || 'This entry is not yet assigned to a journal'}</p>
@@ -359,14 +376,21 @@ const JournalEntryDetailsPage: React.FC = () => {
       </div>
 
       {/* File view section */}
-      {entry.file_path && (
-        <div className="entry-file card">
-          <h3>{t('entryFile') || 'Entry File'}</h3>
-          <a href={`/api${entry.file_path}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-            {t('viewFile') || 'View File'}
-          </a>
+      <div className="entry-file card">
+        <h3>{t('files') || 'Files'}</h3>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          {entry.file_path && (
+            <a href={`/api${entry.file_path}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+              {t('viewFile') || 'View File'}
+            </a>
+          )}
+          {entry.full_pdf && (
+            <a href={`/api${entry.full_pdf}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+              {t('viewFullPdf') || 'View Full PDF'}
+            </a>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Entry Details */}
       <div className="entry-details card">
@@ -400,6 +424,39 @@ const JournalEntryDetailsPage: React.FC = () => {
               <span className={`badge badge-${entry.status.toLowerCase()}`}>
                 {t(entry.status) || entry.status}
               </span>
+            </div>
+          )}
+          {entry.status === 'waiting_for_payment' && (
+            <div className="payment-info-block" style={{
+              backgroundColor: '#f8f9fa',
+              border: '1px solid #dee2e6',
+              borderRadius: '4px',
+              padding: '15px',
+              margin: '15px 0',
+              color: '#495057'
+            }}>
+              <h4 style={{ color: '#0d6efd', marginBottom: '10px' }}>
+                {t('paymentRequired') || 'Payment Required'}
+              </h4>
+              <p>
+                {t('paymentInfoMessage') || 
+                  'To proceed with the publication process, please complete the payment using the following bank information:'}
+              </p>
+              <div style={{ 
+                backgroundColor: '#ffffff', 
+                padding: '10px', 
+                borderRadius: '4px',
+                marginTop: '10px',
+                fontFamily: 'monospace'
+              }}>
+                <p><strong>{t('bankName') || 'Bank Name'}:</strong> Example Bank</p>
+                <p><strong>IBAN:</strong> TR00 0000 0000 0000 0000 0000 00</p>
+                <p><strong>{t('accountHolder') || 'Account Holder'}:</strong> Journal Name</p>
+              </div>
+              <p style={{ marginTop: '10px', fontSize: '0.9em', color: '#6c757d' }}>
+                {t('paymentReference') || 
+                  'Please include your Reference Token as payment reference for proper tracking:'} <strong>{entry.random_token}</strong>
+              </p>
             </div>
           )}
           <div className="meta-item">

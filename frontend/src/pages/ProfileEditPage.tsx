@@ -3,6 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
+import PhoneInput from 'react-phone-input-2';
+import FormattedIdInput from '../components/FormattedIdInput';
+import LocationInput from '../components/LocationInput';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import 'react-phone-input-2/lib/style.css';
+import '../styles/PhoneInput.css';
+import '../styles/FormattedIdInput.css';
 import './EditUserPage.css'; // Reuse the same CSS
 
 interface UserForm {
@@ -136,9 +144,7 @@ const ProfileEditPage: React.FC = () => {
             setSuccess(true);
             
             // Navigate back to profile page after a short delay
-            setTimeout(() => {
-                navigate('/profile');
-            }, 2000);
+            navigate('/profile');
             
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to update profile');
@@ -165,11 +171,6 @@ const ProfileEditPage: React.FC = () => {
             setCurrentPassword('');
             setNewPassword('');
             setConfirmNewPassword('');
-
-            // Clear success message after a delay
-            setTimeout(() => {
-                setPasswordSuccess(false);
-            }, 3000);
 
         } catch (err: any) {
             setPasswordError(err.response?.data?.detail || 'Failed to update password');
@@ -250,27 +251,37 @@ const ProfileEditPage: React.FC = () => {
                     
                     <div className="form-group">
                         <label htmlFor="telephone">{t('telephone') || 'Telephone'}</label>
-                        <input
-                            type="tel"
-                            id="telephone"
-                            name="telephone"
+                        <PhoneInput
+                            country={'tr'}
                             value={formData.telephone}
-                            onChange={handleInputChange}
-                            className="form-control"
-                            maxLength={100}
+                            onChange={(phone: string) => handleInputChange({
+                                target: { name: 'telephone', value: phone }
+                            } as React.ChangeEvent<HTMLInputElement>)}
+                            inputProps={{
+                                id: 'telephone',
+                                disabled: loading
+                            }}
+                            containerClass="phone-input-container"
+                            inputClass="form-input"
+                            buttonClass="country-dropdown"
+                            disabled={loading}
+                            enableSearch={true}
+                            searchPlaceholder={t('searchCountry') || 'Search country'}
+                            searchNotFound={t('countryNotFound') || 'Country not found'}
+                            preferredCountries={['tr']}
                         />
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="location">{t('location') || 'Location'}</label>
-                        <input
-                            type="text"
+                        <LocationInput
+                            value={formData.location}
+                            onChange={(value) => handleInputChange({
+                                target: { name: 'location', value }
+                            } as React.ChangeEvent<HTMLInputElement>)}
                             id="location"
                             name="location"
-                            value={formData.location}
-                            onChange={handleInputChange}
-                            className="form-control"
-                            maxLength={100}
+                            disabled={loading}
                         />
                     </div>
                 </div>
@@ -293,27 +304,29 @@ const ProfileEditPage: React.FC = () => {
 
                     <div className="form-group">
                         <label htmlFor="yoksis_id">{t('yoksisId') || 'YÖKSİS ID'}</label>
-                        <input
-                            type="text"
+                        <FormattedIdInput
+                            type="yoksis"
+                            value={formData.yoksis_id}
+                            onChange={(value) => handleInputChange({
+                                target: { name: 'yoksis_id', value }
+                            } as React.ChangeEvent<HTMLInputElement>)}
                             id="yoksis_id"
                             name="yoksis_id"
-                            value={formData.yoksis_id}
-                            onChange={handleInputChange}
-                            className="form-control"
-                            maxLength={100}
+                            disabled={loading}
                         />
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="orcid_id">{t('orcidId') || 'ORCID ID'}</label>
-                        <input
-                            type="text"
+                        <FormattedIdInput
+                            type="orcid"
+                            value={formData.orcid_id}
+                            onChange={(value) => handleInputChange({
+                                target: { name: 'orcid_id', value }
+                            } as React.ChangeEvent<HTMLInputElement>)}
                             id="orcid_id"
                             name="orcid_id"
-                            value={formData.orcid_id}
-                            onChange={handleInputChange}
-                            className="form-control"
-                            maxLength={100}
+                            disabled={loading}
                         />
                     </div>
                 </div>
@@ -424,6 +437,65 @@ const ProfileEditPage: React.FC = () => {
                     </div>
                 </div>
             </form>
+
+            {/* Mark for Deletion Section */}
+            <div className="form-section" style={{ marginTop: '2rem', padding: '1rem', border: '1px solid #ff4444', borderRadius: '4px' }}>
+                <h2 style={{ color: '#ff4444' }}>
+                    {user?.marked_for_deletion 
+                        ? (t('unmarkForDeletion') || 'Unmark Account for Deletion')
+                        : (t('markForDeletion') || 'Mark Account for Deletion')
+                    }
+                </h2>
+                <p style={{ color: '#666', marginBottom: '1rem' }}>
+                    {user?.marked_for_deletion
+                        ? (t('unmarkForDeletionWarning') || 'Your account is currently marked for deletion. Click the button below to cancel the deletion request.')
+                        : (t('markForDeletionWarning') || 'Warning: This action will mark your account for deletion. This is the first step in the account deletion process. An administrator will review and process your request.')
+                    }
+                </p>
+                <button 
+                    type="button" 
+                    className="btn btn-danger"
+                    onClick={async () => {
+                        const shouldProceed = user?.marked_for_deletion ? true : 
+                            window.confirm(t('confirmMarkForDeletion') || 'Are you sure you want to mark your account for deletion? This action will be reviewed by an administrator.');
+
+                        if (shouldProceed) {
+                            try {
+                                if (user?.marked_for_deletion) {
+                                    await apiService.unmarkUserForDeletion();
+                                    if (refreshUser) {
+                                        await refreshUser();
+                                    }
+                                    toast.success(t('accountUnmarkedForDeletion') || 'Your account has been unmarked for deletion.');
+                                } else {
+                                    await apiService.markUserForDeletion();
+                                    if (refreshUser) {
+                                        await refreshUser();
+                                    }
+                                    toast.warning(t('accountMarkedForDeletion') || 'Your account has been marked for deletion. An administrator will review your request.');
+                                }
+                                navigate('/profile');
+                            } catch (err: any) {
+                                setError(err.response?.data?.detail || (user?.marked_for_deletion ? 'Failed to unmark account for deletion' : 'Failed to mark account for deletion'));
+                                toast.error(t('errorMarkingForDeletion') || 'Failed to update deletion status');
+                            }
+                        }
+                    }}
+                    style={{
+                        backgroundColor: user?.marked_for_deletion ? '#28a745' : '#ff4444',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 20px',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                    }}
+                >
+                    {user?.marked_for_deletion
+                        ? (t('unmarkForDeletion') || 'Unmark for Deletion')
+                        : (t('markForDeletion') || 'Mark for Deletion')
+                    }
+                </button>
+            </div>
         </div>
     );
 };

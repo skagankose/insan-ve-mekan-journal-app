@@ -28,22 +28,24 @@ services:
     ports:
       - "8000:8000"
 
-  frontend: # Renamed from frontend-builder
+  frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5173:5173" # Expose Vite dev server port
+      - "5173:5173"
+      - "24678:24678" # Add WebSocket HMR port
     volumes:
-       # Mount source code for hot-reloading
       - ./frontend:/app
-       # Use anonymous volume for node_modules caching
-      - /app/node_modules 
-    command: npm run dev -- --host # Run dev server, accessible externally
+      - /app/node_modules
+    environment:
+      - VITE_WS_HMR_PORT=24678
+      - CHOKIDAR_USEPOLLING=true
+    command: npm run dev -- --host --port 5173
     depends_on:
-      - backend # Frontend needs backend for API calls
+      - backend
     env_file: 
-      - .env # May need backend URL if not using proxy, but proxy is preferred
+      - .env
 
 # Removed nginx service
 

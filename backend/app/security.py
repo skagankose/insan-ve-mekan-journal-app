@@ -1,4 +1,6 @@
 import os
+import secrets
+import string
 from datetime import datetime, timedelta
 from typing import Any, Union, Optional
 
@@ -6,9 +8,13 @@ from jose import jwt, JWTError
 import bcrypt  # Replace passlib with bcrypt
 from dotenv import load_dotenv
 from pydantic import BaseModel
+from passlib.context import CryptContext
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Password hashing configuration
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # --- Password Hashing --- 
 
@@ -28,6 +34,12 @@ def get_password_hash(password: str) -> str:
     hashed = bcrypt.hashpw(password_bytes, salt)
     # Return the hash as a string
     return hashed.decode('utf-8')
+
+
+def get_random_string(length: int) -> str:
+    """Generate a random string of specified length."""
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 
 # --- JWT Token Handling --- 

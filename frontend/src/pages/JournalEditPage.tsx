@@ -108,11 +108,22 @@ const JournalEditPage: React.FC = () => {
         const { name, files } = e.target;
         if (files && files.length > 0) {
             const file = files[0];
-            if (!validateFileType(file, ['docx'])) {
-                toast.error(t('onlyDocxAllowed') || 'Only DOCX files are allowed');
-                e.target.value = '';
-                return;
+            
+            // Different validation for full_pdf
+            if (name === 'full_pdf') {
+                if (!validateFileType(file, ['pdf'])) {
+                    toast.error(t('onlyPdfAllowed') || 'Only PDF files are allowed');
+                    e.target.value = '';
+                    return;
+                }
+            } else {
+                if (!validateFileType(file, ['docx'])) {
+                    toast.error(t('onlyDocxAllowed') || 'Only DOCX files are allowed');
+                    e.target.value = '';
+                    return;
+                }
             }
+            
             setSelectedFiles(prev => ({
                 ...prev,
                 [name]: file
@@ -130,18 +141,16 @@ const JournalEditPage: React.FC = () => {
             await apiService.updateEntry(Number(id), formData);
 
             // Then handle file uploads if any files were selected
-            if (Object.keys(selectedFiles).length > 0) {
-                const uploadData = new FormData();
-                
-                if (selectedFiles.file_path) {
-                    uploadData.append('file', selectedFiles.file_path);
-                }
-                
-                if (selectedFiles.full_pdf) {
-                    uploadData.append('full_pdf', selectedFiles.full_pdf);
-                }
-                
-                await apiService.uploadEntryFile(Number(id), uploadData);
+            if (selectedFiles.file_path) {
+                const fileData = new FormData();
+                fileData.append('file', selectedFiles.file_path);
+                await apiService.uploadEntryFile(Number(id), fileData);
+            }
+            
+            if (selectedFiles.full_pdf) {
+                const pdfData = new FormData();
+                pdfData.append('file', selectedFiles.full_pdf);
+                await apiService.uploadEntryFullPdf(Number(id), pdfData);
             }
 
             toast.success(t('entryUpdatedSuccessfully') || 'Entry updated successfully');

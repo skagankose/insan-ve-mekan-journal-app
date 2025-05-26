@@ -241,6 +241,41 @@ const UserProfilePage: React.FC = () => {
                             </span>
                         )}
                     </div>
+                    {entry.status === 'waiting_for_payment' && (
+                        <div className="payment-info-block" style={{
+                            backgroundColor: '#f8f9fa',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '4px',
+                            padding: '15px',
+                            margin: '10px 0',
+                            color: '#495057'
+                        }}>
+                            <h4 style={{ color: '#0d6efd', marginBottom: '10px', fontSize: '1rem' }}>
+                                {t('paymentRequired') || 'Payment Required'}
+                            </h4>
+                            <p style={{ fontSize: '0.9rem', marginBottom: '10px' }}>
+                                {t('paymentInfoMessage') || 
+                                    'To proceed with the publication process, please complete the payment using the following bank information:'}
+                            </p>
+                            <div style={{ 
+                                backgroundColor: '#ffffff', 
+                                padding: '10px', 
+                                borderRadius: '4px',
+                                marginTop: '10px',
+                                fontFamily: 'monospace',
+                                fontSize: '0.9rem'
+                            }}>
+                                <p><strong>{t('bankName') || 'Bank Name'}:</strong> Example Bank</p>
+                                <p><strong>IBAN:</strong> TR00 0000 0000 0000 0000 0000 00</p>
+                                <p><strong>{t('accountHolder') || 'Account Holder'}:</strong> Journal Name</p>
+                            </div>
+                            {entry.random_token && (
+                                <p style={{ marginTop: '10px', fontSize: '0.85rem', color: '#6c757d' }}>
+                                    {t('paymentReference') || 'Please include your Reference Token as payment reference:'} <strong>{entry.random_token}</strong>
+                                </p>
+                            )}
+                        </div>
+                    )}
                     <div className="entry-actions" onClick={(e) => e.stopPropagation()}>
                     </div>
                 </div>

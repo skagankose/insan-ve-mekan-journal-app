@@ -29,6 +29,8 @@ const JournalDetailsPage: React.FC = () => {
     const [selectedEditorInChiefId, setSelectedEditorInChiefId] = useState<number | null>(null);
     const [selectedEditorIds, setSelectedEditorIds] = useState<number[]>([]);
     const [isSubmittingEditors, setIsSubmittingEditors] = useState(false);
+    const [isMerging, setIsMerging] = useState<boolean>(false);
+    const [mergeError, setMergeError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchJournalAndEntries = async () => {
@@ -41,7 +43,6 @@ const JournalDetailsPage: React.FC = () => {
                 let entriesData;
 
                 if (isEditorOrAdmin) {
-                    // Fetch data using authenticated endpoints for editors/admins
                     const [journalsData, fetchedEntries] = await Promise.all([
                         apiService.getJournals(),
                         apiService.getEntriesByJournal(parseInt(journalId))
@@ -49,7 +50,6 @@ const JournalDetailsPage: React.FC = () => {
                     journalData = journalsData.find(j => j.id === parseInt(journalId));
                     entriesData = fetchedEntries;
                 } else {
-                    // Fetch data using public endpoints for non-authenticated users
                     const [journals, entries] = await Promise.all([
                         apiService.getPublishedJournals(),
                         apiService.getPublishedJournalEntries(parseInt(journalId))
@@ -65,7 +65,6 @@ const JournalDetailsPage: React.FC = () => {
                 setJournal(journalData);
                 setEntries(entriesData);
 
-                // Fetch editor-in-chief and editors information for all users
                 if (journalData.editor_in_chief_id) {
                     try {
                         const editorInChiefData = await apiService.getPublicUserInfo(journalData.editor_in_chief_id.toString());
@@ -75,18 +74,19 @@ const JournalDetailsPage: React.FC = () => {
                     }
                 }
 
-                // Fetch editors information for all users
                 try {
-                    // Use the public API endpoint to get journal editors
                     const editorLinksData = await apiService.getPublicJournalEditors(journalData.id);
                     if (editorLinksData.length > 0) {
                         const editorsData = await Promise.all(
                             editorLinksData.map(link => apiService.getPublicUserInfo(link.user_id.toString()))
                         );
                         setEditors(editorsData);
+                    } else {
+                        setEditors([]);
                     }
                 } catch (err) {
                     console.error("Failed to fetch editors data:", err);
+                    setEditors([]);
                 }
             } catch (err: any) {
                 console.error("Failed to fetch journal data:", err);
@@ -99,7 +99,6 @@ const JournalDetailsPage: React.FC = () => {
         fetchJournalAndEntries();
     }, [journalId, isEditorOrAdmin, t]);
 
-    // Fetch admin and editor users when modals open
     useEffect(() => {
         const fetchUsers = async () => {
             if (!isAdmin) return;
@@ -108,7 +107,6 @@ const JournalDetailsPage: React.FC = () => {
                 try {
                     const admins = await apiService.getAdminUsers();
                     setAdminUsers(admins);
-                    // Set current editor-in-chief as selected
                     if (journal?.editor_in_chief_id) {
                         setSelectedEditorInChiefId(journal.editor_in_chief_id);
                     }
@@ -121,7 +119,6 @@ const JournalDetailsPage: React.FC = () => {
                 try {
                     const editorRoleUsers = await apiService.getEditorRoleUsers();
                     setEditorUsers(editorRoleUsers);
-                    // Set current editors as selected
                     setSelectedEditorIds(editors.map(editor => editor.id));
                 } catch (err) {
                     console.error('Failed to fetch editor users:', err);
@@ -132,7 +129,6 @@ const JournalDetailsPage: React.FC = () => {
         fetchUsers();
     }, [showEditorInChiefModal, showEditorsModal, isAdmin, journal, editors]);
 
-    // Prevent background scrolling when modals are open
     useEffect(() => {
         const isModalOpen = showEditorInChiefModal || showEditorsModal;
         
@@ -159,7 +155,6 @@ const JournalDetailsPage: React.FC = () => {
         }
     };
 
-    // Handle setting editor-in-chief
     const handleSetEditorInChief = async () => {
         if (!journalId || !selectedEditorInChiefId) return;
         
@@ -167,11 +162,9 @@ const JournalDetailsPage: React.FC = () => {
             setIsSubmittingEditors(true);
             await apiService.setJournalEditorInChief(parseInt(journalId), selectedEditorInChiefId);
             
-            // Fetch updated editor-in-chief info
             const updatedEditorInChief = await apiService.getUserBasicInfo(selectedEditorInChiefId.toString());
             setEditorInChief(updatedEditorInChief);
             
-            // Update journal local state
             if (journal) {
                 setJournal({
                     ...journal,
@@ -187,33 +180,24 @@ const JournalDetailsPage: React.FC = () => {
         }
     };
 
-    // Handle updating editors
     const handleUpdateEditors = async () => {
         if (!journalId) return;
         
         try {
             setIsSubmittingEditors(true);
             
-            // Get current editor IDs
             const currentEditorIds = editors.map(editor => editor.id);
-            
-            // Find editors to add (in selected but not in current)
             const editorsToAdd = selectedEditorIds.filter(id => !currentEditorIds.includes(id));
-            
-            // Find editors to remove (in current but not in selected)
             const editorsToRemove = currentEditorIds.filter(id => !selectedEditorIds.includes(id));
             
-            // Add new editors
             for (const editorId of editorsToAdd) {
                 await apiService.addJournalEditor(parseInt(journalId), editorId);
             }
             
-            // Remove editors
             for (const editorId of editorsToRemove) {
                 await apiService.removeJournalEditor(parseInt(journalId), editorId);
             }
             
-            // Fetch updated editors
             try {
                 const editorLinksData = await apiService.getPublicJournalEditors(parseInt(journalId));
                 if (editorLinksData.length > 0) {
@@ -233,6 +217,31 @@ const JournalDetailsPage: React.FC = () => {
             console.error('Failed to update editors:', err);
         } finally {
             setIsSubmittingEditors(false);
+        }
+    };
+
+    const handleMergeJournal = async () => {
+        if (!journalId || !journal) return;
+        
+        try {
+            setIsMerging(true);
+            setMergeError(null);
+            
+            await apiService.mergeJournalFiles(parseInt(journalId));
+            
+            const [journalsData] = await Promise.all([
+                apiService.getJournals()
+            ]);
+            const updatedJournal = journalsData.find(j => j.id === parseInt(journalId));
+            if (updatedJournal) {
+                setJournal(updatedJournal);
+            }
+            
+        } catch (err: any) {
+            console.error('Failed to merge journal files:', err);
+            setMergeError(err.response?.data?.detail || t('failedToMergeFiles') || 'Failed to merge journal files.');
+        } finally {
+            setIsMerging(false);
         }
     };
 
@@ -268,12 +277,25 @@ const JournalDetailsPage: React.FC = () => {
                                 {t('setAsActive') || 'Set as Active'}
                             </button>
                         )}
-                        <Link to={`/journals/edit/${journal.id}`} className="btn btn-primary">
+                        <button
+                            onClick={handleMergeJournal}
+                            className="btn btn-primary"
+                            disabled={isMerging}
+                        >
+                            {isMerging ? (t('mergingFiles') || 'Merging Files...') : (t('mergeAndCreateToc') || 'Create ToC & Merge Files')}
+                        </button>
+                        <Link to={`/journals/edit/${journal.id}`} className="btn btn-secondary">
                             {t('editJournal') || 'Edit Journal'}
                         </Link>
                     </div>
                 )}
             </div>
+
+            {mergeError && (
+                <div className="alert alert-danger" style={{ marginBottom: '20px' }}>
+                    {mergeError}
+                </div>
+            )}
 
             <div className="journal-details card">
                 <div className="journal-meta" style={{ 
@@ -365,7 +387,7 @@ const JournalDetailsPage: React.FC = () => {
                         )}
                         {journal.file_path && (
                             <a href={`/api${journal.file_path}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-                                {t('viewFilePath') || 'View File'}
+                                {t('viewMergedFile') || 'View Merged File'}
                             </a>
                         )}
                     </div>
@@ -434,7 +456,6 @@ const JournalDetailsPage: React.FC = () => {
                 )}
             </div>
 
-            {/* Editor-in-Chief Modal */}
             {showEditorInChiefModal && (
                 <div className="modal-overlay">
                     <div className="modal-container">
@@ -492,7 +513,6 @@ const JournalDetailsPage: React.FC = () => {
                 </div>
             )}
             
-            {/* Editors Modal */}
             {showEditorsModal && (
                 <div className="modal-overlay">
                     <div className="modal-container">

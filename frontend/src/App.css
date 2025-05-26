@@ -6,7 +6,11 @@ body {
   font-family: var(--font-family-sans); /* Use variable from index.css */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-background-secondary);
+  background-color: transparent; /* Body itself should be plain or transparent if app-container handles image */
+  /* background-image: url('/background.png'); Removed from here */
+  /* background-repeat: repeat; Removed from here */
+  /* background-size: 400px 400px; Removed from here */
+  /* backdrop-filter: blur(54px); Removed from here */
 }
 
 #root {
@@ -14,6 +18,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: transparent; /* Ensure root is transparent to see body's backdrop */
 }
 
 /* App layout styles */
@@ -21,11 +26,29 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: transparent; /* App container itself should be transparent */
+  position: relative; /* Needed for ::before positioning */
+  overflow: hidden; /* Optional: if blur creates edge artifacts */
+}
+
+.app-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/background.png');
+  background-repeat: repeat;
+  background-size: 400px 400px;
+  filter: blur(10px); /* Adjust blur amount as needed */
+  z-index: -1; /* Place it behind the content of .app-container */
+  transform: scale(1.1); /* Optional: scale slightly to avoid blurred edges appearing inside viewport */
 }
 
 /* Navbar Styling */
 .navbar {
-  background-color: var(--color-background-primary);
+  background-color: transparent;
   box-shadow: var(--shadow-md);
   position: sticky;
   top: 0;
@@ -126,14 +149,14 @@ body {
 .content-area {
   display: flex;
   flex: 1;
-  background-color: var(--color-background-secondary);
+  background-color: transparent; /* Make content-area transparent */
   position: relative; /* Add position relative to serve as positioning context */
 }
 
 /* Sidebar Styling */
 .sidebar {
   width: 240px;
-  background-color: var(--color-background-primary);
+  background-color: transparent;
   border-right: 1px solid var(--color-border-light);
   height: calc(100vh - 80px); /* Updated to match new navbar height */
   position: fixed;
@@ -207,7 +230,7 @@ body {
 .main-content {
   flex: 1;
   padding: var(--spacing-6);
-  background-color: var(--color-background-primary);
+  background-color: transparent;
   border-radius: var(--border-radius-lg);
   margin: var(--spacing-4);
   margin-left: 260px; /* Keep the same margin for sidebar spacing */
@@ -218,7 +241,7 @@ body {
 
 /* Card Component */
 .card {
-  background-color: var(--color-background-primary);
+  background-color: rgba(255, 255, 255, 0.8); /* Example: semi-transparent white, or use 'transparent' */
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-md);
   padding: var(--spacing-6);
@@ -239,7 +262,7 @@ body {
 
 /* Journal Entry Styling */
 .journal-entry {
-  background-color: var(--color-background-primary);
+  background-color: rgba(255, 255, 255, 0.8); /* Example: semi-transparent white, or use 'transparent' */
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-4);
   margin-bottom: var(--spacing-4);
@@ -276,7 +299,7 @@ body {
   max-width: 600px;
   margin: 0 auto;
   padding: var(--spacing-6);
-  background-color: var(--color-background-primary);
+  background-color: rgba(255, 255, 255, 0.8); /* Example: semi-transparent white, or use 'transparent' */
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-md);
   border: 1px solid var(--color-border-light);
@@ -886,4 +909,25 @@ body {
   padding: var(--spacing-1) var(--spacing-2);
   font-size: var(--font-size-sm);
   border-radius: var(--border-radius-sm);
+}
+
+.footer {
+  background-color: #f8f9fa;
+  padding: 1rem 0;
+  text-align: center;
+  width: 100%;
+  margin-top: 1px;
+  border-top: 1px solid #e9ecef;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.footer p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
 }

@@ -1,0 +1,38 @@
+.formatted-id-input {
+    position: relative;
+    width: 100%;
+}
+
+.formatted-id-input input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: monospace;
+    letter-spacing: 1px;
+}
+
+.formatted-id-input input.invalid {
+    border-color: var(--error-color);
+}
+
+.formatted-id-input .error-message {
+    color: var(--error-color);
+    font-size: 0.875rem;
+    margin-top: 4px;
+}
+
+.formatted-id-input .help-text {
+    font-size: 0.875rem;
+    margin-top: 4px;
+    color: var(--text-secondary);
+}
+
+.formatted-id-input .orcid-link {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.formatted-id-input .orcid-link:hover {
+    text-decoration: underline;
+} 

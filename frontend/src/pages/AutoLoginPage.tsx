@@ -81,7 +81,7 @@ const AutoLoginPage: React.FC = () => {
             setTimeout(() => {
                 // console.log("AutoLoginPage: Navigating now");
                 window.location.href = '/'; // Force a full page reload
-            }, 10);
+            }, 300);
         }
     }, [user, navigate]);
 

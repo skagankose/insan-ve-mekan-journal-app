@@ -11,6 +11,9 @@ python-multipart
 alembic 
 sib-api-v3-sdk
 email-validator
-pypandoc
 pytz
 requests
+python-docx==1.0.1
+google-auth
+google-auth-oauthlib
+google-auth-httplib2

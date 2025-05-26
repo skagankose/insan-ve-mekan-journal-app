@@ -146,9 +146,7 @@ const EditUserPage: React.FC = () => {
             await apiService.updateUser(Number(id), updateData);
             
             setSuccess(true);
-            setTimeout(() => {
-                navigate('/admin');
-            }, 2000);
+            navigate('/admin');
             
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to update user');
@@ -184,9 +182,6 @@ const EditUserPage: React.FC = () => {
                 const linkCopiedMsg = document.getElementById('link-copied-message');
                 if (linkCopiedMsg) {
                     linkCopiedMsg.style.opacity = '1';
-                    setTimeout(() => {
-                        linkCopiedMsg.style.opacity = '0';
-                    }, 2000);
                 }
             })
             .catch(err => {
@@ -207,11 +202,6 @@ const EditUserPage: React.FC = () => {
             await apiService.sendLoginLinkEmail(Number(id), loginLink, emailToSend);
             
             setEmailSent(true);
-            
-            // Reset email sent success message after a few seconds
-            setTimeout(() => {
-                setEmailSent(false);
-            }, 10);
             
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to send login link via email');
@@ -245,9 +235,7 @@ const EditUserPage: React.FC = () => {
             setShowDeleteConfirm(false);
             
             // Navigate back to admin page after short delay
-            setTimeout(() => {
-                navigate('/admin');
-            }, 10);
+            navigate('/admin');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to delete user');
             setDeleting(false);

@@ -265,6 +265,17 @@ const AdminPage: React.FC = () => {
                 let journalEntryAuthorLinksData: JournalEntryAuthorLinkRead[] = [];
                 let journalEntryRefereeLinksData: JournalEntryRefereeLinkRead[] = [];
                 
+                // Only fetch settings if user is authenticated and has proper role
+                if (isAuthenticated && (user?.role === 'admin' || user?.role === 'owner')) {
+                    try {
+                        settingsData = await apiService.getSettings();
+                    } catch (err: any) {
+                        console.error('Failed to fetch settings:', err);
+                        // Create a default settings object
+                        settingsData = { id: 1, active_journal_id: null, about: null };
+                    }
+                }
+                
                 try {
                     setUsersLoading(true);
                     usersData = await apiService.getAllUsers(
@@ -323,15 +334,6 @@ const AdminPage: React.FC = () => {
                     console.error('Failed to fetch referee updates:', err);
                 } finally {
                     setRefereeUpdatesLoading(false);
-                }
-                
-                try {
-                    settingsData = await apiService.getSettings();
-                    // console.log('Settings data:', settingsData);
-                } catch (err: any) {
-                    console.error('Failed to fetch settings:', err);
-                    // Create a default settings object
-                    settingsData = { id: 1, active_journal_id: null, about: null };
                 }
                 
                 try {
@@ -685,15 +687,22 @@ const AdminPage: React.FC = () => {
                                             <th>{t('orcidId')}</th>
                                             <th>{t('role')}</th>
                                             <th>{t('isAuth')}</th>
+                                            <th>{t('markedForDeletion') || 'Marked for Deletion'}</th>
+                                            <th>{t('tutorialDone') || 'Tutorial Done'}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {users.map((item) => (
+                                        {users
+                                            .sort((a, b) => a.email.toLowerCase().localeCompare(b.email.toLowerCase()))
+                                            .map((item) => (
                                             <tr 
                                                 key={item.id} 
                                                 onClick={() => navigate(`/admin/users/profile/${item.id}`)}
                                                 className="clickable-row"
-                                                style={{ cursor: 'pointer' }}
+                                                style={{ 
+                                                    cursor: 'pointer',
+                                                    outline: item.marked_for_deletion ? '2px solid #ff4444' : 'none'
+                                                }}
                                             >
                                                 <td>{renderCell(item.id)}</td>
                                                 <td>{renderCell(item.email)}</td>
@@ -707,6 +716,8 @@ const AdminPage: React.FC = () => {
                                                 <td>{renderCell(item.orcid_id)}</td>
                                                 <td><span className={`badge badge-${item.role}`}>{renderCell(item.role)}</span></td>
                                                 <td>{renderCell(item.is_auth)}</td>
+                                                <td>{renderCell(item.marked_for_deletion)}</td>
+                                                <td>{renderCell(item.tutorial_done)}</td>
                                             </tr>
                                         ))}
                                     </tbody>

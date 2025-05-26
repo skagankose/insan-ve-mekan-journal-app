@@ -83,7 +83,7 @@ const JournalCreateFormPage: React.FC = () => {
                             placeholder={t('enterTitle') || 'Enter title'}
                             required
                             disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                            maxLength={200}
+                            maxLength={300}
                         />
                     </div>
                     

@@ -5,6 +5,12 @@ import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import './EditUserPage.css'; // Reuse the same styling
 import ReCAPTCHA from 'react-google-recaptcha';
+import PhoneInput from 'react-phone-input-2';
+import FormattedIdInput from '../components/FormattedIdInput';
+import LocationInput from '../components/LocationInput';
+import 'react-phone-input-2/lib/style.css';
+import '../styles/PhoneInput.css';
+import '../styles/FormattedIdInput.css';
 
 interface UserForm {
     email: string;
@@ -133,9 +139,7 @@ const CreateUserPage: React.FC = () => {
             setCaptchaValue(null);
             
             // Navigate back to admin page after a short delay
-            setTimeout(() => {
-                navigate('/admin');
-            }, 10);
+            navigate('/admin');
             
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to create user');
@@ -218,13 +222,24 @@ const CreateUserPage: React.FC = () => {
                 
                 <div className="form-group">
                     <label htmlFor="telephone">{t('telephone')}</label>
-                    <input
-                        type="text"
-                        id="telephone"
-                        name="telephone"
+                    <PhoneInput
+                        country={'tr'}
                         value={formData.telephone}
-                        onChange={handleInputChange}
-                        maxLength={100}
+                        onChange={(phone: string) => handleInputChange({
+                            target: { name: 'telephone', value: phone }
+                        } as React.ChangeEvent<HTMLInputElement>)}
+                        inputProps={{
+                            id: 'telephone',
+                            disabled: loading
+                        }}
+                        containerClass="phone-input-container"
+                        inputClass="form-input"
+                        buttonClass="country-dropdown"
+                        disabled={loading}
+                        enableSearch={true}
+                        searchPlaceholder={t('searchCountry') || 'Search country'}
+                        searchNotFound={t('countryNotFound') || 'Country not found'}
+                        preferredCountries={['tr']}
                     />
                 </div>
                 
@@ -242,37 +257,42 @@ const CreateUserPage: React.FC = () => {
                 
                 <div className="form-group">
                     <label htmlFor="location">{t('location')}</label>
-                    <input
-                        type="text"
+                    <LocationInput
+                        value={formData.location}
+                        onChange={(value) => handleInputChange({
+                            target: { name: 'location', value }
+                        } as React.ChangeEvent<HTMLInputElement>)}
                         id="location"
                         name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        maxLength={100}
+                        disabled={loading}
                     />
                 </div>
                 
                 <div className="form-group">
                     <label htmlFor="yoksis_id">{t('yoksisId')}</label>
-                    <input
-                        type="text"
+                    <FormattedIdInput
+                        type="yoksis"
+                        value={formData.yoksis_id}
+                        onChange={(value) => handleInputChange({
+                            target: { name: 'yoksis_id', value }
+                        } as React.ChangeEvent<HTMLInputElement>)}
                         id="yoksis_id"
                         name="yoksis_id"
-                        value={formData.yoksis_id}
-                        onChange={handleInputChange}
-                        maxLength={100}
+                        disabled={loading}
                     />
                 </div>
                 
                 <div className="form-group">
                     <label htmlFor="orcid_id">{t('orcidId')}</label>
-                    <input
-                        type="text"
+                    <FormattedIdInput
+                        type="orcid"
+                        value={formData.orcid_id}
+                        onChange={(value) => handleInputChange({
+                            target: { name: 'orcid_id', value }
+                        } as React.ChangeEvent<HTMLInputElement>)}
                         id="orcid_id"
                         name="orcid_id"
-                        value={formData.orcid_id}
-                        onChange={handleInputChange}
-                        maxLength={100}
+                        disabled={loading}
                     />
                 </div>
                 

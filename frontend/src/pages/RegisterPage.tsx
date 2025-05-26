@@ -4,6 +4,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext'; // Use the Auth context
 import { useLanguage } from '../contexts/LanguageContext';
 import ReCAPTCHA from 'react-google-recaptcha';
+import PhoneInput from 'react-phone-input-2';
+import FormattedIdInput from '../components/FormattedIdInput';
+import LocationInput from '../components/LocationInput';
+import 'react-phone-input-2/lib/style.css';
+import '../styles/PhoneInput.css';
+import '../styles/FormattedIdInput.css';
 
 const RegisterPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -94,9 +100,7 @@ const RegisterPage: React.FC = () => {
             setYoksisId(''); setOrcidId(''); setPassword(''); setConfirmPassword('');
             setCaptchaValue(null);
             // Redirect to login after a short delay
-            setTimeout(() => {
-                navigate('/login');
-            }, 2000); 
+            navigate('/login');
         } catch (err: any) {
             console.error("Registration failed:", err);
             setError(err.response?.data?.detail || 'Registration failed. Please try again.');
@@ -181,14 +185,23 @@ const RegisterPage: React.FC = () => {
                 
                 <div className="form-group">
                     <label htmlFor="telephone" className="form-label">{t('telephone') || 'Phone Number'}</label>
-                    <input
-                        type="text"
-                        id="telephone"
-                        className="form-input"
+                    <PhoneInput
+                        country={'tr'}
                         value={telephone}
-                        onChange={(e) => setTelephone(e.target.value)}
+                        onChange={(phone: string) => setTelephone(phone)}
+                        inputProps={{
+                            id: 'telephone',
+                            required: true,
+                            disabled: isSubmitting
+                        }}
+                        containerClass="phone-input-container"
+                        inputClass="form-input"
+                        buttonClass="country-dropdown"
                         disabled={isSubmitting}
-                        maxLength={100}
+                        enableSearch={true}
+                        searchPlaceholder={t('searchCountry') || 'Search country'}
+                        searchNotFound={t('countryNotFound') || 'Country not found'}
+                        preferredCountries={['tr']}
                     />
                 </div>
                 
@@ -207,40 +220,34 @@ const RegisterPage: React.FC = () => {
                 
                 <div className="form-group">
                     <label htmlFor="location" className="form-label">{t('location') || 'Location'}</label>
-                    <input
-                        type="text"
-                        id="location"
-                        className="form-input"
+                    <LocationInput
                         value={location}
-                        onChange={(e) => setLocation(e.target.value)}
+                        onChange={setLocation}
+                        id="location"
                         disabled={isSubmitting}
-                        maxLength={100}
+                        required
                     />
                 </div>
                 
                 <div className="form-group">
                     <label htmlFor="yoksisId" className="form-label">{t('yoksisId') || 'YÖKSİS ID'}</label>
-                    <input
-                        type="text"
-                        id="yoksisId"
-                        className="form-input"
+                    <FormattedIdInput
+                        type="yoksis"
                         value={yoksisId}
-                        onChange={(e) => setYoksisId(e.target.value)}
+                        onChange={setYoksisId}
+                        id="yoksisId"
                         disabled={isSubmitting}
-                        maxLength={100}
                     />
                 </div>
                 
                 <div className="form-group">
                     <label htmlFor="orcidId" className="form-label">{t('orcidId') || 'ORCID ID'}</label>
-                    <input
-                        type="text"
-                        id="orcidId"
-                        className="form-input"
+                    <FormattedIdInput
+                        type="orcid"
                         value={orcidId}
-                        onChange={(e) => setOrcidId(e.target.value)}
+                        onChange={setOrcidId}
+                        id="orcidId"
                         disabled={isSubmitting}
-                        maxLength={100}
                     />
                 </div>
                 

@@ -77,7 +77,9 @@ def seed_database():
                             is_auth=True,
                             hashed_password=get_password_hash("ownerpassword"),
                             confirmation_token="owner_token",
-                            confirmation_token_created_at=datetime.utcnow()
+                            confirmation_token_created_at=datetime.utcnow(),
+                            marked_for_deletion=False,  # Admins should not be marked for deletion
+                            tutorial_done=True  # Admins should have completed the tutorial
                         )
                         session.add(owner_user)
                         session.commit()
@@ -135,7 +137,9 @@ def seed_database():
                 is_auth=True,
                 hashed_password=get_password_hash(f"admin{i}password"),
                 confirmation_token=f"admin{i}_token",
-                confirmation_token_created_at=datetime.utcnow()
+                confirmation_token_created_at=datetime.utcnow(),
+                marked_for_deletion=False,  # Admins should not be marked for deletion
+                tutorial_done=True  # Admins should have completed the tutorial
             ) for i in range(2, 4)  # Now creating 2 admin users
         ]
         
@@ -162,7 +166,9 @@ def seed_database():
                     is_auth=True,
                     hashed_password=get_password_hash("ownerpassword"),
                     confirmation_token="owner_token",
-                    confirmation_token_created_at=datetime.utcnow()
+                    confirmation_token_created_at=datetime.utcnow(),
+                    marked_for_deletion=False,  # Owners should not be marked for deletion
+                    tutorial_done=True  # Owners should have completed the tutorial
                 )
                 users.append(owner_user)
                 print("Added primary owner user to be created")
@@ -185,7 +191,9 @@ def seed_database():
                         is_auth=True,
                         hashed_password=get_password_hash("ownerpassword"),
                         confirmation_token="owner_token",
-                        confirmation_token_created_at=datetime.utcnow()
+                        confirmation_token_created_at=datetime.utcnow(),
+                        marked_for_deletion=False,  # Should not be marked for deletion
+                        tutorial_done=True  # Should have completed the tutorial
                     )
                     users.append(owner_user)
                     print("Added primary owner user with admin role as fallback")
@@ -212,7 +220,9 @@ def seed_database():
                 is_auth=True,
                 hashed_password=get_password_hash("owner2password"),
                 confirmation_token="owner2_token",
-                confirmation_token_created_at=datetime.utcnow()
+                confirmation_token_created_at=datetime.utcnow(),
+                marked_for_deletion=False,  # Should not be marked for deletion
+                tutorial_done=True  # Should have completed the tutorial
             )
             users.append(owner_user2)
             print("Added second owner user")
@@ -233,7 +243,9 @@ def seed_database():
                 is_auth=True,
                 hashed_password=get_password_hash("owner3password"),
                 confirmation_token="owner3_token",
-                confirmation_token_created_at=datetime.utcnow()
+                confirmation_token_created_at=datetime.utcnow(),
+                marked_for_deletion=False,  # Should not be marked for deletion
+                tutorial_done=True  # Should have completed the tutorial
             )
             users.append(owner_user3)
             print("Added third owner user")
@@ -252,9 +264,9 @@ def seed_database():
             selected_science_branch = random.choice(science_branch_samples)
             selected_location = random.choice(cities)
             
-            # ---- DEBUG PRINT ----
-            print(f"DEBUG: Creating editor {i} with science_branch='{selected_science_branch}' (type: {type(selected_science_branch)})")
-            # ---- END DEBUG PRINT ----
+            # Random chance for tutorial completion and deletion marking
+            tutorial_done = random.random() < 0.9  # 90% chance of having completed tutorial
+            marked_for_deletion = random.random() < 0.05  # 5% chance of being marked for deletion
 
             editor = User(
                 id=i+3,  # Start IDs at 4 (after 3 admins)
@@ -271,7 +283,9 @@ def seed_database():
                 is_auth=True,
                 hashed_password=get_password_hash(f"editor{i}password"),
                 confirmation_token=f"editor{i}_token",
-                confirmation_token_created_at=datetime.utcnow()
+                confirmation_token_created_at=datetime.utcnow(),
+                marked_for_deletion=marked_for_deletion,
+                tutorial_done=tutorial_done
             )
             editors.append(editor)
         users.extend(editors)
@@ -289,9 +303,9 @@ def seed_database():
             selected_science_branch = random.choice(science_branch_samples)
             selected_location = random.choice(cities)
 
-            # ---- DEBUG PRINT ----
-            print(f"DEBUG: Creating author {i} with science_branch='{selected_science_branch}' (type: {type(selected_science_branch)})")
-            # ---- END DEBUG PRINT ----
+            # Random chance for tutorial completion and deletion marking
+            tutorial_done = random.random() < 0.7  # 70% chance of having completed tutorial
+            marked_for_deletion = random.random() < 0.1  # 10% chance of being marked for deletion
 
             author = User(
                 id=i+13,  # Start at 14 (after 3 admins + 10 editors)
@@ -308,7 +322,9 @@ def seed_database():
                 is_auth=True,
                 hashed_password=get_password_hash(f"author{i}password"),
                 confirmation_token=f"author{i}_token",
-                confirmation_token_created_at=datetime.utcnow()
+                confirmation_token_created_at=datetime.utcnow(),
+                marked_for_deletion=marked_for_deletion,
+                tutorial_done=tutorial_done
             )
             authors.append(author)
         users.extend(authors)
@@ -325,9 +341,9 @@ def seed_database():
             selected_science_branch = random.choice(science_branch_samples)
             selected_location = random.choice(cities)
 
-            # ---- DEBUG PRINT ----
-            print(f"DEBUG: Creating referee {i} with science_branch='{selected_science_branch}' (type: {type(selected_science_branch)})")
-            # ---- END DEBUG PRINT ----
+            # Random chance for tutorial completion and deletion marking
+            tutorial_done = random.random() < 0.8  # 80% chance of having completed tutorial
+            marked_for_deletion = random.random() < 0.08  # 8% chance of being marked for deletion
             
             referee = User(
                 id=i+29,  # Start at 30 (after 3 admins + 10 editors + 16 authors)
@@ -344,7 +360,9 @@ def seed_database():
                 is_auth=True,
                 hashed_password=get_password_hash(f"referee{i}password"),
                 confirmation_token=f"referee{i}_token",
-                confirmation_token_created_at=datetime.utcnow()
+                confirmation_token_created_at=datetime.utcnow(),
+                marked_for_deletion=marked_for_deletion,
+                tutorial_done=tutorial_done
             )
             referees.append(referee)
         users.extend(referees)

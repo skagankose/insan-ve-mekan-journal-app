@@ -125,6 +125,16 @@
     background-color: var(--admin-table-row-hover-bg);
 }
 
+/* Ensure outline is visible on top of other styles */
+.admin-page .data-table tr[style*="outline"] {
+    position: relative;
+    z-index: 1;
+}
+
+.admin-page .data-table tr[style*="outline"]:hover {
+    background-color: var(--admin-table-row-hover-bg);
+}
+
 /* Badge styles */
 .admin-page .badge {
     padding: 0.25rem 0.5rem;

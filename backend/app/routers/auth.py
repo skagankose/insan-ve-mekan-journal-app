@@ -8,16 +8,29 @@ from jose import jwt, JWTError
 from pydantic import BaseModel, EmailStr
 import os
 import requests
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import logging
 
 from .. import crud, schemas, models, auth, security
 from ..database import get_session
 from ..email_utils import send_confirmation_email, send_password_reset_email
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Your Brevo API Key - consider moving to environment variables for production
 # BREVO_API_KEY = "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"
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
 # RECAPTCHA_SECRET_KEY = "6Lc0kEYrAAAAACYXOmcyvtXYvt4vXaibHBKQo1Hz"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
+# Log configuration status
+logger.info(f"Google Client ID configured: {'Yes' if GOOGLE_CLIENT_ID else 'No'}")
+if not GOOGLE_CLIENT_ID:
+    logger.warning("Google Client ID is not configured! Google Sign-In will not work.")
 
 router = APIRouter()
 
@@ -396,4 +409,83 @@ def change_password(
     # Update the password
     crud.update_user_password(db, current_user.id, request.new_password)
     
-    return {"message": "Password has been successfully updated."} 
+    return {"message": "Password has been successfully updated."}
+
+class GoogleLoginData(BaseModel):
+    credential: str
+
+@router.post("/token/google", response_model=auth.Token, tags=["auth"])
+async def login_with_google(data: GoogleLoginData, db: Session = Depends(get_session)):
+    """
+    Authenticate user with Google OAuth token and return an access token.
+    """
+    if not GOOGLE_CLIENT_ID:
+        logger.error("Google OAuth is not configured - missing GOOGLE_CLIENT_ID")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Google OAuth is not configured on the server"
+        )
+
+    try:
+        logger.info(f"Received Google credential, length: {len(data.credential)}")
+        logger.info(f"Using Google Client ID: {GOOGLE_CLIENT_ID[:8]}...")  # Log only first 8 chars for security
+
+        # Verify the Google token
+        idinfo = id_token.verify_oauth2_token(
+            data.credential,
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID,
+            clock_skew_in_seconds=10
+        )
+        
+        logger.info("Google token verified successfully")
+        logger.debug(f"Token verification result: {idinfo}")  # Be careful with logging sensitive info
+
+        # Get user info from the token
+        email = idinfo.get('email')
+        if not email:
+            logger.error("No email found in Google token")
+            raise ValueError("Email not found in token")
+            
+        name = idinfo.get('name', '')
+        logger.info(f"Processing login for Google user: {email}")
+
+        # Check if user exists
+        user = crud.get_user_by_email(db, email=email)
+        
+        if not user:
+            logger.info(f"Creating new user for Google account: {email}")
+            # Create new user if doesn't exist
+            user_data = schemas.UserCreate(
+                email=email,
+                name=name,
+                password=security.get_random_string(32),  # Generate random password
+                is_auth=True,  # Google-authenticated users are automatically verified
+                recaptcha_token="google_oauth"  # Skip recaptcha for Google OAuth
+            )
+            user = crud.create_user(db, user_data)
+            logger.info(f"New user created with ID: {user.id}")
+        else:
+            logger.info(f"Existing user found with ID: {user.id}")
+
+        # Create access token
+        access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = security.create_access_token(
+            data={"sub": user.email}, expires_delta=access_token_expires
+        )
+        
+        logger.info(f"Login successful for user: {email}")
+        return {"access_token": access_token, "token_type": "bearer"}
+        
+    except ValueError as e:
+        logger.error(f"Token verification failed with ValueError: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid Google token: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Token verification failed with unexpected error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        ) 

@@ -7,7 +7,7 @@ import pytz
 
 from .. import crud, models, schemas, auth, notification_utils
 from ..database import get_session
-from ..file_utils import save_upload_file, delete_upload_file
+from ..file_utils import save_upload_file, delete_upload_file, validate_pdf
 
 router = APIRouter(
     prefix="/entries",
@@ -675,6 +675,48 @@ async def upload_entry_file(
     folder = f"entries/{entry_id}"
     file_path = save_upload_file(file, folder)
     db_entry.file_path = file_path
+    
+    # Save changes
+    db.add(db_entry)
+    db.commit()
+    db.refresh(db_entry)
+    
+    return db_entry
+
+
+@router.post("/{entry_id}/upload-full-pdf", response_model=models.JournalEntry)
+async def upload_entry_full_pdf(
+    entry_id: int,
+    file: UploadFile = File(..., description="Upload a PDF file."),
+    db: Session = Depends(get_session),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Upload a full PDF file for a journal entry. Only PDF files are allowed.
+    """
+    # Check if entry exists
+    db_entry = crud.get_entry(db, entry_id=entry_id)
+    if db_entry is None:
+        raise HTTPException(status_code=404, detail="Journal entry not found")
+    
+    # Check if the user has permissions to access this entry
+    is_author = any(author.id == current_user.id for author in db_entry.authors)
+    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    
+    if not is_admin_or_editor and not is_author:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to upload files for this entry."
+        )
+    
+    # Delete previous file if exists
+    if db_entry.full_pdf:
+        delete_upload_file(db_entry.full_pdf)
+    
+    # Save the new file
+    folder = f"entries/{entry_id}"
+    file_path = save_upload_file(file, folder, validate_pdf)
+    db_entry.full_pdf = file_path
     
     # Save changes
     db.add(db_entry)

@@ -23,6 +23,8 @@ export interface UserRead {
     confirmation_token?: string;
     confirmation_token_created_at?: string;
     editor_in_chief_id?: number;
+    marked_for_deletion?: boolean;
+    tutorial_done?: boolean;
 }
 
 interface UserCreate {
@@ -295,6 +297,28 @@ const login = async (email: string, password: string): Promise<TokenResponse> =>
     return response.data;
 };
 
+const loginWithGoogle = async (credential: string): Promise<TokenResponse> => {
+    try {
+        // console.log('Sending Google credential to backend...');
+        const response = await apiClient.post<TokenResponse>(
+            '/token/google',
+            { credential },
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+        // console.log('Backend response:', response.data);
+        return response.data;
+    } catch (error: any) {
+        console.error('Google login API error:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            error: error.message
+        });
+        throw error;
+    }
+};
+
 const register = async (userData: UserCreate): Promise<UserRead> => {
     const response = await apiClient.post<UserRead>('/users/', userData);
     return response.data;
@@ -419,8 +443,23 @@ const updateSettings = async (settingsData: SettingsUpdate): Promise<Settings> =
 
 // --- New Admin API functions ---
 const getSettings = async (): Promise<Settings> => {
-    const response = await apiClient.get<Settings>('/admin/settings');
-    return response.data;
+    // Check if we have a token
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        // Return default settings if not authenticated
+        return { id: 1, active_journal_id: null, about: null };
+    }
+
+    try {
+        const response = await apiClient.get<Settings>('/admin/settings');
+        return response.data;
+    } catch (error: any) {
+        if (error.response?.status === 401) {
+            // Return default settings when unauthorized
+            return { id: 1, active_journal_id: null, about: null };
+        }
+        throw error;
+    }
 };
 
 const getAllAuthorUpdates = async (skip: number = 0, limit: number = 100): Promise<AuthorUpdateRead[]> => {
@@ -636,6 +675,27 @@ const updateMyProfile = async (userData: UserUpdate): Promise<UserRead> => {
     return response.data;
 };
 
+const markUserForDeletion = async (): Promise<UserRead> => {
+    const response = await apiClient.put<UserRead>('/users/me', {
+        marked_for_deletion: true
+    });
+    return response.data;
+};
+
+const unmarkUserForDeletion = async (): Promise<UserRead> => {
+    const response = await apiClient.put<UserRead>('/users/me', {
+        marked_for_deletion: false
+    });
+    return response.data;
+};
+
+const updateTutorialStatus = async (tutorialDone: boolean): Promise<UserRead> => {
+    const response = await apiClient.put<UserRead>('/users/me', {
+        tutorial_done: tutorialDone
+    });
+    return response.data;
+};
+
 // --- Editor Specific Endpoints ---
 
 // Fetch journals the current editor is assigned to
@@ -821,6 +881,15 @@ const uploadEntryFile = async (entryId: number, formData: FormData): Promise<Jou
     return response.data;
 };
 
+const uploadEntryFullPdf = async (entryId: number, formData: FormData): Promise<JournalEntryRead> => {
+    const response = await apiClient.post<JournalEntryRead>(`/entries/${entryId}/upload-full-pdf`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+
 // Add function to change user's password
 const changePassword = async (currentPassword: string, newPassword: string): Promise<{ message: string }> => {
     const response = await apiClient.post('/users/me/change-password', {
@@ -835,6 +904,16 @@ export const getJournalEditors = async (journalId: number): Promise<JournalEdito
   const response = await apiClient.get<JournalEditorLink[]>(`/public/journals/${journalId}/editors`);
   return response.data;
 };
+
+const mergeJournalFiles = async (journalId: number): Promise<Journal> => {
+    const response = await apiClient.post<Journal>(`/journals/${journalId}/merge`);
+    return response.data;
+};
+
+export async function createJournalTableOfContents(journalId: number): Promise<Journal> {
+    const response = await apiClient.post(`/journals/${journalId}/table-of-contents`);
+    return response.data;
+}
 
 export {
     // List all functions that are *not* individually exported with 'export const'
@@ -888,6 +967,9 @@ export {
     getUserRefereeEntries,
     getUserEditedJournals,
     updateMyProfile,
+    markUserForDeletion,
+    unmarkUserForDeletion,
+    updateTutorialStatus,
     // Note: getEditorJournals, getEditorJournalEntries, 
     // getEditorAuthorUpdates, getEditorRefereeUpdates are intentionally omitted 
     // because they use 'export const' above.
@@ -907,7 +989,10 @@ export {
     searchAll,
     uploadJournalFiles,
     uploadEntryFile,
+    uploadEntryFullPdf,
     changePassword,
+    mergeJournalFiles,
+    loginWithGoogle,
 };
 
 export type {

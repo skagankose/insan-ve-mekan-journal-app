@@ -70,6 +70,10 @@ def get_all_users(
                     # Default to author if invalid
                     user_dict['role'] = "author"
             
+            # Ensure boolean fields are properly set
+            user_dict['marked_for_deletion'] = bool(user_dict.get('marked_for_deletion', False))
+            user_dict['tutorial_done'] = bool(user_dict.get('tutorial_done', False))
+            
             sanitized_users.append(user_dict)
         
         return sanitized_users

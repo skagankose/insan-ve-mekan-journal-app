@@ -37,7 +37,7 @@ type TranslationKeys =
   | 'passwordRequirements' | 'passwordMinLength' | 'passwordCase' | 'passwordNumber' | 'passwordMatch' | 'confirmPassword'
   | 'changePassword' | 'currentPassword' | 'newPassword' | 'passwordUpdated' | 'changingPassword'
   | 'statusWaitingForPayment' | 'statusWaitingForAuthors' | 'statusWaitingForReferees' | 'statusWaitingForEditors' | 'statusAccepted' | 'statusNotAccepted'
-  | 'published';
+  | 'published' | 'or' | 'locale' | 'googleSignIn' | 'googleSignInFailed';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -213,6 +213,12 @@ const translations: Record<Language, TranslationDictionary> = {
     'newPassword': 'New Password',
     'passwordUpdated': 'Password updated successfully!',
     'changingPassword': 'Changing Password...',
+
+    // New translations
+    'or': 'OR',
+    'locale': 'en',
+    'googleSignIn': 'Sign in with Google',
+    'googleSignInFailed': 'Google sign-in failed. Please try again.',
   },
   tr: {
     // Navigation
@@ -384,6 +390,12 @@ const translations: Record<Language, TranslationDictionary> = {
     'newPassword': 'Yeni Şifre',
     'passwordUpdated': 'Şifre başarıyla güncellendi!',
     'changingPassword': 'Şifre Değiştiriliyor...',
+
+    // New translations
+    'or': 'VEYA',
+    'locale': 'tr',
+    'googleSignIn': 'Google ile Giriş Yap',
+    'googleSignInFailed': 'Google girişi başarısız oldu. Lütfen tekrar deneyin.',
   }
 };
 

@@ -41,9 +41,7 @@ const ResetPasswordPage: React.FC = () => {
             setSuccess(true);
             
             // Redirect to login after success
-            setTimeout(() => {
-                navigate('/login');
-            }, 3000);
+            navigate('/login');
         } catch (err: any) {
             console.error("Password reset failed:", err);
             setError(err.response?.data?.detail || 'Failed to reset password. The link may have expired. Please request a new password reset.');

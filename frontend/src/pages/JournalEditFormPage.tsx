@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './JournalFormPage.css';
 
 interface JournalFormData {
@@ -211,9 +212,14 @@ const JournalEditFormPage: React.FC = () => {
             return;
         }
 
+        if (journalId === 1) {
+            toast.error(t('cannotDeleteDefaultJournal') || 'Cannot delete the default journal (ID: 1)');
+            return;
+        }
+
         const confirmDelete = window.confirm(
             t('confirmDeleteJournal') || 
-            'Are you sure you want to delete this journal? This will also delete all related entries, updates, and files. This action cannot be undone.'
+            'Are you sure you want to delete this journal? All related entries will be reassigned to the default journal (ID: 1). This action cannot be undone.'
         );
 
         if (!confirmDelete) {
@@ -223,11 +229,15 @@ const JournalEditFormPage: React.FC = () => {
         setIsDeleting(true);
         try {
             await apiService.deleteJournal(journalId);
-            toast.success(t('journalDeleted') || 'Journal deleted successfully');
+            toast.success(t('journalDeleted') || 'Journal deleted successfully. All entries have been reassigned to the default journal.');
             navigate('/journals');
         } catch (err: any) {
             console.error("Failed to delete journal:", err);
-            toast.error(err.response?.data?.detail || t('errorDeletingJournal') || 'Failed to delete journal');
+            if (err.response?.data?.detail?.includes("Cannot delete journal with ID 1")) {
+                toast.error(t('cannotDeleteDefaultJournal') || 'Cannot delete the default journal (ID: 1)');
+            } else {
+                toast.error(err.response?.data?.detail || t('errorDeletingJournal') || 'Failed to delete journal');
+            }
             setIsDeleting(false);
         }
     };
@@ -258,7 +268,7 @@ const JournalEditFormPage: React.FC = () => {
                         onChange={handleChange}
                         required
                         disabled={isSubmitting}
-                        maxLength={200}
+                        maxLength={300}
                     />
                 </div>
                 
@@ -323,6 +333,7 @@ const JournalEditFormPage: React.FC = () => {
                         id="publication_place"
                         name="publication_place"
                         className="form-input"
+                        maxLength={100}
                         value={formData.publication_place || ''}
                         onChange={handleChange}
                         placeholder={t('enterPublicationPlace') || 'Enter publication place'}
@@ -493,7 +504,7 @@ const JournalEditFormPage: React.FC = () => {
                 <div className="danger-zone">
                     <h2>{t('dangerZone') || 'Danger Zone'}</h2>
                     <div className="danger-zone-content">
-                        <p>{t('deleteJournalWarning') || 'Once you delete a journal, there is no going back. This will delete all related entries, updates, and files.'}</p>
+                        <p>{t('deleteJournalWarning') || 'Once you delete a journal, there is no going back. All entries will be reassigned to the default journal (ID: 1).'}</p>
                         <button 
                             onClick={handleDeleteJournal}
                             disabled={isDeleting}

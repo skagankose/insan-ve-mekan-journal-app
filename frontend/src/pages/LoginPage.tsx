@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { GoogleLogin } from '@react-oauth/google';
+import '../styles/LoginPage.css';
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
-    const location = useLocation();
-    const { login, isLoading } = useAuth();
+    const { login, loginWithGoogle, isLoading } = useAuth();
     const { t } = useLanguage();
-
-    // Determine where to redirect after login
-    const from = location.state?.from?.pathname || "/";
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -21,81 +19,82 @@ const LoginPage: React.FC = () => {
 
         try {
             await login(email, password);
-            navigate(from, { replace: true });
+            navigate('/', { replace: true });
         } catch (err: any) {
             console.error("Login failed:", err);
             const detail = err.response?.data?.detail;
             if (err.response?.status === 403 && detail === "Please confirm your email address to login.") {
-                // Assuming you have a showToast function available
-                // showToast(detail, { type: 'error' }); 
-                setError(detail); // Or set a specific state for this message
+                setError(detail);
             } else {
                 setError(detail || 'Login failed. Please check your credentials.');
             }
         }
     };
 
+    const handleGoogleSuccess = async (credentialResponse: any) => {
+        try {
+            await loginWithGoogle(credentialResponse.credential);
+            // Navigate to the home page after successful Google login
+            navigate('/', { replace: true });
+        } catch (err: any) {
+            console.error("Google login failed:", err);
+            setError('Google login failed. Please try again.');
+        }
+    };
+
+    const handleGoogleError = () => {
+        setError('Google login failed. Please try again.');
+    };
+
+    if (isLoading) {
+        return <div className="loading">{t('loading')}</div>;
+    }
+
     return (
-        <div className="form-container">
-            <div className="page-header">
-                <h1 className="page-title">{t('welcomeBack')}</h1>
-            </div>
-            
-            {error && <div className="error-message">{error}</div>}
-            
-            <form onSubmit={handleSubmit} className="card">
-                <div className="form-group">
-                    <label htmlFor="email" className="form-label">{t('email')}</label>
-                    <input
-                        type="email"
-                        id="email"
-                        className="form-input"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={isLoading}
-                        placeholder={t('enterEmail')}
-                        maxLength={200}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="password" className="form-label">{t('password')}</label>
-                    <input
-                        type="password"
-                        id="password"
-                        className="form-input"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        disabled={isLoading}
-                        placeholder={t('enterPassword')}
-                        maxLength={100}
-                    />
-                    <div className="form-helper-text" style={{ textAlign: 'right', marginTop: '4px' }}>
-                        <Link to="/forgot-password" className="forgot-password-link">
-                            {t('forgotPassword')}
-                        </Link>
+        <div className="login-container">
+            <div className="login-box">
+                <h2>{t('login')}</h2>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label htmlFor="email">{t('email')}</label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
                     </div>
-                </div>
-                
-                <div className="form-group" style={{ marginTop: 'var(--spacing-6)' }}>
-                    <button 
-                        type="submit" 
-                        className="btn btn-primary"
-                        disabled={isLoading}
-                        style={{ width: '100%' }}
-                    >
-                        {isLoading ? t('signingIn') : t('loginButton')}
+                    <div className="form-group">
+                        <label htmlFor="password">{t('password')}</label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <button type="submit" className="login-button">
+                        {t('login')}
                     </button>
+                </form>
+
+                <div className="social-login">
+                    <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        useOneTap
+                    />
                 </div>
-                
-                <div style={{ textAlign: 'center', marginTop: 'var(--spacing-4)' }}>
-                    <p className="text-secondary">
-                        {t('dontHaveAccount')} <Link to="/register">{t('signUp')}</Link>
-                    </p>
+
+                {error && <div className="error-message">{error}</div>}
+
+                <div className="links">
+                    <Link to="/forgot-password">{t('forgotPassword')}</Link>
+                    <Link to="/register">{t('register')}</Link>
                 </div>
-            </form>
+            </div>
         </div>
     );
 };

@@ -478,7 +478,11 @@ def update_user_password(db: Session, user_id: int, new_password: str) -> models
     return user
 
 def delete_journal(db: Session, journal_id: int) -> models.Journal | None:
-    """Delete a journal and all its related data."""
+    """Delete a journal and reassign its entries to journal ID 1."""
+    # Don't allow deleting journal ID 1
+    if journal_id == 1:
+        raise ValueError("Cannot delete journal with ID 1 as it is the default journal")
+
     db_journal = db.get(models.Journal, journal_id)
     if not db_journal:
         return None
@@ -487,9 +491,11 @@ def delete_journal(db: Session, journal_id: int) -> models.Journal | None:
     statement = select(models.JournalEntry).where(models.JournalEntry.journal_id == journal_id)
     entries = db.exec(statement).all()
     
-    # Delete each entry and its related data
+    # Reassign entries to journal ID 1
     for entry in entries:
-        delete_entry(db, entry.id)
+        entry.journal_id = 1
+        db.add(entry)
+        db.flush()
     
     # Delete journal's files if they exist
     if db_journal.cover_photo:

@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect, ReactNode, useRe
 import * as apiService from '../services/apiService'; // Use our API service
 
 // Define the shape of the user object (adjust based on UserRead schema)
-interface User {
+export interface User {
     id: number;
     email: string;
     name: string;
@@ -15,6 +15,8 @@ interface User {
     orcid_id?: string;
     role: string;
     is_auth: boolean;
+    marked_for_deletion?: boolean;
+    tutorial_done?: boolean;
 }
 
 // Define the shape of the context data
@@ -24,6 +26,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean; // To handle initial auth check
     login: (email: string, password: string) => Promise<void>;
+    loginWithGoogle: (credential: string) => Promise<User>;
     logout: () => void;
     register: (userData: any) => Promise<void>; // Add register function
     setAuthState: (isAuthenticated: boolean, user: User | null) => void; // Add method to set auth state
@@ -72,12 +75,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const login = async (email: string, password: string) => {
         try {
             const data = await apiService.login(email, password);
+            // Set token first
             localStorage.setItem('authToken', data.access_token);
             setToken(data.access_token);
-            // Fetch user details after setting token (useEffect will trigger)
+            
+            // Then fetch user details
+            const currentUser = await apiService.getCurrentUser();
+            setUser(currentUser);
         } catch (error) {
+            // If anything fails, clean up
+            localStorage.removeItem('authToken');
+            setToken(null);
+            setUser(null);
             console.error("AuthProvider: Login failed", error);
-            throw error; // Re-throw error to be caught by the component
+            throw error;
+        }
+    };
+
+    const loginWithGoogle = async (credential: string) => {
+        try {
+            const data = await apiService.loginWithGoogle(credential);
+            localStorage.setItem('authToken', data.access_token);
+            setToken(data.access_token);
+            
+            // Fetch user details immediately after setting token
+            const currentUser = await apiService.getCurrentUser();
+            setUser(currentUser);
+            
+            return currentUser; // Return the user data for the component to use
+        } catch (error) {
+            console.error("AuthProvider: Google login failed", error);
+            throw error;
         }
     };
 
@@ -144,6 +172,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isAuthenticated: !!token && !!user, // Considered authenticated if token and user exist
         isLoading,
         login,
+        loginWithGoogle,
         logout,
         register,
         setAuthState,

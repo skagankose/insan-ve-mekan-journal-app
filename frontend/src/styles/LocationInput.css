@@ -1,0 +1,92 @@
+.location-input {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.location-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.location-label {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.location-text-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+.location-text-input:disabled {
+    background-color: var(--input-disabled-bg);
+    cursor: not-allowed;
+}
+
+.country-select {
+    width: 100%;
+}
+
+/* Style the react-select component to match your theme */
+.country-select .country-select__control {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+    border-radius: 4px;
+    min-height: 40px;
+}
+
+.country-select .country-select__control:hover {
+    border-color: var(--border-hover-color);
+}
+
+.country-select .country-select__control--is-focused {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+.country-select .country-select__menu {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    z-index: 2;
+}
+
+.country-select .country-select__option {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+.country-select .country-select__option:hover {
+    background-color: var(--input-hover-bg);
+}
+
+.country-select .country-select__option--is-selected {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.country-select .country-select__option--is-focused {
+    background-color: var(--input-hover-bg);
+}
+
+.country-select .country-select__single-value {
+    color: var(--text-color);
+}
+
+.country-select .country-select__placeholder {
+    color: var(--text-secondary);
+}
+
+.location-input .help-text {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-top: -8px;
+} 

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 // Import page components
 import LoginPage from './pages/LoginPage';
@@ -33,6 +34,7 @@ import RefereeUpdateFormPage from './pages/RefereeUpdateFormPage';
 import Navbar from './components/Navbar';
 // Import Sidebar when needed
 import Sidebar from './components/Sidebar';
+import Footer from './components/Footer';
 
 // Import ProtectedRoute component (create next)
 // import ProtectedRoute from './components/ProtectedRoute';
@@ -78,114 +80,120 @@ const UserRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-function App() {
-  return (
-    <div className="app-container">
-      <Navbar /> 
-      <div className="content-area">
-        <Sidebar /> 
-        <main className="main-content">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/auto-login" element={<AutoLoginPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+const App: React.FC = () => {
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-            {/* Protected Routes */}
-            <Route path="/entries/new" element={
-              <UserRoute>
-                <JournalCreatePage />
-              </UserRoute>
-            } />
-            <Route path="/entries/edit/:id" element={
-              <UserRoute>
-                <JournalEditPage />
-              </UserRoute>
-            } />
-            <Route path="/entries/:entryId/updates" element={
-              <UserRoute>
-                <JournalEntryUpdateDetailsPage />
-              </UserRoute>
-            } />
-            <Route path="/entries/:entryId" element={<JournalEntryDetailsPage />} />
-            <Route path="/entries/:entryId/author-update/new" element={
-              <UserRoute>
-                <AuthorUpdateFormPage />
-              </UserRoute>
-            } />
-            <Route path="/entries/:entryId/referee-update/new" element={
-              <UserRoute>
-                <RefereeUpdateFormPage />
-              </UserRoute>
-            } />
-            <Route path="/archive" element={<ArchivedJournalsPage />} />
-            <Route path="/archive/journal/:journalId" element={<JournalEntriesPage />} />
-            <Route path="/profile" element={
-              <UserRoute>
-                <UserProfilePage />
-              </UserRoute>
-            } />
-            <Route path="/profile/edit" element={
-              <UserRoute>
-                <ProfileEditPage />
-              </UserRoute>
-            } />
-            
-            <Route path="/editor/journals" element={
-              <EditorRoute>
-                <EditorJournalsPage />
-              </EditorRoute>
-            } />
-            
-            <Route path="/journals/:journalId" element={<JournalDetailsPage />} />
-            
-            {/* Admin Routes */}
-            <Route path="/" element={
-              <AdminRoute>
-                <AdminPage />
-              </AdminRoute>
-            } />
-            
-            <Route path="/journals/new" element={
-              <AdminRoute>
-                <JournalCreateFormPage />
-              </AdminRoute>
-            } />
-            <Route path="/journals/edit/:id" element={
-              <AdminRoute>
-                <JournalEditFormPage />
-              </AdminRoute>
-            } />
-            <Route path="/admin" element={
-              <AdminRoute>
-                <AdminPage />
-              </AdminRoute>
-            } />
-            <Route path="/admin/users/edit/:id" element={
-              <AdminRoute>
-                <EditUserPage />
-              </AdminRoute>
-            } />
-            <Route path="/admin/users/create" element={
-              <AdminRoute>
-                <CreateUserPage />
-              </AdminRoute>
-            } />
-            <Route path="/admin/users/profile/:id" element={
-              <AdminRoute>
-                <UserProfilePage />
-              </AdminRoute>
-            } />
-            
-            {/* Add a 404 Not Found route */}
-            <Route path="*" element={<div style={{ padding: '2rem', textAlign: 'center' }}>Page Not Found</div>} />
-          </Routes>
-        </main>
+  if (!googleClientId) {
+    console.error('Google Client ID is not set in environment variables');
+    return <div>Configuration Error: Google Client ID is missing</div>;
+  }
+
+  return (
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <div className="app-container">
+        <Navbar /> 
+        <div className="content-area">
+          <Sidebar /> 
+          <main className="main-content">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/auto-login" element={<AutoLoginPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+
+              {/* Protected Routes */}
+              <Route path="/entries/new" element={
+                <UserRoute>
+                  <JournalCreatePage />
+                </UserRoute>
+              } />
+              <Route path="/entries/edit/:id" element={
+                <UserRoute>
+                  <JournalEditPage />
+                </UserRoute>
+              } />
+              <Route path="/entries/:entryId/updates" element={
+                <UserRoute>
+                  <JournalEntryUpdateDetailsPage />
+                </UserRoute>
+              } />
+              <Route path="/entries/:entryId" element={<JournalEntryDetailsPage />} />
+              <Route path="/entries/:entryId/author-update/new" element={
+                <UserRoute>
+                  <AuthorUpdateFormPage />
+                </UserRoute>
+              } />
+              <Route path="/entries/:entryId/referee-update/new" element={
+                <UserRoute>
+                  <RefereeUpdateFormPage />
+                </UserRoute>
+              } />
+              <Route path="/archive" element={<ArchivedJournalsPage />} />
+              <Route path="/archive/journal/:journalId" element={<JournalEntriesPage />} />
+              <Route path="/profile" element={
+                <UserRoute>
+                  <UserProfilePage />
+                </UserRoute>
+              } />
+              <Route path="/profile/edit" element={
+                <UserRoute>
+                  <ProfileEditPage />
+                </UserRoute>
+              } />
+              
+              <Route path="/editor/journals" element={
+                <EditorRoute>
+                  <EditorJournalsPage />
+                </EditorRoute>
+              } />
+              
+              <Route path="/journals/:journalId" element={<JournalDetailsPage />} />
+              
+              {/* Admin Routes */}
+              <Route path="/" element={<ArchivedJournalsPage />} />
+              
+              <Route path="/journals/new" element={
+                <AdminRoute>
+                  <JournalCreateFormPage />
+                </AdminRoute>
+              } />
+              <Route path="/journals/edit/:id" element={
+                <AdminRoute>
+                  <JournalEditFormPage />
+                </AdminRoute>
+              } />
+              <Route path="/admin" element={
+                <AdminRoute>
+                  <AdminPage />
+                </AdminRoute>
+              } />
+              <Route path="/admin/users/edit/:id" element={
+                <AdminRoute>
+                  <EditUserPage />
+                </AdminRoute>
+              } />
+              <Route path="/admin/users/create" element={
+                <AdminRoute>
+                  <CreateUserPage />
+                </AdminRoute>
+              } />
+              <Route path="/admin/users/profile/:id" element={
+                <AdminRoute>
+                  <UserProfilePage />
+                </AdminRoute>
+              } />
+              
+              {/* Add a 404 Not Found route */}
+              <Route path="*" element={<div style={{ padding: '2rem', textAlign: 'center' }}>Page Not Found</div>} />
+            </Routes>
+          </main>
+        </div>
+        <Footer />
+        <ToastContainer position="top-right" autoClose={5000} />
       </div>
-      <ToastContainer position="top-right" autoClose={5000} />
-    </div>
+    </GoogleOAuthProvider>
   )
 }
 

@@ -47,8 +47,10 @@ class UserUpdate(BaseModel):
     location: Optional[str] = None
     yoksis_id: Optional[str] = None
     orcid_id: Optional[str] = None
-    role: Optional[str] = None
+    role: Optional[UserRole] = None
     is_auth: Optional[bool] = None
+    marked_for_deletion: Optional[bool] = None
+    tutorial_done: Optional[bool] = None
 
 
 class UserDelete(BaseModel):
@@ -76,6 +78,14 @@ class SearchResults(BaseModel):
     users: List[UserRead] = []
     journals: List[JournalRead] = []
     entries: List[JournalEntryRead] = []
+
+
+class UserRead(UserBase):
+    id: int
+    role: UserRole
+    is_auth: bool
+    marked_for_deletion: bool = False
+    tutorial_done: bool = False
 
 # Define __all__ to explicitly export the schemas
 __all__ = [

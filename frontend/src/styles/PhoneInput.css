@@ -1,0 +1,48 @@
+.phone-input-container {
+    width: 100%;
+}
+
+.phone-input-container .form-input {
+    width: 100% !important;
+    height: 40px !important;
+    padding: 8px 45px !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px !important;
+    background-color: var(--input-bg) !important;
+    color: var(--text-color) !important;
+}
+
+.phone-input-container .country-dropdown {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px 0 0 4px !important;
+}
+
+.phone-input-container .country-dropdown:hover {
+    background-color: var(--input-hover-bg) !important;
+}
+
+.phone-input-container .selected-flag {
+    background-color: transparent !important;
+    border-radius: 4px 0 0 4px !important;
+}
+
+.phone-input-container .selected-flag:hover,
+.phone-input-container .selected-flag:focus {
+    background-color: var(--input-hover-bg) !important;
+}
+
+.phone-input-container .country-list {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px !important;
+    color: var(--text-color) !important;
+}
+
+.phone-input-container .country-list .country:hover {
+    background-color: var(--input-hover-bg) !important;
+}
+
+.phone-input-container .country-list .country.highlight {
+    background-color: var(--input-hover-bg) !important;
+} 
