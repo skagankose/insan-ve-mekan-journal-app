@@ -190,7 +190,6 @@ const App: React.FC = () => {
             </Routes>
           </main>
         </div>
-        <Footer />
         <ToastContainer position="top-right" autoClose={5000} />
       </div>
     </GoogleOAuthProvider>

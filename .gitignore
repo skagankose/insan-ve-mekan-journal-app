@@ -153,4 +153,8 @@ docker-compose.override.yml
 secrets.py
 
 # IDE - JetBrains
-.idea/ 
+.idea/
+
+# Custom Ignore
+backend/upload/
+postgres/ 
