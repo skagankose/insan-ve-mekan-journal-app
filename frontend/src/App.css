@@ -266,9 +266,15 @@ body::before {
   flex: 1;
   padding: 32px 40px;
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px); /* Keeping blur for the content section itself */
   border-radius: 20px;
   overflow-y: auto;
+  /* margin-bottom: 24px; Removed as Footer is now inside */
+  position: relative; /* Needed for z-stacking if we were to use pseudo-elements, good practice */
+
+  /* Fade effect at the top */
+  mask-image: linear-gradient(to bottom, transparent 0%, black 50px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 50px);
 }
 
 /* Card Component */
