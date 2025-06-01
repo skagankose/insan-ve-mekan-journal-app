@@ -21,9 +21,10 @@ body::before {
   z-index: -1; /* Place it behind all other content */
   background-image: url('/background.png');
   filter: blur(0px); /* Adjust the blur radius as needed */
-  background-size: 100%;
-  background-repeat: no-repeat;
+  background-size: 20%;
+  background-repeat: repeat-x;
   background-color:#ffffff;
+  background-position: top center;
   /* transform: scale(1.05); /* Optional: slightly scale to avoid hard edges from blur */
 }
 

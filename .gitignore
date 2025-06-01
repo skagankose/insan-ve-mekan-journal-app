@@ -156,5 +156,5 @@ secrets.py
 .idea/
 
 # Custom Ignore
-backend/upload/
-postgres/ 
+# backend/upload/
+#postgres/ 
