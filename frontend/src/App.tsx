@@ -6,7 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { motion } from 'framer-motion';
-import { FaBuilding, FaBook, FaHome, FaSearch } from 'react-icons/fa';
+import { FaBuilding, FaSearch } from 'react-icons/fa';
 import { MdExplore } from 'react-icons/md';
 
 // Import page components

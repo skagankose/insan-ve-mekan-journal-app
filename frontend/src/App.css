@@ -1109,6 +1109,25 @@ body::before {
   position: relative;
 }
 
+.register-form .phone-input-group .country-flag-display {
+  width: 40px;
+  min-width: 40px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(249, 250, 251, 0.9);
+  border: 2px solid #E2E8F0;
+  border-right: none;
+  border-radius: 12px 0 0 12px;
+  transition: all 0.3s ease;
+}
+
+.register-form .phone-input-group .flag-emoji {
+  font-size: 20px;
+  line-height: 1;
+}
+
 .register-form .phone-input-group .country-code-input {
   width: 80px;
   min-width: 80px;
@@ -1116,8 +1135,9 @@ body::before {
   text-align: center;
   font-family: var(--font-family-mono, 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace);
   font-weight: var(--font-weight-semibold);
-  border-radius: 12px 0 0 12px;
+  border-radius: 0;
   border-right: none;
+  border-left: none;
   background: rgba(249, 250, 251, 0.9);
   color: var(--color-text-primary);
 }
@@ -1125,15 +1145,10 @@ body::before {
 .register-form .phone-input-group .country-code-input:focus {
   border-color: #14B8A6;
   border-right: none;
+  border-left: none;
   background: rgba(255, 255, 255, 0.95);
   z-index: 2;
   position: relative;
-}
-
-.register-form .phone-input-group .country-code-input:hover {
-  border-color: #94A3B8;
-  border-right: none;
-  background: rgba(255, 255, 255, 0.9);
 }
 
 .register-form .phone-input-group .phone-number-input {
@@ -1153,21 +1168,44 @@ body::before {
   position: relative;
 }
 
-.register-form .phone-input-group .phone-number-input:hover {
-  border-color: #94A3B8;
-  border-left-color: #94A3B8;
-}
-
 .register-form .phone-input-group .phone-number-input::placeholder {
   color: var(--color-text-tertiary);
   font-style: italic;
   letter-spacing: 0.5px;
 }
 
+/* Hover state for the entire phone input group - show all borders */
+.register-form .phone-input-group:hover .country-flag-display {
+  border-color: #94A3B8;
+  border-right: none;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.register-form .phone-input-group:hover .country-code-input {
+  border-color: #94A3B8;
+  border-right: none;
+  border-left: none;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.register-form .phone-input-group:hover .phone-number-input {
+  border-color: #94A3B8;
+  border-left-color: #94A3B8;
+  background: rgba(255, 255, 255, 0.9);
+}
+
 /* Focus state for the entire phone input group */
+.register-form .phone-input-group:focus-within .country-flag-display {
+  border-color: #14B8A6;
+  border-right: none;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+}
+
 .register-form .phone-input-group:focus-within .country-code-input {
   border-color: #14B8A6;
   border-right: none;
+  border-left: none;
   box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
   background: rgba(255, 255, 255, 0.95);
 }
@@ -1179,7 +1217,31 @@ body::before {
   background: rgba(255, 255, 255, 0.95);
 }
 
+/* Override focus state with hover state when hovering over focused field */
+.register-form .phone-input-group:focus-within:hover .country-flag-display {
+  border-color: #94A3B8;
+  border-right: none;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
+}
+
+.register-form .phone-input-group:focus-within:hover .country-code-input {
+  border-color: #94A3B8;
+  border-right: none;
+  border-left: none;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
+}
+
+.register-form .phone-input-group:focus-within:hover .phone-number-input {
+  border-color: #94A3B8;
+  border-left-color: #94A3B8;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
+}
+
 /* Ensure smooth visual connection between inputs */
+.register-form .phone-input-group .country-flag-display,
 .register-form .phone-input-group .country-code-input,
 .register-form .phone-input-group .phone-number-input {
   margin-bottom: 0;

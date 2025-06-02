@@ -96,6 +96,11 @@ const LoginPage: React.FC = () => {
 
                 {error && <div className="error-message">{error}</div>}
 
+                <div className="register-links">
+                    <span>{t('dontHaveAccount')}</span>
+                    <Link to="/register">{t('signUp')}</Link>
+                </div>
+
             </div>
         </div>
     );
