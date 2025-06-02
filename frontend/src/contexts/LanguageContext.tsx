@@ -37,7 +37,11 @@ type TranslationKeys =
   | 'passwordRequirements' | 'passwordMinLength' | 'passwordCase' | 'passwordNumber' | 'passwordMatch' | 'confirmPassword'
   | 'changePassword' | 'currentPassword' | 'newPassword' | 'passwordUpdated' | 'changingPassword'
   | 'statusWaitingForPayment' | 'statusWaitingForAuthors' | 'statusWaitingForReferees' | 'statusWaitingForEditors' | 'statusAccepted' | 'statusNotAccepted'
-  | 'published' | 'or' | 'locale' | 'googleSignIn' | 'googleSignInFailed';
+  | 'published' | 'or' | 'locale' | 'googleSignIn' | 'googleSignInFailed'
+  | 'pageNotFoundTitle' | 'pageNotFoundDescription' | 'exploreJournalsText' | 'searchContentText'
+  | 'forgotPassword' | 'forgotPasswordInstructions' | 'passwordResetLinkSent' | 'backToLogin' | 'enterEmail' | 'sendResetLink' | 'rememberPassword'
+  | 'resetPassword' | 'passwordResetSuccess' | 'redirectingToLogin' | 'enterNewPassword' | 'confirmNewPassword' | 'resetting'
+  | 'createAccountHere';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -219,6 +223,28 @@ const translations: Record<Language, TranslationDictionary> = {
     'locale': 'en',
     'googleSignIn': 'Sign in with Google',
     'googleSignInFailed': 'Google sign-in failed. Please try again.',
+    
+    // 404 Page
+    'pageNotFoundTitle': 'Academic Resource Not Located',
+    'pageNotFoundDescription': 'The requested academic resource could not be located within our scholarly database. This may occur when accessing outdated references, relocated content, or unpublished materials. We encourage you to explore our comprehensive archives and utilize our advanced search capabilities to discover relevant academic content.',
+    'exploreJournalsText': 'Browse peer-reviewed publications',
+    'searchContentText': 'Advanced academic search',
+    
+    // Forgot Password and Reset Password
+    'forgotPassword': 'Forgot Password',
+    'forgotPasswordInstructions': 'Enter your email address and we\'ll send you a link to reset your password.',
+    'passwordResetLinkSent': 'Password reset link has been sent to your email address.',
+    'backToLogin': 'Back to Login',
+    'enterEmail': 'Enter your email address',
+    'sendResetLink': 'Send Reset Link',
+    'rememberPassword': 'Remember your password?',
+    'resetPassword': 'Reset Password',
+    'passwordResetSuccess': 'Your password has been reset successfully!',
+    'redirectingToLogin': 'You will be redirected to the login page.',
+    'enterNewPassword': 'Enter your new password',
+    'confirmNewPassword': 'Confirm your new password',
+    'resetting': 'Resetting...',
+    'createAccountHere': 'Create Account Here',
   },
   tr: {
     // Navigation
@@ -396,11 +422,33 @@ const translations: Record<Language, TranslationDictionary> = {
     'locale': 'tr',
     'googleSignIn': 'Google ile Giriş Yap',
     'googleSignInFailed': 'Google girişi başarısız oldu. Lütfen tekrar deneyin.',
+    
+    // 404 Page
+    'pageNotFoundTitle': 'Akademik Kaynak Bulunamadı',
+    'pageNotFoundDescription': 'Talep edilen akademik kaynağa veritabanımızda ulaşılamamıştır. Bu durum, güncelliğini yitirmiş referanslara, konumu değiştirilmiş içeriklere veya henüz yayınlanmamış materyallere erişilmeye çalışılması halinde meydana gelebilir. İlgili akademik içeriği bulmak amacıyla kapsamlı arşivlerimizi incelemenizi ve gelişmiş arama olanaklarımızdan faydalanmanızı öneririz.',
+    'exploreJournalsText': 'Hakemli yayınları inceleyiniz',
+    'searchContentText': 'Gelişmiş arama olanaklarımızı kullanınız',
+    
+    // Forgot Password and Reset Password
+    'forgotPassword': 'Şifremi Unuttum',
+    'forgotPasswordInstructions': 'E-posta adresinizi girin ve şifrenizi sıfırlamak için bir bağlantı göndereceğiz.',
+    'passwordResetLinkSent': 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.',
+    'backToLogin': 'Giriş Sayfasına Dön',
+    'enterEmail': 'E-posta adresinizi girin',
+    'sendResetLink': 'Şifre Sıfırlama Bağlantısı Gönder',
+    'rememberPassword': 'Şifrenizi hatırlıyor musunuz?',
+    'resetPassword': 'Şifre Sıfırlama',
+    'passwordResetSuccess': 'Şifreniz başarıyla sıfırlandı!',
+    'redirectingToLogin': 'Giriş sayfasına yönlendiriliyorsunuz.',
+    'enterNewPassword': 'Yeni şifrenizi girin',
+    'confirmNewPassword': 'Yeni şifrenizi onaylayın',
+    'resetting': 'Sıfırlama...',
+    'createAccountHere': 'Hesap Oluştur',
   }
 };
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('tr');
 
   // Translation function
   const t = (key: string): string => {

@@ -21,8 +21,8 @@ body::before {
   z-index: -1; /* Place it behind all other content */
   background-image: url('/background.png');
   filter: blur(0px); /* Adjust the blur radius as needed */
-  background-size: 20%;
-  background-repeat: repeat-x;
+  background-size: 100%;
+  /* background-repeat: repeat-x; */
   background-color:#ffffff;
   background-position: top center;
   /* transform: scale(1.05); /* Optional: slightly scale to avoid hard edges from blur */
@@ -46,16 +46,17 @@ body::before {
 
 /* Navbar Styling */
 .navbar {
-  background-color: rgba(255, 255, 255, 0.75); /* Adjusted for better visibility over image */
-  backdrop-filter: blur(12px); /* Slightly more blur */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Standard shadow */
+  background-color: rgba(255, 255, 255, 0.8); /* Match sidebar transparency */
+  backdrop-filter: blur(0px); /* Remove backdrop filter to match sidebar */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 100;
   padding: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Lighter border for glass effect */
-  height: 80px; /* Increased height */
+  border-bottom: 1.5px solid rgba(20, 184, 166, 0.6); /* Decreased from 2px to 1.5px */
+  height: 80px;
   width: 100%;
+  transition: all 0.3s ease;
 }
 
 .navbar-container {
@@ -87,9 +88,9 @@ body::before {
 }
 
 .navbar-logo-image {
-  height: 70px; /* Increased logo size */
+  height: 50px; /* Adjusted size to work better with container padding */
   width: auto; /* Maintain aspect ratio */
-  margin-right: var(--spacing-2);
+  margin-right: 0; /* Removed margin since container handles spacing */
   object-fit: contain; /* Ensure logo maintains its aspect ratio */
 }
 
@@ -154,22 +155,25 @@ body::before {
 
 /* Sidebar Styling */
 .sidebar {
-  width: 240px;
-  background-color: rgba(255, 255, 255, 0.75); /* Adjusted for better visibility over image */
-  backdrop-filter: blur(12px); /* Slightly more blur */
-  border-right: 1px solid rgba(255, 255, 255, 0.1); /* Lighter border for glass effect */
-  height: calc(100vh - 80px); /* Updated to match new navbar height */
+  width: 280px; /* Increased width */
+  background-color: rgba(255, 255, 255, 0.95); /* More opaque background */
+  backdrop-filter: blur(12px);
+  border-right: 1.5px solid rgba(20, 184, 166, 0.6); /* Decreased from 2px to 1.5px */
+  height: calc(100vh - 80px);
   position: fixed;
-  top: 80px; /* Updated to match new navbar height */
+  top: 80px;
   left: 0;
   display: flex;
   flex-direction: column;
   z-index: 50;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05), 2px 0 8px rgba(20, 184, 166, 0.1); /* Added turquoise shadow for emphasis */
+  transition: all 0.3s ease;
 }
 
 .sidebar-header {
-  padding: var(--spacing-4);
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1.5px solid rgba(20, 184, 166, 0.4); /* Decreased from 2px to 1.5px */
+  background: linear-gradient(to right, rgba(20, 184, 166, 0.05), transparent);
+  padding-top: 20px;
 }
 
 .sidebar-title {
@@ -180,7 +184,7 @@ body::before {
 
 .sidebar-nav {
   flex: 1;
-  padding: var(--spacing-4) 0;
+  padding: var(--spacing-4) var(--spacing-2);
 }
 
 .sidebar-menu {
@@ -190,33 +194,61 @@ body::before {
 }
 
 .sidebar-menu-item {
-  margin-bottom: var(--spacing-1);
+  margin-bottom: var(--spacing-2);
 }
 
 .sidebar-link {
   display: flex;
   align-items: center;
   padding: var(--spacing-3) var(--spacing-4);
-  color: var(--color-text-secondary);
+  color: #1E293B;
   text-decoration: none;
-  transition: all 0.2s ease;
-  border-radius: var(--border-radius-md);
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin: 4px 8px;
+  position: relative;
+  font-weight: 500;
 }
 
 .sidebar-link:hover {
-  background-color: var(--color-background-secondary);
-  color: var(--color-primary);
-  text-decoration: none;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(13, 148, 136, 0.05) 100%);
+  color: #0D9488;
+  transform: translateX(4px);
+}
+
+.sidebar-link.active {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.1) 100%);
+  color: #0D9488;
+  font-weight: 600;
+}
+
+.sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background: linear-gradient(to bottom, #14B8A6, #0D9488);
+  border-radius: 0 4px 4px 0;
 }
 
 .sidebar-icon {
   margin-right: var(--spacing-3);
-  font-style: normal;
+  font-size: 1.2em;
+  opacity: 0.9;
+  transition: all 0.3s ease;
+}
+
+.sidebar-link:hover .sidebar-icon {
+  transform: scale(1.1);
 }
 
 .sidebar-footer {
   padding: var(--spacing-4);
-  border-top: 1px solid var(--color-border-light);
+  border-top: 1.5px solid rgba(20, 184, 166, 0.4); /* Decreased from 2px to 1.5px */
+  background: linear-gradient(to right, rgba(20, 184, 166, 0.05), transparent);
   text-align: center;
 }
 
@@ -232,7 +264,7 @@ body::before {
   padding: 0;
   background-color: transparent;
   margin: var(--spacing-4);
-  margin-left: 260px;
+  margin-left: 300px; /* Increased to match new sidebar width + padding */
   height: calc(100vh - 80px - var(--spacing-8) - var(--spacing-4));
   box-shadow: none;
   overflow: hidden;
@@ -266,16 +298,16 @@ body::before {
 .page-content-section {
   flex: 1;
   padding: 32px 40px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px); /* Keeping blur for the content section itself */
+  background: transparent; /* Made transparent */
+  backdrop-filter: none; /* Removed backdrop filter */
   border-radius: 20px;
   overflow-y: auto;
   /* margin-bottom: 24px; Removed as Footer is now inside */
   position: relative; /* Needed for z-stacking if we were to use pseudo-elements, good practice */
 
-  /* Fade effect at the top */
-  mask-image: linear-gradient(to bottom, transparent 0%, black 50px);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 50px);
+  /* Fade effect at the top and bottom */
+  mask-image: linear-gradient(to bottom, transparent 0%, black 50px, black calc(100% - 50px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 50px, black calc(100% - 50px), transparent 100%);
 }
 
 /* Card Component */
@@ -951,28 +983,336 @@ body::before {
 }
 
 .footer {
-  background-color: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  padding: 1rem;
+  padding: 0;
   text-align: center;
   width: auto;
-  margin-right: 0;
-  margin-bottom: 0;
-  margin-left: 0;
-  margin-top: 24px; /* Added top margin for spacing within scrollable area */
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin: 0;
+  transition: opacity 0.3s ease;
 }
 
 .footer-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
 }
 
 .footer p {
   margin: 0;
-  color: #6c757d;
+  color: #475569;
   font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.footer a:hover {
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+/* Register Page Styles */
+.register-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(20, 184, 166, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.register-form-container::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(13, 148, 136, 0.05) 100%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  position: relative;
+  z-index: 1;
+}
+
+.register-form .form-group {
+  margin-bottom: 0;
+}
+
+.register-form .form-group label {
+  display: block;
+  margin-bottom: var(--spacing-2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.025em;
+}
+
+.register-form .form-input,
+.register-form .form-textarea {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+.register-form .form-input:focus,
+.register-form .form-textarea:focus {
+  outline: none;
+  border-color: #14B8A6;
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
+.register-form .form-input:hover,
+.register-form .form-textarea:hover {
+  border-color: #94A3B8;
+}
+
+.register-form .form-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Phone Input Specific Styles */
+.register-form input[type="tel"] {
+  font-family: var(--font-family-mono, 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace);
+  letter-spacing: 0.5px;
+}
+
+.register-form input[type="tel"]::placeholder {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  font-family: var(--font-family-sans);
+  letter-spacing: normal;
+}
+
+/* Phone Input Group Styles */
+.register-form .phone-input-group {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+
+.register-form .phone-input-group .country-code-input {
+  width: 80px;
+  min-width: 80px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: var(--font-family-mono, 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace);
+  font-weight: var(--font-weight-semibold);
+  border-radius: 12px 0 0 12px;
+  border-right: none;
+  background: rgba(249, 250, 251, 0.9);
+  color: var(--color-text-primary);
+}
+
+.register-form .phone-input-group .country-code-input:focus {
+  border-color: #14B8A6;
+  border-right: none;
+  background: rgba(255, 255, 255, 0.95);
+  z-index: 2;
+  position: relative;
+}
+
+.register-form .phone-input-group .country-code-input:hover {
+  border-color: #94A3B8;
+  border-right: none;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.register-form .phone-input-group .phone-number-input {
+  flex: 1;
+  border-radius: 0 12px 12px 0;
+  border-left: 1px solid rgba(226, 232, 240, 0.5);
+  font-family: var(--font-family-mono, 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace);
+  letter-spacing: 1px;
+  text-align: left;
+  padding-left: 16px;
+}
+
+.register-form .phone-input-group .phone-number-input:focus {
+  border-color: #14B8A6;
+  border-left-color: #14B8A6;
+  z-index: 1;
+  position: relative;
+}
+
+.register-form .phone-input-group .phone-number-input:hover {
+  border-color: #94A3B8;
+  border-left-color: #94A3B8;
+}
+
+.register-form .phone-input-group .phone-number-input::placeholder {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  letter-spacing: 0.5px;
+}
+
+/* Focus state for the entire phone input group */
+.register-form .phone-input-group:focus-within .country-code-input {
+  border-color: #14B8A6;
+  border-right: none;
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.register-form .phone-input-group:focus-within .phone-number-input {
+  border-color: #14B8A6;
+  border-left-color: #14B8A6;
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* Ensure smooth visual connection between inputs */
+.register-form .phone-input-group .country-code-input,
+.register-form .phone-input-group .phone-number-input {
+  margin-bottom: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.register-form .location-input-container input,
+.register-form .formatted-id-container input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+.register-form .location-input-container input:focus,
+.register-form .formatted-id-container input:focus {
+  outline: none;
+  border-color: #14B8A6;
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
+.register-form .password-requirements {
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: rgba(249, 250, 251, 0.8);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.register-form .password-requirements small {
+  display: block;
+  margin-bottom: var(--spacing-2);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.register-form .password-requirements ul {
+  margin: 0;
+  padding-left: var(--spacing-4);
+  list-style-type: disc;
+}
+
+.register-form .password-requirements li {
+  margin-bottom: var(--spacing-1);
+  color: var(--color-text-tertiary);
+}
+
+/* Register Page Styles */
+.register-submit-button {
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+  letter-spacing: 0.025em;
+  margin-top: var(--spacing-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-submit-button:hover {
+  background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.4);
+}
+
+.register-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+}
+
+.register-links {
+  text-align: center;
+  margin-top: var(--spacing-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.register-links a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  margin-left: var(--spacing-1);
+  transition: color 0.2s ease;
+}
+
+.register-links a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+/* Responsive design for register form */
+@media (max-width: 768px) {
+  .register-form-container {
+    margin: var(--spacing-4);
+    padding: var(--spacing-6);
+    max-width: none;
+  }
+  
+  .register-form .form-input,
+  .register-form .form-textarea {
+    padding: 14px 16px;
+  }
+  
+  .register-submit-button {
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .register-form-container {
+    margin: var(--spacing-2);
+    padding: var(--spacing-4);
+  }
 }

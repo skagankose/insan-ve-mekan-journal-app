@@ -73,11 +73,18 @@ const LoginPage: React.FC = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
+                        <div className="forgot-password-link">
+                            <Link to="/forgot-password">{t('forgotPassword')}</Link>
+                        </div>
                     </div>
                     <button type="submit" className="login-button">
                         {t('login')}
                     </button>
                 </form>
+
+                <div className="divider">
+                    <span>{t('or') || 'or'}</span>
+                </div>
 
                 <div className="social-login">
                     <GoogleLogin
@@ -89,10 +96,6 @@ const LoginPage: React.FC = () => {
 
                 {error && <div className="error-message">{error}</div>}
 
-                <div className="links">
-                    <Link to="/forgot-password">{t('forgotPassword')}</Link>
-                    <Link to="/register">{t('register')}</Link>
-                </div>
             </div>
         </div>
     );

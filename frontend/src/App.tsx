@@ -1,9 +1,13 @@
 import './App.css'
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { useLanguage } from './contexts/LanguageContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { motion } from 'framer-motion';
+import { FaBuilding, FaBook, FaHome, FaSearch } from 'react-icons/fa';
+import { MdExplore } from 'react-icons/md';
 
 // Import page components
 import LoginPage from './pages/LoginPage';
@@ -34,7 +38,6 @@ import RefereeUpdateFormPage from './pages/RefereeUpdateFormPage';
 import Navbar from './components/Navbar';
 // Import Sidebar when needed
 import Sidebar from './components/Sidebar';
-import Footer from './components/Footer';
 
 // Import ProtectedRoute component (create next)
 // import ProtectedRoute from './components/ProtectedRoute';
@@ -78,6 +81,90 @@ const UserRoute = ({ children }: { children: React.ReactNode }) => {
   
   // If we have a user, render the protected content
   return <>{children}</>;
+};
+
+// NotFoundPage component
+const NotFoundPage = () => {
+  const { t } = useLanguage();
+  
+  return (
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      minHeight: '70vh',
+      padding: '2rem',
+      textAlign: 'center'
+    }}>
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        style={{ 
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '24px',
+          padding: '3rem 2.5rem',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          maxWidth: '700px',
+          width: '100%'
+        }}
+      >
+        <div style={{ marginBottom: '2rem' }}>
+          <FaBuilding size={120} color="#14b8a6" style={{ marginBottom: '1rem' }} />
+        </div>
+
+        <div style={{ marginBottom: '2rem' }}>
+          <h1 style={{ 
+            fontSize: '4rem', 
+            margin: '0 0 1rem 0', 
+            color: '#374151',
+            fontWeight: 'bold'
+          }}>
+            404
+          </h1>
+          <h2 style={{ 
+            fontSize: '1.8rem', 
+            margin: '0 0 1rem 0', 
+            color: '#6b7280',
+            fontWeight: '600'
+          }}>
+            {t('pageNotFoundTitle')}
+          </h2>
+          <p style={{ 
+            fontSize: '1.1rem', 
+            color: '#9ca3af', 
+            maxWidth: '600px',
+            lineHeight: '1.6',
+            margin: '0 auto'
+          }}>
+            {t('pageNotFoundDescription')}
+          </p>
+        </div>
+
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '2rem',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          color: '#9ca3af',
+          fontSize: '0.9rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <MdExplore size={20} color="#14b8a6" />
+            <span>{t('exploreJournalsText')}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FaSearch size={16} color="#14b8a6" />
+            <span>{t('searchContentText')}</span>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
 };
 
 const App: React.FC = () => {
@@ -186,7 +273,7 @@ const App: React.FC = () => {
               } />
               
               {/* Add a 404 Not Found route */}
-              <Route path="*" element={<div style={{ padding: '2rem', textAlign: 'center' }}>Page Not Found</div>} />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </main>
         </div>

@@ -219,7 +219,9 @@ const EditorJournalsPage: React.FC = () => {
                 <h1>{t('myJournals') || 'My Journals'}</h1>
             </div>
 
-            <div className="page-content-section">
+            <div className="page-content-section" style={{
+                paddingBottom: '0px'
+            }}>
                 {journalsWithEntries.length === 0 ? (
                     <div style={{
                         maxWidth: '600px',
@@ -504,7 +506,11 @@ const EditorJournalsPage: React.FC = () => {
                         ))}
                     </div>
                 )}
-                <Footer />
+                <div style={{ marginTop: '16px', marginBottom: '0px' }}>
+                    <div className="transparent-footer">
+                        <Footer />
+                    </div>
+                </div>
             </div>
             
             <style>{`
@@ -517,6 +523,10 @@ const EditorJournalsPage: React.FC = () => {
                 }
                 .journal-card {
                     will-change: box-shadow, transform;
+                }
+                .transparent-footer .footer-content {
+                    background: transparent !important;
+                    border-top: none !important;
                 }
             `}</style>
         </>

@@ -4,11 +4,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext'; // Use the Auth context
 import { useLanguage } from '../contexts/LanguageContext';
 import ReCAPTCHA from 'react-google-recaptcha';
-import PhoneInput from 'react-phone-input-2';
 import FormattedIdInput from '../components/FormattedIdInput';
 import LocationInput from '../components/LocationInput';
-import 'react-phone-input-2/lib/style.css';
-import '../styles/PhoneInput.css';
 import '../styles/FormattedIdInput.css';
 
 const RegisterPage: React.FC = () => {
@@ -16,7 +13,8 @@ const RegisterPage: React.FC = () => {
     const [name, setName] = useState('');
     const [title, setTitle] = useState('');
     const [bio, setBio] = useState('');
-    const [telephone, setTelephone] = useState('');
+    const [countryCode, setCountryCode] = useState('+90');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [scienceBranch, setScienceBranch] = useState('');
     const [location, setLocation] = useState('');
     const [yoksisId, setYoksisId] = useState('');
@@ -31,6 +29,34 @@ const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
     const { register } = useAuth(); // Get register function
     const { t } = useLanguage();
+
+    // Format phone number as user types
+    const formatPhoneNumber = (value: string) => {
+        // Remove all non-digits
+        const digitsOnly = value.replace(/\D/g, '');
+        
+        // Limit to 7 digits (for Turkish mobile format: XXX XX XX)
+        const limitedDigits = digitsOnly.slice(0, 7);
+        
+        // Format as XXX XX XX
+        let formatted = '';
+        if (limitedDigits.length > 0) {
+            formatted = limitedDigits.slice(0, 3);
+            if (limitedDigits.length > 3) {
+                formatted += ' ' + limitedDigits.slice(3, 5);
+                if (limitedDigits.length > 5) {
+                    formatted += ' ' + limitedDigits.slice(5, 7);
+                }
+            }
+        }
+        
+        return formatted;
+    };
+
+    const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const formatted = formatPhoneNumber(e.target.value);
+        setPhoneNumber(formatted);
+    };
 
     const validatePassword = (password: string): boolean => {
         const minLength = 8;
@@ -78,6 +104,9 @@ const RegisterPage: React.FC = () => {
         }
 
         try {
+            // Combine country code and phone number
+            const telephone = countryCode + phoneNumber.replace(/\s/g, '');
+            
             const userData = { 
                 email, 
                 name,
@@ -96,7 +125,7 @@ const RegisterPage: React.FC = () => {
             setSuccess('Registration successful! Redirecting to login...');
             // Clear form
             setEmail(''); setName(''); setTitle(''); setBio(''); 
-            setTelephone(''); setScienceBranch(''); setLocation(''); 
+            setCountryCode('+90'); setPhoneNumber(''); setScienceBranch(''); setLocation(''); 
             setYoksisId(''); setOrcidId(''); setPassword(''); setConfirmPassword('');
             setCaptchaValue(null);
             // Redirect to login after a short delay
@@ -119,210 +148,218 @@ const RegisterPage: React.FC = () => {
     };
 
     return (
-        <div className="form-container">
-            <div className="page-header">
-                <h1 className="page-title">{t('createAccount')}</h1>
+        <>
+            {/* Title Section */}
+            <div className="page-title-section">
+                <h1 style={{textAlign: 'center'}}>{t('createAccount')}</h1>
             </div>
-            
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
-            {passwordError && <div className="error-message">{passwordError}</div>}
-            
-            <form onSubmit={handleSubmit} className="card">
-                <div className="form-group">
-                    <label htmlFor="email" className="form-label">{t('email')}</label>
-                    <input
-                        type="email"
-                        id="email"
-                        className="form-input"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={isSubmitting}
-                        maxLength={200}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="name" className="form-label">{t('name')}</label>
-                    <input
-                        type="text"
-                        id="name"
-                        className="form-input"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                        disabled={isSubmitting}
-                        maxLength={200}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="title" className="form-label">{t('title')}</label>
-                    <input
-                        type="text"
-                        id="title"
-                        className="form-input"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        disabled={isSubmitting}
-                        maxLength={200}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="bio" className="form-label">{t('bio')}</label>
-                    <textarea
-                        id="bio"
-                        className="form-input"
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        disabled={isSubmitting}
-                        rows={3}
-                        maxLength={400}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="telephone" className="form-label">{t('telephone') || 'Phone Number'}</label>
-                    <PhoneInput
-                        country={'tr'}
-                        value={telephone}
-                        onChange={(phone: string) => setTelephone(phone)}
-                        inputProps={{
-                            id: 'telephone',
-                            required: true,
-                            disabled: isSubmitting
-                        }}
-                        containerClass="phone-input-container"
-                        inputClass="form-input"
-                        buttonClass="country-dropdown"
-                        disabled={isSubmitting}
-                        enableSearch={true}
-                        searchPlaceholder={t('searchCountry') || 'Search country'}
-                        searchNotFound={t('countryNotFound') || 'Country not found'}
-                        preferredCountries={['tr']}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="scienceBranch" className="form-label">{t('scienceBranch') || 'Science Branch'}</label>
-                    <input
-                        type="text"
-                        id="scienceBranch"
-                        className="form-input"
-                        value={scienceBranch}
-                        onChange={(e) => setScienceBranch(e.target.value)}
-                        disabled={isSubmitting}
-                        maxLength={300}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="location" className="form-label">{t('location') || 'Location'}</label>
-                    <LocationInput
-                        value={location}
-                        onChange={setLocation}
-                        id="location"
-                        disabled={isSubmitting}
-                        required
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="yoksisId" className="form-label">{t('yoksisId') || 'YÖKSİS ID'}</label>
-                    <FormattedIdInput
-                        type="yoksis"
-                        value={yoksisId}
-                        onChange={setYoksisId}
-                        id="yoksisId"
-                        disabled={isSubmitting}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="orcidId" className="form-label">{t('orcidId') || 'ORCID ID'}</label>
-                    <FormattedIdInput
-                        type="orcid"
-                        value={orcidId}
-                        onChange={setOrcidId}
-                        id="orcidId"
-                        disabled={isSubmitting}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="password" className="form-label">{t('password')}</label>
-                    <input
-                        type="password"
-                        id="password"
-                        className="form-input"
-                        value={password}
-                        onChange={(e) => {
-                            setPassword(e.target.value);
-                            if (confirmPassword) {
-                                validatePassword(e.target.value);
-                            }
-                        }}
-                        required
-                        disabled={isSubmitting}
-                        minLength={8}
-                        maxLength={100}
-                    />
-                    <small className="form-text text-muted">
-                        {t('passwordRequirements')}
-                        <ul style={{ marginTop: '0.5rem', marginLeft: '1.5rem' }}>
-                            <li>{t('passwordMinLength')}</li>
-                            <li>{t('passwordCase')}</li>
-                            <li>{t('passwordNumber')}</li>
-                        </ul>
-                    </small>
-                </div>
 
-                <div className="form-group">
-                    <label htmlFor="confirmPassword" className="form-label">{t('confirmPassword')}</label>
-                    <input
-                        type="password"
-                        id="confirmPassword"
-                        className="form-input"
-                        value={confirmPassword}
-                        onChange={(e) => {
-                            setConfirmPassword(e.target.value);
-                            if (password) {
-                                validatePassword(password);
-                            }
-                        }}
-                        required
-                        disabled={isSubmitting}
-                        minLength={8}
-                    />
-                </div>
+            {/* Content Section */}
+            <div className="page-content-section">
+                <div className="register-form-container">
+                    {error && <div className="error-message">{error}</div>}
+                    {success && <div className="success-message">{success}</div>}
+                    {passwordError && <div className="error-message">{passwordError}</div>}
+                    
+                    <form className="register-form" onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label htmlFor="email">{t('email')}</label>
+                            <input
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                disabled={isSubmitting}
+                                maxLength={200}
+                                className="form-input"
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="name">{t('name')}</label>
+                            <input
+                                type="text"
+                                id="name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                                disabled={isSubmitting}
+                                maxLength={200}
+                                className="form-input"
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="title">{t('title')}</label>
+                            <input
+                                type="text"
+                                id="title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                disabled={isSubmitting}
+                                maxLength={200}
+                                className="form-input"
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="bio">{t('bio')}</label>
+                            <textarea
+                                id="bio"
+                                className="form-textarea"
+                                value={bio}
+                                onChange={(e) => setBio(e.target.value)}
+                                disabled={isSubmitting}
+                                rows={3}
+                                maxLength={400}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="telephone">{t('telephone') || 'Phone Number'}</label>
+                            <div className="phone-input-group">
+                                <input
+                                    type="text"
+                                    id="countryCode"
+                                    value={countryCode}
+                                    onChange={(e) => setCountryCode(e.target.value)}
+                                    required
+                                    disabled={isSubmitting}
+                                    className="form-input country-code-input"
+                                    maxLength={4}
+                                    placeholder="+90"
+                                />
+                                <input
+                                    type="tel"
+                                    id="phoneNumber"
+                                    value={phoneNumber}
+                                    onChange={handlePhoneNumberChange}
+                                    required
+                                    disabled={isSubmitting}
+                                    className="form-input phone-number-input"
+                                    placeholder="555 55 55"
+                                    maxLength={9}
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="scienceBranch">{t('scienceBranch') || 'Science Branch'}</label>
+                            <input
+                                type="text"
+                                id="scienceBranch"
+                                value={scienceBranch}
+                                onChange={(e) => setScienceBranch(e.target.value)}
+                                disabled={isSubmitting}
+                                maxLength={300}
+                                className="form-input"
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="location">{t('location') || 'Location'}</label>
+                            <LocationInput
+                                value={location}
+                                onChange={setLocation}
+                                id="location"
+                                disabled={isSubmitting}
+                                required
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="yoksisId">{t('yoksisId') || 'YÖKSİS ID'}</label>
+                            <FormattedIdInput
+                                type="yoksis"
+                                value={yoksisId}
+                                onChange={setYoksisId}
+                                id="yoksisId"
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="orcidId">{t('orcidId') || 'ORCID ID'}</label>
+                            <FormattedIdInput
+                                type="orcid"
+                                value={orcidId}
+                                onChange={setOrcidId}
+                                id="orcidId"
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="password">{t('password')}</label>
+                            <input
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    if (confirmPassword) {
+                                        validatePassword(e.target.value);
+                                    }
+                                }}
+                                required
+                                disabled={isSubmitting}
+                                minLength={8}
+                                maxLength={100}
+                                className="form-input"
+                            />
+                            <div className="password-requirements">
+                                <small>{t('passwordRequirements')}</small>
+                                <ul>
+                                    <li>{t('passwordMinLength')}</li>
+                                    <li>{t('passwordCase')}</li>
+                                    <li>{t('passwordNumber')}</li>
+                                </ul>
+                            </div>
+                        </div>
 
-                <div className="form-group" style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', marginBottom: '20px' }}>
-                    <ReCAPTCHA
-                        sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                        onChange={handleCaptchaChange}
-                    />
+                        <div className="form-group">
+                            <label htmlFor="confirmPassword">{t('confirmPassword')}</label>
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                value={confirmPassword}
+                                onChange={(e) => {
+                                    setConfirmPassword(e.target.value);
+                                    if (password) {
+                                        validatePassword(password);
+                                    }
+                                }}
+                                required
+                                disabled={isSubmitting}
+                                minLength={8}
+                                className="form-input"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <ReCAPTCHA
+                                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                                onChange={handleCaptchaChange}
+                            />
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            className="btn btn-primary register-submit-button" 
+                            disabled={isSubmitting || !captchaValue}
+                        >
+                            {isSubmitting ? t('creatingAccount') : t('registerButton')}
+                        </button>
+                        
+                        <div className="register-links">
+                            <span>{t('alreadyHaveAccount')}</span>
+                            <Link to="/login">{t('loginText')}</Link>
+                        </div>
+                    </form>
                 </div>
-                
-                <div className="form-group" style={{ marginTop: 'var(--spacing-6)' }}>
-                    <button 
-                        type="submit" 
-                        className="btn btn-primary" 
-                        disabled={isSubmitting || !captchaValue}
-                        style={{ width: '100%' }}
-                    >
-                        {isSubmitting ? t('creatingAccount') : t('registerButton')}
-                    </button>
-                </div>
-                
-                <div style={{ textAlign: 'center', marginTop: 'var(--spacing-4)' }}>
-                    <p className="text-secondary">
-                        {t('alreadyHaveAccount')} <Link to="/login">{t('loginText')}</Link>
-                    </p>
-                </div>
-            </form>
-        </div>
+            </div>
+        </>
     );
 };
 

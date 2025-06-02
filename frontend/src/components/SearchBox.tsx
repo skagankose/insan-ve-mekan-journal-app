@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchAll, SearchResults } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
+import { FaUser, FaBook, FaFileAlt, FaSearch } from 'react-icons/fa';
 import '../styles/SearchBox.css';
 
 const SearchBox: React.FC = () => {
@@ -99,6 +100,16 @@ const SearchBox: React.FC = () => {
   return (
     <div className="search-box" ref={searchRef}>
       <div className="search-input-container">
+        <FaSearch 
+          style={{
+            position: 'absolute',
+            left: '15px',
+            zIndex: 1,
+            opacity: 0.6,
+            fontSize: '14px',
+            color: '#64748B'
+          }}
+        />
         <input
           ref={inputRef}
           type="text"
@@ -111,6 +122,7 @@ const SearchBox: React.FC = () => {
             if (query.length >= 2) setShowResults(true);
           }}
           onBlur={() => setIsFocused(false)}
+          style={{ paddingLeft: '38px' }}
         />
         {isLoading && <div className="search-spinner"></div>}
         {!isFocused && !isLoading && <span className="search-shortcut-hint">/</span>}
@@ -129,7 +141,7 @@ const SearchBox: React.FC = () => {
                     className="search-result-item"
                     onClick={() => handleResultClick('user', user.id)}
                   >
-                    <span className="result-icon">👤</span>
+                    <FaUser className="result-icon" />
                     <span className="result-text">{user.name}</span>
                   </li>
                 ))}
@@ -148,7 +160,7 @@ const SearchBox: React.FC = () => {
                     className="search-result-item"
                     onClick={() => handleResultClick('journal', journal.id)}
                   >
-                    <span className="result-icon">📚</span>
+                    <FaBook className="result-icon" />
                     <span className="result-text">{journal.title}</span>
                   </li>
                 ))}
@@ -167,7 +179,7 @@ const SearchBox: React.FC = () => {
                     className="search-result-item"
                     onClick={() => handleResultClick('entry', entry.id)}
                   >
-                    <span className="result-icon">📄</span>
+                    <FaFileAlt className="result-icon" />
                     <span className="result-text">{entry.title}</span>
                   </li>
                 ))}

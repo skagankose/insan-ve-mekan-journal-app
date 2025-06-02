@@ -186,7 +186,9 @@ const ArchivedJournalsPage: React.FC = () => {
             </div>
 
             {/* Content Section */}
-            <div className="page-content-section">
+            <div className="page-content-section" style={{
+                paddingBottom: '0px'
+            }}>
                 {journalsWithEntries.length === 0 ? (
                     <div style={{
                         maxWidth: '600px',
@@ -678,7 +680,11 @@ const ArchivedJournalsPage: React.FC = () => {
                         ))}
                     </div>
                 )}
-                <Footer />
+                <div style={{ marginTop: '16px', marginBottom: '0px' }}>
+                    <div className="transparent-footer">
+                        <Footer />
+                    </div>
+                </div>
             </div>
             
             {/* CSS Animations (can be moved to a global CSS file if preferred) */}
@@ -699,6 +705,10 @@ const ArchivedJournalsPage: React.FC = () => {
                 }
                 .journal-card {
                     will-change: box-shadow, transform;
+                }
+                .transparent-footer .footer-content {
+                    background: transparent !important;
+                    border-top: none !important;
                 }
             `}</style>
         </>
