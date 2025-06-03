@@ -398,7 +398,6 @@ const ProfileEditPage: React.FC = () => {
                             minLength={8}
                         />
                         <small className="form-text text-muted">
-                            {t('passwordRequirements')}
                             <ul style={{ marginTop: '0.5rem', marginLeft: '1.5rem' }}>
                                 <li>{t('passwordMinLength')}</li>
                                 <li>{t('passwordCase')}</li>

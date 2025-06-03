@@ -383,7 +383,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                         />
                                                     </svg>
                                                     <span style={{ fontSize: '14px', fontWeight: '600' }}>
-                                                        {journal.publication_date ? new Date(journal.publication_date).toLocaleDateString('en-US', { 
+                                                        {journal.publication_date ? new Date(journal.publication_date).toLocaleDateString(t('locale'), { 
                                                             year: 'numeric', 
                                                             month: 'long', 
                                                             day: 'numeric' 
@@ -430,7 +430,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                         : '0 4px 15px rgba(0, 0, 0, 0.1)';
                                                 }}
                                             >
-                                                <span>{t('viewJournal') || 'View Journal'}</span>
+                                                <span>{t('viewJournal')}</span>
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                     <path d="M7 17L17 7M17 7H7M17 7V17" 
                                                         stroke="currentColor" 
@@ -561,6 +561,10 @@ const ArchivedJournalsPage: React.FC = () => {
                                                     >
                                                         <div style={{
                                                             background: 'rgba(255, 255, 255, 0.8)',
+                                                            backgroundImage: 'url(/pattern_transparent.png)',
+                                                            backgroundSize: '50% 80%',
+                                                            backgroundPosition: '140% -170%',
+                                                            backgroundRepeat: 'no-repeat',
                                                             backdropFilter: 'blur(10px)',
                                                             borderRadius: '16px',
                                                             padding: '28px',
@@ -583,17 +587,6 @@ const ArchivedJournalsPage: React.FC = () => {
                                                             e.currentTarget.style.boxShadow = 'none';
                                                             e.currentTarget.style.borderColor = '#E2E8F0';
                                                         }}>
-                                                            {/* Decorative Element */}
-                                                            <div style={{
-                                                                position: 'absolute',
-                                                                top: '-20px',
-                                                                right: '-20px',
-                                                                width: '80px',
-                                                                height: '80px',
-                                                                background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-                                                                borderRadius: '50%',
-                                                                opacity: '0.1'
-                                                            }}></div>
                                                             
                                                             <h5 style={{
                                                                 margin: '0 0 16px 0',

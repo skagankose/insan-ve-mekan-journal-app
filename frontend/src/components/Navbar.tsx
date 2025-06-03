@@ -38,7 +38,7 @@ const Navbar: React.FC = () => {
                             justifyContent: 'center'
                         }}>
                             <img src="/logo.png" alt="Journal App Logo" className="navbar-logo-image" 
-                            style={{padding: '0px', margin: '0px 0px 0px 0px', height: '60px', width: 'auto' }} />
+                            style={{padding: '0px', margin: '0px 0px 0px -20px', height: '64px', width: 'auto' }} />
                         </div>
                         <span className="navbar-title-text" style={{
                             whiteSpace: 'nowrap',
@@ -46,7 +46,7 @@ const Navbar: React.FC = () => {
                             fontWeight: '500',
                             fontSize: '1.3rem',
                             letterSpacing: '-0.02em',
-                            margin: '-20px 0px 0px -180px'
+                            margin: '-23px 0px 0px -190px'
                         }}>
                             {language === 'en' ? 'human & space' : 'insan & mekan'}
                         </span>

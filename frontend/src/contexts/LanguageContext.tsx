@@ -44,7 +44,7 @@ type TranslationKeys =
   | 'createAccountHere'
   | 'country' | 'selectCountry' | 'searchCountries' | 'noCountriesFound' | 'enterLocation'
   | 'pleaseVerifyCaptcha' | 'captchaExpired'
-  | 'editorJournals' | 'submitPaper' | 'publishedIssues' | 'searchPlaceholder';
+  | 'editorJournals' | 'submitPaper' | 'publishedIssues' | 'searchPlaceholder' | 'viewJournal';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -71,6 +71,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'createAccount': 'Create an Account',
     'welcomeBack': 'Welcome Back',
     'publishedJournals': 'Published Journals',
+    'viewJournal': 'View Journal',
     
     // Form labels
     'title': 'Title',
@@ -106,7 +107,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'loginText': 'Log in',
     'pleaseLogin': 'Please log in to view your journal entries.',
     'loadingEntries': 'Loading your journal entries...',
-    'acceptedEntries': 'Accepted Entries',
+    'acceptedEntries': 'Published Papers',
     
     // Status labels
     'statusWaitingForPayment': 'Waiting for Payment',
@@ -277,7 +278,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'previousIssues': 'Önceki Sayılar',
     'editorJournals': 'Editör Dergileri',
     'submitPaper': 'Makale Gönder',
-    'publishedIssues': 'Yayınlanlar',
+    'publishedIssues': 'Arşivler',
     
     // Page titles
     'createNewEntry': 'Yeni Günlük Kaydı Oluştur',
@@ -285,6 +286,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'createAccount': 'Hesap Oluştur',
     'welcomeBack': 'Tekrar Hoş Geldiniz',
     'publishedJournals': 'Yayınlanmış Dergiler',
+    'viewJournal': 'Dergiyi Görüntüle',
     
     // Form labels
     'title': 'Ünvan',
@@ -320,7 +322,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'loginText': 'Giriş yapın',
     'pleaseLogin': 'Günlük kayıtlarınızı görmek için lütfen giriş yapın.',
     'loadingEntries': 'Günlük kayıtlarınız yükleniyor...',
-    'acceptedEntries': 'Kabul Edilen Kayıtlar',
+    'acceptedEntries': 'Yayınlanan Makaleler',
     
     // Status labels
     'statusWaitingForPayment': 'Ödeme Bekliyor',

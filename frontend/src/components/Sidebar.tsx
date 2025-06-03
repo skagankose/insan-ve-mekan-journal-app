@@ -92,7 +92,7 @@ const Sidebar: React.FC = () => {
             }
             .sidebar-search-container {
                 background: transparent;
-                padding: 32px 16px 8px 16px;
+                padding: 24px 24px 4px 24px;
                 margin: 0;
                 border-bottom: none !important;
             }

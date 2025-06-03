@@ -566,12 +566,11 @@ const RegisterPage: React.FC = () => {
                                 className="form-input"
                             />
                             <div className="password-requirements">
-                                <small>{t('passwordRequirements')}</small>
-                                <ul>
-                                    <li>{t('passwordMinLength')}</li>
-                                    <li>{t('passwordCase')}</li>
-                                    <li>{t('passwordNumber')}</li>
-                                </ul>
+                                <div className="password-requirements-list" style={{ color: 'gray' }}>
+                                    <div>• {t('passwordMinLength')}</div>
+                                    <div>• {t('passwordCase')}</div>
+                                    <div>• {t('passwordNumber')}</div>
+                                </div>
                             </div>
                         </div>
 
@@ -594,7 +593,7 @@ const RegisterPage: React.FC = () => {
                             />
                         </div>
 
-                        <div className="form-group">
+                        <div className="form-group" style={{ display: 'flex', justifyContent: 'center', marginTop: '15px' }}>
                             <ReCAPTCHA
                                 sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
                                 onChange={handleCaptchaChange}
