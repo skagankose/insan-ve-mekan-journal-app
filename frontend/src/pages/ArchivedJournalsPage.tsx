@@ -244,17 +244,15 @@ const ArchivedJournalsPage: React.FC = () => {
                                     transform: journal.isExpanded ? 'scale(1.02)' : 'scale(1)',
                                     animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
                                     cursor: 'pointer',
-                                    border: '1px solid rgba(20, 184, 166, 0.2)',
+                                    border: `1px solid ${journal.isExpanded ? '#14B8A6' : 'rgba(20, 184, 166, 0.2)'}`,
                                 }}
                                 onMouseEnter={e => {
-                                    e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.16)';
                                     e.currentTarget.style.transform = 'translateY(-6px) scale(1.025)';
+                                    e.currentTarget.style.borderColor = '#14B8A6';
                                 }}
                                 onMouseLeave={e => {
-                                    e.currentTarget.style.boxShadow = journal.isExpanded
-                                        ? '0 20px 40px rgba(0, 0, 0, 0.1)'
-                                        : '0 4px 20px rgba(0, 0, 0, 0.08)';
                                     e.currentTarget.style.transform = journal.isExpanded ? 'scale(1.02)' : 'scale(1)';
+                                    e.currentTarget.style.borderColor = journal.isExpanded ? '#14B8A6' : 'rgba(20, 184, 166, 0.2)';
                                 }}
                             >
                                 <div 
@@ -563,7 +561,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                             background: 'rgba(255, 255, 255, 0.8)',
                                                             backgroundImage: 'url(/pattern_transparent.png)',
                                                             backgroundSize: '50% 80%',
-                                                            backgroundPosition: '140% -170%',
+                                                            backgroundPosition: '138% -162%',
                                                             backgroundRepeat: 'no-repeat',
                                                             backdropFilter: 'blur(10px)',
                                                             borderRadius: '16px',

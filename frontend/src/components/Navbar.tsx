@@ -35,7 +35,10 @@ const Navbar: React.FC = () => {
                         <div className="navbar-logo-container" style={{
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.2) 0%, rgba(255, 255, 255, 0.8) 100%)',
+                            padding: '0px 0px 0px 10px',
+                            borderRadius: '2px'
                         }}>
                             <img src="/logo.png" alt="Journal App Logo" className="navbar-logo-image" 
                             style={{padding: '0px', margin: '0px 0px 0px -20px', height: '64px', width: 'auto' }} />
