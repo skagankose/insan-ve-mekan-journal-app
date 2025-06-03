@@ -604,7 +604,7 @@ const RegisterPage: React.FC = () => {
                         <button 
                             type="submit" 
                             className="btn btn-primary register-submit-button" 
-                            disabled={isSubmitting || !captchaValue}
+                            disabled={isSubmitting}
                         >
                             {isSubmitting ? t('creatingAccount') : t('registerButton')}
                         </button>

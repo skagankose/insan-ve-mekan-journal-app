@@ -278,7 +278,7 @@ const EditorJournalsPage: React.FC = () => {
                                     cursor: 'pointer',
                                     border: activeJournal?.id === journal.id 
                                         ? '2px solid #14B8A6' 
-                                        : '1px solid rgba(20, 184, 166, 0.1)'
+                                        : '1px solid rgba(20, 184, 166, 0.2)'
                                 }}
                                 onMouseEnter={e => {
                                     e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.16)';

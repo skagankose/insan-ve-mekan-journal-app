@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import SearchBox from './SearchBox';
-import LanguageToggle from './LanguageToggle';
 import { MdEdit, MdArchive, MdDashboard } from 'react-icons/md';
 
 const Sidebar: React.FC = () => {
@@ -18,7 +17,8 @@ const Sidebar: React.FC = () => {
     <aside className="sidebar" style={{
         background: 'rgba(255, 255, 255, 0.8)', 
         backdropFilter: 'blur(0px)',
-        borderRight: '1.5px solid rgba(20, 184, 166, 0.6)'
+        borderRight: '1px solid rgba(20, 184, 166, 0.2)',
+        boxShadow: '4px 0 12px rgba(0, 0, 0, 0.08)'
     }}>
       <div className="sidebar-header">
         <div className="sidebar-search-container">
@@ -75,11 +75,8 @@ const Sidebar: React.FC = () => {
         </ul>
       </nav>
       
-      <div className="sidebar-footer" style={{ borderTop: '1.5px solid rgba(20, 184, 166, 0.4)', paddingTop: '16px', marginTop: 'auto' }}>
+      <div className="sidebar-footer" style={{ borderTop: '1px solid rgba(20, 184, 166, 0.15)', paddingTop: '16px', marginTop: 'auto' }}>
         <div className="sidebar-footer-content">
-          <div className="sidebar-language-toggle">
-            <LanguageToggle />
-          </div>
           <p className="sidebar-footer-text">
             © {new Date().getFullYear()} {language === 'en' ? 'Human & Space' : 'İnsan & Mekan'}
           </p>
@@ -87,42 +84,55 @@ const Sidebar: React.FC = () => {
       </div>
       <style>
           {`
+            .sidebar-header {
+                background: transparent;
+                padding: 0;
+                margin: 0;
+                border-bottom: none !important;
+            }
+            .sidebar-search-container {
+                background: transparent;
+                padding: 32px 16px 8px 16px;
+                margin: 0;
+                border-bottom: none !important;
+            }
+            .sidebar-search-container .search-box {
+                background: transparent;
+                margin: 0;
+                padding: 0;
+            }
             .sidebar-search-container .search-input {
                 font-size: 16px !important;
                 padding: 12px 15px 12px 40px !important;
+                background: rgba(255, 255, 255, 0.4) !important;
+                border: 1px solid rgba(20, 184, 166, 0.2) !important;
+                border-radius: 12px !important;
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease !important;
+            }
+            .sidebar-search-container .search-input:focus {
+                background: rgba(255, 255, 255, 0.8) !important;
+                border-color: rgba(20, 184, 166, 0.4) !important;
+                box-shadow: 0 4px 12px rgba(20, 184, 166, 0.15) !important;
             }
             .sidebar-search-container .search-input::placeholder {
                 font-size: 16px !important;
+                color: rgba(100, 116, 139, 0.8) !important;
+            }
+            .sidebar-search-container .search-results {
+                left: 0 !important;
+                right: 0 !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                border: 1px solid rgba(20, 184, 166, 0.2) !important;
+                border-radius: 12px !important;
+                backdrop-filter: blur(10px) !important;
+                box-shadow: 0 8px 25px rgba(20, 184, 166, 0.18) !important;
             }
             .sidebar-footer-content {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 gap: 12px;
-            }
-            .sidebar-language-toggle {
-                display: flex;
-                justify-content: center;
-            }
-            .sidebar-language-toggle .language-toggle {
-                background: rgba(20, 184, 166, 0.1);
-                border: 1px solid rgba(20, 184, 166, 0.3);
-                color: #0D9488;
-                font-size: 14px;
-                font-weight: 600;
-                padding: 8px 16px;
-                border-radius: 20px;
-                transition: all 0.2s ease;
-                min-width: 50px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .sidebar-language-toggle .language-toggle:hover {
-                background: rgba(20, 184, 166, 0.2);
-                border-color: rgba(20, 184, 166, 0.5);
-                transform: translateY(-1px);
-                box-shadow: 0 2px 8px rgba(20, 184, 166, 0.2);
             }
             .sidebar-link {
                 display: flex;
@@ -134,19 +144,17 @@ const Sidebar: React.FC = () => {
                 border-radius: 12px;
                 margin: 6px 16px;
                 position: relative;
-                background: rgba(255, 255, 255, 0.6);
+                background: linear-gradient(135deg, rgba(20, 184, 166, 0.08) 0%, rgba(255, 255, 255, 0.7) 100%);
                 border: 1px solid rgba(20, 184, 166, 0.15);
             }
             .sidebar-link:hover {
                 background: rgba(255, 255, 255, 0.95);
-                border-color: rgba(20, 184, 166, 0.4);
-                box-shadow: 0 6px 20px rgba(20, 184, 166, 0.12);
+                border-color: rgba(20, 184, 166, 0.2);
                 text-decoration: none;
             }
             .sidebar-link.active {
                 background: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.08) 100%);
-                border-color: rgba(20, 184, 166, 0.5);
-                box-shadow: 0 8px 25px rgba(20, 184, 166, 0.18);
+                border-color: rgba(20, 184, 166, 0.25);
                 text-decoration: none;
             }
             .sidebar-icon {

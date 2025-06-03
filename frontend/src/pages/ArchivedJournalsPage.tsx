@@ -244,6 +244,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                     transform: journal.isExpanded ? 'scale(1.02)' : 'scale(1)',
                                     animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
                                     cursor: 'pointer',
+                                    border: '1px solid rgba(20, 184, 166, 0.2)',
                                 }}
                                 onMouseEnter={e => {
                                     e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.16)';
@@ -311,7 +312,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                     transition: 'all 0.4s ease',
                                                     boxShadow: journal.isExpanded 
                                                         ? 'none'
-                                                        : '0 4px 15px rgba(20, 184, 166, 0.3)'
+                                                        : 'none'
                                                 }}>
                                                     <svg 
                                                         width="24" 
@@ -412,7 +413,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                     transition: 'all 0.3s ease',
                                                     boxShadow: journal.isExpanded 
                                                         ? '0 4px 15px rgba(0, 0, 0, 0.1)'
-                                                        : '0 4px 15px rgba(20, 184, 166, 0.3)',
+                                                        : '0 4px 15px rgba(0, 0, 0, 0.1)',
                                                     transform: 'translateY(0)',
                                                     letterSpacing: '0.025em'
                                                 }}
@@ -420,13 +421,13 @@ const ArchivedJournalsPage: React.FC = () => {
                                                     e.currentTarget.style.transform = 'translateY(-2px)';
                                                     e.currentTarget.style.boxShadow = journal.isExpanded 
                                                         ? '0 8px 20px rgba(0, 0, 0, 0.15)'
-                                                        : '0 8px 20px rgba(20, 184, 166, 0.4)';
+                                                        : '0 8px 20px rgba(0, 0, 0, 0.15)';
                                                 }}
                                                 onMouseLeave={(e) => {
                                                     e.currentTarget.style.transform = 'translateY(0)';
                                                     e.currentTarget.style.boxShadow = journal.isExpanded 
                                                         ? '0 4px 15px rgba(0, 0, 0, 0.1)'
-                                                        : '0 4px 15px rgba(20, 184, 166, 0.3)';
+                                                        : '0 4px 15px rgba(0, 0, 0, 0.1)';
                                                 }}
                                             >
                                                 <span>{t('viewJournal') || 'View Journal'}</span>

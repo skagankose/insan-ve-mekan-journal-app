@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchAll, SearchResults } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { FaUser, FaBook, FaFileAlt, FaSearch } from 'react-icons/fa';
 import '../styles/SearchBox.css';
 
@@ -15,6 +16,7 @@ const SearchBox: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -114,7 +116,7 @@ const SearchBox: React.FC = () => {
           ref={inputRef}
           type="text"
           className="search-input"
-          placeholder="Search..."
+          placeholder={t('searchPlaceholder') || 'Search...'}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => {

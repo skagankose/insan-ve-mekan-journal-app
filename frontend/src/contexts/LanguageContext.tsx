@@ -41,7 +41,10 @@ type TranslationKeys =
   | 'pageNotFoundTitle' | 'pageNotFoundDescription' | 'exploreJournalsText' | 'searchContentText'
   | 'forgotPassword' | 'forgotPasswordInstructions' | 'passwordResetLinkSent' | 'backToLogin' | 'enterEmail' | 'sendResetLink' | 'rememberPassword'
   | 'resetPassword' | 'passwordResetSuccess' | 'redirectingToLogin' | 'enterNewPassword' | 'confirmNewPassword' | 'resetting'
-  | 'createAccountHere';
+  | 'createAccountHere'
+  | 'country' | 'selectCountry' | 'searchCountries' | 'noCountriesFound' | 'enterLocation'
+  | 'pleaseVerifyCaptcha' | 'captchaExpired'
+  | 'editorJournals' | 'submitPaper' | 'publishedIssues' | 'searchPlaceholder';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -58,6 +61,9 @@ const translations: Record<Language, TranslationDictionary> = {
     'myJournal': 'My Journal',
     'navigation': 'Navigation',
     'previousIssues': 'Previous Issues',
+    'editorJournals': 'Editor Journals',
+    'submitPaper': 'Submit Paper',
+    'publishedIssues': 'Published Issues',
     
     // Page titles
     'createNewEntry': 'Create New Journal Entry',
@@ -245,6 +251,18 @@ const translations: Record<Language, TranslationDictionary> = {
     'confirmNewPassword': 'Confirm your new password',
     'resetting': 'Resetting...',
     'createAccountHere': 'Create Account Here',
+
+    // Country and Location
+    'country': 'Country',
+    'selectCountry': 'Select country',
+    'searchCountries': 'Search countries...',
+    'noCountriesFound': 'No countries found',
+    'enterLocation': 'Enter your location (e.g., Istanbul, Ankara, London)',
+
+    // CAPTCHA
+    'pleaseVerifyCaptcha': 'Please verify that you are human',
+    'captchaExpired': 'CAPTCHA verification expired. Please verify again.',
+    'searchPlaceholder': 'Search...',
   },
   tr: {
     // Navigation
@@ -257,6 +275,9 @@ const translations: Record<Language, TranslationDictionary> = {
     'myJournal': 'Günlüğüm',
     'navigation': 'Navigasyon',
     'previousIssues': 'Önceki Sayılar',
+    'editorJournals': 'Editör Dergileri',
+    'submitPaper': 'Makale Gönder',
+    'publishedIssues': 'Yayınlanlar',
     
     // Page titles
     'createNewEntry': 'Yeni Günlük Kaydı Oluştur',
@@ -266,7 +287,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'publishedJournals': 'Yayınlanmış Dergiler',
     
     // Form labels
-    'title': 'Başlık',
+    'title': 'Ünvan',
     'content': 'İçerik',
     'username': 'Kullanıcı Adı',
     'password': 'Şifre',
@@ -295,8 +316,8 @@ const translations: Record<Language, TranslationDictionary> = {
     'entrySavedSecurely': 'Kaydınız güvenli bir şekilde saklanacak ve daha sonra düzenlenebilecektir.',
     'alreadyHaveAccount': 'Zaten hesabınız var mı?',
     'dontHaveAccount': 'Hesabınız yok mu?',
-    'signUp': 'Kaydol',
-    'loginText': 'Giriş yap',
+    'signUp': 'Kaydolun',
+    'loginText': 'Giriş yapın',
     'pleaseLogin': 'Günlük kayıtlarınızı görmek için lütfen giriş yapın.',
     'loadingEntries': 'Günlük kayıtlarınız yükleniyor...',
     'acceptedEntries': 'Kabul Edilen Kayıtlar',
@@ -444,6 +465,18 @@ const translations: Record<Language, TranslationDictionary> = {
     'confirmNewPassword': 'Yeni şifrenizi onaylayın',
     'resetting': 'Sıfırlama...',
     'createAccountHere': 'Hesap Oluştur',
+
+    // Country and Location
+    'country': 'Ülke',
+    'selectCountry': 'Ülke seçin',
+    'searchCountries': 'Ülke ara...',
+    'noCountriesFound': 'Ülke bulunamadı',
+    'enterLocation': 'Konumunuzu girin (örn: İstanbul, Ankara, Londra)',
+
+    // CAPTCHA
+    'pleaseVerifyCaptcha': 'Lütfen insan olduğunuzu doğrulayın',
+    'captchaExpired': 'CAPTCHA doğrulaması süresi doldu. Lütfen tekrar doğrulayın.',
+    'searchPlaceholder': 'Ara...',
   }
 };
 

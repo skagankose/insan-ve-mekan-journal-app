@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Use Link for client-side routing
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageToggle from './LanguageToggle';
 
 const Navbar: React.FC = () => {
     const { isAuthenticated, user, logout, isLoading } = useAuth(); // Get auth state and functions
@@ -36,14 +37,16 @@ const Navbar: React.FC = () => {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            <img src="/logo.png" alt="Journal App Logo" className="navbar-logo-image" />
+                            <img src="/logo.png" alt="Journal App Logo" className="navbar-logo-image" 
+                            style={{padding: '0px', margin: '0px 0px 0px 5px', height: '60px', width: 'auto' }} />
                         </div>
                         <span style={{
                             whiteSpace: 'nowrap',
                             color: '#1E293B',
                             fontWeight: '700',
                             fontSize: '1.3rem',
-                            letterSpacing: '-0.02em'
+                            letterSpacing: '-0.02em',
+                            margin: '13px 0px 0px 0px'
                         }}>
                             {language === 'en' ? 'Human & Space' : 'İnsan & Mekan'}
                         </span>
@@ -52,10 +55,12 @@ const Navbar: React.FC = () => {
                 
                 <div className="navbar-menu" style={{ marginLeft: 'auto', gap: '24px' }}>
                     <div className="navbar-end" style={{ gap: '16px', alignItems: 'center' }}>
+                        <LanguageToggle />
                         {isAuthenticated && user ? (
                             <>
                                 <div className="navbar-item navbar-user" style={{
                                     background: 'rgba(20, 184, 166, 0.1)',
+                                    border: '1px solid rgba(20, 184, 166, 0.15)',
                                     padding: '8px 16px',
                                     borderRadius: '30px',
                                     display: 'flex',
@@ -146,7 +151,6 @@ const Navbar: React.FC = () => {
                         overflow: hidden;
                     }
                     .${primaryButtonClass}:hover {
-                        transform: translateY(-2px);
                         box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
                     }
                     .${primaryButtonClass}.no-text-hover:hover {
@@ -178,7 +182,7 @@ const Navbar: React.FC = () => {
                         justify-content: center;
                         font-weight: 600;
                         transition: all 0.3s ease;
-                        border: 2px solid #14B8A6;
+                        border: 1px solid #14B8A6;
                         position: relative;
                         overflow: hidden;
                     }
@@ -199,6 +203,29 @@ const Navbar: React.FC = () => {
                         text-transform: uppercase;
                         color: white;
                         letter-spacing: 0.5px;
+                    }
+                    .navbar-end .language-toggle {
+                        background: rgba(20, 184, 166, 0.1);
+                        border: 1px solid rgba(20, 184, 166, 0.15);
+                        color: #0D9488;
+                        font-size: 14px;
+                        font-weight: 600;
+                        padding: 8px 16px;
+                        border-radius: 20px;
+                        transition: all 0.2s ease;
+                        min-width: 50px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-right: 8px;
+                        outline: none;
+                    }
+                    .navbar-end .language-toggle:hover {
+                        background: rgba(20, 184, 166, 0.2);
+                        border-color: rgba(20, 184, 166, 0.25);
+                        transform: translateY(-1px);
+                        box-shadow: 0 2px 8px rgba(20, 184, 166, 0.2);
+                        outline: none;
                     }
                 `}
             </style>

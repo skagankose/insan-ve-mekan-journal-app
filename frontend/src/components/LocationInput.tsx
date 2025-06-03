@@ -40,10 +40,6 @@ const LocationInput: React.FC<LocationInputProps> = ({
                 name={name}
                 className={`${className} location-text-input`}
             />
-            
-            <small className="help-text">
-                {t('locationHelp') || 'Enter your location (e.g., Istanbul, Turkey or London, UK)'}
-            </small>
         </div>
     );
 };
