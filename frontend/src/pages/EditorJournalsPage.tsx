@@ -281,14 +281,12 @@ const EditorJournalsPage: React.FC = () => {
                                         : '1px solid rgba(20, 184, 166, 0.2)'
                                 }}
                                 onMouseEnter={e => {
-                                    e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.16)';
-                                    e.currentTarget.style.transform = `translateY(-6px) ${journal.isExpanded ? 'scale(1.02)' : 'scale(1.005)'}`;
+                                    e.currentTarget.style.transform = 'translateY(-6px) scale(1.025)';
+                                    e.currentTarget.style.borderColor = '#14B8A6';
                                 }}
                                 onMouseLeave={e => {
-                                    e.currentTarget.style.boxShadow = journal.isExpanded
-                                        ? '0 20px 40px rgba(0, 0, 0, 0.1)'
-                                        : '0 4px 20px rgba(0, 0, 0, 0.08)';
                                     e.currentTarget.style.transform = journal.isExpanded ? 'scale(1.02)' : 'scale(1)';
+                                    e.currentTarget.style.borderColor = journal.isExpanded ? '#14B8A6' : 'rgba(20, 184, 166, 0.2)';
                                 }}
                             >
                                 <div 
@@ -426,74 +424,159 @@ const EditorJournalsPage: React.FC = () => {
                                                         style={{ display: 'block', textDecoration: 'none', animation: `fadeInUp 0.6s ease-out ${entryIndex * 0.1}s both` }}
                                                     >
                                                         <div style={{
-                                                            background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderRadius: '16px', padding: '28px',
-                                                            height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden',
-                                                            border: '1px solid #E2E8F0', transition: 'all 0.3s ease', cursor: 'pointer'
+                                                            background: 'rgba(255, 255, 255, 0.8)',
+                                                            backgroundImage: 'url(/pattern_transparent.png)',
+                                                            backgroundSize: '50% 80%',
+                                                            backgroundPosition: '138% -162%',
+                                                            backgroundRepeat: 'no-repeat',
+                                                            backdropFilter: 'blur(10px)', 
+                                                            borderRadius: '16px', 
+                                                            padding: '28px',
+                                                            height: '100%', 
+                                                            display: 'flex', 
+                                                            flexDirection: 'column', 
+                                                            position: 'relative', 
+                                                            overflow: 'hidden',
+                                                            border: '1px solid #E2E8F0', 
+                                                            transition: 'all 0.3s ease', 
+                                                            cursor: 'pointer'
                                                         }}
-                                                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.1)'; e.currentTarget.style.borderColor = '#14B8A6'; }}
-                                                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '#E2E8F0'; }}>
-                                                            <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '80px', height: '80px', background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)', borderRadius: '50%', opacity: '0.1' }}></div>
-                                                            <h5 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '700', color: '#1E293B', lineHeight: '1.4', letterSpacing: '-0.025em', position: 'relative', zIndex: 1 }}>{entry.title}</h5>
-                                                            <p style={{ color: '#64748B', fontSize: '14px', lineHeight: '1.6', marginBottom: '20px', flexGrow: 1, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', position: 'relative', zIndex: 1 }}>
+                                                        onMouseEnter={(e) => { 
+                                                            e.currentTarget.style.transform = 'translateY(-4px)'; 
+                                                            e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.1)'; 
+                                                            e.currentTarget.style.borderColor = '#14B8A6'; 
+                                                        }}
+                                                        onMouseLeave={(e) => { 
+                                                            e.currentTarget.style.transform = 'translateY(0)'; 
+                                                            e.currentTarget.style.boxShadow = 'none'; 
+                                                            e.currentTarget.style.borderColor = '#E2E8F0'; 
+                                                        }}>
+                                                            
+                                                            <h5 style={{ 
+                                                                margin: '0 0 16px 0', 
+                                                                fontSize: '18px', 
+                                                                fontWeight: '700', 
+                                                                color: '#1E293B', 
+                                                                lineHeight: '1.4', 
+                                                                letterSpacing: '-0.025em', 
+                                                                position: 'relative', 
+                                                                zIndex: 1 
+                                                            }}>{entry.title}</h5>
+                                                            
+                                                            <p style={{ 
+                                                                color: '#64748B', 
+                                                                fontSize: '14px', 
+                                                                lineHeight: '1.6', 
+                                                                marginBottom: '20px', 
+                                                                flexGrow: 1, 
+                                                                display: '-webkit-box', 
+                                                                WebkitLineClamp: 3, 
+                                                                WebkitBoxOrient: 'vertical', 
+                                                                overflow: 'hidden', 
+                                                                textOverflow: 'ellipsis', 
+                                                                position: 'relative', 
+                                                                zIndex: 1 
+                                                            }}>
                                                                 {entry.abstract_tr || entry.abstract_en || 'No abstract available.'}
                                                             </p>
-                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '20px', borderTop: '1px solid #F1F5F9', position: 'relative', zIndex: 1 }}>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94A3B8', fontSize: '12px' }}>
+                                                            
+                                                            <div style={{ 
+                                                                display: 'flex', 
+                                                                alignItems: 'center', 
+                                                                justifyContent: 'space-between', 
+                                                                paddingTop: '20px', 
+                                                                borderTop: '1px solid #F1F5F9', 
+                                                                position: 'relative', 
+                                                                zIndex: 1 
+                                                            }}>
+                                                                <div style={{ 
+                                                                    display: 'flex', 
+                                                                    alignItems: 'center', 
+                                                                    gap: '8px', 
+                                                                    color: '#94A3B8', 
+                                                                    fontSize: '12px' 
+                                                                }}>
                                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                                                                         <path d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                                                     </svg>
                                                                     <span>{new Date(entry.created_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                                                 </div>
-                                                                {entry.status && (() => {
-                                                                    let backgroundColor = 'rgba(107, 114, 128, 0.1)'; // Default gray
-                                                                    let textColor = '#6B7280'; // Default gray
+                                                                
+                                                                <div style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '12px'
+                                                                }}>
+                                                                    {entry.status && (() => {
+                                                                        let backgroundColor = 'rgba(107, 114, 128, 0.1)'; // Default gray
+                                                                        let textColor = '#6B7280'; // Default gray
 
-                                                                    switch (entry.status.toLowerCase()) {
-                                                                        case 'accepted':
-                                                                            backgroundColor = 'rgba(22, 163, 74, 0.1)'; // Light Green
-                                                                            textColor = '#16A34A'; // Green
-                                                                            break;
-                                                                        case 'rejected':
-                                                                            backgroundColor = 'rgba(220, 38, 38, 0.1)'; // Light Red
-                                                                            textColor = '#DC2626'; // Red
-                                                                            break;
-                                                                        case 'pending':
-                                                                            backgroundColor = 'rgba(245, 158, 11, 0.1)'; // Light Amber
-                                                                            textColor = '#D97706'; // Amber
-                                                                            break;
-                                                                        case 'under review':
-                                                                        case 'review':
-                                                                            backgroundColor = 'rgba(59, 130, 246, 0.1)'; // Light Blue
-                                                                            textColor = '#3B82F6'; // Blue
-                                                                            break;
-                                                                        case 'revision required':
-                                                                        case 'revisions':
-                                                                            backgroundColor = 'rgba(249, 115, 22, 0.1)'; // Light Orange
-                                                                            textColor = '#F97316'; // Orange
-                                                                            break;
-                                                                        case 'submitted':
-                                                                            backgroundColor = 'rgba(168, 85, 247, 0.1)'; // Light Purple
-                                                                            textColor = '#A855F7'; // Purple
-                                                                            break;
-                                                                        default:
-                                                                            // Keep default gray for other statuses
-                                                                            break;
-                                                                    }
+                                                                        switch (entry.status.toLowerCase()) {
+                                                                            case 'accepted':
+                                                                                backgroundColor = 'rgba(22, 163, 74, 0.1)'; // Light Green
+                                                                                textColor = '#16A34A'; // Green
+                                                                                break;
+                                                                            case 'rejected':
+                                                                                backgroundColor = 'rgba(220, 38, 38, 0.1)'; // Light Red
+                                                                                textColor = '#DC2626'; // Red
+                                                                                break;
+                                                                            case 'pending':
+                                                                                backgroundColor = 'rgba(245, 158, 11, 0.1)'; // Light Amber
+                                                                                textColor = '#D97706'; // Amber
+                                                                                break;
+                                                                            case 'under review':
+                                                                            case 'review':
+                                                                                backgroundColor = 'rgba(59, 130, 246, 0.1)'; // Light Blue
+                                                                                textColor = '#3B82F6'; // Blue
+                                                                                break;
+                                                                            case 'revision required':
+                                                                            case 'revisions':
+                                                                                backgroundColor = 'rgba(249, 115, 22, 0.1)'; // Light Orange
+                                                                                textColor = '#F97316'; // Orange
+                                                                                break;
+                                                                            case 'submitted':
+                                                                                backgroundColor = 'rgba(168, 85, 247, 0.1)'; // Light Purple
+                                                                                textColor = '#A855F7'; // Purple
+                                                                                break;
+                                                                            default:
+                                                                                // Keep default gray for other statuses
+                                                                                break;
+                                                                        }
 
-                                                                    return (
-                                                                        <div style={{
-                                                                            padding: '3px 10px',
-                                                                            borderRadius: '12px',
-                                                                            fontSize: '11px',
-                                                                            fontWeight: '600',
-                                                                            textTransform: 'capitalize',
-                                                                            backgroundColor: backgroundColor,
-                                                                            color: textColor
-                                                                        }}>
-                                                                            {t(entry.status) || entry.status}
-                                                                        </div>
-                                                                    );
-                                                                })()}
+                                                                        return (
+                                                                            <div style={{
+                                                                                padding: '3px 10px',
+                                                                                borderRadius: '12px',
+                                                                                fontSize: '11px',
+                                                                                fontWeight: '600',
+                                                                                textTransform: 'capitalize',
+                                                                                backgroundColor: backgroundColor,
+                                                                                color: textColor
+                                                                            }}>
+                                                                                {t(entry.status) || entry.status}
+                                                                            </div>
+                                                                        );
+                                                                    })()}
+                                                                    
+                                                                    <div style={{
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '4px',
+                                                                        color: '#14B8A6',
+                                                                        fontSize: '14px',
+                                                                        fontWeight: '600'
+                                                                    }}>
+                                                                        <span>Read More</span>
+                                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                                            <path d="M5 12H19M19 12L12 5M19 12L12 19" 
+                                                                                stroke="currentColor" 
+                                                                                strokeWidth="2" 
+                                                                                strokeLinecap="round" 
+                                                                                strokeLinejoin="round"
+                                                                            />
+                                                                        </svg>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </Link>
