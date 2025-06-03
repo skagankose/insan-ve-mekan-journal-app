@@ -243,263 +243,302 @@ const EditUserPage: React.FC = () => {
     };
 
     if (loading && !formData.email) {
-        return <div className="loading-container">{t('loading')}</div>;
+        return (
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '400px',
+                gap: '24px'
+            }}>
+                <div style={{
+                    width: '60px',
+                    height: '60px',
+                    border: '3px solid rgba(20, 184, 166, 0.1)',
+                    borderTopColor: '#14B8A6',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                }}></div>
+                <p style={{
+                    fontSize: '16px',
+                    color: '#64748B',
+                    fontWeight: '500',
+                    letterSpacing: '0.025em'
+                }}>{t('loading')}</p>
+            </div>
+        );
     }
 
     return (
-        <div className="container edit-user-page">
-            <h1 className="page-title">{t('editUser')}</h1>
-            
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{t('userUpdatedSuccessfully')}</div>}
-            
-            {/* Login Link Section */}
-            <div className="login-link-section">
-                <h2>{t('directLogin')}</h2>
-                <p>{t('directLoginDescription')}</p>
-                
-                {loginLinkGenerated ? (
-                    <div className="login-link-container">
-                        <div className="login-link">{loginLink}</div>
-                        <div className="link-actions">
+        <>
+            {/* Title Section */}
+            <div className="page-title-section">
+                <h1>{t('editUser')}</h1>
+            </div>
+
+            {/* Content Section */}
+            <div className="page-content-section">
+                <div className="edit-user-content">
+                    {error && <div className="error-message">{error}</div>}
+                    {success && <div className="success-message">{t('userUpdatedSuccessfully')}</div>}
+                    
+                    {/* Login Link Section */}
+                    <div className="login-link-section">
+                        <h2>{t('directLogin')}</h2>
+                        <p>{t('directLoginDescription')}</p>
+                        
+                        {loginLinkGenerated ? (
+                            <div className="login-link-container">
+                                <div className="login-link">{loginLink}</div>
+                                <div className="link-actions">
+                                    <button 
+                                        type="button" 
+                                        className="copy-button" 
+                                        onClick={handleCopyLoginLink}
+                                        disabled={loading}
+                                    >
+                                        {t('copyLink')}
+                                    </button>
+                                    <div className="email-actions">
+                                        <input
+                                            type="email"
+                                            placeholder={t('customEmailAddress') || "Custom email address"}
+                                            value={customEmailAddress}
+                                            onChange={(e) => setCustomEmailAddress(e.target.value)}
+                                            className="custom-email-input"
+                                        />
+                                        <button 
+                                            type="button" 
+                                            className="email-button" 
+                                            onClick={handleSendLoginLinkEmail}
+                                            disabled={loading || sendingEmail}
+                                        >
+                                            {sendingEmail ? t('sending') : t('sendLinkViaEmail')}
+                                        </button>
+                                    </div>
+                                </div>
+                                <span id="link-copied-message" className="link-copied-message">
+                                    {t('linkCopied')}
+                                </span>
+                                {emailSent && (
+                                    <span className="email-sent-message">
+                                        {t('linkEmailSent')}
+                                    </span>
+                                )}
+                            </div>
+                        ) : (
                             <button 
                                 type="button" 
-                                className="copy-button" 
-                                onClick={handleCopyLoginLink}
+                                className="generate-link-button" 
+                                onClick={handleGenerateLoginLink}
                                 disabled={loading}
                             >
-                                {t('copyLink')}
+                                {loading ? t('generating') : t('generateLoginLink')}
                             </button>
-                            <div className="email-actions">
-                                <input
-                                    type="email"
-                                    placeholder={t('customEmailAddress') || "Custom email address"}
-                                    value={customEmailAddress}
-                                    onChange={(e) => setCustomEmailAddress(e.target.value)}
-                                    className="custom-email-input"
-                                />
-                                <button 
-                                    type="button" 
-                                    className="email-button" 
-                                    onClick={handleSendLoginLinkEmail}
-                                    disabled={loading || sendingEmail}
-                                >
-                                    {sendingEmail ? t('sending') : t('sendLinkViaEmail')}
-                                </button>
-                            </div>
-                        </div>
-                        <span id="link-copied-message" className="link-copied-message">
-                            {t('linkCopied')}
-                        </span>
-                        {emailSent && (
-                            <span className="email-sent-message">
-                                {t('linkEmailSent')}
-                            </span>
                         )}
                     </div>
-                ) : (
-                    <button 
-                        type="button" 
-                        className="generate-link-button" 
-                        onClick={handleGenerateLoginLink}
-                        disabled={loading}
-                    >
-                        {loading ? t('generating') : t('generateLoginLink')}
-                    </button>
-                )}
-            </div>
-            
-            <form onSubmit={handleSubmit} className="edit-user-form">
-                <div className="form-group">
-                    <label htmlFor="email">{t('email')}</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        maxLength={200}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="name">{t('name')}</label>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        maxLength={200}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="title">{t('title')}</label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleInputChange}
-                        maxLength={200}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="bio">{t('bio')}</label>
-                    <textarea
-                        id="bio"
-                        name="bio"
-                        value={formData.bio}
-                        onChange={handleInputChange}
-                        rows={3}
-                        maxLength={400}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="telephone">{t('telephone')}</label>
-                    <input
-                        type="text"
-                        id="telephone"
-                        name="telephone"
-                        value={formData.telephone}
-                        onChange={handleInputChange}
-                        maxLength={100}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="science_branch">{t('scienceBranch')}</label>
-                    <input
-                        type="text"
-                        id="science_branch"
-                        name="science_branch"
-                        value={formData.science_branch}
-                        onChange={handleInputChange}
-                        maxLength={300}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="location">{t('location')}</label>
-                    <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        maxLength={100}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="yoksis_id">{t('yoksisId')}</label>
-                    <input
-                        type="text"
-                        id="yoksis_id"
-                        name="yoksis_id"
-                        value={formData.yoksis_id}
-                        onChange={handleInputChange}
-                        maxLength={100}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="orcid_id">{t('orcidId')}</label>
-                    <input
-                        type="text"
-                        id="orcid_id"
-                        name="orcid_id"
-                        value={formData.orcid_id}
-                        onChange={handleInputChange}
-                        maxLength={100}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="role">{t('role')}</label>
-                    <select
-                        id="role"
-                        name="role"
-                        value={formData.role}
-                        onChange={handleInputChange}
-                        required
-                    >
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                        <option value="owner">Owner</option>
-                        <option value="editor">Editor</option>
-                        <option value="referee">Referee</option>
-                        <option value="author">Author</option>
-                    </select>
-                </div>
-                
-                <div className="form-group checkbox-group">
-                    <label htmlFor="is_auth">
-                        <input
-                            type="checkbox"
-                            id="is_auth"
-                            name="is_auth"
-                            checked={formData.is_auth}
-                            onChange={handleInputChange}
-                        />
-                        {t('isAuth')}
-                    </label>
-                </div>
-                
-                <div className="form-actions">
-                    <button type="button" className="cancel-button" onClick={() => navigate('/admin')}>
-                        {t('cancel')}
-                    </button>
-                    <button type="submit" className="save-button" disabled={loading}>
-                        {loading ? t('saving') : t('saveChanges')}
-                    </button>
-                </div>
-            </form>
-
-            {/* Delete User Section */}
-            <div className="delete-user-section">
-                <h2>{t('deleteUser') || 'Delete User'}</h2>
-                <p>{t('deleteUserWarning') || 'Warning: This action will permanently delete the user and transfer all related objects to your account. This cannot be undone.'}</p>
-                
-                {showDeleteConfirm ? (
-                    <div className="delete-confirmation">
-                        <p>{t('deleteUserConfirm') || 'Are you sure you want to delete this user? All related data will be transferred to your account.'}</p>
-                        <div className="confirmation-actions">
-                            <button 
-                                type="button" 
-                                className="cancel-delete-button" 
-                                onClick={handleCancelDelete}
-                                disabled={deleting}
+                    
+                    <form onSubmit={handleSubmit} className="edit-user-form">
+                        <div className="form-group">
+                            <label htmlFor="email">{t('email')}</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                required
+                                maxLength={200}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="name">{t('name')}</label>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                required
+                                maxLength={200}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="title">{t('title')}</label>
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleInputChange}
+                                maxLength={200}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="bio">{t('bio')}</label>
+                            <textarea
+                                id="bio"
+                                name="bio"
+                                value={formData.bio}
+                                onChange={handleInputChange}
+                                rows={3}
+                                maxLength={400}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="telephone">{t('telephone')}</label>
+                            <input
+                                type="text"
+                                id="telephone"
+                                name="telephone"
+                                value={formData.telephone}
+                                onChange={handleInputChange}
+                                maxLength={100}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="science_branch">{t('scienceBranch')}</label>
+                            <input
+                                type="text"
+                                id="science_branch"
+                                name="science_branch"
+                                value={formData.science_branch}
+                                onChange={handleInputChange}
+                                maxLength={300}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="location">{t('location')}</label>
+                            <input
+                                type="text"
+                                id="location"
+                                name="location"
+                                value={formData.location}
+                                onChange={handleInputChange}
+                                maxLength={100}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="yoksis_id">{t('yoksisId')}</label>
+                            <input
+                                type="text"
+                                id="yoksis_id"
+                                name="yoksis_id"
+                                value={formData.yoksis_id}
+                                onChange={handleInputChange}
+                                maxLength={100}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="orcid_id">{t('orcidId')}</label>
+                            <input
+                                type="text"
+                                id="orcid_id"
+                                name="orcid_id"
+                                value={formData.orcid_id}
+                                onChange={handleInputChange}
+                                maxLength={100}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="role">{t('role')}</label>
+                            <select
+                                id="role"
+                                name="role"
+                                value={formData.role}
+                                onChange={handleInputChange}
+                                required
                             >
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                                <option value="owner">Owner</option>
+                                <option value="editor">Editor</option>
+                                <option value="referee">Referee</option>
+                                <option value="author">Author</option>
+                            </select>
+                        </div>
+                        
+                        <div className="form-group checkbox-group">
+                            <label htmlFor="is_auth">
+                                <input
+                                    type="checkbox"
+                                    id="is_auth"
+                                    name="is_auth"
+                                    checked={formData.is_auth}
+                                    onChange={handleInputChange}
+                                />
+                                {t('isAuth')}
+                            </label>
+                        </div>
+                        
+                        <div className="form-actions">
+                            <button type="button" className="cancel-button" onClick={() => navigate('/admin')}>
                                 {t('cancel')}
                             </button>
-                            <button 
-                                type="button" 
-                                className="confirm-delete-button" 
-                                onClick={handleDeleteUser}
-                                disabled={deleting}
-                            >
-                                {deleting ? (t('deleting') || 'Deleting...') : (t('confirmDelete') || 'Confirm Delete')}
+                            <button type="submit" className="save-button" disabled={loading}>
+                                {loading ? t('saving') : t('saveChanges')}
                             </button>
                         </div>
+                    </form>
+
+                    {/* Delete User Section */}
+                    <div className="delete-user-section">
+                        <h2>{t('deleteUser') || 'Delete User'}</h2>
+                        <p>{t('deleteUserWarning') || 'Warning: This action will permanently delete the user and transfer all related objects to your account. This cannot be undone.'}</p>
+                        
+                        {showDeleteConfirm ? (
+                            <div className="delete-confirmation">
+                                <p>{t('deleteUserConfirm') || 'Are you sure you want to delete this user? All related data will be transferred to your account.'}</p>
+                                <div className="confirmation-actions">
+                                    <button 
+                                        type="button" 
+                                        className="cancel-delete-button" 
+                                        onClick={handleCancelDelete}
+                                        disabled={deleting}
+                                    >
+                                        {t('cancel')}
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className="confirm-delete-button" 
+                                        onClick={handleDeleteUser}
+                                        disabled={deleting}
+                                    >
+                                        {deleting ? (t('deleting') || 'Deleting...') : (t('confirmDelete') || 'Confirm Delete')}
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <button 
+                                type="button" 
+                                className="delete-user-button" 
+                                onClick={handleDeleteConfirm}
+                                disabled={loading}
+                            >
+                                {t('deleteUser') || 'Delete User'}
+                            </button>
+                        )}
                     </div>
-                ) : (
-                    <button 
-                        type="button" 
-                        className="delete-user-button" 
-                        onClick={handleDeleteConfirm}
-                        disabled={loading}
-                    >
-                        {t('deleteUser') || 'Delete User'}
-                    </button>
-                )}
+                </div>
             </div>
-        </div>
+
+            {/* CSS Animations */}
+            <style>{`
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            `}</style>
+        </>
     );
 };
 

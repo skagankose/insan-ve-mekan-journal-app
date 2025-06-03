@@ -38,17 +38,17 @@ const Navbar: React.FC = () => {
                             justifyContent: 'center'
                         }}>
                             <img src="/logo.png" alt="Journal App Logo" className="navbar-logo-image" 
-                            style={{padding: '0px', margin: '0px 0px 0px 5px', height: '60px', width: 'auto' }} />
+                            style={{padding: '0px', margin: '0px 0px 0px 0px', height: '60px', width: 'auto' }} />
                         </div>
-                        <span style={{
+                        <span className="navbar-title-text" style={{
                             whiteSpace: 'nowrap',
                             color: '#1E293B',
-                            fontWeight: '700',
+                            fontWeight: '500',
                             fontSize: '1.3rem',
                             letterSpacing: '-0.02em',
-                            margin: '13px 0px 0px 0px'
+                            margin: '-20px 0px 0px -180px'
                         }}>
-                            {language === 'en' ? 'Human & Space' : 'İnsan & Mekan'}
+                            {language === 'en' ? 'human & space' : 'insan & mekan'}
                         </span>
                     </Link>
                 </div>
@@ -226,6 +226,13 @@ const Navbar: React.FC = () => {
                         transform: translateY(-1px);
                         box-shadow: 0 2px 8px rgba(20, 184, 166, 0.2);
                         outline: none;
+                    }
+                    .navbar-title-text {
+                        transition: transform 0.3s ease;
+                        cursor: pointer;
+                    }
+                    .navbar-title-text:hover {
+                        transform: scale(1.05);
                     }
                 `}
             </style>

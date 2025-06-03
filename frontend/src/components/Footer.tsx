@@ -43,7 +43,7 @@ const Footer: React.FC = () => {
               fontWeight: '600',
               opacity: 0.9
             }}>
-              {language === 'tr' ? 'İnsan & Mekan' : 'Human & Space'}
+              {language === 'tr' ? 'insan & mekan' : 'human & space'}
             </h5>
             <p style={{ 
               color: '#475569', 

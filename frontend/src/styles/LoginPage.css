@@ -173,7 +173,6 @@
   border-color: #14B8A6;
   box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
   background: rgba(255, 255, 255, 0.95);
-  transform: translateY(-1px);
 }
 
 .form-group input:hover {
@@ -234,6 +233,7 @@
   z-index: 1;
 }
 
+/* Commenting out this rule to remove the line behind/through the Google button
 .social-login::before {
   content: '';
   position: absolute;
@@ -244,16 +244,15 @@
   background: linear-gradient(90deg, transparent, #E2E8F0, transparent);
   transform: translateY(-50%);
 }
+*/
 
 /* Google Login button styling */
 .social-login > div {
   display: flex;
   justify-content: center;
   position: relative;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 0 20px;
-  margin: 0 auto;
-  width: fit-content;
+  z-index: 2;
+  background-color: transparent !important;
 }
 
 .divider {
@@ -274,11 +273,14 @@
 }
 
 .divider span {
-  margin: 0 var(--spacing-4);
-  font-size: var(--font-size-sm);
+  display: inline-block;
+  padding: 0 var(--spacing-3);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  background: rgba(255, 255, 255, 0.9);
-  padding: 0 var(--spacing-2);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: transparent;
 }
 
 .error-message {
@@ -560,7 +562,6 @@
   border-color: #14B8A6;
   box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
   background: rgba(255, 255, 255, 0.95);
-  transform: translateY(-1px);
 }
 
 .register-textarea:hover {
@@ -597,7 +598,6 @@
   border-color: #14B8A6 !important;
   box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1) !important;
   background: rgba(255, 255, 255, 0.95) !important;
-  transform: translateY(-1px);
 }
 
 .phone-input-container .react-tel-input .form-control:hover {
@@ -768,7 +768,6 @@
   border-color: #14B8A6 !important;
   box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1) !important;
   background: rgba(255, 255, 255, 0.95) !important;
-  transform: translateY(-1px);
 }
 
 .register-box .location-input-container input:hover {
@@ -801,7 +800,6 @@
   border-color: #14B8A6 !important;
   box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1) !important;
   background: rgba(255, 255, 255, 0.95) !important;
-  transform: translateY(-1px);
 }
 
 .register-box .formatted-id-container input:hover {

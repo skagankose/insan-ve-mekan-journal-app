@@ -263,8 +263,10 @@ body::before {
   flex: 1;
   padding: 0;
   background-color: transparent;
-  margin: var(--spacing-4);
+  margin-top: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
   margin-left: 300px; /* Increased to match new sidebar width + padding */
+  margin-right: 0; /* Remove right margin to allow scrollbar at edge */
   height: calc(100vh - 80px - var(--spacing-8) - var(--spacing-4));
   box-shadow: none;
   overflow: hidden;
@@ -1076,7 +1078,6 @@ body::before {
   border-color: #14B8A6;
   box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
   background: rgba(255, 255, 255, 0.95);
-  transform: translateY(-1px);
 }
 
 .register-form .form-input:hover,
@@ -1272,7 +1273,6 @@ body::before {
   border-color: #14B8A6;
   box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
   background: rgba(255, 255, 255, 0.95);
-  transform: translateY(-1px);
 }
 
 .register-form .password-requirements {
