@@ -22,6 +22,13 @@ const JournalDetailsPage: React.FC = () => {
     const isEditor = isAuthenticated && user && user.role === 'editor';
     const isEditorOrAdmin = isAuthenticated && user && (isEditor || isAdmin);
     
+    // Check if current user can view journal files (admin/owner or editor related to this journal)
+    const canViewJournalFiles = isAdmin || 
+                               (isEditor && user && (
+                                   editors.some(editor => editor.id === user.id) ||
+                                   editorInChief?.id === user.id
+                               ));
+    
     // Modal states for editor management
     const [showEditorInChiefModal, setShowEditorInChiefModal] = useState(false);
     const [showEditorsModal, setShowEditorsModal] = useState(false);
@@ -690,241 +697,313 @@ const JournalDetailsPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: '32px' }}>
+                    {canViewJournalFiles && (
+                        <div style={{ marginBottom: '32px' }}>
+                            <h3 style={{
+                                fontSize: '20px',
+                                fontWeight: '700',
+                                color: '#1E293B',
+                                marginBottom: '20px',
+                                letterSpacing: '-0.025em'
+                            }}>{t('journalFiles') || 'Journal Files'}</h3>
+                            
+                            <div style={{ 
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                                gap: '12px'
+                            }}>
+                                {journal.cover_photo && (
+                                    <a 
+                                        href={`/api${journal.cover_photo}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '12px 16px',
+                                            background: 'rgba(248, 250, 252, 0.8)',
+                                            border: '1px solid #E2E8F0',
+                                            borderRadius: '10px',
+                                            color: '#0D9488',
+                                            textDecoration: 'none',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                            e.currentTarget.style.borderColor = '#14B8A6';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                            e.currentTarget.style.borderColor = '#E2E8F0';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M4 16L4 10C4 7.79086 5.79086 6 8 6L16 6C18.2091 6 20 7.79086 20 10L20 16M4 16C4 18.2091 5.79086 20 8 20L16 20C18.2091 20 20 18.2091 20 16M4 16L8.5 10.5L13 15L15.5 12.5L20 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                        {t('viewCoverPhoto') || 'Cover Photo'}
+                                    </a>
+                                )}
+                                {journal.meta_files && (
+                                    <a 
+                                        href={`/api${journal.meta_files}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '12px 16px',
+                                            background: 'rgba(248, 250, 252, 0.8)',
+                                            border: '1px solid #E2E8F0',
+                                            borderRadius: '10px',
+                                            color: '#0D9488',
+                                            textDecoration: 'none',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                            e.currentTarget.style.borderColor = '#14B8A6';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                            e.currentTarget.style.borderColor = '#E2E8F0';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                        {t('viewMetaFiles') || 'Meta Files'}
+                                    </a>
+                                )}
+                                {canViewJournalFiles && journal.editor_notes && (
+                                    <a 
+                                        href={`/api${journal.editor_notes}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '12px 16px',
+                                            background: 'rgba(248, 250, 252, 0.8)',
+                                            border: '1px solid #E2E8F0',
+                                            borderRadius: '10px',
+                                            color: '#0D9488',
+                                            textDecoration: 'none',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                            e.currentTarget.style.borderColor = '#14B8A6';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                            e.currentTarget.style.borderColor = '#E2E8F0';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H16C16.5304 20 17.0391 19.7893 17.4142 19.4142C17.7893 19.0391 18 18.5304 18 18V13M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                        {t('viewEditorNotes') || 'Editor Notes'}
+                                    </a>
+                                )}
+                                {journal.full_pdf && (
+                                    <a 
+                                        href={`/api${journal.full_pdf}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '12px 16px',
+                                            background: 'rgba(248, 250, 252, 0.8)',
+                                            border: '1px solid #E2E8F0',
+                                            borderRadius: '10px',
+                                            color: '#0D9488',
+                                            textDecoration: 'none',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                            e.currentTarget.style.borderColor = '#14B8A6';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                            e.currentTarget.style.borderColor = '#E2E8F0';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                        {t('viewFullPdf') || 'Full PDF'}
+                                    </a>
+                                )}
+                                {journal.index_section && (
+                                    <a 
+                                        href={`/api${journal.index_section}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '12px 16px',
+                                            background: 'rgba(248, 250, 252, 0.8)',
+                                            border: '1px solid #E2E8F0',
+                                            borderRadius: '10px',
+                                            color: '#14B8A6',
+                                            textDecoration: 'none',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                            e.currentTarget.style.borderColor = '#14B8A6';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                            e.currentTarget.style.borderColor = '#E2E8F0';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M6 2V22M18 7V22M4 7H8M4 12H8M4 17H8M16 12H20M16 17H20M11 7H13M11 12H13M11 17H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                        {t('viewIndexSection') || 'Index Section'}
+                                    </a>
+                                )}
+                                {journal.file_path && (
+                                    <a 
+                                        href={`/api${journal.file_path}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '12px 16px',
+                                            background: 'rgba(248, 250, 252, 0.8)',
+                                            border: '1px solid #E2E8F0',
+                                            borderRadius: '10px',
+                                            color: '#14B8A6',
+                                            textDecoration: 'none',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                            e.currentTarget.style.borderColor = '#14B8A6';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                            e.currentTarget.style.borderColor = '#E2E8F0';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M16 2V8H22L16 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M15 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9H15V2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                        {t('viewMergedFile') || 'Merged File'}
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Public PDF Download Section - Available to all users */}
+                {journal.full_pdf && (
+                    <div style={{
+                        background: 'rgba(255, 255, 255, 0.8)',
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: '20px',
+                        padding: '32px',
+                        marginBottom: '24px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                        border: '1px solid rgba(20, 184, 166, 0.2)'
+                    }}>
                         <h3 style={{
                             fontSize: '20px',
                             fontWeight: '700',
                             color: '#1E293B',
                             marginBottom: '20px',
                             letterSpacing: '-0.025em'
-                        }}>{t('journalFiles') || 'Journal Files'}</h3>
+                        }}>{t('downloadJournal') || 'Download Journal'}</h3>
                         
-                        <div style={{ 
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                            gap: '12px'
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '24px'
                         }}>
-                            {journal.cover_photo && (
-                                <a 
-                                    href={`/api${journal.cover_photo}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        padding: '12px 16px',
-                                        background: 'rgba(248, 250, 252, 0.8)',
-                                        border: '1px solid #E2E8F0',
-                                        borderRadius: '10px',
-                                        color: '#0D9488',
-                                        textDecoration: 'none',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                        e.currentTarget.style.borderColor = '#14B8A6';
-                                        e.currentTarget.style.transform = 'translateY(-2px)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                        e.currentTarget.style.borderColor = '#E2E8F0';
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                    }}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <path d="M4 16L4 10C4 7.79086 5.79086 6 8 6L16 6C18.2091 6 20 7.79086 20 10L20 16M4 16C4 18.2091 5.79086 20 8 20L16 20C18.2091 20 20 18.2091 20 16M4 16L8.5 10.5L13 15L15.5 12.5L20 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                    {t('viewCoverPhoto') || 'Cover Photo'}
-                                </a>
-                            )}
-                            {journal.meta_files && (
-                                <a 
-                                    href={`/api${journal.meta_files}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        padding: '12px 16px',
-                                        background: 'rgba(248, 250, 252, 0.8)',
-                                        border: '1px solid #E2E8F0',
-                                        borderRadius: '10px',
-                                        color: '#0D9488',
-                                        textDecoration: 'none',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                        e.currentTarget.style.borderColor = '#14B8A6';
-                                        e.currentTarget.style.transform = 'translateY(-2px)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                        e.currentTarget.style.borderColor = '#E2E8F0';
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                    }}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                    {t('viewMetaFiles') || 'Meta Files'}
-                                </a>
-                            )}
-                            {isEditorOrAdmin && journal.editor_notes && (
-                                <a 
-                                    href={`/api${journal.editor_notes}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        padding: '12px 16px',
-                                        background: 'rgba(248, 250, 252, 0.8)',
-                                        border: '1px solid #E2E8F0',
-                                        borderRadius: '10px',
-                                        color: '#0D9488',
-                                        textDecoration: 'none',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                        e.currentTarget.style.borderColor = '#14B8A6';
-                                        e.currentTarget.style.transform = 'translateY(-2px)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                        e.currentTarget.style.borderColor = '#E2E8F0';
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                    }}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H16C16.5304 20 17.0391 19.7893 17.4142 19.4142C17.7893 19.0391 18 18.5304 18 18V13M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                    {t('viewEditorNotes') || 'Editor Notes'}
-                                </a>
-                            )}
-                            {journal.full_pdf && (
-                                <a 
-                                    href={`/api${journal.full_pdf}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        padding: '12px 16px',
-                                        background: 'rgba(248, 250, 252, 0.8)',
-                                        border: '1px solid #E2E8F0',
-                                        borderRadius: '10px',
-                                        color: '#0D9488',
-                                        textDecoration: 'none',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                        e.currentTarget.style.borderColor = '#14B8A6';
-                                        e.currentTarget.style.transform = 'translateY(-2px)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                        e.currentTarget.style.borderColor = '#E2E8F0';
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                    }}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                    {t('viewFullPdf') || 'Full PDF'}
-                                </a>
-                            )}
-                            {journal.index_section && (
-                                <a 
-                                    href={`/api${journal.index_section}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        padding: '12px 16px',
-                                        background: 'rgba(248, 250, 252, 0.8)',
-                                        border: '1px solid #E2E8F0',
-                                        borderRadius: '10px',
-                                        color: '#14B8A6',
-                                        textDecoration: 'none',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                        e.currentTarget.style.borderColor = '#14B8A6';
-                                        e.currentTarget.style.transform = 'translateY(-2px)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                        e.currentTarget.style.borderColor = '#E2E8F0';
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                    }}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <path d="M6 2V22M18 7V22M4 7H8M4 12H8M4 17H8M16 12H20M16 17H20M11 7H13M11 12H13M11 17H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                    {t('viewIndexSection') || 'Index Section'}
-                                </a>
-                            )}
-                            {journal.file_path && (
-                                <a 
-                                    href={`/api${journal.file_path}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        padding: '12px 16px',
-                                        background: 'rgba(248, 250, 252, 0.8)',
-                                        border: '1px solid #E2E8F0',
-                                        borderRadius: '10px',
-                                        color: '#14B8A6',
-                                        textDecoration: 'none',
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        transition: 'all 0.3s ease'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                        e.currentTarget.style.borderColor = '#14B8A6';
-                                        e.currentTarget.style.transform = 'translateY(-2px)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                        e.currentTarget.style.borderColor = '#E2E8F0';
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                    }}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                        <path d="M16 2V8H22L16 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        <path d="M15 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9H15V2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                    {t('viewMergedFile') || 'Merged File'}
-                                </a>
-                            )}
+                            <a 
+                                href={`/api${journal.full_pdf}`} 
+                                download
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    padding: '16px 32px',
+                                    background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                    color: 'white',
+                                    textDecoration: 'none',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    borderRadius: '12px',
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(20, 184, 166, 0.4)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.3)';
+                                }}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15L17 10M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                {t('downloadFullPdf') || 'Download Full PDF'}
+                            </a>
                         </div>
+                        
+                        <p style={{
+                            textAlign: 'center',
+                            color: '#64748B',
+                            fontSize: '14px',
+                            marginTop: '16px',
+                            marginBottom: '0'
+                        }}>
+                            {t('downloadJournalDescription') || 'Download the complete journal in PDF format'}
+                        </p>
                     </div>
-                </div>
+                )}
 
                 <div style={{ marginBottom: '32px' }}>
                     <h3 style={{
