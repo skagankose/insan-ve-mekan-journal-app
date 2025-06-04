@@ -5,7 +5,6 @@ import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './JournalEditPage.css';
 
 interface JournalFormData {
     title: string;
@@ -182,241 +181,361 @@ const JournalEditPage: React.FC = () => {
         setIsDeleting(true);
         try {
             await apiService.deleteEntry(entryId);
+            toast.success(t('entryDeletedSuccessfully') || 'Entry deleted successfully');
             navigate('/');
         } catch (err: any) {
             console.error("Failed to delete entry:", err);
             setError(err.response?.data?.detail || "Failed to delete entry.");
+            toast.error(t('errorDeletingEntry') || 'Failed to delete entry');
             setIsDeleting(false);
         }
     };
 
     if (isLoading) {
-        return <div className="loading">{t('loadingEntry') || 'Loading entry...'}</div>;
+        return (
+            <>
+                <div className="page-title-section">
+                    <h1 style={{textAlign: 'center'}}>{t('editEntry') || 'Edit Entry'}</h1>
+                </div>
+                <div className="page-content-section">
+                    <div className="loading">{t('loadingEntry') || 'Loading entry...'}</div>
+                </div>
+            </>
+        );
     }
     
     if (error) {
-        return <div className="error-message">{error}</div>;
+        return (
+            <>
+                <div className="page-title-section">
+                    <h1 style={{textAlign: 'center'}}>{t('editEntry') || 'Edit Entry'}</h1>
+                </div>
+                <div className="page-content-section">
+                    <div className="error-message">{error}</div>
+                </div>
+            </>
+        );
     }
 
     return (
-        <div className="form-container">
-            <div className="page-header">
-                <h1 className="page-title">{t('editEntry') || 'Edit Entry'}</h1>
-                <button 
-                    onClick={handleDeleteEntry}
-                    disabled={isDeleting}
-                    className="delete-entry-button"
-                >
-                    {isDeleting 
-                        ? (t('deleting') || 'Deleting...') 
-                        : (t('deleteEntry') || 'Delete Entry')}
-                </button>
+        <>
+            {/* Title Section */}
+            <div className="page-title-section">
+                <h1 style={{textAlign: 'center'}}>{t('editEntry') || 'Edit Entry'}</h1>
             </div>
-            
-            <form onSubmit={handleSubmit} className="card">
-                {submitError && <div className="error-message">{submitError}</div>}
-                
-                <div className="form-group">
-                    <label htmlFor="title" className="form-label">{t('title')}</label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        className="form-input"
-                        value={formData.title}
-                        onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        placeholder={t('enterTitle')}
-                        required
-                        disabled={isSubmitting}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="publication_date" className="form-label">{t('publicationDate') || 'Publication Date'}</label>
-                    <input
-                        type="datetime-local"
-                        id="publication_date"
-                        name="publication_date"
-                        className="form-input"
-                        value={formData.publication_date || ''}
-                        onChange={(e) => setFormData({...formData, publication_date: e.target.value})}
-                        placeholder={t('enterPublicationDate') || 'Enter publication date'}
-                        disabled={isSubmitting}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="abstract_tr" className="form-label">{t('abstractTurkish') || 'Abstract (Turkish)'}</label>
-                    <textarea
-                        id="abstract_tr"
-                        name="abstract_tr"
-                        className="form-textarea"
-                        value={formData.abstract_tr}
-                        onChange={(e) => setFormData({...formData, abstract_tr: e.target.value})}
-                        placeholder={t('enterAbstractTr') || 'Enter a brief summary in Turkish...'}
-                        required
-                        disabled={isSubmitting}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="abstract_en" className="form-label">{t('abstractEnglish') || 'Abstract (English)'}</label>
-                    <textarea
-                        id="abstract_en"
-                        name="abstract_en"
-                        className="form-textarea"
-                        value={formData.abstract_en || ''}
-                        onChange={(e) => setFormData({...formData, abstract_en: e.target.value})}
-                        placeholder={t('enterAbstractEn') || 'Enter a brief summary in English...'}
-                        disabled={isSubmitting}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="keywords" className="form-label">{t('keywords') || 'Keywords'}</label>
-                    <input
-                        type="text"
-                        id="keywords"
-                        name="keywords"
-                        className="form-input"
-                        value={formData.keywords || ''}
-                        onChange={(e) => setFormData({...formData, keywords: e.target.value})}
-                        placeholder={t('enterKeywords') || 'Enter keywords, separated by commas...'}
-                        disabled={isSubmitting}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="page_number" className="form-label">{t('pageNumber') || 'Page Number'}</label>
-                    <input
-                        type="text"
-                        id="page_number"
-                        name="page_number"
-                        className="form-input"
-                        value={formData.page_number || ''}
-                        onChange={(e) => setFormData({...formData, page_number: e.target.value})}
-                        placeholder={t('enterPageNumber') || 'Enter page number'}
-                        disabled={isSubmitting}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="article_type" className="form-label">{t('articleType') || 'Article Type'}</label>
-                    <select
-                        id="article_type"
-                        name="article_type"
-                        className="form-select"
-                        value={formData.article_type || ''}
-                        onChange={(e) => setFormData({...formData, article_type: e.target.value})}
-                        disabled={isSubmitting}
-                    >
-                        <option value="">{t('selectArticleType') || 'Select article type'}</option>
-                        <option value="research">{t('research') || 'Research'}</option>
-                        <option value="review">{t('review') || 'Review'}</option>
-                        <option value="case_study">{t('caseStudy') || 'Case Study'}</option>
-                    </select>
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="language" className="form-label">{t('language') || 'Language'}</label>
-                    <select
-                        id="language"
-                        name="language"
-                        className="form-select"
-                        value={formData.language || ''}
-                        onChange={(e) => setFormData({...formData, language: e.target.value})}
-                        disabled={isSubmitting}
-                    >
-                        <option value="">{t('selectLanguage') || 'Select language'}</option>
-                        <option value="turkish">{t('turkish') || 'Turkish'}</option>
-                        <option value="english">{t('english') || 'English'}</option>
-                    </select>
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="doi" className="form-label">{t('doi') || 'DOI'}</label>
-                    <input
-                        type="text"
-                        id="doi"
-                        name="doi"
-                        className="form-input"
-                        value={formData.doi || ''}
-                        onChange={(e) => setFormData({...formData, doi: e.target.value})}
-                        placeholder={t('enterDoi') || 'Enter DOI'}
-                        disabled={isSubmitting}
-                    />
-                </div>
 
-                <div className="form-group">
-                    <label htmlFor="file_path" className="form-label">{t('file') || 'File'}</label>
-                    <input
-                        type="file"
-                        id="file_path"
-                        name="file_path"
-                        className="form-input"
-                        onChange={handleFileChange}
-                        accept=".docx"
-                        disabled={isSubmitting}
-                    />
-                    {formData.file_path && (
-                        <div className="current-file">
-                            <a href={`/api${formData.file_path}`} target="_blank" rel="noopener noreferrer">
-                                {t('currentFile') || 'Current File'}
-                            </a>
+            {/* Content Section */}
+            <div className="page-content-section">
+                <div className="register-form-container">
+                    <div className="form-header" style={{ 
+                        display: 'flex', 
+                        justifyContent: 'flex-end', 
+                        marginBottom: 'var(--spacing-4)',
+                        paddingBottom: 'var(--spacing-3)',
+                        borderBottom: '1px solid rgba(226, 232, 240, 0.6)'
+                    }}>
+                        <button 
+                            onClick={handleDeleteEntry}
+                            disabled={isDeleting}
+                            className="btn btn-danger btn-sm"
+                            style={{
+                                background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                                border: 'none',
+                                borderRadius: '8px',
+                                padding: '8px 16px',
+                                fontSize: '0.875rem',
+                                fontWeight: '600',
+                                color: 'white',
+                                cursor: isDeleting ? 'not-allowed' : 'pointer',
+                                opacity: isDeleting ? 0.6 : 1,
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                            }}
+                        >
+                            {isDeleting 
+                                ? (t('deleting') || 'Deleting...') 
+                                : (t('deleteEntry') || 'Delete Entry')}
+                        </button>
+                    </div>
+                    
+                    <form onSubmit={handleSubmit} className="register-form">
+                        {submitError && <div className="error-message">{submitError}</div>}
+                        
+                        <div className="form-group">
+                            <label htmlFor="title" className="form-label">{t('title')}</label>
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                className="form-input"
+                                value={formData.title}
+                                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                placeholder={t('enterTitle')}
+                                required
+                                disabled={isSubmitting}
+                            />
                         </div>
-                    )}
-                </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="publication_date" className="form-label">{t('publicationDate') || 'Publication Date'}</label>
+                            <input
+                                type="datetime-local"
+                                id="publication_date"
+                                name="publication_date"
+                                className="form-input"
+                                value={formData.publication_date || ''}
+                                onChange={(e) => setFormData({...formData, publication_date: e.target.value})}
+                                placeholder={t('enterPublicationDate') || 'Enter publication date'}
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="abstract_tr" className="form-label">{t('abstractTurkish') || 'Abstract (Turkish)'}</label>
+                            <textarea
+                                id="abstract_tr"
+                                name="abstract_tr"
+                                className="form-textarea"
+                                value={formData.abstract_tr}
+                                onChange={(e) => setFormData({...formData, abstract_tr: e.target.value})}
+                                placeholder={t('enterAbstractTr') || 'Enter a brief summary in Turkish...'}
+                                required
+                                disabled={isSubmitting}
+                                rows={4}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="abstract_en" className="form-label">{t('abstractEnglish') || 'Abstract (English)'}</label>
+                            <textarea
+                                id="abstract_en"
+                                name="abstract_en"
+                                className="form-textarea"
+                                value={formData.abstract_en || ''}
+                                onChange={(e) => setFormData({...formData, abstract_en: e.target.value})}
+                                placeholder={t('enterAbstractEn') || 'Enter a brief summary in English...'}
+                                disabled={isSubmitting}
+                                rows={4}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="keywords" className="form-label">{t('keywords') || 'Keywords'}</label>
+                            <input
+                                type="text"
+                                id="keywords"
+                                name="keywords"
+                                className="form-input"
+                                value={formData.keywords || ''}
+                                onChange={(e) => setFormData({...formData, keywords: e.target.value})}
+                                placeholder={t('enterKeywords') || 'Enter keywords, separated by commas...'}
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="page_number" className="form-label">{t('pageNumber') || 'Page Number'}</label>
+                            <input
+                                type="text"
+                                id="page_number"
+                                name="page_number"
+                                className="form-input"
+                                value={formData.page_number || ''}
+                                onChange={(e) => setFormData({...formData, page_number: e.target.value})}
+                                placeholder={t('enterPageNumber') || 'Enter page number'}
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="article_type" className="form-label">{t('articleType') || 'Article Type'}</label>
+                            <select
+                                id="article_type"
+                                name="article_type"
+                                className="form-input"
+                                value={formData.article_type || ''}
+                                onChange={(e) => setFormData({...formData, article_type: e.target.value})}
+                                disabled={isSubmitting}
+                                style={{
+                                    appearance: 'none',
+                                    backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6,9 12,15 18,9\'%3e%3c/polyline%3e%3c/svg%3e")',
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'right 12px center',
+                                    backgroundSize: '20px',
+                                    paddingRight: '40px'
+                                }}
+                            >
+                                <option value="">{t('selectArticleType') || 'Select article type'}</option>
+                                <option value="research">{t('research') || 'Research'}</option>
+                                <option value="review">{t('review') || 'Review'}</option>
+                                <option value="case_study">{t('caseStudy') || 'Case Study'}</option>
+                            </select>
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="language" className="form-label">{t('language') || 'Language'}</label>
+                            <select
+                                id="language"
+                                name="language"
+                                className="form-input"
+                                value={formData.language || ''}
+                                onChange={(e) => setFormData({...formData, language: e.target.value})}
+                                disabled={isSubmitting}
+                                style={{
+                                    appearance: 'none',
+                                    backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6,9 12,15 18,9\'%3e%3c/polyline%3e%3c/svg%3e")',
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'right 12px center',
+                                    backgroundSize: '20px',
+                                    paddingRight: '40px'
+                                }}
+                            >
+                                <option value="">{t('selectLanguage') || 'Select language'}</option>
+                                <option value="turkish">{t('turkish') || 'Turkish'}</option>
+                                <option value="english">{t('english') || 'English'}</option>
+                            </select>
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="doi" className="form-label">{t('doi') || 'DOI'}</label>
+                            <input
+                                type="text"
+                                id="doi"
+                                name="doi"
+                                className="form-input"
+                                value={formData.doi || ''}
+                                onChange={(e) => setFormData({...formData, doi: e.target.value})}
+                                placeholder={t('enterDoi') || 'Enter DOI'}
+                                disabled={isSubmitting}
+                            />
+                        </div>
 
-                <div className="form-group">
-                    <label htmlFor="full_pdf" className="form-label">{t('fullPdf') || 'Full PDF'}</label>
-                    <input
-                        type="file"
-                        id="full_pdf"
-                        name="full_pdf"
-                        className="form-input"
-                        onChange={handleFileChange}
-                        accept=".pdf"
-                        disabled={isSubmitting}
-                    />
-                    {formData.full_pdf && (
-                        <div className="current-file">
-                            <a href={`/api${formData.full_pdf}`} target="_blank" rel="noopener noreferrer">
-                                {t('currentFullPdf') || 'Current Full PDF'}
-                            </a>
+                        <div className="form-group">
+                            <label htmlFor="file_path" className="form-label">{t('file') || 'File'}</label>
+                            <input
+                                type="file"
+                                id="file_path"
+                                name="file_path"
+                                className="form-input"
+                                onChange={handleFileChange}
+                                accept=".docx"
+                                disabled={isSubmitting}
+                                style={{
+                                    padding: '12px 16px',
+                                    border: '2px dashed #E2E8F0',
+                                    borderRadius: '12px',
+                                    background: 'rgba(249, 250, 251, 0.8)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            />
+                            {formData.file_path && (
+                                <div style={{ 
+                                    marginTop: 'var(--spacing-2)', 
+                                    padding: 'var(--spacing-2)', 
+                                    background: 'rgba(20, 184, 166, 0.1)', 
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(20, 184, 166, 0.3)'
+                                }}>
+                                    <a 
+                                        href={`/api${formData.file_path}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            color: '#0D9488',
+                                            textDecoration: 'none',
+                                            fontWeight: '500',
+                                            fontSize: '0.9rem'
+                                        }}
+                                    >
+                                        📄 {t('currentFile') || 'Current File'}
+                                    </a>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-                
-                {isEditorOrAdmin && (
-                    <div className="form-group">
-                        <label htmlFor="status" className="form-label">{t('status') || 'Status'}</label>
-                        <select
-                            id="status"
-                            name="status"
-                            className="form-select"
-                            value={formData.status || ''}
-                            onChange={(e) => setFormData({...formData, status: e.target.value})}
+
+                        <div className="form-group">
+                            <label htmlFor="full_pdf" className="form-label">{t('fullPdf') || 'Full PDF'}</label>
+                            <input
+                                type="file"
+                                id="full_pdf"
+                                name="full_pdf"
+                                className="form-input"
+                                onChange={handleFileChange}
+                                accept=".pdf"
+                                disabled={isSubmitting}
+                                style={{
+                                    padding: '12px 16px',
+                                    border: '2px dashed #E2E8F0',
+                                    borderRadius: '12px',
+                                    background: 'rgba(249, 250, 251, 0.8)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            />
+                            {formData.full_pdf && (
+                                <div style={{ 
+                                    marginTop: 'var(--spacing-2)', 
+                                    padding: 'var(--spacing-2)', 
+                                    background: 'rgba(239, 68, 68, 0.1)', 
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)'
+                                }}>
+                                    <a 
+                                        href={`/api${formData.full_pdf}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            color: '#DC2626',
+                                            textDecoration: 'none',
+                                            fontWeight: '500',
+                                            fontSize: '0.9rem'
+                                        }}
+                                    >
+                                        📄 {t('currentFullPdf') || 'Current Full PDF'}
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {isEditorOrAdmin && (
+                            <div className="form-group">
+                                <label htmlFor="status" className="form-label">{t('status') || 'Status'}</label>
+                                <select
+                                    id="status"
+                                    name="status"
+                                    className="form-input"
+                                    value={formData.status || ''}
+                                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                                    disabled={isSubmitting}
+                                    style={{
+                                        appearance: 'none',
+                                        backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6,9 12,15 18,9\'%3e%3c/polyline%3e%3c/svg%3e")',
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundPosition: 'right 12px center',
+                                        backgroundSize: '20px',
+                                        paddingRight: '40px'
+                                    }}
+                                >
+                                    <option value="waiting_for_payment">{t('statusWaitingForPayment') || 'Waiting for Payment'}</option>
+                                    <option value="waiting_for_editors">{t('statusWaitingForEditors') || 'Waiting for Editors'}</option>
+                                    <option value="accepted">{t('statusAccepted') || 'Accepted'}</option>
+                                    <option value="not_accepted">{t('statusNotAccepted') || 'Not Accepted'}</option>
+                                </select>
+                            </div>
+                        )}
+                        
+                        <button 
+                            type="submit" 
+                            className="register-submit-button" 
                             disabled={isSubmitting}
                         >
-                            <option value="waiting_for_payment">{t('statusWaitingForPayment') || 'Waiting for Payment'}</option>
-                            <option value="waiting_for_editors">{t('statusWaitingForEditors') || 'Waiting for Editors'}</option>
-                            <option value="accepted">{t('statusAccepted') || 'Accepted'}</option>
-                            <option value="not_accepted">{t('statusNotAccepted') || 'Not Accepted'}</option>
-                        </select>
-                    </div>
-                )}
-                
-                <div className="form-group" style={{ marginTop: 'var(--spacing-6)', display: 'flex', justifyContent: 'flex-end' }}>
-                    <button 
-                        type="submit" 
-                        className="btn btn-primary" 
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? t('saving') : t('updateEntry') || 'Update Entry'}
-                    </button>
+                            {isSubmitting ? (t('saving') || 'Saving...') : (t('updateEntry') || 'Update Entry')}
+                        </button>
+                    </form>
                 </div>
-            </form>
-        </div>
+            </div>
+        </>
     );
 };
 

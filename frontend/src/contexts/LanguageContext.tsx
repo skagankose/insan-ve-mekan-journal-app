@@ -12,7 +12,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 // Define the translation type
 type TranslationKeys = 
-  | 'home' | 'newEntry' | 'login' | 'register' | 'logout' | 'welcome' | 'myJournal' | 'navigation'
+  | 'home' | 'newEntry' | 'login' | 'register' | 'logout' | 'welcome' | 'myJournal' | 'myJournals' | 'navigation'
   | 'createNewEntry' | 'editEntry' | 'createAccount' | 'welcomeBack'
   | 'title' | 'content' | 'username' | 'password' | 'email' | 'fullName'
   | 'createEntry' | 'updateEntry' | 'delete' | 'edit' | 'loginButton' | 'registerButton'
@@ -34,9 +34,11 @@ type TranslationKeys =
   | 'profile' | 'userProfile' | 'myJournalEntries' | 'noEntriesFound' | 'loadingUserData' | 'failedToLoadUserEntries'
   | 'biography' | 'scienceBranch' | 'location' | 'telephone' | 'yoksisId' | 'orcidId' | 'journalId' | 'date'
   | 'myRefereeEntries' | 'noRefereeEntriesFound' | 'myEditedJournals' | 'noEditedJournalsFound' | 'issue'
+  | 'entriesInJournal'
   | 'passwordRequirements' | 'passwordMinLength' | 'passwordCase' | 'passwordNumber' | 'passwordMatch' | 'confirmPassword'
   | 'changePassword' | 'currentPassword' | 'newPassword' | 'passwordUpdated' | 'changingPassword'
   | 'statusWaitingForPayment' | 'statusWaitingForAuthors' | 'statusWaitingForReferees' | 'statusWaitingForEditors' | 'statusAccepted' | 'statusNotAccepted'
+  | 'notAccepted' | 'waitingForPayment' | 'waitingForAuthors' | 'waitingForReferees' | 'waitingForEditors' | 'rejected' | 'pending' | 'accepted'
   | 'published' | 'or' | 'locale' | 'googleSignIn' | 'googleSignInFailed'
   | 'pageNotFoundTitle' | 'pageNotFoundDescription' | 'exploreJournalsText' | 'searchContentText'
   | 'forgotPassword' | 'forgotPasswordInstructions' | 'passwordResetLinkSent' | 'backToLogin' | 'enterEmail' | 'sendResetLink' | 'rememberPassword'
@@ -44,7 +46,11 @@ type TranslationKeys =
   | 'createAccountHere'
   | 'country' | 'selectCountry' | 'searchCountries' | 'noCountriesFound' | 'enterLocation'
   | 'pleaseVerifyCaptcha' | 'captchaExpired'
-  | 'editorJournals' | 'submitPaper' | 'publishedIssues' | 'searchPlaceholder' | 'viewJournal';
+  | 'editorJournals' | 'submitPaper' | 'publishedIssues' | 'searchPlaceholder' | 'viewJournal' | 'readMore'
+  | 'about' | 'generalInformation'
+  | 'footer.contact' | 'footer.quickLinks' | 'footer.aboutUs' | 'footer.generalInformation' | 'footer.archive' | 'footer.connectWithUs'
+  | 'footer.facebookAria' | 'footer.twitterAria' | 'footer.instagramAria' | 'footer.linkedinAria' | 'footer.allRightsReserved'
+  | 'validation.required' | 'validation.email' | 'validation.minLength' | 'validation.maxLength' | 'validation.tooShort' | 'validation.tooLong';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -59,9 +65,10 @@ const translations: Record<Language, TranslationDictionary> = {
     'logout': 'Logout',
     'welcome': 'Welcome',
     'myJournal': 'My Journal',
+    'myJournals': 'My Journals',
     'navigation': 'Navigation',
     'previousIssues': 'Previous Issues',
-    'editorJournals': 'Editor Journals',
+    'editorJournals': 'Active Journals',
     'submitPaper': 'Submit Paper',
     'publishedIssues': 'Published Issues',
     
@@ -116,6 +123,16 @@ const translations: Record<Language, TranslationDictionary> = {
     'statusWaitingForEditors': 'Waiting for Editors',
     'statusAccepted': 'Accepted',
     'statusNotAccepted': 'Not Accepted',
+    
+    // Entry status translations
+    'notAccepted': 'Not Accepted',
+    'waitingForPayment': 'Waiting for Payment',
+    'waitingForAuthors': 'Waiting for Authors',
+    'waitingForReferees': 'Waiting for Referees',
+    'waitingForEditors': 'Waiting for Editors',
+    'rejected': 'Rejected',
+    'pending': 'Pending',
+    'accepted': 'Accepted',
     
     // Placeholders
     'enterTitle': 'Enter a title for your journal entry',
@@ -209,6 +226,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'noEditedJournalsFound': 'No journals found.',
     'issue': 'Issue',
     'published': 'Published',
+    'entriesInJournal': 'Entries in this Journal',
 
     // Password requirements
     'passwordRequirements': 'Password must meet the following requirements:',
@@ -264,6 +282,32 @@ const translations: Record<Language, TranslationDictionary> = {
     'pleaseVerifyCaptcha': 'Please verify that you are human',
     'captchaExpired': 'CAPTCHA verification expired. Please verify again.',
     'searchPlaceholder': 'Search...',
+    'readMore': 'Read More',
+    
+    // New pages
+    'about': 'About',
+    'generalInformation': 'General Information',
+
+    // Footer translations
+    'footer.contact': 'Contact',
+    'footer.quickLinks': 'Quick Links',
+    'footer.aboutUs': 'About Us',
+    'footer.generalInformation': 'General Information',
+    'footer.archive': 'Archive',
+    'footer.connectWithUs': 'Connect With Us',
+    'footer.facebookAria': 'Follow us on Facebook',
+    'footer.twitterAria': 'Follow us on Twitter',
+    'footer.instagramAria': 'Follow us on Instagram',
+    'footer.linkedinAria': 'Connect with us on LinkedIn',
+    'footer.allRightsReserved': 'All rights reserved.',
+
+    // Form validation
+    'validation.required': 'Please fill out this field.',
+    'validation.email': 'Please enter a valid email address.',
+    'validation.minLength': 'Please lengthen this text to {min} characters or more.',
+    'validation.maxLength': 'Please shorten this text to {max} characters or less.',
+    'validation.tooShort': 'Please use at least {min} characters.',
+    'validation.tooLong': 'Please use no more than {max} characters.',
   },
   tr: {
     // Navigation
@@ -274,9 +318,10 @@ const translations: Record<Language, TranslationDictionary> = {
     'logout': 'Çıkış Yap',
     'welcome': 'Hoş Geldiniz',
     'myJournal': 'Günlüğüm',
+    'myJournals': 'Dergilerim',
     'navigation': 'Navigasyon',
     'previousIssues': 'Önceki Sayılar',
-    'editorJournals': 'Editör Dergileri',
+    'editorJournals': 'Aktif Dergiler',
     'submitPaper': 'Makale Gönder',
     'publishedIssues': 'Arşivler',
     
@@ -287,7 +332,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'welcomeBack': 'Tekrar Hoş Geldiniz',
     'publishedJournals': 'Yayınlanmış Dergiler',
     'viewJournal': 'Dergiyi Görüntüle',
-    
+     
     // Form labels
     'title': 'Ünvan',
     'content': 'İçerik',
@@ -325,12 +370,22 @@ const translations: Record<Language, TranslationDictionary> = {
     'acceptedEntries': 'Yayınlanan Makaleler',
     
     // Status labels
-    'statusWaitingForPayment': 'Ödeme Bekliyor',
-    'statusWaitingForAuthors': 'Yazarları Bekliyor',
-    'statusWaitingForReferees': 'Hakemleri Bekliyor',
-    'statusWaitingForEditors': 'Editörleri Bekliyor',
+    'statusWaitingForPayment': 'Ödeme Bekleniyor',
+    'statusWaitingForAuthors': 'Yazarlar Bekleniyor',
+    'statusWaitingForReferees': 'Hakemler Bekleniyor',
+    'statusWaitingForEditors': 'Editörler Bekleniyor',
     'statusAccepted': 'Kabul Edildi',
     'statusNotAccepted': 'Kabul Edilmedi',
+    
+    // Entry status translations
+    'notAccepted': 'Kabul Edilmedi',
+    'waitingForPayment': 'Ödeme Bekleniyor',
+    'waitingForAuthors': 'Yazarlar Bekleniyor',
+    'waitingForReferees': 'Hakemler Bekleniyor',
+    'waitingForEditors': 'Editörler Bekleniyor',
+    'rejected': 'Kabul Edilmedi',
+    'pending': 'Beklemede',
+    'accepted': 'Kabul Edildi',
     
     // Placeholders
     'enterTitle': 'Günlük kaydınız için bir başlık girin',
@@ -424,6 +479,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'noEditedJournalsFound': 'Editör olduğunuz dergi bulunamadı.',
     'issue': 'Sayı',
     'published': 'Yayınlandı',
+    'entriesInJournal': 'Dergi Yazıları',
 
     // Password requirements
     'passwordRequirements': 'Şifre aşağıdaki gereksinimleri karşılamalıdır:',
@@ -479,6 +535,32 @@ const translations: Record<Language, TranslationDictionary> = {
     'pleaseVerifyCaptcha': 'Lütfen insan olduğunuzu doğrulayın',
     'captchaExpired': 'CAPTCHA doğrulaması süresi doldu. Lütfen tekrar doğrulayın.',
     'searchPlaceholder': 'Ara...',
+    'readMore': 'Devamını Oku',
+    
+    // New pages
+    'about': 'Hakkımızda',
+    'generalInformation': 'Genel Bilgiler',
+
+    // Footer translations
+    'footer.contact': 'İletişim',
+    'footer.quickLinks': 'Hızlı Bağlantılar',
+    'footer.aboutUs': 'Hakkımızda',
+    'footer.generalInformation': 'Genel Bilgiler',
+    'footer.archive': 'Arşiv',
+    'footer.connectWithUs': 'Bizi Takip Edin',
+    'footer.facebookAria': 'Facebook\'ta bizi takip edin',
+    'footer.twitterAria': 'Twitter\'da bizi takip edin',
+    'footer.instagramAria': 'Instagram\'da bizi takip edin',
+    'footer.linkedinAria': 'LinkedIn\'de bağlantı kurun',
+    'footer.allRightsReserved': 'Tüm hakları saklıdır.',
+
+    // Form validation
+    'validation.required': 'Lütfen bu alanı doldurun.',
+    'validation.email': 'Lütfen geçerli bir e-posta adresi girin.',
+    'validation.minLength': 'Lütfen bu metni {min} karakter veya daha fazla olacak şekilde uzatın.',
+    'validation.maxLength': 'Lütfen bu metni {max} karakter veya daha az olacak şekilde kısaltın.',
+    'validation.tooShort': 'Lütfen en az {min} karakter kullanın.',
+    'validation.tooLong': 'Lütfen en fazla {max} karakter kullanın.',
   }
 };
 

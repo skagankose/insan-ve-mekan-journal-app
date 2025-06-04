@@ -4,6 +4,7 @@ import * as apiService from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveJournal } from '../contexts/ActiveJournalContext';
+import Footer from '../components/Footer';
 
 const JournalDetailsPage: React.FC = () => {
     const { journalId } = useParams<{ journalId: string }>();
@@ -246,215 +247,957 @@ const JournalDetailsPage: React.FC = () => {
     };
 
     if (loading) {
-        return <div className="loading">{t('loadingJournalData') || 'Loading journal data...'}</div>;
+        return (
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '400px',
+                gap: '24px'
+            }}>
+                <div style={{
+                    width: '60px',
+                    height: '60px',
+                    border: '3px solid rgba(20, 184, 166, 0.1)',
+                    borderTopColor: '#14B8A6',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                }}></div>
+                <p style={{
+                    fontSize: '16px',
+                    color: '#64748B',
+                    fontWeight: '500',
+                    letterSpacing: '0.025em'
+                }}>{t('loadingJournalData') || 'Loading journal data...'}</p>
+            </div>
+        );
     }
 
     if (error) {
-        return <div className="error-message">{error}</div>;
+        return (
+            <div style={{
+                maxWidth: '600px',
+                margin: '60px auto',
+                padding: '32px',
+                background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
+                borderRadius: '16px',
+                boxShadow: '0 10px 25px rgba(239, 68, 68, 0.1)',
+                textAlign: 'center'
+            }}>
+                <div style={{
+                    width: '64px',
+                    height: '64px',
+                    margin: '0 auto 24px',
+                    background: '#EF4444',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '32px',
+                    color: 'white'
+                }}>⚠️</div>
+                <h3 style={{
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    color: '#991B1B',
+                    marginBottom: '12px'
+                }}>Error Loading Journal</h3>
+                <p style={{
+                    fontSize: '16px',
+                    color: '#DC2626',
+                    lineHeight: '1.6'
+                }}>{error}</p>
+            </div>
+        );
     }
 
     if (!journal) {
-        return <div className="error-message">{t('journalNotFound') || 'Journal not found.'}</div>;
+        return (
+            <div style={{
+                maxWidth: '600px',
+                margin: '60px auto',
+                padding: '32px',
+                background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
+                borderRadius: '16px',
+                boxShadow: '0 10px 25px rgba(239, 68, 68, 0.1)',
+                textAlign: 'center'
+            }}>
+                <div style={{
+                    width: '64px',
+                    height: '64px',
+                    margin: '0 auto 24px',
+                    background: '#EF4444',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '32px',
+                    color: 'white'
+                }}>📖</div>
+                <h3 style={{
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    color: '#991B1B',
+                    marginBottom: '12px'
+                }}>Journal Not Found</h3>
+                <p style={{
+                    fontSize: '16px',
+                    color: '#DC2626',
+                    lineHeight: '1.6'
+                }}>{t('journalNotFound') || 'Journal not found.'}</p>
+            </div>
+        );
     }
 
     return (
-        <div>
-            <div className="page-header">
-                <button 
-                    onClick={() => navigate(isEditorOrAdmin ? '/editor/journals' : '/archive')} 
-                    className="btn btn-outline back-button"
-                >
-                    ← {isEditorOrAdmin ? (t('backToJournals') || 'Back to Journals') : (t('backToArchive') || 'Back to Archive')}
-                </button>
-                <h1 className="page-title">{journal.title}</h1>
-                {isEditorOrAdmin && (
-                    <div className="journal-actions" style={{ display: 'flex', gap: '12px' }}>
-                        {activeJournal?.id !== journal.id && (
+        <>
+            {/* Title Section */}
+            <div className="page-title-section" style={{ marginLeft: '60px' }}>
+                <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '20px',
+                    marginBottom: '16px'
+                }}>
+                    <button 
+                        onClick={() => navigate(isEditorOrAdmin ? '/editor/journals' : '/archive')} 
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '12px 20px',
+                            background: 'rgba(255, 255, 255, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(20, 184, 166, 0.2)',
+                            borderRadius: '12px',
+                            color: '#0D9488',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            textDecoration: 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                            e.currentTarget.style.borderColor = '#14B8A6';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)';
+                            e.currentTarget.style.borderColor = 'rgba(20, 184, 166, 0.2)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        {isEditorOrAdmin ? (t('backToJournals') || 'Back to Journals') : (t('backToArchive') || 'Back to Archive')}
+                    </button>
+                    
+                    {isEditorOrAdmin && (
+                        <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto' }}>
+                            {activeJournal?.id !== journal.id && (
+                                <button
+                                    onClick={handleSetActive}
+                                    style={{
+                                        padding: '12px 20px',
+                                        background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
+                                >
+                                    {t('setAsActive') || 'Set as Active'}
+                                </button>
+                            )}
                             <button
-                                onClick={handleSetActive}
-                                className="btn btn-secondary"
+                                onClick={handleMergeJournal}
+                                disabled={isMerging}
+                                style={{
+                                    padding: '12px 20px',
+                                    background: isMerging ? '#94A3B8' : 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    cursor: isMerging ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.3s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isMerging) {
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isMerging) {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }
+                                }}
                             >
-                                {t('setAsActive') || 'Set as Active'}
+                                {isMerging ? (t('mergingFiles') || 'Merging Files...') : (t('mergeAndCreateToc') || 'Create ToC & Merge Files')}
                             </button>
-                        )}
-                        <button
-                            onClick={handleMergeJournal}
-                            className="btn btn-primary"
-                            disabled={isMerging}
-                        >
-                            {isMerging ? (t('mergingFiles') || 'Merging Files...') : (t('mergeAndCreateToc') || 'Create ToC & Merge Files')}
-                        </button>
-                        <Link to={`/journals/edit/${journal.id}`} className="btn btn-secondary">
-                            {t('editJournal') || 'Edit Journal'}
-                        </Link>
+                            <Link 
+                                to={`/journals/edit/${journal.id}`} 
+                                style={{
+                                    padding: '12px 20px',
+                                    background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    textDecoration: 'none',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    display: 'inline-flex',
+                                    alignItems: 'center'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }}
+                            >
+                                {t('editJournal') || 'Edit Journal'}
+                            </Link>
+                        </div>
+                    )}
+                </div>
+                <h1>{journal.title}</h1>
+            </div>
+
+            {/* Content Section */}
+            <div className="page-content-section" style={{
+                paddingBottom: '0px',
+                marginLeft: '60px'
+            }}>
+
+                {mergeError && (
+                    <div style={{
+                        padding: '16px 20px',
+                        background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
+                        borderRadius: '12px',
+                        border: '1px solid #FCA5A5',
+                        marginBottom: '24px',
+                        color: '#DC2626',
+                        fontSize: '14px',
+                        fontWeight: '500'
+                    }}>
+                        {mergeError}
                     </div>
                 )}
-            </div>
 
-            {mergeError && (
-                <div className="alert alert-danger" style={{ marginBottom: '20px' }}>
-                    {mergeError}
-                </div>
-            )}
-
-            <div className="journal-details card">
-                <div className="journal-meta" style={{ 
-                    marginBottom: '20px',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '20px'
+                <div style={{
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: '20px',
+                    padding: '32px',
+                    marginBottom: '24px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                    border: '1px solid rgba(20, 184, 166, 0.2)'
                 }}>
-                    <div>
-                        <strong>{t('issue') || 'Issue'}:</strong> {journal.issue}
-                    </div>
-                    <div>
-                        <strong>{t('createdDate') || 'Created Date'}:</strong> {new Date(journal.created_date).toLocaleDateString()}
-                    </div>
-                    {isEditorOrAdmin && (
-                        <div>
-                            <strong>{t('publicationStatus') || 'Publication Status'}:</strong> {journal.is_published ? t('published') || 'Published' : t('notPublished') || 'Not Published'}
-                        </div>
-                    )}
-                    {journal.publication_date && (
-                        <div>
-                            <strong>{t('publicationDate') || 'Publication Date'}:</strong> {new Date(journal.publication_date).toLocaleDateString()}
-                        </div>
-                    )}
-                    {journal.publication_place && (
-                        <div>
-                            <strong>{t('publicationPlace') || 'Publication Place'}:</strong> {journal.publication_place}
-                        </div>
-                    )}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <strong>{t('editorInChief') || 'Editor-in-Chief'}:</strong> 
-                        {editorInChief ? editorInChief.name : t('none') || 'None'}
-                        {isAdmin && (
-                            <button
-                                onClick={() => setShowEditorInChiefModal(true)}
-                                className="btn btn-sm btn-outline"
-                                style={{ marginLeft: '10px' }}
-                            >
-                                {t('change') || 'Change'}
-                            </button>
-                        )}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <strong>{t('editors') || 'Editors'}:</strong> 
-                        {editors.length > 0 ? editors.map(editor => editor.name).join(', ') : t('none') || 'None'}
-                        {isAdmin && (
-                            <button
-                                onClick={() => setShowEditorsModal(true)}
-                                className="btn btn-sm btn-outline"
-                                style={{ marginLeft: '10px' }}
-                            >
-                                {t('manage') || 'Manage'}
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-                <div className="journal-files" style={{ marginBottom: '20px' }}>
-                    <h3>{t('journalFiles') || 'Journal Files'}</h3>
-                    <div style={{ 
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '10px'
+                    <div style={{
+                        marginBottom: '32px'
                     }}>
-                        {journal.cover_photo && (
-                            <a href={`/api${journal.cover_photo}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-                                {t('viewCoverPhoto') || 'View Cover Photo'}
-                            </a>
-                        )}
-                        {journal.meta_files && (
-                            <a href={`/api${journal.meta_files}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-                                {t('viewMetaFiles') || 'View Meta Files'}
-                            </a>
-                        )}
-                        {isEditorOrAdmin && journal.editor_notes && (
-                            <a href={`/api${journal.editor_notes}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-                                {t('viewEditorNotes') || 'View Editor Notes'}
-                            </a>
-                        )}
-                        {journal.full_pdf && (
-                            <a href={`/api${journal.full_pdf}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-                                {t('viewFullPdf') || 'View Full PDF'}
-                            </a>
-                        )}
-                        {journal.index_section && (
-                            <a href={`/api${journal.index_section}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-                                {t('viewIndexSection') || 'View Index Section'}
-                            </a>
-                        )}
-                        {journal.file_path && (
-                            <a href={`/api${journal.file_path}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-                                {t('viewMergedFile') || 'View Merged File'}
-                            </a>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            <div className="journal-entries">
-                <h2>{t('entriesInJournal') || 'Entries in this Journal'}</h2>
-                
-                {entries.length === 0 ? (
-                    <div className="empty-state">
-                        <div className="empty-state-icon">📝</div>
-                        <h3>{t('noEntriesInJournal') || 'No entries found in this journal.'}</h3>
-                    </div>
-                ) : (
-                    <div className="entries-grid" style={{ 
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                        gap: '20px',
-                        marginTop: '20px'
-                    }}>
-                        {entries.map(entry => (
-                            <div 
-                                key={entry.id} 
-                                className="entry-card card clickable" 
-                                style={{
-                                    padding: '20px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    height: '100%',
-                                    cursor: 'pointer',
-                                    transition: 'transform 0.2s, box-shadow 0.2s'
-                                }}
-                                onClick={() => navigate(`/entries/${entry.id}`)}
-                            >
-                                <h3 className="entry-title">{entry.title}</h3>
-                                <p className="entry-abstract" style={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 3,
-                                    WebkitBoxOrient: 'vertical',
-                                    flexGrow: 1
+                        <h3 style={{
+                            fontSize: '20px',
+                            fontWeight: '700',
+                            color: '#1E293B',
+                            marginBottom: '20px',
+                            letterSpacing: '-0.025em'
+                        }}>Journal Information</h3>
+                        
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                            gap: '16px'
+                        }}>
+                            <div style={{
+                                padding: '16px',
+                                background: 'rgba(248, 250, 252, 0.8)',
+                                borderRadius: '12px',
+                                border: '1px solid #E2E8F0'
+                            }}>
+                                <strong style={{ color: '#475569' }}>{t('issue') || 'Issue'}:</strong>
+                                <div style={{ marginTop: '4px', color: '#1E293B', fontWeight: '600' }}>#{journal.issue}</div>
+                            </div>
+                            
+                            {isEditorOrAdmin && (
+                                <div style={{
+                                    padding: '16px',
+                                    background: 'rgba(248, 250, 252, 0.8)',
+                                    borderRadius: '12px',
+                                    border: '1px solid #E2E8F0'
                                 }}>
-                                    {entry.abstract_tr || entry.abstract_en}
-                                </p>
-                                <div className="entry-meta" style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    marginTop: '15px',
-                                    marginBottom: '15px'
+                                    <strong style={{ color: '#475569' }}>{t('createdDate') || 'Created Date'}:</strong>
+                                    <div style={{ marginTop: '4px', color: '#1E293B', fontWeight: '600' }}>{new Date(journal.created_date).toLocaleDateString()}</div>
+                                </div>
+                            )}
+                            
+                            {isEditorOrAdmin && (
+                                <div style={{
+                                    padding: '16px',
+                                    background: 'rgba(248, 250, 252, 0.8)',
+                                    borderRadius: '12px',
+                                    border: '1px solid #E2E8F0'
                                 }}>
-                                    <span className="entry-date">
-                                        {entry.publication_date ? new Date(entry.publication_date).toLocaleDateString() : '-'}
-                                    </span>
-                                    {isEditorOrAdmin && entry.status && (
-                                        <span className={`badge badge-${entry.status.toLowerCase()}`}>
-                                            {t(entry.status) || entry.status}
-                                        </span>
+                                    <strong style={{ color: '#475569' }}>{t('publicationStatus') || 'Publication Status'}:</strong>
+                                    <div style={{ 
+                                        marginTop: '4px', 
+                                        color: journal.is_published ? '#059669' : '#DC2626', 
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}>
+                                        <div style={{
+                                            width: '8px',
+                                            height: '8px',
+                                            borderRadius: '50%',
+                                            background: journal.is_published ? '#10B981' : '#EF4444'
+                                        }}></div>
+                                        {journal.is_published ? (t('published') || 'Published') : (t('notPublished') || 'Not Published')}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {journal.publication_date && (
+                                <div style={{
+                                    padding: '16px',
+                                    background: 'rgba(248, 250, 252, 0.8)',
+                                    borderRadius: '12px',
+                                    border: '1px solid #E2E8F0'
+                                }}>
+                                    <strong style={{ color: '#475569' }}>{t('publicationDate') || 'Publication Date'}:</strong>
+                                    <div style={{ marginTop: '4px', color: '#1E293B', fontWeight: '600' }}>{new Date(journal.publication_date).toLocaleDateString()}</div>
+                                </div>
+                            )}
+                            
+                            {journal.publication_place && (
+                                <div style={{
+                                    padding: '16px',
+                                    background: 'rgba(248, 250, 252, 0.8)',
+                                    borderRadius: '12px',
+                                    border: '1px solid #E2E8F0'
+                                }}>
+                                    <strong style={{ color: '#475569' }}>{t('publicationPlace') || 'Publication Place'}:</strong>
+                                    <div style={{ marginTop: '4px', color: '#1E293B', fontWeight: '600' }}>{journal.publication_place}</div>
+                                </div>
+                            )}
+                            
+                            <div style={{
+                                padding: '16px',
+                                background: 'rgba(248, 250, 252, 0.8)',
+                                borderRadius: '12px',
+                                border: '1px solid #E2E8F0'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <strong style={{ color: '#475569' }}>{t('editorInChief') || 'Editor-in-Chief'}:</strong>
+                                        <div style={{ marginTop: '4px', color: '#1E293B', fontWeight: '600' }}>
+                                            {editorInChief ? editorInChief.name : (t('none') || 'None')}
+                                        </div>
+                                    </div>
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => setShowEditorInChiefModal(true)}
+                                            style={{
+                                                padding: '6px 12px',
+                                                background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                fontSize: '12px',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.3s ease'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.3)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                            }}
+                                        >
+                                            {t('change') || 'Change'}
+                                        </button>
                                     )}
                                 </div>
                             </div>
-                        ))}
+                            
+                            <div style={{
+                                padding: '16px',
+                                background: 'rgba(248, 250, 252, 0.8)',
+                                borderRadius: '12px',
+                                border: '1px solid #E2E8F0'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <strong style={{ color: '#475569' }}>{t('editors') || 'Editors'}:</strong>
+                                        <div style={{ marginTop: '4px', color: '#1E293B', fontWeight: '600' }}>
+                                            {editors.length > 0 ? editors.map(editor => editor.name).join(', ') : (t('none') || 'None')}
+                                        </div>
+                                    </div>
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => setShowEditorsModal(true)}
+                                            style={{
+                                                padding: '6px 12px',
+                                                background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                fontSize: '12px',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.3s ease'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.3)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                            }}
+                                        >
+                                            {t('manage') || 'Manage'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                )}
+
+                    <div style={{ marginBottom: '32px' }}>
+                        <h3 style={{
+                            fontSize: '20px',
+                            fontWeight: '700',
+                            color: '#1E293B',
+                            marginBottom: '20px',
+                            letterSpacing: '-0.025em'
+                        }}>{t('journalFiles') || 'Journal Files'}</h3>
+                        
+                        <div style={{ 
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                            gap: '12px'
+                        }}>
+                            {journal.cover_photo && (
+                                <a 
+                                    href={`/api${journal.cover_photo}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '12px 16px',
+                                        background: 'rgba(248, 250, 252, 0.8)',
+                                        border: '1px solid #E2E8F0',
+                                        borderRadius: '10px',
+                                        color: '#0D9488',
+                                        textDecoration: 'none',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                        e.currentTarget.style.borderColor = '#14B8A6';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                        e.currentTarget.style.borderColor = '#E2E8F0';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                    }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M4 16L4 10C4 7.79086 5.79086 6 8 6L16 6C18.2091 6 20 7.79086 20 10L20 16M4 16C4 18.2091 5.79086 20 8 20L16 20C18.2091 20 20 18.2091 20 16M4 16L8.5 10.5L13 15L15.5 12.5L20 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    {t('viewCoverPhoto') || 'Cover Photo'}
+                                </a>
+                            )}
+                            {journal.meta_files && (
+                                <a 
+                                    href={`/api${journal.meta_files}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '12px 16px',
+                                        background: 'rgba(248, 250, 252, 0.8)',
+                                        border: '1px solid #E2E8F0',
+                                        borderRadius: '10px',
+                                        color: '#0D9488',
+                                        textDecoration: 'none',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                        e.currentTarget.style.borderColor = '#14B8A6';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                        e.currentTarget.style.borderColor = '#E2E8F0';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                    }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    {t('viewMetaFiles') || 'Meta Files'}
+                                </a>
+                            )}
+                            {isEditorOrAdmin && journal.editor_notes && (
+                                <a 
+                                    href={`/api${journal.editor_notes}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '12px 16px',
+                                        background: 'rgba(248, 250, 252, 0.8)',
+                                        border: '1px solid #E2E8F0',
+                                        borderRadius: '10px',
+                                        color: '#0D9488',
+                                        textDecoration: 'none',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                        e.currentTarget.style.borderColor = '#14B8A6';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                        e.currentTarget.style.borderColor = '#E2E8F0';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                    }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H16C16.5304 20 17.0391 19.7893 17.4142 19.4142C17.7893 19.0391 18 18.5304 18 18V13M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    {t('viewEditorNotes') || 'Editor Notes'}
+                                </a>
+                            )}
+                            {journal.full_pdf && (
+                                <a 
+                                    href={`/api${journal.full_pdf}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '12px 16px',
+                                        background: 'rgba(248, 250, 252, 0.8)',
+                                        border: '1px solid #E2E8F0',
+                                        borderRadius: '10px',
+                                        color: '#0D9488',
+                                        textDecoration: 'none',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                        e.currentTarget.style.borderColor = '#14B8A6';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                        e.currentTarget.style.borderColor = '#E2E8F0';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                    }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    {t('viewFullPdf') || 'Full PDF'}
+                                </a>
+                            )}
+                            {journal.index_section && (
+                                <a 
+                                    href={`/api${journal.index_section}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '12px 16px',
+                                        background: 'rgba(248, 250, 252, 0.8)',
+                                        border: '1px solid #E2E8F0',
+                                        borderRadius: '10px',
+                                        color: '#14B8A6',
+                                        textDecoration: 'none',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                        e.currentTarget.style.borderColor = '#14B8A6';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                        e.currentTarget.style.borderColor = '#E2E8F0';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                    }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M6 2V22M18 7V22M4 7H8M4 12H8M4 17H8M16 12H20M16 17H20M11 7H13M11 12H13M11 17H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    {t('viewIndexSection') || 'Index Section'}
+                                </a>
+                            )}
+                            {journal.file_path && (
+                                <a 
+                                    href={`/api${journal.file_path}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '12px 16px',
+                                        background: 'rgba(248, 250, 252, 0.8)',
+                                        border: '1px solid #E2E8F0',
+                                        borderRadius: '10px',
+                                        color: '#14B8A6',
+                                        textDecoration: 'none',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                        e.currentTarget.style.borderColor = '#14B8A6';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                                        e.currentTarget.style.borderColor = '#E2E8F0';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                    }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M16 2V8H22L16 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M15 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9H15V2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    {t('viewMergedFile') || 'Merged File'}
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div style={{ marginBottom: '32px' }}>
+                    <h3 style={{
+                        fontSize: '20px',
+                        fontWeight: '700',
+                        color: '#1E293B',
+                        marginBottom: '20px',
+                        letterSpacing: '-0.025em'
+                    }}>{t('entriesInJournal') || 'Entries in this Journal'}</h3>
+                    
+                    {entries.length === 0 ? (
+                        <div style={{
+                            background: 'rgba(255, 255, 255, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            borderRadius: '16px',
+                            padding: '48px',
+                            textAlign: 'center',
+                            border: '2px dashed #E2E8F0'
+                        }}>
+                            <div style={{
+                                width: '80px',
+                                height: '80px',
+                                margin: '0 auto 24px',
+                                background: '#F1F5F9',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '32px'
+                            }}>📝</div>
+                            <h3 style={{
+                                fontSize: '18px',
+                                fontWeight: '600',
+                                color: '#64748B',
+                                margin: 0
+                            }}>{t('noEntriesInJournal') || 'No entries found in this journal.'}</h3>
+                        </div>
+                    ) : (
+                        <div style={{ 
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+                            gap: '24px'
+                        }}>
+                            {entries.map((entry, index) => (
+                                <div 
+                                    key={entry.id} 
+                                    style={{
+                                        background: 'rgba(255, 255, 255, 0.8)',
+                                        backgroundImage: 'url(/pattern_transparent.png)',
+                                        backgroundSize: '50% 70%',
+                                        backgroundPosition: '137% -93%',
+                                        backgroundRepeat: 'no-repeat',
+                                        backdropFilter: 'blur(10px)',
+                                        borderRadius: '16px',
+                                        padding: '28px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        border: '1px solid #E2E8F0',
+                                        transition: 'all 0.3s ease',
+                                        cursor: 'pointer',
+                                        animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`
+                                    }}
+                                    onClick={() => navigate(`/entries/${entry.id}`)}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                        e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.1)';
+                                        e.currentTarget.style.borderColor = '#14B8A6';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                        e.currentTarget.style.borderColor = '#E2E8F0';
+                                    }}
+                                >
+                                    <h4 style={{
+                                        margin: '0 0 16px 0',
+                                        fontSize: '18px',
+                                        fontWeight: '700',
+                                        color: '#1E293B',
+                                        lineHeight: '1.4',
+                                        letterSpacing: '-0.025em',
+                                        position: 'relative',
+                                        zIndex: 1
+                                    }}>{entry.title}</h4>
+                                    
+                                    {entry.authors && entry.authors.length > 0 && (
+                                        <p style={{
+                                            margin: '0 0 16px 0',
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            color: '#64748B',
+                                            position: 'relative',
+                                            zIndex: 1,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px'
+                                        }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
+                                                    stroke="currentColor" 
+                                                    strokeWidth="2" 
+                                                    strokeLinecap="round" 
+                                                    strokeLinejoin="round"
+                                                />
+                                            </svg>
+                                            <span>{entry.authors.map(author => author.name).join(', ')}</span>
+                                        </p>
+                                    )}
+                                    
+                                    <p style={{
+                                        color: '#64748B',
+                                        fontSize: '14px',
+                                        lineHeight: '1.6',
+                                        marginBottom: '20px',
+                                        flexGrow: 1,
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 3,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        position: 'relative',
+                                        zIndex: 1
+                                    }}>
+                                        {entry.keywords ? (
+                                            <>
+                                                <span style={{ 
+                                                    fontWeight: '600', 
+                                                    color: '#475569',
+                                                    marginRight: '8px'
+                                                }}>Keywords:</span>
+                                                {entry.keywords}
+                                            </>
+                                        ) : 'No keywords available.'}
+                                    </p>
+                                    
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        paddingTop: '20px',
+                                        borderTop: '1px solid #F1F5F9',
+                                        position: 'relative',
+                                        zIndex: 1
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px'
+                                        }}>
+                                            {entry.status === 'accepted' ? (
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    color: '#94A3B8',
+                                                    fontSize: '12px'
+                                                }}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                        <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" 
+                                                            stroke="currentColor" 
+                                                            strokeWidth="2" 
+                                                            strokeLinecap="round"
+                                                        />
+                                                    </svg>
+                                                    <span>{entry.doi ? `DOI: ${entry.doi}` : 'No DOI available'}</span>
+                                                </div>
+                                            ) : entry.status ? (
+                                                <span style={{
+                                                    padding: '4px 8px',
+                                                    background: entry.status === 'not_accepted' ? '#FCA5A5' : 
+                                                               entry.status === 'waiting_for_payment' ? '#FDE68A' : 
+                                                               entry.status === 'waiting_for_authors' ? '#BFDBFE' :
+                                                               entry.status === 'waiting_for_referees' ? '#DDD6FE' :
+                                                               entry.status === 'waiting_for_editors' ? '#FED7AA' :
+                                                               entry.status === 'rejected' ? '#FCA5A5' : 
+                                                               entry.status === 'pending' ? '#FDE68A' : '#D1D5DB',
+                                                    color: entry.status === 'not_accepted' ? '#991B1B' : 
+                                                          entry.status === 'waiting_for_payment' ? '#92400E' : 
+                                                          entry.status === 'waiting_for_authors' ? '#1E40AF' :
+                                                          entry.status === 'waiting_for_referees' ? '#6B21A8' :
+                                                          entry.status === 'waiting_for_editors' ? '#C2410C' :
+                                                          entry.status === 'rejected' ? '#991B1B' : 
+                                                          entry.status === 'pending' ? '#92400E' : '#374151',
+                                                    borderRadius: '6px',
+                                                    fontSize: '13px',
+                                                    fontWeight: '600',
+                                                    letterSpacing: '0.5px'
+                                                }}>
+                                                    {entry.status === 'not_accepted' ? (t('notAccepted') || 'Not Accepted') :
+                                                     entry.status === 'waiting_for_payment' ? (t('waitingForPayment') || 'Waiting for Payment') :
+                                                     entry.status === 'waiting_for_authors' ? (t('waitingForAuthors') || 'Waiting for Authors') :
+                                                     entry.status === 'waiting_for_referees' ? (t('waitingForReferees') || 'Waiting for Referees') :
+                                                     entry.status === 'waiting_for_editors' ? (t('waitingForEditors') || 'Waiting for Editors') :
+                                                     entry.status === 'rejected' ? (t('rejected') || 'Rejected') :
+                                                     entry.status === 'pending' ? (t('pending') || 'Pending') :
+                                                     entry.status === 'accepted' ? (t('accepted') || 'Accepted') :
+                                                     (t(entry.status) || entry.status)}
+                                                </span>
+                                            ) : (
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    color: '#94A3B8',
+                                                    fontSize: '12px'
+                                                }}>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                        <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" 
+                                                            stroke="currentColor" 
+                                                            strokeWidth="2" 
+                                                            strokeLinecap="round"
+                                                        />
+                                                    </svg>
+                                                    <span>{entry.doi ? `DOI: ${entry.doi}` : 'No DOI available'}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            color: '#0D9488',
+                                            fontSize: '14px',
+                                            fontWeight: '600'
+                                        }}>
+                                            <span>{t('readMore') || 'Read More'}</span>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M5 12H19M19 12L12 5M19 12L12 19" 
+                                                    stroke="currentColor" 
+                                                    strokeWidth="2" 
+                                                    strokeLinecap="round" 
+                                                    strokeLinejoin="round"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                
+                {/* Footer */}
+                <div style={{ marginTop: '16px', marginBottom: '0px' }}>
+                    <div className="transparent-footer">
+                        <Footer />
+                    </div>
+                </div>
             </div>
+            
+            <style>{`
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .transparent-footer .footer-content {
+                    background: transparent !important;
+                    border-top: none !important;
+                                 }
+             `}</style>
 
             {showEditorInChiefModal && (
                 <div className="modal-overlay">
@@ -574,7 +1317,7 @@ const JournalDetailsPage: React.FC = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 };
 

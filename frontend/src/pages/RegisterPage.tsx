@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 // import apiService from '../services/apiService'; // No longer needed directly
 import { useAuth } from '../contexts/AuthContext'; // Use the Auth context
@@ -241,6 +241,7 @@ const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
     const { register } = useAuth(); // Get register function
     const { t } = useLanguage();
+    const formRef = useRef<HTMLFormElement>(null);
 
     // Function to get flag for country code
     const getFlagForCountryCode = (code: string): string => {
@@ -265,6 +266,49 @@ const RegisterPage: React.FC = () => {
     useEffect(() => {
         setCurrentFlag(getFlagForCountryCode(countryCode));
     }, [countryCode]);
+
+    // Set custom validation messages
+    useEffect(() => {
+        if (!formRef.current) return;
+
+        const form = formRef.current;
+        const inputs = form.querySelectorAll('input, select, textarea');
+        
+        const handleInvalid = (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            
+            if (target.validity.valueMissing) {
+                target.setCustomValidity(t('validation.required'));
+            } else if (target.validity.typeMismatch && target.type === 'email') {
+                target.setCustomValidity(t('validation.email'));
+            } else if (target.validity.tooShort) {
+                target.setCustomValidity(t('validation.tooShort').replace('{min}', target.minLength?.toString() || '8'));
+            } else if (target.validity.tooLong) {
+                target.setCustomValidity(t('validation.tooLong').replace('{max}', target.maxLength?.toString() || '200'));
+            } else {
+                target.setCustomValidity('');
+            }
+        };
+
+        const handleInput = (e: Event) => {
+            const target = e.target as HTMLInputElement;
+            target.setCustomValidity('');
+        };
+
+        // Add event listeners
+        inputs.forEach((input) => {
+            input.addEventListener('invalid', handleInvalid);
+            input.addEventListener('input', handleInput);
+        });
+
+        // Cleanup
+        return () => {
+            inputs.forEach((input) => {
+                input.removeEventListener('invalid', handleInvalid);
+                input.removeEventListener('input', handleInput);
+            });
+        };
+    }, [t]); // Re-run when language changes
 
     // Handle country code change
     const handleCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -332,6 +376,16 @@ const RegisterPage: React.FC = () => {
         setError(null);
         setSuccess(null);
         setPasswordError(null);
+
+        const form = event.target as HTMLFormElement;
+        
+        // Check form validity and show browser validation messages
+        if (!form.checkValidity()) {
+            // This will trigger HTML5 validation messages and scroll to first invalid field
+            form.reportValidity();
+            return;
+        }
+
         setIsSubmitting(true);
 
         if (!captchaValue) {
@@ -400,11 +454,7 @@ const RegisterPage: React.FC = () => {
             {/* Content Section */}
             <div className="page-content-section">
                 <div className="register-form-container">
-                    {error && <div className="error-message">{error}</div>}
-                    {success && <div className="success-message">{success}</div>}
-                    {passwordError && <div className="error-message">{passwordError}</div>}
-                    
-                    <form className="register-form" onSubmit={handleSubmit}>
+                    <form ref={formRef} className="register-form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label htmlFor="email">{t('email')}</label>
                             <input
@@ -599,6 +649,10 @@ const RegisterPage: React.FC = () => {
                                 onChange={handleCaptchaChange}
                             />
                         </div>
+                        
+                        {error && <div className="error-message">{error}</div>}
+                        {success && <div className="success-message">{success}</div>}
+                        {passwordError && <div className="error-message">{passwordError}</div>}
                         
                         <button 
                             type="submit" 

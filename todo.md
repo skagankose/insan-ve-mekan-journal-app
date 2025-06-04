@@ -1,42 +1,44 @@
 All Pages in the Project
 
 Public/Authentication Pages
-[ + ] LoginPage - User login page
-[ - ] RegisterPage - User registration page
-[ - ] AutoLoginPage - Automatic login handling page
-[ - ] ForgotPasswordPage - Password recovery page
-[ - ] ResetPasswordPage - Password reset page (with token parameter)
-
-Admin-Only Pages
-[ - ] AdminPage - Main admin dashboard
-[ - ] JournalCreateFormPage - Admin form to create new journals
-[ - ] JournalEditFormPage - Admin form to edit existing journals
-[ - ] EditUserPage - Admin page to edit user details
-[ - ] CreateUserPage - Admin page to create new users
-
-Protected User Pages
-[ - ] UserProfilePage - User profile display page
-[ - ] ProfileEditPage - Edit user profile page
-[ - ] JournalCreatePage - Create new journal entry page
-[ - ] JournalEditPage - Edit existing journal entry page
-[ - ] AuthorUpdateFormPage - Form for author updates
-[ - ] RefereeUpdateFormPage - Form for referee updates
-[ - ] JournalEntryUpdateDetailsPage - View/manage journal entry updates
+[ + ] LoginPage - User Login
+[ + ] RegisterPage - User Register
+[ - ] AutoLoginPage - Automatic Login
+[ - ] ForgotPasswordPage - Password Recovery
+[ - ] ResetPasswordPage - Password Reset (with token parameter)
 
 Public Content Pages
-[ + ] ArchivedJournalsPage - Browse archived journals (also serves as homepage "/")
-[ - ] JournalDetailsPage - Detailed view of a specific journal
-[ ? ] JournalEntriesPage - View entries for a specific archived journal
-[ - ] JournalEntryDetailsPage - Detailed view of a specific journal entry
+[ + ] ArchivedJournalsPage - Journal List - Published
+[ - ] JournalDetailsPage - Journal Details
+[ + ] JournalEntriesPage - ?????
+[ - ] JournalEntryDetailsPage - Entry Details
+[ + ] About Page
+[ + ] General Information Page
+
+Protected User Pages
+[ - ] UserProfilePage - User Profile
+[ - ] ProfileEditPage - User Edit Profile
+[ - ] JournalCreatePage - Entry Create
+[ - ] JournalEditPage - Entry Edit
+[ - ] JournalEntryUpdateDetailsPage - Entry Update Details
+[ - ] AuthorUpdateFormPage - Author Update Create
+[ - ] RefereeUpdateFormPage - Referee Update Create
+
+Admin-Only Pages
+[ - ] AdminPage - Dashboard
+[ - ] JournalCreateFormPage - Journal Create
+[ - ] JournalEditFormPage - Journal Edit
+[ - ] EditUserPage - User Edit
+[ - ] CreateUserPage - User Create
 
 Editor-Only Pages
-[ + ] EditorJournalsPage - Editor dashboard for managing journals
+[ + ] EditorJournalsPage - Journal List - All
 
 Error/Fallback Pages
-[ + ] 404 Not Found - Generic fallback for unmatched routes (inline component)
+[ + ] 404 Not Found
 
 Page Access Levels:
-Public: 5 pages (authentication + password recovery)
+Public: 7 pages (authentication + password recovery)
 User Protected: 7 pages (requires login)
 Public Content: 4 pages (viewable by anyone)
 Editor Only: 1 page (requires editor+ role)

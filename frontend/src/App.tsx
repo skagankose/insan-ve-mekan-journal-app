@@ -1,5 +1,5 @@
 import './App.css'
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { useLanguage } from './contexts/LanguageContext';
 import { ToastContainer } from 'react-toastify';
@@ -12,6 +12,8 @@ import { MdExplore } from 'react-icons/md';
 // Import page components
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import AboutPage from './pages/AboutPage';
+import GeneralInfoPage from './pages/GeneralInfoPage';
 import JournalCreatePage from './pages/JournalCreatePage';
 import JournalEditPage from './pages/JournalEditPage';
 import JournalCreateFormPage from './pages/JournalCreateFormPage';
@@ -19,7 +21,6 @@ import JournalEditFormPage from './pages/JournalEditFormPage';
 import AdminPage from './pages/AdminPage';
 import EditorJournalsPage from './pages/EditorJournalsPage';
 import ArchivedJournalsPage from './pages/ArchivedJournalsPage';
-import JournalEntriesPage from './pages/JournalEntriesPage';
 import JournalDetailsPage from './pages/JournalDetailsPage';
 import JournalEntryDetailsPage from './pages/JournalEntryDetailsPage';
 import EditUserPage from './pages/EditUserPage';
@@ -169,6 +170,10 @@ const NotFoundPage = () => {
 
 const App: React.FC = () => {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const location = useLocation();
+  
+  // Check if current route should hide sidebar
+  const hideSidebar = ['/login', '/register'].includes(location.pathname);
 
   if (!googleClientId) {
     console.error('Google Client ID is not set in environment variables');
@@ -180,12 +185,14 @@ const App: React.FC = () => {
       <div className="app-container">
         <Navbar /> 
         <div className="content-area">
-          <Sidebar /> 
-          <main className="main-content">
+          {!hideSidebar && <Sidebar />}
+          <main className={`main-content ${hideSidebar ? 'no-sidebar' : ''}`}>
             <Routes>
               {/* Public Routes */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/general-info" element={<GeneralInfoPage />} />
               <Route path="/auto-login" element={<AutoLoginPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
@@ -218,7 +225,6 @@ const App: React.FC = () => {
                 </UserRoute>
               } />
               <Route path="/archive" element={<ArchivedJournalsPage />} />
-              <Route path="/archive/journal/:journalId" element={<JournalEntriesPage />} />
               <Route path="/profile" element={
                 <UserRoute>
                   <UserProfilePage />

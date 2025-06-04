@@ -141,20 +141,15 @@ const Sidebar: React.FC = () => {
                 color: #000000;
                 text-decoration: none;
                 transition: all 0.2s ease;
-                border-radius: 12px;
+                border-radius: 6px;
                 margin: 6px 16px;
                 position: relative;
-                background: linear-gradient(135deg, rgba(20, 184, 166, 0.08) 0%, rgba(255, 255, 255, 0.7) 100%);
-                border: 1px solid rgba(20, 184, 166, 0.15);
+                border:1px solid rgba(0, 0, 0, 0.2);
             }
             .sidebar-link:hover {
-                background: rgba(255, 255, 255, 0.95);
-                border-color: rgba(20, 184, 166, 0.2);
                 text-decoration: none;
             }
             .sidebar-link.active {
-                background: linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.08) 100%);
-                border-color: rgba(20, 184, 166, 0.25);
                 text-decoration: none;
             }
             .sidebar-icon {

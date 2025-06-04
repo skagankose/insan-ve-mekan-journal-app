@@ -918,7 +918,7 @@
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
   letter-spacing: 0.025em;
-  margin-top: var(--spacing-4);
+  margin-top: var(--spacing-1);
   position: relative;
   z-index: 1;
   overflow: hidden;

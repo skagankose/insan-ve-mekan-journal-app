@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveJournal } from '../contexts/ActiveJournalContext';
 import { Journal, JournalEntryRead } from '../services/apiService';
 import Footer from '../components/Footer';
+import { HiChevronRight, HiChevronDown } from "react-icons/hi2";
 
 interface JournalWithEntries extends Journal {
     entries: JournalEntryRead[];
@@ -215,7 +216,7 @@ const EditorJournalsPage: React.FC = () => {
 
     return (
         <>
-            <div className="page-title-section">
+            <div className="page-title-section" style={{ marginLeft: '60px' }}>
                 <h1>{t('myJournals') || 'My Journals'}</h1>
             </div>
 
@@ -258,7 +259,7 @@ const EditorJournalsPage: React.FC = () => {
                         }}>{t('contactAdminForJournalAssignment') || 'Contact an administrator if you believe this is an error.'}</p>
                     </div>
                 ) : (
-                    <div style={{ margin: '0 auto' }}>
+                    <div style={{ margin: '0 auto', marginLeft: '60px' }}>
                         {journalsWithEntries.map((journal, index) => (
                             <div 
                                 key={journal.id} 
@@ -286,7 +287,8 @@ const EditorJournalsPage: React.FC = () => {
                                 }}
                                 onMouseLeave={e => {
                                     e.currentTarget.style.transform = journal.isExpanded ? 'scale(1.02)' : 'scale(1)';
-                                    e.currentTarget.style.borderColor = journal.isExpanded ? '#14B8A6' : 'rgba(20, 184, 166, 0.2)';
+                                    const shouldKeepSpecialBorder = journal.isExpanded || activeJournal?.id === journal.id;
+                                    e.currentTarget.style.borderColor = shouldKeepSpecialBorder ? '#14B8A6' : 'rgba(20, 184, 166, 0.2)';
                                 }}
                             >
                                 <div 
@@ -313,19 +315,31 @@ const EditorJournalsPage: React.FC = () => {
                                     
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
                                         <div style={{ flex: 1 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '16px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0px', marginBottom: '16px', marginLeft: '-10px' }}>
                                                 <div style={{
-                                                    width: '40px', height: '40px',
-                                                    background: journal.isExpanded 
-                                                        ? 'rgba(255, 255, 255, 0.2)'
-                                                        : 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-                                                    borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    transition: 'all 0.4s ease',
-                                                    boxShadow: journal.isExpanded ? 'none' : '0 4px 15px rgba(20, 184, 166, 0.3)'
+                                                    width: '32px', height: '32px',
+                                                    background: 'transparent',
+                                                    borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    transition: 'all 0.3s ease',
+                                                    opacity: 0.7
                                                 }}>
-                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ transform: journal.isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.4s ease' }}>
-                                                        <path d="M9 6L15 12L9 18" stroke={journal.isExpanded ? 'white' : 'white'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                                    </svg>
+                                                    {journal.isExpanded ? (
+                                                        <HiChevronDown 
+                                                            size={20} 
+                                                            color={journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B'}
+                                                            style={{
+                                                                transition: 'all 0.3s ease'
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <HiChevronRight 
+                                                            size={20} 
+                                                            color={journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B'}
+                                                            style={{
+                                                                transition: 'all 0.3s ease'
+                                                            }}
+                                                        />
+                                                    )}
                                                 </div>
                                                 <h3 style={{ margin: 0, fontSize: '28px', fontWeight: '700', color: journal.isExpanded ? 'white' : '#1E293B', letterSpacing: '-0.025em', transition: 'color 0.4s ease' }}>
                                                     {journal.title}
@@ -349,13 +363,13 @@ const EditorJournalsPage: React.FC = () => {
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                         <path d="M9 11H15M9 15H15M17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V5C19 3.89543 18.1046 3 17 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                                     </svg>
-                                                    <span style={{ fontSize: '14px', fontWeight: '600' }}>{t('issue')}: #{journal.issue}</span>
+                                                    <span style={{ fontSize: '14px', fontWeight: '400' }}>{t('issue')}: #{journal.issue}</span>
                                                 </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B', transition: 'color 0.4s ease' }}>
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                         <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                                     </svg>
-                                                    <span style={{ fontSize: '14px', fontWeight: '600' }}>{new Date(journal.created_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                                    <span style={{ fontSize: '14px', fontWeight: '400' }}>{new Date(journal.created_date).toLocaleDateString(t('locale'), { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -369,11 +383,11 @@ const EditorJournalsPage: React.FC = () => {
                                                     color: journal.isExpanded ? '#14B8A6' : 'white',
                                                     borderRadius: '12px', fontSize: '14px', fontWeight: '600', textDecoration: 'none',
                                                     display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease',
-                                                    boxShadow: journal.isExpanded ? '0 4px 15px rgba(0, 0, 0, 0.1)' : '0 4px 15px rgba(20, 184, 166, 0.3)',
+                                                    boxShadow: 'none',
                                                     transform: 'translateY(0)', letterSpacing: '0.025em'
                                                 }}
-                                                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = journal.isExpanded ? '0 8px 20px rgba(0, 0, 0, 0.15)' : '0 8px 20px rgba(20, 184, 166, 0.4)'; }}
-                                                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = journal.isExpanded ? '0 4px 15px rgba(0, 0, 0, 0.1)' : '0 4px 15px rgba(20, 184, 166, 0.3)'; }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'none'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
                                             >
                                                 <span>{t('viewJournal') || 'View Journal'}</span>
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -418,168 +432,202 @@ const EditorJournalsPage: React.FC = () => {
                                         ) : (
                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '24px' }}>
                                                 {journal.entries.map((entry, entryIndex) => (
-                                                    <Link 
+                                                    <div 
                                                         key={entry.id} 
-                                                        to={`/entries/${entry.id}`}
-                                                        style={{ display: 'block', textDecoration: 'none', animation: `fadeInUp 0.6s ease-out ${entryIndex * 0.1}s both` }}
-                                                    >
-                                                        <div style={{
+                                                        style={{
                                                             background: 'rgba(255, 255, 255, 0.8)',
                                                             backgroundImage: 'url(/pattern_transparent.png)',
-                                                            backgroundSize: '50% 80%',
-                                                            backgroundPosition: '138% -162%',
+                                                            backgroundSize: '50% 70%',
+                                                            backgroundPosition: '137% -93%',
                                                             backgroundRepeat: 'no-repeat',
-                                                            backdropFilter: 'blur(10px)', 
-                                                            borderRadius: '16px', 
+                                                            backdropFilter: 'blur(10px)',
+                                                            borderRadius: '16px',
                                                             padding: '28px',
-                                                            height: '100%', 
-                                                            display: 'flex', 
-                                                            flexDirection: 'column', 
-                                                            position: 'relative', 
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            position: 'relative',
                                                             overflow: 'hidden',
-                                                            border: '1px solid #E2E8F0', 
-                                                            transition: 'all 0.3s ease', 
-                                                            cursor: 'pointer'
+                                                            border: '1px solid #E2E8F0',
+                                                            transition: 'all 0.3s ease',
+                                                            cursor: 'pointer',
+                                                            animation: `fadeInUp 0.6s ease-out ${entryIndex * 0.1}s both`
                                                         }}
-                                                        onMouseEnter={(e) => { 
-                                                            e.currentTarget.style.transform = 'translateY(-4px)'; 
-                                                            e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.1)'; 
-                                                            e.currentTarget.style.borderColor = '#14B8A6'; 
+                                                        onClick={() => window.location.href = `/entries/${entry.id}`}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.transform = 'translateY(-4px)';
+                                                            e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.1)';
+                                                            e.currentTarget.style.borderColor = '#14B8A6';
                                                         }}
-                                                        onMouseLeave={(e) => { 
-                                                            e.currentTarget.style.transform = 'translateY(0)'; 
-                                                            e.currentTarget.style.boxShadow = 'none'; 
-                                                            e.currentTarget.style.borderColor = '#E2E8F0'; 
-                                                        }}>
-                                                            
-                                                            <h5 style={{ 
-                                                                margin: '0 0 16px 0', 
-                                                                fontSize: '18px', 
-                                                                fontWeight: '700', 
-                                                                color: '#1E293B', 
-                                                                lineHeight: '1.4', 
-                                                                letterSpacing: '-0.025em', 
-                                                                position: 'relative', 
-                                                                zIndex: 1 
-                                                            }}>{entry.title}</h5>
-                                                            
-                                                            <p style={{ 
-                                                                color: '#64748B', 
-                                                                fontSize: '14px', 
-                                                                lineHeight: '1.6', 
-                                                                marginBottom: '20px', 
-                                                                flexGrow: 1, 
-                                                                display: '-webkit-box', 
-                                                                WebkitLineClamp: 3, 
-                                                                WebkitBoxOrient: 'vertical', 
-                                                                overflow: 'hidden', 
-                                                                textOverflow: 'ellipsis', 
-                                                                position: 'relative', 
-                                                                zIndex: 1 
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.transform = 'translateY(0)';
+                                                            e.currentTarget.style.boxShadow = 'none';
+                                                            e.currentTarget.style.borderColor = '#E2E8F0';
+                                                        }}
+                                                    >
+                                                        <h4 style={{
+                                                            margin: '0 0 16px 0',
+                                                            fontSize: '18px',
+                                                            fontWeight: '700',
+                                                            color: '#1E293B',
+                                                            lineHeight: '1.4',
+                                                            letterSpacing: '-0.025em',
+                                                            position: 'relative',
+                                                            zIndex: 1
+                                                        }}>{entry.title}</h4>
+                                                        
+                                                        {entry.authors && entry.authors.length > 0 && (
+                                                            <p style={{
+                                                                margin: '0 0 16px 0',
+                                                                fontSize: '14px',
+                                                                fontWeight: '500',
+                                                                color: '#64748B',
+                                                                position: 'relative',
+                                                                zIndex: 1,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '6px'
                                                             }}>
-                                                                {entry.abstract_tr || entry.abstract_en || 'No abstract available.'}
+                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
+                                                                        stroke="currentColor" 
+                                                                        strokeWidth="2" 
+                                                                        strokeLinecap="round" 
+                                                                        strokeLinejoin="round"
+                                                                    />
+                                                                </svg>
+                                                                <span>{entry.authors.map(author => author.name).join(', ')}</span>
                                                             </p>
-                                                            
-                                                            <div style={{ 
-                                                                display: 'flex', 
-                                                                alignItems: 'center', 
-                                                                justifyContent: 'space-between', 
-                                                                paddingTop: '20px', 
-                                                                borderTop: '1px solid #F1F5F9', 
-                                                                position: 'relative', 
-                                                                zIndex: 1 
+                                                        )}
+                                                        
+                                                        <p style={{
+                                                            color: '#64748B',
+                                                            fontSize: '14px',
+                                                            lineHeight: '1.6',
+                                                            marginBottom: '20px',
+                                                            flexGrow: 1,
+                                                            display: '-webkit-box',
+                                                            WebkitLineClamp: 3,
+                                                            WebkitBoxOrient: 'vertical',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            position: 'relative',
+                                                            zIndex: 1
+                                                        }}>
+                                                            {entry.keywords ? (
+                                                                <>
+                                                                    <span style={{ 
+                                                                        fontWeight: '600', 
+                                                                        color: '#475569',
+                                                                        marginRight: '8px'
+                                                                    }}>Keywords:</span>
+                                                                    {entry.keywords}
+                                                                </>
+                                                            ) : 'No keywords available.'}
+                                                        </p>
+                                                        
+                                                        <div style={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'space-between',
+                                                            paddingTop: '20px',
+                                                            borderTop: '1px solid #F1F5F9',
+                                                            position: 'relative',
+                                                            zIndex: 1
+                                                        }}>
+                                                            <div style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '8px'
                                                             }}>
-                                                                <div style={{ 
-                                                                    display: 'flex', 
-                                                                    alignItems: 'center', 
-                                                                    gap: '8px', 
-                                                                    color: '#94A3B8', 
-                                                                    fontSize: '12px' 
-                                                                }}>
-                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                                                                        <path d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                                                                    </svg>
-                                                                    <span>{new Date(entry.created_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                                                </div>
-                                                                
-                                                                <div style={{
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '12px'
-                                                                }}>
-                                                                    {entry.status && (() => {
-                                                                        let backgroundColor = 'rgba(107, 114, 128, 0.1)'; // Default gray
-                                                                        let textColor = '#6B7280'; // Default gray
-
-                                                                        switch (entry.status.toLowerCase()) {
-                                                                            case 'accepted':
-                                                                                backgroundColor = 'rgba(22, 163, 74, 0.1)'; // Light Green
-                                                                                textColor = '#16A34A'; // Green
-                                                                                break;
-                                                                            case 'rejected':
-                                                                                backgroundColor = 'rgba(220, 38, 38, 0.1)'; // Light Red
-                                                                                textColor = '#DC2626'; // Red
-                                                                                break;
-                                                                            case 'pending':
-                                                                                backgroundColor = 'rgba(245, 158, 11, 0.1)'; // Light Amber
-                                                                                textColor = '#D97706'; // Amber
-                                                                                break;
-                                                                            case 'under review':
-                                                                            case 'review':
-                                                                                backgroundColor = 'rgba(59, 130, 246, 0.1)'; // Light Blue
-                                                                                textColor = '#3B82F6'; // Blue
-                                                                                break;
-                                                                            case 'revision required':
-                                                                            case 'revisions':
-                                                                                backgroundColor = 'rgba(249, 115, 22, 0.1)'; // Light Orange
-                                                                                textColor = '#F97316'; // Orange
-                                                                                break;
-                                                                            case 'submitted':
-                                                                                backgroundColor = 'rgba(168, 85, 247, 0.1)'; // Light Purple
-                                                                                textColor = '#A855F7'; // Purple
-                                                                                break;
-                                                                            default:
-                                                                                // Keep default gray for other statuses
-                                                                                break;
-                                                                        }
-
-                                                                        return (
-                                                                            <div style={{
-                                                                                padding: '3px 10px',
-                                                                                borderRadius: '12px',
-                                                                                fontSize: '11px',
-                                                                                fontWeight: '600',
-                                                                                textTransform: 'capitalize',
-                                                                                backgroundColor: backgroundColor,
-                                                                                color: textColor
-                                                                            }}>
-                                                                                {t(entry.status) || entry.status}
-                                                                            </div>
-                                                                        );
-                                                                    })()}
-                                                                    
+                                                                {entry.status === 'accepted' ? (
                                                                     <div style={{
                                                                         display: 'flex',
                                                                         alignItems: 'center',
-                                                                        gap: '4px',
-                                                                        color: '#14B8A6',
-                                                                        fontSize: '14px',
-                                                                        fontWeight: '600'
+                                                                        gap: '8px',
+                                                                        color: '#94A3B8',
+                                                                        fontSize: '12px'
                                                                     }}>
-                                                                        <span>Read More</span>
-                                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                                            <path d="M5 12H19M19 12L12 5M19 12L12 19" 
+                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                                            <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" 
                                                                                 stroke="currentColor" 
                                                                                 strokeWidth="2" 
-                                                                                strokeLinecap="round" 
-                                                                                strokeLinejoin="round"
+                                                                                strokeLinecap="round"
                                                                             />
                                                                         </svg>
+                                                                        <span>{entry.doi ? `DOI: ${entry.doi}` : 'No DOI available'}</span>
                                                                     </div>
-                                                                </div>
+                                                                ) : entry.status ? (
+                                                                    <span style={{
+                                                                        padding: '4px 8px',
+                                                                        background: entry.status === 'not_accepted' ? '#FCA5A5' : 
+                                                                                   entry.status === 'waiting_for_payment' ? '#FDE68A' : 
+                                                                                   entry.status === 'waiting_for_authors' ? '#BFDBFE' :
+                                                                                   entry.status === 'waiting_for_referees' ? '#DDD6FE' :
+                                                                                   entry.status === 'waiting_for_editors' ? '#FED7AA' :
+                                                                                   entry.status === 'rejected' ? '#FCA5A5' : 
+                                                                                   entry.status === 'pending' ? '#FDE68A' : '#D1D5DB',
+                                                                        color: entry.status === 'not_accepted' ? '#991B1B' : 
+                                                                              entry.status === 'waiting_for_payment' ? '#92400E' : 
+                                                                              entry.status === 'waiting_for_authors' ? '#1E40AF' :
+                                                                              entry.status === 'waiting_for_referees' ? '#6B21A8' :
+                                                                              entry.status === 'waiting_for_editors' ? '#C2410C' :
+                                                                              entry.status === 'rejected' ? '#991B1B' : 
+                                                                              entry.status === 'pending' ? '#92400E' : '#374151',
+                                                                        borderRadius: '6px',
+                                                                        fontSize: '13px',
+                                                                        fontWeight: '600',
+                                                                        letterSpacing: '0.5px'
+                                                                    }}>
+                                                                        {entry.status === 'not_accepted' ? (t('notAccepted') || 'Not Accepted') :
+                                                                         entry.status === 'waiting_for_payment' ? (t('waitingForPayment') || 'Waiting for Payment') :
+                                                                         entry.status === 'waiting_for_authors' ? (t('waitingForAuthors') || 'Waiting for Authors') :
+                                                                         entry.status === 'waiting_for_referees' ? (t('waitingForReferees') || 'Waiting for Referees') :
+                                                                         entry.status === 'waiting_for_editors' ? (t('waitingForEditors') || 'Waiting for Editors') :
+                                                                         entry.status === 'rejected' ? (t('rejected') || 'Rejected') :
+                                                                         entry.status === 'pending' ? (t('pending') || 'Pending') :
+                                                                         entry.status === 'accepted' ? (t('accepted') || 'Accepted') :
+                                                                         (t(entry.status) || entry.status)}
+                                                                    </span>
+                                                                ) : (
+                                                                    <div style={{
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '8px',
+                                                                        color: '#94A3B8',
+                                                                        fontSize: '12px'
+                                                                    }}>
+                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                                            <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" 
+                                                                                stroke="currentColor" 
+                                                                                strokeWidth="2" 
+                                                                                strokeLinecap="round"
+                                                                            />
+                                                                        </svg>
+                                                                        <span>{entry.doi ? `DOI: ${entry.doi}` : 'No DOI available'}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            
+                                                            <div style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px',
+                                                                color: '#0D9488',
+                                                                fontSize: '14px',
+                                                                fontWeight: '600'
+                                                            }}>
+                                                                <span>{t('readMore') || 'Read More'}</span>
+                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                                    <path d="M5 12H19M19 12L12 5M19 12L12 19" 
+                                                                        stroke="currentColor" 
+                                                                        strokeWidth="2" 
+                                                                        strokeLinecap="round" 
+                                                                        strokeLinejoin="round"
+                                                                    />
+                                                                </svg>
                                                             </div>
                                                         </div>
-                                                    </Link>
+                                                    </div>
                                                 ))}
                                             </div>
                                         )}

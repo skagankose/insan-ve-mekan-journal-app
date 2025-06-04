@@ -36,12 +36,11 @@ const Navbar: React.FC = () => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.2) 0%, rgba(255, 255, 255, 0.8) 100%)',
                             padding: '0px 0px 0px 10px',
                             borderRadius: '2px'
                         }}>
                             <img src="/logo.png" alt="Journal App Logo" className="navbar-logo-image" 
-                            style={{padding: '0px', margin: '0px 0px 0px -20px', height: '64px', width: 'auto' }} />
+                            style={{padding: '0px', margin: '0px 0px 0px -29px', height: '64px', width: 'auto' }} />
                         </div>
                         <span className="navbar-title-text" style={{
                             whiteSpace: 'nowrap',
@@ -58,6 +57,28 @@ const Navbar: React.FC = () => {
                 
                 <div className="navbar-menu" style={{ marginLeft: 'auto', gap: '24px' }}>
                     <div className="navbar-end" style={{ gap: '16px', alignItems: 'center' }}>
+                        {/* Add navigation links for public pages */}
+                        <Link to="/about" className="navbar-item" style={{
+                            color: '#0D9488',
+                            fontWeight: '600',
+                            position: 'relative',
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            {t('about')}
+                        </Link>
+                        <Link to="/general-info" className="navbar-item" style={{
+                            color: '#0D9488',
+                            fontWeight: '600',
+                            position: 'relative',
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            transition: 'all 0.3s ease'
+                        }}>
+                            {t('generalInformation')}
+                        </Link>
+                        
                         <LanguageToggle />
                         {isAuthenticated && user ? (
                             <>

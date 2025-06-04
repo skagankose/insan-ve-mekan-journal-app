@@ -4,6 +4,7 @@ import * as apiService from '../services/apiService';
 import { Journal, JournalEntryRead } from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import Footer from '../components/Footer';
+import { HiChevronRight, HiChevronDown } from "react-icons/hi2";
 
 interface JournalWithEntries extends Journal {
     entries: JournalEntryRead[];
@@ -29,15 +30,20 @@ const ArchivedJournalsPage: React.FC = () => {
                     new Date(b.created_date).getTime() - new Date(a.created_date).getTime()
                 );
                 
-                // Initialize journals with empty entries array and collapsed state
-                const journalsData = sortedJournals.map(journal => ({
+                // Initialize journals with empty entries array and first one expanded
+                const journalsData = sortedJournals.map((journal, index) => ({
                     ...journal,
                     entries: [],
-                    isExpanded: false,
+                    isExpanded: index === 0, // First journal expanded by default
                     isLoading: false
                 }));
                 
                 setJournalsWithEntries(journalsData);
+                
+                // Automatically load entries for the first journal if it exists
+                if (sortedJournals.length > 0) {
+                    loadJournalEntries(sortedJournals[0].id);
+                }
             } catch (err: any) {
                 console.error("Failed to fetch published journals:", err);
                 setError(err.response?.data?.detail || t('failedToLoadPublishedJournals') || 'Failed to load published journals.');
@@ -181,7 +187,7 @@ const ArchivedJournalsPage: React.FC = () => {
     return (
         <>
             {/* Title Section */}
-            <div className="page-title-section">
+            <div className="page-title-section" style={{ marginLeft: '60px' }}>
                 <h1>{t('publishedJournals')}</h1>
             </div>
 
@@ -225,7 +231,8 @@ const ArchivedJournalsPage: React.FC = () => {
                     </div>
                 ) : (
                     <div style={{
-                        margin: '0 auto'
+                        margin: '0 auto',
+                        marginLeft: '60px'
                     }}>
                         {journalsWithEntries.sort((a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime()).map((journal, index) => (
                             <div
@@ -293,43 +300,39 @@ const ArchivedJournalsPage: React.FC = () => {
                                             <div style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '20px',
-                                                marginBottom: '16px'
+                                                gap: '0px',
+                                                marginBottom: '16px',
+                                                marginLeft: '-10px'
                                             }}>
                                                 {/* Animated Chevron */}
                                                 <div style={{
-                                                    width: '40px',
-                                                    height: '40px',
-                                                    background: journal.isExpanded 
-                                                        ? 'rgba(255, 255, 255, 0.2)'
-                                                        : 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-                                                    borderRadius: '12px',
+                                                    width: '32px',
+                                                    height: '32px',
+                                                    background: 'transparent',
+                                                    borderRadius: '8px',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    transition: 'all 0.4s ease',
-                                                    boxShadow: journal.isExpanded 
-                                                        ? 'none'
-                                                        : 'none'
+                                                    transition: 'all 0.3s ease',
+                                                    opacity: 0.7
                                                 }}>
-                                                    <svg 
-                                                        width="24" 
-                                                        height="24" 
-                                                        viewBox="0 0 24 24" 
-                                                        fill="none"
-                                                        style={{
-                                                            transform: journal.isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                                                            transition: 'transform 0.4s ease'
-                                                        }}
-                                                    >
-                                                        <path 
-                                                            d="M9 6L15 12L9 18" 
-                                                            stroke={journal.isExpanded ? 'white' : 'white'}
-                                                            strokeWidth="2.5" 
-                                                            strokeLinecap="round" 
-                                                            strokeLinejoin="round"
+                                                    {journal.isExpanded ? (
+                                                        <HiChevronDown 
+                                                            size={20} 
+                                                            color={journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B'}
+                                                            style={{
+                                                                transition: 'all 0.3s ease'
+                                                            }}
                                                         />
-                                                    </svg>
+                                                    ) : (
+                                                        <HiChevronRight 
+                                                            size={20} 
+                                                            color={journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B'}
+                                                            style={{
+                                                                transition: 'all 0.3s ease'
+                                                            }}
+                                                        />
+                                                    )}
                                                 </div>
                                                 
                                                 <h3 style={{
@@ -361,7 +364,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                             strokeLinecap="round"
                                                         />
                                                     </svg>
-                                                    <span style={{ fontSize: '14px', fontWeight: '600' }}>
+                                                    <span style={{ fontSize: '14px', fontWeight: '400' }}>
                                                         {t('issue')}: #{journal.issue}
                                                     </span>
                                                 </div>
@@ -380,7 +383,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                             strokeLinecap="round"
                                                         />
                                                     </svg>
-                                                    <span style={{ fontSize: '14px', fontWeight: '600' }}>
+                                                    <span style={{ fontSize: '14px', fontWeight: '400' }}>
                                                         {journal.publication_date ? new Date(journal.publication_date).toLocaleDateString(t('locale'), { 
                                                             year: 'numeric', 
                                                             month: 'long', 
@@ -560,8 +563,8 @@ const ArchivedJournalsPage: React.FC = () => {
                                                         <div style={{
                                                             background: 'rgba(255, 255, 255, 0.8)',
                                                             backgroundImage: 'url(/pattern_transparent.png)',
-                                                            backgroundSize: '50% 80%',
-                                                            backgroundPosition: '138% -162%',
+                                                            backgroundSize: '50% 70%',
+                                                            backgroundPosition: '137% -93%',
                                                             backgroundRepeat: 'no-repeat',
                                                             backdropFilter: 'blur(10px)',
                                                             borderRadius: '16px',
@@ -597,6 +600,30 @@ const ArchivedJournalsPage: React.FC = () => {
                                                                 zIndex: 1
                                                             }}>{entry.title}</h5>
                                                             
+                                                            {entry.authors && entry.authors.length > 0 && (
+                                                                <p style={{
+                                                                    margin: '0 0 16px 0',
+                                                                    fontSize: '14px',
+                                                                    fontWeight: '500',
+                                                                    color: '#64748B',
+                                                                    position: 'relative',
+                                                                    zIndex: 1,
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '6px'
+                                                                }}>
+                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                                        <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
+                                                                            stroke="currentColor" 
+                                                                            strokeWidth="2" 
+                                                                            strokeLinecap="round" 
+                                                                            strokeLinejoin="round"
+                                                                        />
+                                                                    </svg>
+                                                                    <span>{entry.authors.map(author => author.name).join(', ')}</span>
+                                                                </p>
+                                                            )}
+                                                            
                                                             <p style={{
                                                                 color: '#64748B',
                                                                 fontSize: '14px',
@@ -610,7 +637,18 @@ const ArchivedJournalsPage: React.FC = () => {
                                                                 textOverflow: 'ellipsis',
                                                                 position: 'relative',
                                                                 zIndex: 1
-                                                            }}>{entry.abstract_tr}</p>
+                                                            }}>
+                                                                {entry.keywords ? (
+                                                                    <>
+                                                                        <span style={{ 
+                                                                            fontWeight: '600', 
+                                                                            color: '#475569',
+                                                                            marginRight: '8px'
+                                                                        }}>Keywords:</span>
+                                                                        {entry.keywords}
+                                                                    </>
+                                                                ) : 'No keywords available.'}
+                                                            </p>
                                                             
                                                             <div style={{
                                                                 display: 'flex',
@@ -629,28 +667,24 @@ const ArchivedJournalsPage: React.FC = () => {
                                                                     fontSize: '12px'
                                                                 }}>
                                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                                                                        <path d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+                                                                        <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" 
                                                                             stroke="currentColor" 
                                                                             strokeWidth="2" 
                                                                             strokeLinecap="round"
                                                                         />
                                                                     </svg>
-                                                                    <span>{new Date(entry.created_date).toLocaleDateString('en-US', {
-                                                                        month: 'short',
-                                                                        day: 'numeric',
-                                                                        year: 'numeric'
-                                                                    })}</span>
+                                                                    <span>{entry.doi ? `DOI: ${entry.doi}` : 'No DOI available'}</span>
                                                                 </div>
                                                                 
                                                                 <div style={{
                                                                     display: 'flex',
                                                                     alignItems: 'center',
                                                                     gap: '4px',
-                                                                    color: '#14B8A6',
+                                                                    color: '#0D9488',
                                                                     fontSize: '14px',
                                                                     fontWeight: '600'
                                                                 }}>
-                                                                    <span>Read More</span>
+                                                                    <span>{t('readMore')}</span>
                                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                                         <path d="M5 12H19M19 12L12 5M19 12L12 19" 
                                                                             stroke="currentColor" 

@@ -5,7 +5,6 @@ import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './JournalFormPage.css';
 
 interface JournalFormData {
     title: string;
@@ -59,6 +58,8 @@ const JournalEditFormPage: React.FC = () => {
     const navigate = useNavigate();
     const { isAuthenticated, user } = useAuth();
     const { t } = useLanguage();
+
+    const isAdminOrOwner = user?.role === 'admin' || user?.role === 'owner';
 
     // Fetch journal data
     useEffect(() => {
@@ -230,7 +231,7 @@ const JournalEditFormPage: React.FC = () => {
         try {
             await apiService.deleteJournal(journalId);
             toast.success(t('journalDeleted') || 'Journal deleted successfully. All entries have been reassigned to the default journal.');
-            navigate('/journals');
+            navigate('/');
         } catch (err: any) {
             console.error("Failed to delete journal:", err);
             if (err.response?.data?.detail?.includes("Cannot delete journal with ID 1")) {
@@ -243,281 +244,360 @@ const JournalEditFormPage: React.FC = () => {
     };
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <>
+                <div className="page-title-section">
+                    <h1 style={{textAlign: 'center'}}>{t('editJournal') || 'Edit Journal'}</h1>
+                </div>
+                <div className="page-content-section">
+                    <div className="loading">{t('loadingJournal') || 'Loading journal...'}</div>
+                </div>
+            </>
+        );
     }
 
     if (error) {
-        return <div className="error">{error}</div>;
+        return (
+            <>
+                <div className="page-title-section">
+                    <h1 style={{textAlign: 'center'}}>{t('editJournal') || 'Edit Journal'}</h1>
+                </div>
+                <div className="page-content-section">
+                    <div className="error-message">{error}</div>
+                </div>
+            </>
+        );
     }
 
     return (
-        <div className="form-container">
-            <h1>{t('editJournal') || 'Edit Journal'}</h1>
-            
-            <form onSubmit={handleSubmit} className="journal-form">
-                {submitError && <div className="error">{submitError}</div>}
-                
-                <div className="form-group">
-                    <label htmlFor="title" className="form-label">{t('title') || 'Title'}</label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        className="form-input"
-                        value={formData.title}
-                        onChange={handleChange}
-                        required
-                        disabled={isSubmitting}
-                        maxLength={300}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="issue" className="form-label">{t('issue') || 'Issue'}</label>
-                    <input
-                        type="text"
-                        id="issue"
-                        name="issue"
-                        className="form-input"
-                        value={formData.issue}
-                        onChange={handleChange}
-                        required
-                        disabled={isSubmitting}
-                        maxLength={100}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="created_date" className="form-label">{t('createdDate') || 'Created Date'}</label>
-                    <input
-                        type="datetime-local"
-                        id="created_date"
-                        name="created_date"
-                        className="form-input"
-                        value={formData.created_date || ''}
-                        onChange={handleChange}
-                        disabled={isSubmitting}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label className="form-label">
-                        <input
-                            type="checkbox"
-                            name="is_published"
-                            checked={formData.is_published}
-                            onChange={handleChange}
-                            disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                        />
-                        {' '}{t('isPublished') || 'Is Published'}
-                    </label>
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="publication_date" className="form-label">{t('publicationDate') || 'Publication Date'}</label>
-                    <input
-                        type="datetime-local"
-                        id="publication_date"
-                        name="publication_date"
-                        className="form-input"
-                        value={formData.publication_date || ''}
-                        onChange={handleChange}
-                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="publication_place" className="form-label">{t('publicationPlace') || 'Publication Place'}</label>
-                    <input
-                        type="text"
-                        id="publication_place"
-                        name="publication_place"
-                        className="form-input"
-                        maxLength={100}
-                        value={formData.publication_place || ''}
-                        onChange={handleChange}
-                        placeholder={t('enterPublicationPlace') || 'Enter publication place'}
-                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="cover_photo" className="form-label">{t('coverPhoto') || 'Cover Photo'}</label>
-                    {formData.cover_photo && (
-                        <div className="current-file">
-                            <a href={`/api${formData.cover_photo}`} target="_blank" rel="noopener noreferrer">
-                                {t('currentCoverPhoto') || 'Current Cover Photo'}
-                            </a>
-                        </div>
-                    )}
-                    <input
-                        type="file"
-                        id="cover_photo"
-                        name="cover_photo"
-                        className="form-input"
-                        onChange={handleFileChange}
-                        accept=".png,.jpg,.jpeg"
-                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                    />
-                    <small className="text-muted">
-                        {t('coverPhotoDescription') || 'Upload a PNG or JPEG image file'}
-                    </small>
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="meta_files" className="form-label">{t('metaFiles') || 'Meta Files'}</label>
-                    {formData.meta_files && (
-                        <div className="current-file">
-                            <a href={`/api${formData.meta_files}`} target="_blank" rel="noopener noreferrer">
-                                {t('currentMetaFiles') || 'Current Meta Files'}
-                            </a>
-                        </div>
-                    )}
-                    <input
-                        type="file"
-                        id="meta_files"
-                        name="meta_files"
-                        className="form-input"
-                        onChange={handleFileChange}
-                        accept=".docx"
-                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                    />
-                    <small className="text-muted">
-                        {t('metaFilesDescription') || 'Upload a DOCX file'}
-                    </small>
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="editor_notes" className="form-label">{t('editorNotes') || 'Editor Notes'}</label>
-                    {formData.editor_notes && (
-                        <div className="current-file">
-                            <a href={`/api${formData.editor_notes}`} target="_blank" rel="noopener noreferrer">
-                                {t('currentEditorNotes') || 'Current Editor Notes'}
-                            </a>
-                        </div>
-                    )}
-                    <input
-                        type="file"
-                        id="editor_notes"
-                        name="editor_notes"
-                        className="form-input"
-                        onChange={handleFileChange}
-                        accept=".docx"
-                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                    />
-                    <small className="text-muted">
-                        {t('editorNotesDescription') || 'Upload a DOCX file'}
-                    </small>
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="full_pdf" className="form-label">{t('fullPdf') || 'Full PDF'}</label>
-                    {formData.full_pdf && (
-                        <div className="current-file">
-                            <a href={`/api${formData.full_pdf}`} target="_blank" rel="noopener noreferrer">
-                                {t('currentFullPdf') || 'Current Full PDF'}
-                            </a>
-                        </div>
-                    )}
-                    <input
-                        type="file"
-                        id="full_pdf"
-                        name="full_pdf"
-                        className="form-input"
-                        onChange={handleFileChange}
-                        accept=".pdf"
-                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                    />
-                    <small className="text-muted">
-                        {t('fullPdfDescription') || 'Upload a PDF file'}
-                    </small>
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="index_section" className="form-label">{t('indexSection') || 'Index Section'}</label>
-                    {formData.index_section && (
-                        <div className="current-file">
-                            <a href={`/api${formData.index_section}`} target="_blank" rel="noopener noreferrer">
-                                {t('currentIndexSection') || 'Current Index Section'}
-                            </a>
-                        </div>
-                    )}
-                    <input
-                        type="file"
-                        id="index_section"
-                        name="index_section"
-                        className="form-input"
-                        onChange={handleFileChange}
-                        accept=".docx"
-                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                    />
-                    <small className="text-muted">
-                        {t('indexSectionDescription') || 'Upload a DOCX file'}
-                    </small>
-                </div>
-                
-                <div className="form-group">
-                    <label htmlFor="file_path" className="form-label">{t('filePath') || 'File Path'}</label>
-                    {formData.file_path && (
-                        <div className="current-file">
-                            <a href={`/api${formData.file_path}`} target="_blank" rel="noopener noreferrer">
-                                {t('currentFilePath') || 'Current File Path'}
-                            </a>
-                        </div>
-                    )}
-                    <input
-                        type="file"
-                        id="file_path"
-                        name="file_path"
-                        className="form-input"
-                        onChange={handleFileChange}
-                        accept=".docx"
-                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                    />
-                    <small className="text-muted">
-                        {t('filePathDescription') || 'Upload a DOCX file'}
-                    </small>
-                </div>
-                
-                <div className="form-buttons">
-                    <button 
-                        type="button" 
-                        onClick={() => navigate('/journals')} 
-                        className="cancel-button"
-                        disabled={isSubmitting}
-                    >
-                        {t('cancel') || 'Cancel'}
-                    </button>
-                    <button 
-                        type="submit" 
-                        className="submit-button"
-                        disabled={isSubmitting || (user ? (user.role !== 'admin' && user.role !== 'owner') : true)}
-                    >
-                        {isSubmitting 
-                            ? (t('saving') || 'Saving...') 
-                            : (t('saveChanges') || 'Save Changes')}
-                    </button>
-                </div>
-            </form>
+        <>
+            {/* Title Section */}
+            <div className="page-title-section">
+                <h1 style={{textAlign: 'center'}}>{t('editJournal') || 'Edit Journal'}</h1>
+            </div>
 
-            {(user?.role === 'admin' || user?.role === 'owner') && (
-                <div className="danger-zone">
-                    <h2>{t('dangerZone') || 'Danger Zone'}</h2>
-                    <div className="danger-zone-content">
-                        <p>{t('deleteJournalWarning') || 'Once you delete a journal, there is no going back. All entries will be reassigned to the default journal (ID: 1).'}</p>
-                        <button 
-                            onClick={handleDeleteJournal}
-                            disabled={isDeleting}
-                            className="delete-button"
-                        >
-                            {isDeleting 
-                                ? (t('deletingJournal') || 'Deleting Journal...') 
-                                : (t('deleteJournal') || 'Delete Journal')}
-                        </button>
-                    </div>
+            {/* Content Section */}
+            <div className="page-content-section">
+                <div className="register-form-container">
+                    {isAdminOrOwner && (
+                        <div className="form-header" style={{ 
+                            display: 'flex', 
+                            justifyContent: 'flex-end', 
+                            marginBottom: 'var(--spacing-4)',
+                            paddingBottom: 'var(--spacing-3)',
+                            borderBottom: '1px solid rgba(226, 232, 240, 0.6)'
+                        }}>
+                            <button 
+                                onClick={handleDeleteJournal}
+                                disabled={isDeleting}
+                                className="btn btn-danger btn-sm"
+                                style={{
+                                    background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    padding: '8px 16px',
+                                    fontSize: '0.875rem',
+                                    fontWeight: '600',
+                                    color: 'white',
+                                    cursor: isDeleting ? 'not-allowed' : 'pointer',
+                                    opacity: isDeleting ? 0.6 : 1,
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                                }}
+                            >
+                                {isDeleting 
+                                    ? (t('deletingJournal') || 'Deleting Journal...') 
+                                    : (t('deleteJournal') || 'Delete Journal')}
+                            </button>
+                        </div>
+                    )}
+                    
+                    <form onSubmit={handleSubmit} className="register-form">
+                        {submitError && <div className="error-message">{submitError}</div>}
+                        
+                        <div className="form-group">
+                            <label htmlFor="title" className="form-label">{t('title') || 'Title'}</label>
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                className="form-input"
+                                value={formData.title}
+                                onChange={handleChange}
+                                required
+                                disabled={isSubmitting}
+                                maxLength={300}
+                                placeholder={t('enterJournalTitle') || 'Enter journal title'}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="issue" className="form-label">{t('issue') || 'Issue'}</label>
+                            <input
+                                type="text"
+                                id="issue"
+                                name="issue"
+                                className="form-input"
+                                value={formData.issue}
+                                onChange={handleChange}
+                                required
+                                disabled={isSubmitting}
+                                maxLength={100}
+                                placeholder={t('enterIssue') || 'Enter issue number'}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="created_date" className="form-label">{t('createdDate') || 'Created Date'}</label>
+                            <input
+                                type="datetime-local"
+                                id="created_date"
+                                name="created_date"
+                                className="form-input"
+                                value={formData.created_date || ''}
+                                onChange={handleChange}
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label className="form-label" style={{ 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                gap: 'var(--spacing-2)',
+                                cursor: 'pointer'
+                            }}>
+                                <input
+                                    type="checkbox"
+                                    name="is_published"
+                                    checked={formData.is_published}
+                                    onChange={handleChange}
+                                    disabled={isSubmitting || !isAdminOrOwner}
+                                    style={{
+                                        width: '18px',
+                                        height: '18px',
+                                        cursor: isAdminOrOwner ? 'pointer' : 'not-allowed'
+                                    }}
+                                />
+                                <span>{t('isPublished') || 'Is Published'}</span>
+                                {!isAdminOrOwner && (
+                                    <small style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>
+                                        ({t('adminOnly') || 'Admin only'})
+                                    </small>
+                                )}
+                            </label>
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="publication_date" className="form-label">
+                                {t('publicationDate') || 'Publication Date'}
+                                {!isAdminOrOwner && (
+                                    <small style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic', marginLeft: 'var(--spacing-1)' }}>
+                                        ({t('adminOnly') || 'Admin only'})
+                                    </small>
+                                )}
+                            </label>
+                            <input
+                                type="datetime-local"
+                                id="publication_date"
+                                name="publication_date"
+                                className="form-input"
+                                value={formData.publication_date || ''}
+                                onChange={handleChange}
+                                disabled={isSubmitting || !isAdminOrOwner}
+                                style={{
+                                    opacity: !isAdminOrOwner ? 0.6 : 1,
+                                    cursor: !isAdminOrOwner ? 'not-allowed' : 'text'
+                                }}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="publication_place" className="form-label">
+                                {t('publicationPlace') || 'Publication Place'}
+                                {!isAdminOrOwner && (
+                                    <small style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic', marginLeft: 'var(--spacing-1)' }}>
+                                        ({t('adminOnly') || 'Admin only'})
+                                    </small>
+                                )}
+                            </label>
+                            <input
+                                type="text"
+                                id="publication_place"
+                                name="publication_place"
+                                className="form-input"
+                                maxLength={100}
+                                value={formData.publication_place || ''}
+                                onChange={handleChange}
+                                placeholder={t('enterPublicationPlace') || 'Enter publication place'}
+                                disabled={isSubmitting || !isAdminOrOwner}
+                                style={{
+                                    opacity: !isAdminOrOwner ? 0.6 : 1,
+                                    cursor: !isAdminOrOwner ? 'not-allowed' : 'text'
+                                }}
+                            />
+                        </div>
+
+                        {/* File Upload Sections */}
+                        {[
+                            {
+                                key: 'cover_photo',
+                                label: t('coverPhoto') || 'Cover Photo',
+                                accept: '.png,.jpg,.jpeg',
+                                description: t('coverPhotoDescription') || 'Upload a PNG or JPEG image file',
+                                icon: '🖼️',
+                                color: '#8B5CF6'
+                            },
+                            {
+                                key: 'meta_files',
+                                label: t('metaFiles') || 'Meta Files',
+                                accept: '.docx',
+                                description: t('metaFilesDescription') || 'Upload a DOCX file',
+                                icon: '📋',
+                                color: '#06B6D4'
+                            },
+                            {
+                                key: 'editor_notes',
+                                label: t('editorNotes') || 'Editor Notes',
+                                accept: '.docx',
+                                description: t('editorNotesDescription') || 'Upload a DOCX file',
+                                icon: '📝',
+                                color: '#F59E0B'
+                            },
+                            {
+                                key: 'full_pdf',
+                                label: t('fullPdf') || 'Full PDF',
+                                accept: '.pdf',
+                                description: t('fullPdfDescription') || 'Upload a PDF file',
+                                icon: '📄',
+                                color: '#EF4444'
+                            },
+                            {
+                                key: 'index_section',
+                                label: t('indexSection') || 'Index Section',
+                                accept: '.docx',
+                                description: t('indexSectionDescription') || 'Upload a DOCX file',
+                                icon: '📊',
+                                color: '#10B981'
+                            },
+                            {
+                                key: 'file_path',
+                                label: t('filePath') || 'File Path',
+                                accept: '.docx',
+                                description: t('filePathDescription') || 'Upload a DOCX file',
+                                icon: '📁',
+                                color: '#6366F1'
+                            }
+                        ].map(({ key, label, accept, description, icon, color }) => (
+                            <div className="form-group" key={key}>
+                                <label htmlFor={key} className="form-label">
+                                    {label}
+                                    {!isAdminOrOwner && (
+                                        <small style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic', marginLeft: 'var(--spacing-1)' }}>
+                                            ({t('adminOnly') || 'Admin only'})
+                                        </small>
+                                    )}
+                                </label>
+                                {(formData as any)[key] && (
+                                    <div style={{ 
+                                        marginBottom: 'var(--spacing-2)', 
+                                        padding: 'var(--spacing-2)', 
+                                        background: `${color}15`, 
+                                        borderRadius: '8px',
+                                        border: `1px solid ${color}30`
+                                    }}>
+                                        <a 
+                                            href={`/api${(formData as any)[key]}`} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            style={{
+                                                color: color,
+                                                textDecoration: 'none',
+                                                fontWeight: '500',
+                                                fontSize: '0.9rem',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 'var(--spacing-1)'
+                                            }}
+                                        >
+                                            <span>{icon}</span>
+                                            {t(`current${key.charAt(0).toUpperCase() + key.slice(1).replace('_', '')}`) || `Current ${label}`}
+                                        </a>
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    id={key}
+                                    name={key}
+                                    className="form-input"
+                                    onChange={handleFileChange}
+                                    accept={accept}
+                                    disabled={isSubmitting || !isAdminOrOwner}
+                                    style={{
+                                        padding: '12px 16px',
+                                        border: '2px dashed #E2E8F0',
+                                        borderRadius: '12px',
+                                        background: 'rgba(249, 250, 251, 0.8)',
+                                        cursor: isAdminOrOwner ? 'pointer' : 'not-allowed',
+                                        transition: 'all 0.3s ease',
+                                        opacity: !isAdminOrOwner ? 0.6 : 1
+                                    }}
+                                />
+                                <small style={{ 
+                                    color: 'var(--color-text-tertiary)', 
+                                    fontSize: '0.8rem',
+                                    fontStyle: 'italic',
+                                    marginTop: 'var(--spacing-1)',
+                                    display: 'block'
+                                }}>
+                                    {description}
+                                </small>
+                            </div>
+                        ))}
+                        
+                        <div style={{ 
+                            display: 'flex',
+                            gap: 'var(--spacing-3)',
+                            marginTop: 'var(--spacing-6)'
+                        }}>
+                            <button 
+                                type="button" 
+                                onClick={() => navigate('/')} 
+                                className="btn btn-outline"
+                                disabled={isSubmitting}
+                                style={{
+                                    flex: '1',
+                                    padding: '12px 20px',
+                                    border: '2px solid #E2E8F0',
+                                    borderRadius: '12px',
+                                    background: 'transparent',
+                                    color: 'var(--color-text-secondary)',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease'
+                                }}
+                            >
+                                {t('cancel') || 'Cancel'}
+                            </button>
+                            <button 
+                                type="submit" 
+                                className="register-submit-button"
+                                disabled={isSubmitting || !isAdminOrOwner}
+                                style={{
+                                    flex: '2',
+                                    opacity: !isAdminOrOwner ? 0.6 : 1,
+                                    cursor: !isAdminOrOwner ? 'not-allowed' : 'pointer'
+                                }}
+                            >
+                                {isSubmitting 
+                                    ? (t('saving') || 'Saving...') 
+                                    : (t('saveChanges') || 'Save Changes')}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            )}
-        </div>
+            </div>
+        </>
     );
 };
 

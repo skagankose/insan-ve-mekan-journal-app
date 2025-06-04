@@ -265,14 +265,20 @@ body::before {
   background-color: transparent;
   margin-top: var(--spacing-4);
   margin-bottom: var(--spacing-4);
-  margin-left: 270px; /* Decreased from 300px to match new sidebar width + padding */
-  margin-right: 0; /* Remove right margin to allow scrollbar at edge */
+  margin-left: 200px; /* Reduced from 270px to move content toward left */
+  margin-right: 0px; /* Remove right margin to allow scrollbar at edge */
   height: calc(100vh - 90px - var(--spacing-8) - var(--spacing-4)); /* Adjusted for new navbar height */
   box-shadow: none;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
+}
+
+/* Main Content Area without sidebar */
+.main-content.no-sidebar {
+  margin-left: 0;
+  width: 100%;
 }
 
 /* New Page Structure */
@@ -306,10 +312,6 @@ body::before {
   overflow-y: auto;
   /* margin-bottom: 24px; Removed as Footer is now inside */
   position: relative; /* Needed for z-stacking if we were to use pseudo-elements, good practice */
-
-  /* Fade effect at the top and bottom */
-  mask-image: linear-gradient(to bottom, transparent 0%, black 50px, black calc(100% - 50px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 50px, black calc(100% - 50px), transparent 100%);
 }
 
 /* Card Component */

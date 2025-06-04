@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // Import Link for internal navigation
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa'; // Example social icons
+import { FaTwitter, FaInstagram, FaLinkedin, FaPhone, FaEnvelope } from 'react-icons/fa'; // Add contact icons
 import { useLanguage } from '../contexts/LanguageContext'; // Import useLanguage
 
 const Footer: React.FC = () => {
-  const { t, language } = useLanguage(); // Get t function and current language
+  const { t } = useLanguage(); // Get t function
 
   return (
     <footer className="footer" style={{ 
@@ -26,83 +26,135 @@ const Footer: React.FC = () => {
       }}>
         <div className="footer-main-sections" style={{
           display: 'flex',
-          justifyContent: 'space-around',
+          justifyContent: 'center',
           width: '100%',
-          maxWidth: '1000px',
-          flexWrap: 'wrap',
-          gap: '20px',
+          maxWidth: '800px',
+          flexWrap: 'nowrap',
+          gap: '25px',
           textAlign: 'left',
           paddingBottom: '10px',
-          paddingTop: '10px'
+          paddingTop: '10px',
+          paddingLeft: '100px'
         }}>
-          <div className="footer-section" style={{ flex: '1 1 200px', minWidth: '180px' }}>
+          {/* Left Section - Contact Information */}
+          <div className="footer-section" style={{ flex: '1 1 200px', minWidth: '150px' }}>
             <h5 style={{ 
               color: '#1E293B', 
-              marginBottom: '12px', 
+              marginBottom: '15px', 
               fontSize: '1rem', 
               fontWeight: '600',
-              opacity: 0.9
+              opacity: 0.9,
+              borderBottom: '2px solid rgba(20, 184, 166, 0.3)',
+              paddingBottom: '8px',
+              display: 'inline-block',
+              width: 'auto',
+              marginRight: '20px'
             }}>
-              {language === 'tr' ? 'insan & mekan' : 'human & space'}
+              {t('footer.contact')}
             </h5>
-            <p style={{ 
-              color: '#475569', 
-              fontSize: '0.875rem', 
-              lineHeight: '1.5',
-              opacity: 0.8
-            }}>
-              {t('footer.aboutJournalText')}
-            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FaPhone style={{ color: '#14B8A6', fontSize: '0.875rem' }} />
+                <a href="tel:+902122223344" style={{ 
+                  color: '#475569', 
+                  textDecoration: 'none', 
+                  fontSize: '0.875rem', 
+                  opacity: 0.8,
+                  transition: 'color 0.2s ease'
+                }}>
+                  +90 (212) 222 33 44
+                </a>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FaEnvelope style={{ color: '#14B8A6', fontSize: '0.875rem' }} />
+                <a href="mailto:info@insanmekan.com" style={{ 
+                  color: '#475569', 
+                  textDecoration: 'none', 
+                  fontSize: '0.875rem', 
+                  opacity: 0.8,
+                  transition: 'color 0.2s ease'
+                }}>
+                  info@insanmekan.com
+                </a>
+              </div>
+            </div>
           </div>
 
+          {/* Middle Section - Quick Links */}
           <div className="footer-section" style={{ flex: '1 1 150px', minWidth: '120px' }}>
             <h5 style={{ 
               color: '#1E293B', 
-              marginBottom: '12px', 
+              marginBottom: '15px', 
               fontSize: '1rem', 
               fontWeight: '600',
-              opacity: 0.9
+              opacity: 0.9,
+              borderBottom: '2px solid rgba(20, 184, 166, 0.3)',
+              paddingBottom: '8px',
+              display: 'inline-block',
+              width: 'auto',
+              marginRight: '20px'
             }}>{t('footer.quickLinks')}</h5>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><Link to="/about" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', opacity: 0.8 }}>{t('footer.aboutUs')}</Link></li>
-              <li><Link to="/contact" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', opacity: 0.8 }}>{t('footer.contact')}</Link></li>
-              <li><Link to="/archive" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', opacity: 0.8 }}>{t('footer.archive')}</Link></li>
-              <li><Link to="/submission-guidelines" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', opacity: 0.8 }}>{t('footer.submissionGuidelines')}</Link></li>
+              <li><Link to="/about" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', opacity: 0.8, transition: 'color 0.2s ease' }}>{t('footer.aboutUs')}</Link></li>
+              <li><Link to="/general-info" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', opacity: 0.8, transition: 'color 0.2s ease' }}>{t('footer.generalInformation')}</Link></li>
+              <li><Link to="/archive" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', opacity: 0.8, transition: 'color 0.2s ease' }}>{t('footer.archive')}</Link></li>
             </ul>
           </div>
 
-          <div className="footer-section" style={{ flex: '1 1 150px', minWidth: '120px' }}>
+          {/* Right Section - Social Media */}
+          <div className="footer-section" style={{ flex: '1 1 150px', minWidth: '140px' }}>
             <h5 style={{ 
               color: '#1E293B', 
-              marginBottom: '12px', 
+              marginBottom: '15px', 
               fontSize: '1rem', 
               fontWeight: '600',
-              opacity: 0.9
-            }}>{t('footer.legal')}</h5>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><Link to="/terms-of-service" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', opacity: 0.8 }}>{t('footer.termsOfService')}</Link></li>
-              <li><Link to="/privacy-policy" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', opacity: 0.8 }}>{t('footer.privacyPolicy')}</Link></li>
-              <li><Link to="/copyright" style={{ color: '#475569', textDecoration: 'none', fontSize: '0.875rem', opacity: 0.8 }}>{t('footer.copyrightLink')}</Link></li>
-            </ul>
-          </div>
-
-          <div className="footer-section" style={{ flex: '1 1 150px', minWidth: '180px' }}>
-            <h5 style={{ 
-              color: '#1E293B', 
-              marginBottom: '12px', 
-              fontSize: '1rem', 
-              fontWeight: '600',
-              opacity: 0.9
+              opacity: 0.9,
+              borderBottom: '2px solid rgba(20, 184, 166, 0.3)',
+              paddingBottom: '8px',
+              display: 'inline-block',
+              width: 'auto',
+              marginRight: '20px'
             }}>{t('footer.connectWithUs')}</h5>
             <div className="social-links" style={{ display: 'flex', gap: '15px' }}>
-              <a href="#" target="_blank" rel="noopener noreferrer" style={{ color: '#475569', fontSize: '1.5rem', opacity: 0.8 }} aria-label={t('footer.facebookAria') || 'Facebook'}><FaFacebook /></a>
-              <a href="#" target="_blank" rel="noopener noreferrer" style={{ color: '#475569', fontSize: '1.5rem', opacity: 0.8 }} aria-label={t('footer.twitterAria') || 'Twitter'}><FaTwitter /></a>
-              <a href="#" target="_blank" rel="noopener noreferrer" style={{ color: '#475569', fontSize: '1.5rem', opacity: 0.8 }} aria-label={t('footer.instagramAria') || 'Instagram'}><FaInstagram /></a>
-              <a href="#" target="_blank" rel="noopener noreferrer" style={{ color: '#475569', fontSize: '1.5rem', opacity: 0.8 }} aria-label={t('footer.linkedinAria') || 'LinkedIn'}><FaLinkedin /></a>
+              <a href="#" target="_blank" rel="noopener noreferrer" style={{ color: '#475569', fontSize: '1.5rem', opacity: 0.8, transition: 'color 0.2s ease' }} aria-label={t('footer.twitterAria') || 'Twitter'}><FaTwitter /></a>
+              <a href="#" target="_blank" rel="noopener noreferrer" style={{ color: '#475569', fontSize: '1.5rem', opacity: 0.8, transition: 'color 0.2s ease' }} aria-label={t('footer.instagramAria') || 'Instagram'}><FaInstagram /></a>
+              <a href="#" target="_blank" rel="noopener noreferrer" style={{ color: '#475569', fontSize: '1.5rem', opacity: 0.8, transition: 'color 0.2s ease' }} aria-label={t('footer.linkedinAria') || 'LinkedIn'}><FaLinkedin /></a>
             </div>
           </div>
         </div>
       </div>
+      
+      <style>
+        {`
+          .footer-section a:hover {
+            color: #14B8A6 !important;
+            opacity: 1 !important;
+          }
+          
+          .social-links a:hover {
+            color: #14B8A6 !important;
+            opacity: 1 !important;
+            transform: translateY(-2px);
+          }
+          
+          @media (max-width: 768px) {
+            .footer-main-sections {
+              flex-direction: column !important;
+              text-align: center !important;
+              gap: 25px !important;
+            }
+            
+            .footer-section {
+              min-width: auto !important;
+              flex: none !important;
+            }
+            
+            .social-links {
+              justify-content: center !important;
+            }
+          }
+        `}
+      </style>
     </footer>
   );
 };
