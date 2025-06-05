@@ -1170,7 +1170,7 @@ const JournalDetailsPage: React.FC = () => {
                                                             strokeLinecap="round"
                                                         />
                                                     </svg>
-                                                    <span>{entry.doi ? `DOI: ${entry.doi}` : 'No DOI available'}</span>
+                                                    <span>{entry.doi ? entry.doi : 'No DOI available'}</span>
                                                 </div>
                                             ) : entry.status ? (
                                                 <span style={{
@@ -1219,7 +1219,7 @@ const JournalDetailsPage: React.FC = () => {
                                                             strokeLinecap="round"
                                                         />
                                                     </svg>
-                                                    <span>{entry.doi ? `DOI: ${entry.doi}` : 'No DOI available'}</span>
+                                                    <span>{entry.doi ? entry.doi : 'No DOI available'}</span>
                                                 </div>
                                             )}
                                         </div>

@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'; // Use Link for client-sid
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageToggle from './LanguageToggle';
+import { FaJournalWhills, FaUsers } from 'react-icons/fa';
+import { MdArticle } from 'react-icons/md';
 
 const Navbar: React.FC = () => {
     const { isAuthenticated, user, logout, isLoading } = useAuth(); // Get auth state and functions
@@ -24,10 +26,10 @@ const Navbar: React.FC = () => {
 
     return (
         <nav className="navbar">
-            <div className="navbar-container" style={{ padding: '0 24px' }}>
+            <div className="navbar-container" style={{ padding: '0 10px' }}>
                 <div className="navbar-brand">
                     <Link to="/" className="navbar-logo" style={{
-                        gap: '16px',
+                        gap: '12px',
                         display: 'flex',
                         alignItems: 'center',
                         textDecoration: 'none'
@@ -36,22 +38,54 @@ const Navbar: React.FC = () => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            padding: '0px 0px 0px 10px',
-                            borderRadius: '2px'
+                            padding: '8px',
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                            boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
+                            position: 'relative'
                         }}>
-                            <img src="/logo.png" alt="Journal App Logo" className="navbar-logo-image" 
-                            style={{padding: '0px', margin: '0px 0px 0px -29px', height: '64px', width: 'auto' }} />
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                position: 'relative'
+                            }}>
+                                <MdArticle style={{
+                                    fontSize: '24px',
+                                    color: 'white',
+                                    position: 'relative',
+                                    zIndex: 2
+                                }} />
+                                <FaUsers style={{
+                                    fontSize: '16px',
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-40%, -40%)',
+                                    zIndex: 1
+                                }} />
+                            </div>
                         </div>
-                        <span className="navbar-title-text" style={{
-                            whiteSpace: 'nowrap',
-                            color: '#1E293B',
-                            fontWeight: '500',
-                            fontSize: '1.3rem',
-                            letterSpacing: '-0.02em',
-                            margin: '-23px 0px 0px -190px'
-                        }}>
-                            {language === 'en' ? 'human & space' : 'insan & mekan'}
-                        </span>
+                        <div className="navbar-title-container">
+                            <span className="navbar-title-text" style={{
+                                fontWeight: '700',
+                                fontSize: '1.5rem',
+                                letterSpacing: '-0.02em',
+                                lineHeight: '1.2'
+                            }}>
+                                {language === 'en' ? 'Human & Space' : 'İnsan & Mekan'}
+                            </span>
+                            <span className="navbar-subtitle-text" style={{
+                                fontWeight: '450',
+                                fontSize: '0.850rem',
+                                letterSpacing: '0.025em',
+                                marginTop: '-2px',
+                                display: 'block'
+                            }}>
+                                {language === 'en' ? 'Academy Platform' : 'Akademi Platformu'}
+                            </span>
+                        </div>
                     </Link>
                 </div>
                 
@@ -158,6 +192,51 @@ const Navbar: React.FC = () => {
             </div>
             <style>
                 {`
+                    .navbar-logo-container::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+                        border-radius: 12px;
+                        opacity: 0;
+                        transition: opacity 0.3s ease;
+                    }
+                    
+                    .navbar-logo:hover .navbar-logo-container::before {
+                        opacity: 1;
+                    }
+                    
+                    .navbar-logo:hover .navbar-logo-container {
+                        transform: translateY(0px);
+                        box-shadow: 0 6px 16px rgba(20, 184, 166, 0.4);
+                    }
+                    
+                    .navbar-title-container {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    
+                    .navbar-title-text {
+                        color: #1E293B;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .navbar-subtitle-text {
+                        color: #0D9488;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .navbar-logo:hover .navbar-title-text {
+                        color: #0D9488 !important;
+                    }
+                    
+                    .navbar-logo:hover .navbar-subtitle-text {
+                        color: #1E293B !important;
+                    }
+                    
                     .${primaryButtonClass} {
                         background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
                         color: white;
@@ -250,13 +329,6 @@ const Navbar: React.FC = () => {
                         transform: translateY(-1px);
                         box-shadow: 0 2px 8px rgba(20, 184, 166, 0.2);
                         outline: none;
-                    }
-                    .navbar-title-text {
-                        transition: transform 0.3s ease;
-                        cursor: pointer;
-                    }
-                    .navbar-title-text:hover {
-                        transform: scale(1.05);
                     }
                 `}
             </style>

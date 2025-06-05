@@ -498,8 +498,27 @@ const GeneralInfoPage: React.FC = () => {
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <a 
                 href="/about" 
-                className="btn btn-outline"
-                style={{ textDecoration: 'none' }}
+                style={{ 
+                  textDecoration: 'none',
+                  background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                  color: 'white',
+                  padding: '12px 24px',
+                  borderRadius: '10px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(20, 184, 166, 0.3)',
+                  transition: 'all 0.3s ease',
+                  border: 'none'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(20, 184, 166, 0.3)';
+                }}
               >
                 {language === 'en' ? 'Learn More' : 'Daha Fazla Öğren'}
               </a>

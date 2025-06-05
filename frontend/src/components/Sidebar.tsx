@@ -141,7 +141,7 @@ const Sidebar: React.FC = () => {
                 color: #000000;
                 text-decoration: none;
                 transition: all 0.2s ease;
-                border-radius: 6px;
+                border-radius: 12px;
                 margin: 6px 16px;
                 position: relative;
                 border:1px solid rgba(0, 0, 0, 0.2);

@@ -673,7 +673,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                                             strokeLinecap="round"
                                                                         />
                                                                     </svg>
-                                                                    <span>{entry.doi ? `DOI: ${entry.doi}` : 'No DOI available'}</span>
+                                                                    <span>{entry.doi ? entry.doi : 'No DOI available'}</span>
                                                                 </div>
                                                                 
                                                                 <div style={{
