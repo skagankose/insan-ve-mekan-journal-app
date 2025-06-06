@@ -30,7 +30,7 @@ export const ActiveJournalProvider: React.FC<{ children: ReactNode }> = ({ child
               setActiveJournalState(foundJournal);
               // Update localStorage with the current active journal
               localStorage.setItem('activeJournal', JSON.stringify(foundJournal));
-              console.log('Active journal set from backend settings:', foundJournal.title);
+              // console.log('Active journal set from backend settings:', foundJournal.title);
               return;
             }
           } catch (err) {
@@ -44,7 +44,7 @@ export const ActiveJournalProvider: React.FC<{ children: ReactNode }> = ({ child
         if (storedJournal) {
           try {
             setActiveJournalState(JSON.parse(storedJournal));
-            console.log('Active journal loaded from localStorage');
+            // console.log('Active journal loaded from localStorage');
           } catch (e) {
             console.error('Failed to parse active journal from localStorage', e);
             localStorage.removeItem('activeJournal');

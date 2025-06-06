@@ -563,8 +563,8 @@ const ArchivedJournalsPage: React.FC = () => {
                                                         <div style={{
                                                             background: 'rgba(255, 255, 255, 0.8)',
                                                             backgroundImage: 'url(/pattern_transparent.png)',
-                                                            backgroundSize: '50% 70%',
-                                                            backgroundPosition: '137% -93%',
+                                                            backgroundSize: '190px 190px',
+                                                            backgroundPosition: '131% -100%',
                                                             backgroundRepeat: 'no-repeat',
                                                             backdropFilter: 'blur(10px)',
                                                             borderRadius: '16px',

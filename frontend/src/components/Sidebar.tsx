@@ -144,7 +144,7 @@ const Sidebar: React.FC = () => {
                 border-radius: 12px;
                 margin: 6px 16px;
                 position: relative;
-                border:1px solid rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(20, 184, 166, 0.3);
             }
             .sidebar-link:hover {
                 text-decoration: none;
@@ -181,6 +181,7 @@ const Sidebar: React.FC = () => {
             }
             .sidebar-link:hover .sidebar-link-title {
                 color: #0D9488;
+                font-weight: 700;
             }
             .sidebar-link.active .sidebar-link-title {
                 color: #0D9488;

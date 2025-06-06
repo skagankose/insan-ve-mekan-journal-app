@@ -70,7 +70,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'previousIssues': 'Previous Issues',
     'editorJournals': 'Active Journals',
     'submitPaper': 'Submit Paper',
-    'publishedIssues': 'Published Issues',
+    'publishedIssues': 'Published',
     
     // Page titles
     'createNewEntry': 'Create New Journal Entry',

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'; // Use Link for client-sid
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageToggle from './LanguageToggle';
-import { FaJournalWhills, FaUsers } from 'react-icons/fa';
+import { FaUsers } from 'react-icons/fa';
 import { MdArticle } from 'react-icons/md';
 
 const Navbar: React.FC = () => {
@@ -231,10 +231,11 @@ const Navbar: React.FC = () => {
                     
                     .navbar-logo:hover .navbar-title-text {
                         color: #0D9488 !important;
+                        transform: scale(1.05);
                     }
                     
                     .navbar-logo:hover .navbar-subtitle-text {
-                        color: #1E293B !important;
+                        color: #0D9488 !important;
                     }
                     
                     .${primaryButtonClass} {
