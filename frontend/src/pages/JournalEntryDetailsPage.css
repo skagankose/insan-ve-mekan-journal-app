@@ -1,27 +1,4 @@
-.journal-entry-details-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.page-title {
-  margin: 0;
-  font-size: 2rem;
-  flex-grow: 1;
-  text-align: center;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  max-width: 100%;
-}
+/* Remove old page container styles since we're using global ones */
 
 .back-button {
   font-weight: 500;
@@ -30,6 +7,8 @@
 .action-buttons {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .card {
@@ -321,21 +300,20 @@
 
 /* Responsive styles */
 @media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .page-title {
-    text-align: left;
-    margin: 15px 0;
-  }
-  
   .meta-item {
     flex-basis: 100%;
   }
   
   .author-card, .referee-card {
     min-width: 100%;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .action-buttons button {
+    width: 100%;
   }
 } 

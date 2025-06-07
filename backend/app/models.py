@@ -156,6 +156,7 @@ class UserUpdate(SQLModel):
 
 class JournalBase(SQLModel):
     title: str = Field(index=True)
+    title_en: Optional[str] = Field(default="")
     created_date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
     issue: str
     is_published: bool = Field(default=False)
@@ -186,6 +187,7 @@ class JournalRead(JournalBase):
 
 class JournalCreate(SQLModel):
     title: str
+    title_en: Optional[str] = ""
     issue: str
     is_published: bool = False
     publication_date: Optional[datetime] = None
@@ -200,6 +202,7 @@ class JournalCreate(SQLModel):
 
 class JournalUpdate(SQLModel):
     title: Optional[str] = None
+    title_en: Optional[str] = None
     issue: Optional[str] = None
     created_date: Optional[datetime] = None
     is_published: Optional[bool] = None
@@ -218,6 +221,7 @@ class JournalUpdate(SQLModel):
 # Define a base JournalEntry model
 class JournalEntryBase(SQLModel):
     title: str = Field(index=True)
+    title_en: Optional[str] = Field(default="")
     created_date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
     publication_date: Optional[datetime] = Field(default=None)  # Manually set publication date
     abstract_tr: str
@@ -273,6 +277,7 @@ class JournalEntryCreate(JournalEntryBase):
 # Define a JournalEntry model for updating
 class JournalEntryUpdate(SQLModel):
     title: Optional[str] = None
+    title_en: Optional[str] = None
     created_date: Optional[datetime] = None
     abstract_tr: Optional[str] = None
     abstract_en: Optional[str] = None

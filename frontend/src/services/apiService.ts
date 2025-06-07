@@ -47,6 +47,7 @@ interface UserCreate {
 export interface JournalEntryRead {
     id: number;
     title: string;
+    title_en?: string;
     created_date: string; // ISO format string for datetime
     publication_date?: string; // ISO format string for datetime
     abstract_tr: string;
@@ -69,6 +70,7 @@ export interface JournalEntryRead {
 
 export interface JournalEntryCreate {
     title: string;
+    title_en?: string;
     abstract_tr: string;
     abstract_en?: string;
     keywords?: string;
@@ -81,6 +83,7 @@ export interface JournalEntryCreate {
 
 interface JournalEntryUpdate {
     title?: string;
+    title_en?: string;
     abstract_tr?: string;
     abstract_en?: string;
     keywords?: string;
@@ -95,6 +98,7 @@ interface JournalEntryUpdate {
 interface Journal { // This will serve as JournalRead for admin purposes too
     id: number;
     title: string;
+    title_en?: string;
     created_date: string; // ISO format string for datetime
     issue: string;
     is_published: boolean;
@@ -112,6 +116,7 @@ interface Journal { // This will serve as JournalRead for admin purposes too
 // Add JournalCreate interface
 interface JournalCreate {
     title: string;
+    title_en?: string;
     issue: string;
     is_published: boolean;
     publication_date?: string | null;
@@ -127,6 +132,7 @@ interface JournalCreate {
 
 interface JournalUpdate {
     title?: string;
+    title_en?: string;
     issue?: string;
     created_date?: string; // Changed from date to created_date
     is_published?: boolean;

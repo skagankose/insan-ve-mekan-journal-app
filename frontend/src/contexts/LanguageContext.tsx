@@ -24,10 +24,12 @@ type TranslationKeys =
   | 'abstract' | 'enterAbstract' | 'type' | 'submitted' | 'reviewed' | 'isAccepted'
   | 'name' | 'bio' | 'role' | 'loading' | 'adminDashboard' | 'userManagement' | 'totalUsers'
   | 'writer' | 'editor' | 'arbitrator' | 'admin' | 'owner'
+  | 'roleAuthor' | 'roleAdmin' | 'roleOwner' | 'roleEditor' | 'roleReferee'
+  | 'isAuth' | 'isAuthDescription'
   | 'publicationDate' | 'isPublished' | 'editJournal' | 'updateJournal' | 'accessDeniedAdminOnly'
   | 'theme' | 'lightMode' | 'darkMode' | 'switchToDark' | 'switchToLight'
   | 'previousIssues' | 'publishedJournals' | 'acceptedEntries'
-  | 'createUser' | 'userCreatedSuccessfully' | 'cancel' | 'editUser' | 'userUpdatedSuccessfully'
+  | 'createUser' | 'userCreatedSuccessfully' | 'cancel' | 'editUser' | 'userUpdatedSuccessfully' | 'createJournal'
   | 'directLogin' | 'directLoginDescription' | 'generateLoginLink' | 'copyLink' | 'linkCopied' | 'generating' | 'saveChanges'
   | 'invalidLoginLink' | 'loginFailed' | 'autoLoginFailed' | 'autoLoginProcessing' | 'loginError' | 'goToLogin' | 'loginSuccessful' | 'redirecting'
   | 'loginSuccessButUserInfoFailed'
@@ -50,7 +52,16 @@ type TranslationKeys =
   | 'about' | 'generalInformation'
   | 'footer.contact' | 'footer.quickLinks' | 'footer.aboutUs' | 'footer.generalInformation' | 'footer.archive' | 'footer.connectWithUs'
   | 'footer.facebookAria' | 'footer.twitterAria' | 'footer.instagramAria' | 'footer.linkedinAria' | 'footer.allRightsReserved'
-  | 'validation.required' | 'validation.email' | 'validation.minLength' | 'validation.maxLength' | 'validation.tooShort' | 'validation.tooLong';
+  | 'validation.required' | 'validation.email' | 'validation.minLength' | 'validation.maxLength' | 'validation.tooShort' | 'validation.tooLong'
+  | 'admin.welcomeTitle' | 'admin.welcomeDescription' | 'admin.searchTipsTitle' | 'admin.searchTip1' | 'admin.searchTip2' | 'admin.searchTip3'
+  | 'searchResults' | 'users' | 'journals' | 'entries' | 'globalSearchPlaceholder'
+  | 'setAsActive' | 'mergeAndCreateToc'
+  | 'backToJournals' | 'backToArchive' | 'failedToLoadJournalData' | 'loadingJournalData' | 'journalNotFound'
+  | 'createdDate' | 'publicationStatus' | 'notPublished' | 'publicationPlace' | 'editorInChief' | 'none' | 'editors'
+  | 'change' | 'manage' | 'journalFiles' | 'viewCoverPhoto' | 'viewMetaFiles' | 'viewEditorNotes' | 'viewFullPdf'
+  | 'viewIndexSection' | 'viewMergedFile' | 'downloadJournal' | 'downloadFullPdf' | 'downloadJournalDescription'
+  | 'noEntriesInJournal' | 'failedToMergeFiles' | 'mergingFiles' | 'selectEditorInChief' | 'noAdminUsers'
+  | 'manageEditors' | 'noEditorUsers' | 'save';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -70,7 +81,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'previousIssues': 'Previous Issues',
     'editorJournals': 'Active Journals',
     'submitPaper': 'Submit Paper',
-    'publishedIssues': 'Published',
+    'publishedIssues': 'Archives',
     
     // Page titles
     'createNewEntry': 'Create New Journal Entry',
@@ -163,6 +174,13 @@ const translations: Record<Language, TranslationDictionary> = {
     'arbitrator': 'Arbitrator',
     'admin': 'Admin',
     'owner': 'Owner',
+    'roleAuthor': 'Author',
+    'roleAdmin': 'Admin',
+    'roleOwner': 'Owner',
+    'roleEditor': 'Editor',
+    'roleReferee': 'Referee',
+    'isAuth': 'Authorize',
+    'isAuthDescription': 'When enabled, this user will have authorized access to the system with their assigned role.',
 
     // New translations
     'publicationDate': 'Publication Date',
@@ -184,6 +202,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'editUser': 'Edit User',
     'userUpdatedSuccessfully': 'User updated successfully!',
     'cancel': 'Cancel',
+    'createJournal': 'Create Journal',
 
     // Login link feature
     'directLogin': 'Direct Login Link',
@@ -308,6 +327,59 @@ const translations: Record<Language, TranslationDictionary> = {
     'validation.maxLength': 'Please shorten this text to {max} characters or less.',
     'validation.tooShort': 'Please use at least {min} characters.',
     'validation.tooLong': 'Please use no more than {max} characters.',
+
+    // Admin Dashboard Welcome Text
+    'admin.welcomeTitle': 'Welcome to Admin Dashboard',
+    'admin.welcomeDescription': 'Use the search box above to find users, journals, or journal entries.',
+    'admin.searchTipsTitle': 'Search Tips:',
+    'admin.searchTip1': 'Search by user names, emails, titles, or roles',
+    'admin.searchTip2': 'Find journals by title (Turkish or English) or publication details',
+    'admin.searchTip3': 'Look for journal entries by title, abstracts, keywords, or authors',
+    
+    // Search Results
+    'searchResults': 'Search Results',
+    'users': 'users',
+    'journals': 'journals',
+    'entries': 'entries',
+    'globalSearchPlaceholder': 'Search users, journals, journal entries...',
+    
+    // Journal actions
+    'setAsActive': 'Set as Active',
+    'mergeAndCreateToc': 'Merge Journal Files',
+    
+    // Journal Details Page
+    'backToJournals': 'Back to Journals',
+    'backToArchive': 'Back to Archive',
+    'failedToLoadJournalData': 'Failed to load journal data',
+    'loadingJournalData': 'Loading journal data...',
+    'journalNotFound': 'Journal not found',
+    'createdDate': 'Created Date',
+    'publicationStatus': 'Publication Status',
+    'notPublished': 'Not Published',
+    'publicationPlace': 'Publication Place',
+    'editorInChief': 'Editor-in-Chief',
+    'none': 'None',
+    'editors': 'Editors',
+    'change': 'Change',
+    'manage': 'Manage',
+    'journalFiles': 'Journal Files',
+    'viewCoverPhoto': 'Cover Photo',
+    'viewMetaFiles': 'Meta Files',
+    'viewEditorNotes': 'Editor Notes',
+    'viewFullPdf': 'Full PDF',
+    'viewIndexSection': 'Index Section',
+    'viewMergedFile': 'Merged File',
+    'downloadJournal': 'Download Journal',
+    'downloadFullPdf': 'Download Full PDF',
+    'downloadJournalDescription': 'Download the complete journal in PDF format',
+    'noEntriesInJournal': 'No entries found in this journal',
+    'failedToMergeFiles': 'Failed to merge journal files',
+    'mergingFiles': 'Merging Files...',
+    'selectEditorInChief': 'Select Editor-in-Chief',
+    'noAdminUsers': 'No admin users found',
+    'manageEditors': 'Manage Editors',
+    'noEditorUsers': 'No editor users found',
+    'save': 'Save',
   },
   tr: {
     // Navigation
@@ -416,6 +488,13 @@ const translations: Record<Language, TranslationDictionary> = {
     'arbitrator': 'Hakem',
     'admin': 'Yönetici',
     'owner': 'Sahip',
+    'roleAuthor': 'Yazar',
+    'roleAdmin': 'Site Yöneticisi',
+    'roleOwner': 'Site Sahibi',
+    'roleEditor': 'Editör',
+    'roleReferee': 'Hakem',
+    'isAuth': 'Yetkilendir',
+    'isAuthDescription': 'Etkinleştirildiğinde, bu kullanıcı atanan rolü için sisteme erişime sahip olacaktır.',
 
     // New translations
     'publicationDate': 'Yayın Tarihi',
@@ -437,6 +516,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'editUser': 'Kullanıcıyı Düzenle',
     'userUpdatedSuccessfully': 'Kullanıcı başarıyla güncellendi!',
     'cancel': 'İptal',
+    'createJournal': 'Dergi Oluştur',
 
     // Login link feature
     'directLogin': 'Doğrudan Giriş Bağlantısı',
@@ -561,6 +641,59 @@ const translations: Record<Language, TranslationDictionary> = {
     'validation.maxLength': 'Lütfen bu metni {max} karakter veya daha az olacak şekilde kısaltın.',
     'validation.tooShort': 'Lütfen en az {min} karakter kullanın.',
     'validation.tooLong': 'Lütfen en fazla {max} karakter kullanın.',
+
+    // Admin Dashboard Welcome Text
+    'admin.welcomeTitle': 'Yönetici Paneline Hoş Geldiniz',
+    'admin.welcomeDescription': 'Kullanıcıları, dergileri veya dergi yazılarını bulmak için yukarıdaki arama kutusunu kullanın.',
+    'admin.searchTipsTitle': 'Arama İpuçları:',
+    'admin.searchTip1': 'Kullanıcı isimleri, e-postalar, başlıklar veya rollere göre arama yapın',
+    'admin.searchTip2': 'Dergileri başlığa (Türkçe veya İngilizce) veya yayın detaylarına göre bulun',
+    'admin.searchTip3': 'Dergi yazılarını başlık, özet, anahtar kelimeler veya yazarlara göre arayın',
+    
+    // Search Results
+    'searchResults': 'Arama Sonuçları',
+    'users': 'kullanıcı',
+    'journals': 'dergi',
+    'entries': 'makale',
+    'globalSearchPlaceholder': 'Kullanıcı, dergi, dergi yazısı ara...',
+    
+    // Journal actions
+    'setAsActive': 'Aktif Olarak Ayarla',
+    'mergeAndCreateToc': 'Dergi Dosyalarını Birleştir',
+    
+    // Journal Details Page
+    'backToJournals': 'Dergilere Dön',
+    'backToArchive': 'Arşive Dön',
+    'failedToLoadJournalData': 'Dergi verileri yüklenemedi',
+    'loadingJournalData': 'Dergi verileri yükleniyor...',
+    'journalNotFound': 'Dergi bulunamadı',
+    'createdDate': 'Oluşturulma Tarihi',
+    'publicationStatus': 'Yayın Durumu',
+    'notPublished': 'Yayınlanmadı',
+    'publicationPlace': 'Yayın Yeri',
+    'editorInChief': 'Editör',
+    'none': 'Yok',
+    'editors': 'Editörler',
+    'change': 'Değiştir',
+    'manage': 'Yönet',
+    'journalFiles': 'Dergi Dosyaları',
+    'viewCoverPhoto': 'Kapak Fotoğrafı',
+    'viewMetaFiles': 'Meta Dosyalar',
+    'viewEditorNotes': 'Editör Notları',
+    'viewFullPdf': 'Tam PDF',
+    'viewIndexSection': 'İndeks Bölümü',
+    'viewMergedFile': 'Birleştirilmiş Dosya',
+    'downloadJournal': 'Dergiyi İndir',
+    'downloadFullPdf': 'Tam PDF İndir',
+    'downloadJournalDescription': 'Dergiyi PDF formatında tamamen indirin',
+    'noEntriesInJournal': 'Bu dergide hiç makale bulunamadı',
+    'failedToMergeFiles': 'Dergi dosyaları birleştirilemedi',
+    'mergingFiles': 'Dosyalar Birleştiriliyor...',
+    'selectEditorInChief': 'Editör Seç',
+    'noAdminUsers': 'Yönetici kullanıcı bulunamadı',
+    'manageEditors': 'Editörleri Yönet',
+    'noEditorUsers': 'Editör kullanıcı bulunamadı',
+    'save': 'Kaydet',
   }
 };
 

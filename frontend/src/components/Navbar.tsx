@@ -77,7 +77,7 @@ const Navbar: React.FC = () => {
                                 {language === 'en' ? 'Human & Space' : 'İnsan & Mekan'}
                             </span>
                             <span className="navbar-subtitle-text" style={{
-                                fontWeight: '450',
+                                fontWeight: '600',
                                 fontSize: '0.850rem',
                                 letterSpacing: '0.025em',
                                 marginTop: '-2px',
@@ -113,7 +113,6 @@ const Navbar: React.FC = () => {
                             {t('generalInformation')}
                         </Link>
                         
-                        <LanguageToggle />
                         {isAuthenticated && user ? (
                             <>
                                 <div className="navbar-item navbar-user" style={{
@@ -144,6 +143,7 @@ const Navbar: React.FC = () => {
                                         }}>Owner</span>
                                     )}
                                 </div>
+                                <LanguageToggle />
                                 <Link 
                                     to="/profile" 
                                     className={`navbar-button ${primaryButtonClass} no-text-hover`}
@@ -170,6 +170,7 @@ const Navbar: React.FC = () => {
                             </>
                         ) : (
                             <>
+                                <LanguageToggle />
                                 <Link to="/login" className="navbar-item" style={{
                                     color: '#0D9488',
                                     fontWeight: '600',

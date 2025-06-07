@@ -82,59 +82,117 @@ const RefereeUpdateFormPage: React.FC = () => {
   };
   
   return (
-    <div className="form-container">
-      <h1>{t('addRefereeUpdate') || 'Add Referee Update'}</h1>
-      
-      <form onSubmit={handleSubmit} className="update-form" encType="multipart/form-data">
-        <div className="form-group">
-          <label htmlFor="notes">{t('notes') || 'Notes'}</label>
-          <textarea
-            id="notes"
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            className="form-control"
-            rows={6}
-            maxLength={1000}
-          />
+    <>
+      {/* Title Section */}
+      <div className="page-title-section">
+        <h1 style={{textAlign: 'center'}}>{t('addRefereeUpdate') || 'Add Referee Update'}</h1>
+      </div>
+
+      {/* Content Section */}
+      <div className="page-content-section">
+        <div className="register-form-container">
+          <form onSubmit={handleSubmit} className="register-form" encType="multipart/form-data">
+            <div className="form-group">
+              <label htmlFor="notes" className="form-label">{t('notes') || 'Notes'}</label>
+              <textarea
+                id="notes"
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                className="form-textarea"
+                placeholder={t('enterNotes') || 'Enter your review notes and feedback'}
+                rows={6}
+                maxLength={1000}
+                disabled={isSubmitting}
+              />
+              <small style={{ 
+                display: 'block', 
+                marginTop: '8px', 
+                color: '#64748B', 
+                fontSize: '0.875rem' 
+              }}>
+                {t('reviewNotesDescription') || 'Provide detailed feedback and review comments for the authors'}
+              </small>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="file" className="form-label">{t('fileUpload') || 'Upload File'}</label>
+              <input
+                type="file"
+                id="file"
+                name="file"
+                onChange={handleFileChange}
+                className="form-input"
+                accept=".docx"
+                disabled={isSubmitting}
+                style={{
+                  padding: '12px 16px',
+                  border: '2px dashed #E2E8F0',
+                  borderRadius: '12px',
+                  background: 'rgba(249, 250, 251, 0.8)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+              <small style={{ 
+                display: 'block', 
+                marginTop: '8px', 
+                color: '#64748B', 
+                fontSize: '0.875rem' 
+              }}>
+                {t('uploadFileDescription') || 'Upload a .docx file with detailed review comments (optional)'}
+              </small>
+            </div>
+            
+            <div style={{ 
+              display: 'flex', 
+              gap: '16px', 
+              marginTop: '32px',
+              flexDirection: 'column'
+            }}>
+              <button 
+                type="submit" 
+                className="register-submit-button"
+                disabled={isSubmitting}
+              >
+                {isSubmitting 
+                  ? (t('submitting') || 'Submitting...') 
+                  : (t('submitUpdate') || 'Submit Review')}
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => navigate(`/entries/${entryId}/updates`)} 
+                disabled={isSubmitting}
+                style={{
+                  width: '100%',
+                  padding: '16px 20px',
+                  background: 'transparent',
+                  color: '#64748B',
+                  border: '2px solid #E2E8F0',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  letterSpacing: '0.025em'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#94A3B8';
+                  e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#E2E8F0';
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                {t('cancel') || 'Cancel'}
+              </button>
+            </div>
+          </form>
         </div>
-        
-        <div className="form-group">
-          <label htmlFor="file">{t('fileUpload') || 'Upload File'}</label>
-          <input
-            type="file"
-            id="file"
-            name="file"
-            onChange={handleFileChange}
-            className="form-control"
-            accept=".docx"
-          />
-          <small className="text-muted">
-            {t('uploadFileDescription') || 'Upload a .docx file'}
-          </small>
-        </div>
-        
-        <div className="form-buttons">
-          <button 
-            type="button" 
-            onClick={() => navigate(`/entries/${entryId}/updates`)} 
-            className="cancel-button"
-            disabled={isSubmitting}
-          >
-            {t('cancel') || 'Cancel'}
-          </button>
-          <button 
-            type="submit" 
-            className="submit-button"
-            disabled={isSubmitting}
-          >
-            {isSubmitting 
-              ? (t('submitting') || 'Submitting...') 
-              : (t('submitUpdate') || 'Submit Update')}
-          </button>
-        </div>
-      </form>
-    </div>
+      </div>
+    </>
   );
 };
 

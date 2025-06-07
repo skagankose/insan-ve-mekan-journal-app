@@ -16,7 +16,7 @@ const ArchivedJournalsPage: React.FC = () => {
     const [journalsWithEntries, setJournalsWithEntries] = useState<JournalWithEntries[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
     useEffect(() => {
         const fetchPublishedJournals = async () => {
@@ -342,7 +342,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                     color: journal.isExpanded ? 'white' : '#1E293B',
                                                     letterSpacing: '-0.025em',
                                                     transition: 'color 0.4s ease'
-                                                }}>{journal.title}</h3>
+                                                }}>{language === 'en' && journal.title_en ? journal.title_en : journal.title}</h3>
                                             </div>
                                             
                                             <div style={{
@@ -598,7 +598,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                                 letterSpacing: '-0.025em',
                                                                 position: 'relative',
                                                                 zIndex: 1
-                                                            }}>{entry.title}</h5>
+                                                            }}>{language === 'en' && entry.title_en ? entry.title_en : entry.title}</h5>
                                                             
                                                             {entry.authors && entry.authors.length > 0 && (
                                                                 <p style={{

@@ -146,118 +146,184 @@ const AuthorUpdateFormPage: React.FC = () => {
   };
   
   if (isLoading) {
-    return <div className="loading">{t('loading') || 'Loading...'}</div>;
+    return (
+      <>
+        <div className="page-title-section">
+          <h1 style={{textAlign: 'center'}}>{t('addAuthorUpdate') || 'Add Author Update'}</h1>
+        </div>
+        <div className="page-content-section">
+          <div className="loading">{t('loading') || 'Loading...'}</div>
+        </div>
+      </>
+    );
   }
   
   return (
-    <div className="form-container">
-      <h1>{t('addAuthorUpdate') || 'Add Author Update'}</h1>
-      
-      <form onSubmit={handleSubmit} className="update-form" encType="multipart/form-data">
-        <div className="form-group">
-          <label htmlFor="title">{t('title') || 'Title'} *</label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            className="form-control"
-            required
-            maxLength={300}
-          />
+    <>
+      {/* Title Section */}
+      <div className="page-title-section">
+        <h1 style={{textAlign: 'center'}}>{t('addAuthorUpdate') || 'Add Author Update'}</h1>
+      </div>
+
+      {/* Content Section */}
+      <div className="page-content-section">
+        <div className="register-form-container">
+          <form onSubmit={handleSubmit} className="register-form" encType="multipart/form-data">
+            <div className="form-group">
+              <label htmlFor="title" className="form-label">{t('title') || 'Title'} *</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                className="form-input"
+                placeholder={t('enterTitle') || 'Enter title'}
+                required
+                maxLength={300}
+                disabled={isSubmitting}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="abstract_tr" className="form-label">{t('abstractTr') || 'Abstract (Turkish)'}</label>
+              <textarea
+                id="abstract_tr"
+                name="abstract_tr"
+                value={formData.abstract_tr}
+                onChange={handleChange}
+                className="form-textarea"
+                placeholder={t('enterAbstractTr') || 'Enter abstract in Turkish'}
+                rows={4}
+                maxLength={500}
+                disabled={isSubmitting}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="abstract_en" className="form-label">{t('abstractEn') || 'Abstract (English)'}</label>
+              <textarea
+                id="abstract_en"
+                name="abstract_en"
+                value={formData.abstract_en}
+                onChange={handleChange}
+                className="form-textarea"
+                placeholder={t('enterAbstractEn') || 'Enter abstract in English'}
+                rows={4}
+                maxLength={500}
+                disabled={isSubmitting}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="keywords" className="form-label">{t('keywords') || 'Keywords'}</label>
+              <input
+                type="text"
+                id="keywords"
+                name="keywords"
+                value={formData.keywords}
+                onChange={handleChange}
+                className="form-input"
+                placeholder={t('keywordsSeparatedByCommas') || 'Separate keywords with commas'}
+                maxLength={100}
+                disabled={isSubmitting}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="notes" className="form-label">{t('notes') || 'Notes'}</label>
+              <textarea
+                id="notes"
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                className="form-textarea"
+                placeholder={t('enterNotes') || 'Enter any additional notes'}
+                rows={4}
+                maxLength={1000}
+                disabled={isSubmitting}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="file" className="form-label">{t('fileUpload') || 'Upload File'} *</label>
+              <input
+                type="file"
+                id="file"
+                name="file"
+                onChange={handleFileChange}
+                className="form-input"
+                accept=".docx"
+                required={!formData.title}
+                disabled={isSubmitting}
+                style={{
+                  padding: '12px 16px',
+                  border: '2px dashed #E2E8F0',
+                  borderRadius: '12px',
+                  background: 'rgba(249, 250, 251, 0.8)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+              <small style={{ 
+                display: 'block', 
+                marginTop: '8px', 
+                color: '#64748B', 
+                fontSize: '0.875rem' 
+              }}>
+                {t('uploadFileDescription') || 'Upload a .docx file'}
+              </small>
+            </div>
+            
+            <div style={{ 
+              display: 'flex', 
+              gap: '16px', 
+              marginTop: '32px',
+              flexDirection: 'column'
+            }}>
+              <button 
+                type="submit" 
+                className="register-submit-button"
+                disabled={isSubmitting}
+              >
+                {isSubmitting 
+                  ? (t('submitting') || 'Submitting...') 
+                  : (t('submitUpdate') || 'Submit Update')}
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => navigate(`/entries/${entryId}/updates`)} 
+                disabled={isSubmitting}
+                style={{
+                  width: '100%',
+                  padding: '16px 20px',
+                  background: 'transparent',
+                  color: '#64748B',
+                  border: '2px solid #E2E8F0',
+                  borderRadius: '12px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  letterSpacing: '0.025em'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#94A3B8';
+                  e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#E2E8F0';
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                {t('cancel') || 'Cancel'}
+              </button>
+            </div>
+          </form>
         </div>
-        
-        <div className="form-group">
-          <label htmlFor="abstract_tr">{t('abstractTr') || 'Abstract (Turkish)'}</label>
-          <textarea
-            id="abstract_tr"
-            name="abstract_tr"
-            value={formData.abstract_tr}
-            onChange={handleChange}
-            className="form-control"
-            rows={4}
-            maxLength={500}
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="abstract_en">{t('abstractEn') || 'Abstract (English)'}</label>
-          <textarea
-            id="abstract_en"
-            name="abstract_en"
-            value={formData.abstract_en}
-            onChange={handleChange}
-            className="form-control"
-            rows={4}
-            maxLength={500}
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="keywords">{t('keywords') || 'Keywords'}</label>
-          <input
-            type="text"
-            id="keywords"
-            name="keywords"
-            value={formData.keywords}
-            onChange={handleChange}
-            className="form-control"
-            placeholder={t('keywordsSeparatedByCommas') || 'Separate keywords with commas'}
-            maxLength={100}
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="notes">{t('notes') || 'Notes'}</label>
-          <textarea
-            id="notes"
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            className="form-control"
-            rows={4}
-            maxLength={1000}
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="file">{t('fileUpload') || 'Upload File'} *</label>
-          <input
-            type="file"
-            id="file"
-            name="file"
-            onChange={handleFileChange}
-            className="form-control"
-            accept=".docx"
-            required={!formData.title}
-          />
-          <small className="text-muted">
-            {t('uploadFileDescription') || 'Upload a .docx file'}
-          </small>
-        </div>
-        
-        <div className="form-buttons">
-          <button 
-            type="button" 
-            onClick={() => navigate(`/entries/${entryId}/updates`)} 
-            className="cancel-button"
-            disabled={isSubmitting}
-          >
-            {t('cancel') || 'Cancel'}
-          </button>
-          <button 
-            type="submit" 
-            className="submit-button"
-            disabled={isSubmitting}
-          >
-            {isSubmitting 
-              ? (t('submitting') || 'Submitting...') 
-              : (t('submitUpdate') || 'Submit Update')}
-          </button>
-        </div>
-      </form>
-    </div>
+      </div>
+    </>
   );
 };
 

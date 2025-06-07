@@ -8,7 +8,7 @@ import './JournalEntryDetailsPage.css';
 const JournalEntryDetailsPage: React.FC = () => {
   const { entryId } = useParams<{ entryId: string }>();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user, isAuthenticated } = useAuth();
   
   const [entry, setEntry] = useState<apiService.JournalEntryRead | null>(null);
@@ -276,281 +276,290 @@ const JournalEntryDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="journal-entry-details-page">
-      <div className="page-header">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="btn btn-outline back-button"
-        >
-          ← {t('back') || 'Back'}
-        </button>
-        <h1 className="page-title">{entry.title}</h1>
-        
-        {/* Show action buttons only for authenticated users with appropriate roles */}
-        {user && (
-          // Show action-buttons div if user is author, editor, admin, OR referee for this entry
-          (entry.authors?.some(author => author.id === user.id) || 
-           user.role === 'editor' || 
-           user.role === 'admin' ||
-           user.role === 'owner' ||
-           entry.referees?.some(referee => referee.id === user.id)
-          ) && (
-            <div className="action-buttons">
-                {entry.random_token && (
-                <div className="reference-token" style={{ fontFamily: 'monospace', fontSize: '0.9em', backgroundColor: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}>
-                    {t('referenceToken') || 'Reference Token'}: <strong>{entry.random_token}</strong>
-                </div>
+    <>
+      {/* Title Section */}
+      <div className="page-title-section" style={{ marginLeft: '60px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <button 
+            onClick={() => navigate(-1)} 
+            className="btn btn-outline back-button"
+          >
+            ← {t('back') || 'Back'}
+          </button>
+          <h1 style={{ margin: 0 }}>{language === 'en' && entry.title_en ? entry.title_en : entry.title}</h1>
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div className="page-content-section" style={{ paddingBottom: '0px' }}>
+        <div style={{ margin: '0 auto', marginLeft: '60px' }}>
+          
+          {/* Show action buttons only for authenticated users with appropriate roles */}
+          {user && (
+            // Show action-buttons div if user is author, editor, admin, OR referee for this entry
+            (entry.authors?.some(author => author.id === user.id) || 
+             user.role === 'editor' || 
+             user.role === 'admin' ||
+             user.role === 'owner' ||
+             entry.referees?.some(referee => referee.id === user.id)
+            ) && (
+              <div className="action-buttons" style={{ marginBottom: '30px' }}>
+                  {entry.random_token && (
+                  <div className="reference-token" style={{ fontFamily: 'monospace', fontSize: '0.9em', backgroundColor: '#f5f5f5', padding: '4px 8px', borderRadius: '4px' }}>
+                      {t('referenceToken') || 'Reference Token'}: <strong>{entry.random_token}</strong>
+                  </div>
+                  )}
+                {/* Edit Entry Button: Show if user is author, editor, or admin */}
+                {(entry.authors?.some(author => author.id === user.id) ||
+                  user.role === 'editor' ||
+                  user.role === 'admin' ||
+                  user.role === 'owner') && (
+                  <button
+                    onClick={() => navigate(`/entries/edit/${entry.id}`)}
+                    className="btn btn-primary"
+                  >
+                    {t('editEntry') || 'Edit Entry'}
+                  </button>
                 )}
-              {/* Edit Entry Button: Show if user is author, editor, or admin */}
-              {(entry.authors?.some(author => author.id === user.id) ||
-                user.role === 'editor' ||
-                user.role === 'admin' ||
-                user.role === 'owner') && (
+                
+                {/* View Updates Button: Show if user is editor, admin, author, or referee for this entry */}
+                {(user.role === 'editor' || 
+                  user.role === 'admin' ||
+                  user.role === 'owner' ||
+                  entry.authors?.some(author => author.id === user?.id) ||
+                  entry.referees?.some(referee => referee.id === user?.id)) && (
+                  <div className="updates-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <button
+                      onClick={() => navigate(`/entries/${entry.id}/updates`)}
+                      className="btn btn-secondary"
+                    >
+                      {t('viewUpdates') || 'View Updates'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )
+          )}
+
+          {/* Journal Information */}
+          <div className="journal-info card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3>{t('publishedIn') || 'Published In'}</h3>
+              {isEditorOrAdmin && (
                 <button
-                  onClick={() => navigate(`/entries/edit/${entry.id}`)}
-                  className="btn btn-primary"
+                  onClick={() => setShowJournalModal(true)}
+                  className="btn btn-sm btn-outline"
                 >
-                  {t('editEntry') || 'Edit Entry'}
+                  {t('changeJournal') || 'Change Journal'}
                 </button>
               )}
+            </div>
+            {journal ? (
+              <div 
+                onClick={() => navigate(`/journals/${journal.id}`)}
+                onMouseEnter={() => setIsJournalHovered(true)}
+                onMouseLeave={() => setIsJournalHovered(false)}
+                style={{ 
+                  cursor: 'pointer',
+                  padding: '10px',
+                  margin: '-10px',
+                  borderRadius: '4px',
+                  transition: 'background-color 0.2s ease',
+                  backgroundColor: isJournalHovered ? 'rgba(13, 110, 253, 0.05)' : 'transparent'
+                }}
+                role="link"
+                aria-label={`View details for journal: ${journal.title}`}
+              >
+                <p>
+                  <strong>{journal.title}</strong> - {t('issue')}: {journal.issue} 
+                  {journal.publication_date ? ` ${t('published')}: ${formatDate(journal.publication_date)}` : ''}
+                </p>
+              </div>
+            ) : (
+              <div className="empty-state">
+                <p>{t('notAssignedToJournal') || 'This entry is not yet assigned to a journal'}</p>
+              </div>
+            )}
+          </div>
+
+          {/* File view section */}
+          <div className="entry-file card">
+            <h3>{t('files') || 'Files'}</h3>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              {entry.file_path && (
+                <a href={`/api${entry.file_path}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+                  {t('viewFile') || 'View File'}
+                </a>
+              )}
+              {entry.full_pdf && (
+                <a href={`/api${entry.full_pdf}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+                  {t('viewFullPdf') || 'View Full PDF'}
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Entry Details */}
+          <div className="entry-details card">
+            <div className="entry-meta">
+              <div className="meta-item">
+                <strong>{t('date') || 'Date'}:</strong> {formatDate(entry.publication_date)}
+              </div>
+              {entry.page_number && (
+                <div className="meta-item">
+                  <strong>{t('pageNumber') || 'Page Number'}:</strong> {entry.page_number}
+                </div>
+              )}
+              {entry.doi && (
+                <div className="meta-item">
+                  <strong>DOI:</strong> {entry.doi}
+                </div>
+              )}
+              {entry.article_type && (
+                <div className="meta-item">
+                  <strong>{t('articleType') || 'Article Type'}:</strong> {entry.article_type}
+                </div>
+              )}
+              {entry.language && (
+                <div className="meta-item">
+                  <strong>{t('language') || 'Language'}:</strong> {entry.language}
+                </div>
+              )}
+              {entry.status && (
+                <div className="meta-item">
+                  <strong>{t('status') || 'Status'}:</strong> 
+                  <span className={`badge badge-${entry.status.toLowerCase()}`}>
+                    {t(entry.status) || entry.status}
+                  </span>
+                </div>
+              )}
+              {entry.status === 'waiting_for_payment' && (
+                <div className="payment-info-block" style={{
+                  backgroundColor: '#f8f9fa',
+                  border: '1px solid #dee2e6',
+                  borderRadius: '4px',
+                  padding: '15px',
+                  margin: '15px 0',
+                  color: '#495057'
+                }}>
+                  <h4 style={{ color: '#0d6efd', marginBottom: '10px' }}>
+                    {t('paymentRequired') || 'Payment Required'}
+                  </h4>
+                  <p>
+                    {t('paymentInfoMessage') || 
+                      'To proceed with the publication process, please complete the payment using the following bank information:'}
+                  </p>
+                  <div style={{ 
+                    backgroundColor: '#ffffff', 
+                    padding: '10px', 
+                    borderRadius: '4px',
+                    marginTop: '10px',
+                    fontFamily: 'monospace'
+                  }}>
+                    <p><strong>{t('bankName') || 'Bank Name'}:</strong> Example Bank</p>
+                    <p><strong>IBAN:</strong> TR00 0000 0000 0000 0000 0000 00</p>
+                    <p><strong>{t('accountHolder') || 'Account Holder'}:</strong> Journal Name</p>
+                  </div>
+                  <p style={{ marginTop: '10px', fontSize: '0.9em', color: '#6c757d' }}>
+                    {t('paymentReference') || 
+                      'Please include your Reference Token as payment reference for proper tracking:'} <strong>{entry.random_token}</strong>
+                  </p>
+                </div>
+              )}
+              <div className="meta-item">
+                <strong>{t('downloads') || 'Downloads'}:</strong> {entry.download_count}
+              </div>
+              <div className="meta-item">
+                <strong>{t('reads') || 'Reads'}:</strong> {entry.read_count}
+              </div>
+            </div>
+
+            {/* Abstract sections */}
+            <div className="abstract-section">
+              {entry.abstract_tr && (
+                <div className="abstract">
+                  <h3>{t('abstractTurkish') || 'Abstract (Turkish)'}</h3>
+                  <p>{entry.abstract_tr}</p>
+                </div>
+              )}
               
-              {/* View Updates Button: Show if user is editor, admin, author, or referee for this entry */}
-              {(user.role === 'editor' || 
-                user.role === 'admin' ||
-                user.role === 'owner' ||
-                entry.authors?.some(author => author.id === user?.id) ||
-                entry.referees?.some(referee => referee.id === user?.id)) && (
-                <div className="updates-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <button
-                    onClick={() => navigate(`/entries/${entry.id}/updates`)}
-                    className="btn btn-secondary"
-                  >
-                    {t('viewUpdates') || 'View Updates'}
-                  </button>
+              {entry.abstract_en && (
+                <div className="abstract">
+                  <h3>{t('abstractEnglish') || 'Abstract (English)'}</h3>
+                  <p>{entry.abstract_en}</p>
                 </div>
               )}
             </div>
-          )
-        )}
-      </div>
 
-      {/* Journal Information */}
-      <div className="journal-info card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3>{t('publishedIn') || 'Published In'}</h3>
-          {isEditorOrAdmin && (
-            <button
-              onClick={() => setShowJournalModal(true)}
-              className="btn btn-sm btn-outline"
-            >
-              {t('changeJournal') || 'Change Journal'}
-            </button>
-          )}
-        </div>
-        {journal ? (
-          <div 
-            onClick={() => navigate(`/journals/${journal.id}`)}
-            onMouseEnter={() => setIsJournalHovered(true)}
-            onMouseLeave={() => setIsJournalHovered(false)}
-            style={{ 
-              cursor: 'pointer',
-              padding: '10px',
-              margin: '-10px',
-              borderRadius: '4px',
-              transition: 'background-color 0.2s ease',
-              backgroundColor: isJournalHovered ? 'rgba(13, 110, 253, 0.05)' : 'transparent'
-            }}
-            role="link"
-            aria-label={`View details for journal: ${journal.title}`}
-          >
-            <p>
-              <strong>{journal.title}</strong> - {t('issue')}: {journal.issue} 
-              {journal.publication_date ? ` ${t('published')}: ${formatDate(journal.publication_date)}` : ''}
-            </p>
-          </div>
-        ) : (
-          <div className="empty-state">
-            <p>{t('notAssignedToJournal') || 'This entry is not yet assigned to a journal'}</p>
-          </div>
-        )}
-      </div>
-
-      {/* File view section */}
-      <div className="entry-file card">
-        <h3>{t('files') || 'Files'}</h3>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          {entry.file_path && (
-            <a href={`/api${entry.file_path}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-              {t('viewFile') || 'View File'}
-            </a>
-          )}
-          {entry.full_pdf && (
-            <a href={`/api${entry.full_pdf}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-              {t('viewFullPdf') || 'View Full PDF'}
-            </a>
-          )}
-        </div>
-      </div>
-
-      {/* Entry Details */}
-      <div className="entry-details card">
-        <div className="entry-meta">
-          <div className="meta-item">
-            <strong>{t('date') || 'Date'}:</strong> {formatDate(entry.publication_date)}
-          </div>
-          {entry.page_number && (
-            <div className="meta-item">
-              <strong>{t('pageNumber') || 'Page Number'}:</strong> {entry.page_number}
-            </div>
-          )}
-          {entry.doi && (
-            <div className="meta-item">
-              <strong>DOI:</strong> {entry.doi}
-            </div>
-          )}
-          {entry.article_type && (
-            <div className="meta-item">
-              <strong>{t('articleType') || 'Article Type'}:</strong> {entry.article_type}
-            </div>
-          )}
-          {entry.language && (
-            <div className="meta-item">
-              <strong>{t('language') || 'Language'}:</strong> {entry.language}
-            </div>
-          )}
-          {entry.status && (
-            <div className="meta-item">
-              <strong>{t('status') || 'Status'}:</strong> 
-              <span className={`badge badge-${entry.status.toLowerCase()}`}>
-                {t(entry.status) || entry.status}
-              </span>
-            </div>
-          )}
-          {entry.status === 'waiting_for_payment' && (
-            <div className="payment-info-block" style={{
-              backgroundColor: '#f8f9fa',
-              border: '1px solid #dee2e6',
-              borderRadius: '4px',
-              padding: '15px',
-              margin: '15px 0',
-              color: '#495057'
-            }}>
-              <h4 style={{ color: '#0d6efd', marginBottom: '10px' }}>
-                {t('paymentRequired') || 'Payment Required'}
-              </h4>
-              <p>
-                {t('paymentInfoMessage') || 
-                  'To proceed with the publication process, please complete the payment using the following bank information:'}
-              </p>
-              <div style={{ 
-                backgroundColor: '#ffffff', 
-                padding: '10px', 
-                borderRadius: '4px',
-                marginTop: '10px',
-                fontFamily: 'monospace'
-              }}>
-                <p><strong>{t('bankName') || 'Bank Name'}:</strong> Example Bank</p>
-                <p><strong>IBAN:</strong> TR00 0000 0000 0000 0000 0000 00</p>
-                <p><strong>{t('accountHolder') || 'Account Holder'}:</strong> Journal Name</p>
+            {/* Keywords */}
+            {entry.keywords && (
+              <div className="keywords-section">
+                <h3>{t('keywords') || 'Keywords'}</h3>
+                <p>{entry.keywords}</p>
               </div>
-              <p style={{ marginTop: '10px', fontSize: '0.9em', color: '#6c757d' }}>
-                {t('paymentReference') || 
-                  'Please include your Reference Token as payment reference for proper tracking:'} <strong>{entry.random_token}</strong>
-              </p>
-            </div>
-          )}
-          <div className="meta-item">
-            <strong>{t('downloads') || 'Downloads'}:</strong> {entry.download_count}
-          </div>
-          <div className="meta-item">
-            <strong>{t('reads') || 'Reads'}:</strong> {entry.read_count}
-          </div>
-        </div>
-
-        {/* Abstract sections */}
-        <div className="abstract-section">
-          {entry.abstract_tr && (
-            <div className="abstract">
-              <h3>{t('abstractTurkish') || 'Abstract (Turkish)'}</h3>
-              <p>{entry.abstract_tr}</p>
-            </div>
-          )}
-          
-          {entry.abstract_en && (
-            <div className="abstract">
-              <h3>{t('abstractEnglish') || 'Abstract (English)'}</h3>
-              <p>{entry.abstract_en}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Keywords */}
-        {entry.keywords && (
-          <div className="keywords-section">
-            <h3>{t('keywords') || 'Keywords'}</h3>
-            <p>{entry.keywords}</p>
-          </div>
-        )}
-
-        {/* Authors list */}
-        <div className="authors-section">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3>{t('authors') || 'Authors'}</h3>
-            {isEditorOrAdmin && (
-              <button
-                onClick={() => setShowAuthorsModal(true)}
-                className="btn btn-sm btn-outline"
-              >
-                {t('manageAuthors') || 'Manage Authors'}
-              </button>
             )}
+
+            {/* Authors list */}
+            <div className="authors-section">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3>{t('authors') || 'Authors'}</h3>
+                {isEditorOrAdmin && (
+                  <button
+                    onClick={() => setShowAuthorsModal(true)}
+                    className="btn btn-sm btn-outline"
+                  >
+                    {t('manageAuthors') || 'Manage Authors'}
+                  </button>
+                )}
+              </div>
+              <div className="authors-list">
+                {entry.authors && entry.authors.length > 0 ? (
+                  entry.authors.map(author => (
+                    <div key={author.id} className="author-card">
+                      <h4>{author.name}</h4>
+                      {author.title && <p>{author.title}</p>}
+                      {author.location && <p>{author.location}</p>}
+                      {author.email && <p>{author.email}</p>}
+                    </div>
+                  ))
+                ) : (
+                  <div className="empty-state">
+                    <p>{t('noAuthors') || 'No authors assigned'}</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="authors-list">
-            {entry.authors && entry.authors.length > 0 ? (
-              entry.authors.map(author => (
-                <div key={author.id} className="author-card">
-                  <h4>{author.name}</h4>
-                  {author.title && <p>{author.title}</p>}
-                  {author.location && <p>{author.location}</p>}
-                  {author.email && <p>{author.email}</p>}
+
+          {/* Referees section - visible to editors/admins */}
+          <div className="referees-section card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3>{t('referees') || 'Referees'}</h3>
+              {isEditorOrAdmin && (
+                <button
+                  onClick={() => setShowRefereesModal(true)}
+                  className="btn btn-sm btn-outline"
+                >
+                  {t('manageReferees') || 'Manage Referees'}
+                </button>
+              )}
+            </div>
+            <div className="referees-list">
+              {entry.referees && entry.referees.length > 0 ? (
+                entry.referees.map(referee => (
+                  <div key={referee.id} className="referee-card">
+                    <h4>{referee.name}</h4>
+                    {referee.title && <p>{referee.title}</p>}
+                    {referee.email && <p>{referee.email}</p>}
+                  </div>
+                ))
+              ) : (
+                <div className="empty-state">
+                  <p>{t('noReferees') || 'No referees assigned'}</p>
                 </div>
-              ))
-            ) : (
-              <div className="empty-state">
-                <p>{t('noAuthors') || 'No authors assigned'}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Referees section - visible to editors/admins */}
-      <div className="referees-section card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3>{t('referees') || 'Referees'}</h3>
-          {isEditorOrAdmin && (
-            <button
-              onClick={() => setShowRefereesModal(true)}
-              className="btn btn-sm btn-outline"
-            >
-              {t('manageReferees') || 'Manage Referees'}
-            </button>
-          )}
-        </div>
-        <div className="referees-list">
-          {entry.referees && entry.referees.length > 0 ? (
-            entry.referees.map(referee => (
-              <div key={referee.id} className="referee-card">
-                <h4>{referee.name}</h4>
-                {referee.title && <p>{referee.title}</p>}
-                {referee.email && <p>{referee.email}</p>}
-              </div>
-            ))
-          ) : (
-            <div className="empty-state">
-              <p>{t('noReferees') || 'No referees assigned'}</p>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -751,7 +760,7 @@ const JournalEntryDetailsPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

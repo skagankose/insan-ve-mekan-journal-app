@@ -378,7 +378,8 @@ def seed_database():
         journals = [
             Journal(
                 id=100,
-                title="Journal of Human and Space",
+                title="İnsan ve Mekan Dergisi",
+                title_en="Journal of Human and Space",
                 created_date=datetime(2023, 5, 1),
                 issue="Issue 1",
                 is_published=True,
@@ -392,7 +393,8 @@ def seed_database():
             ),
             Journal(
                 id=101,
-                title="Architecture Today",
+                title="Günümüz Mimarisi",
+                title_en="Architecture Today",
                 created_date=datetime(2023, 6, 15),
                 issue="Volume 5, Issue 2",
                 is_published=True,
@@ -406,7 +408,8 @@ def seed_database():
             ),
             Journal(
                 id=102,
-                title="Urban Design Quarterly",
+                title="Kentsel Tasarım Üç Aylık",
+                title_en="Urban Design Quarterly",
                 created_date=datetime(2023, 7, 10),
                 issue="Summer Issue",
                 is_published=True,
@@ -420,7 +423,8 @@ def seed_database():
             ),
             Journal(
                 id=103,
-                title="Contemporary Spaces",
+                title="Çağdaş Mekanlar",
+                title_en="Contemporary Spaces",
                 created_date=datetime(2023, 8, 5),
                 issue="Fall Collection",
                 is_published=False,
@@ -434,7 +438,8 @@ def seed_database():
             ),
             Journal(
                 id=104,
-                title="Heritage & Culture",
+                title="Miras ve Kültür",
+                title_en="Heritage & Culture",
                 created_date=datetime(2023, 9, 1),
                 issue="Annual Edition",
                 is_published=False,
@@ -449,7 +454,8 @@ def seed_database():
             # New journals
             Journal(
                 id=105,
-                title="Sustainable Architecture Review",
+                title="Sürdürülebilir Mimarlık İncelemesi",
+                title_en="Sustainable Architecture Review",
                 created_date=datetime(2023, 10, 5),
                 issue="Volume 3, Issue 4",
                 is_published=True,
@@ -463,7 +469,8 @@ def seed_database():
             ),
             Journal(
                 id=106,
-                title="Public Space Quarterly",
+                title="Kamusal Mekan Üç Aylık",
+                title_en="Public Space Quarterly",
                 created_date=datetime(2023, 11, 15),
                 issue="Winter Issue",
                 is_published=True,
@@ -477,7 +484,8 @@ def seed_database():
             ),
             Journal(
                 id=107,
-                title="Digital Design Journal",
+                title="Dijital Tasarım Dergisi",
+                title_en="Digital Design Journal",
                 created_date=datetime(2023, 12, 10),
                 issue="Special Edition",
                 is_published=True,
@@ -491,7 +499,8 @@ def seed_database():
             ),
             Journal(
                 id=108,
-                title="Urban Interventions",
+                title="Kentsel Müdahaleler",
+                title_en="Urban Interventions",
                 created_date=datetime(2024, 1, 5),
                 issue="Volume 1, Issue 1",
                 is_published=False,
@@ -505,7 +514,8 @@ def seed_database():
             ),
             Journal(
                 id=109,
-                title="Historical Preservation Studies",
+                title="Tarihi Koruma Çalışmaları",
+                title_en="Historical Preservation Studies",
                 created_date=datetime(2024, 2, 10),
                 issue="Anniversary Issue",
                 is_published=False,
@@ -519,7 +529,8 @@ def seed_database():
             ),
             Journal(
                 id=110,
-                title="Critical Architecture Review",
+                title="Eleştirel Mimarlık İncelemesi",
+                title_en="Critical Architecture Review",
                 created_date=datetime(2024, 3, 15),
                 issue="Spring Edition",
                 is_published=False,
@@ -533,7 +544,8 @@ def seed_database():
             ),
             Journal(
                 id=111,
-                title="Spatial Analytics Journal",
+                title="Mekansal Analitik Dergisi",
+                title_en="Spatial Analytics Journal",
                 created_date=datetime(2024, 4, 20),
                 issue="Data Edition",
                 is_published=False,
@@ -587,11 +599,26 @@ def seed_database():
             'Landscape Design', 'Cultural Spaces', 'Urban Mobility'
         ]
         
+        article_themes_tr = [
+            'Kentsel Mekanlar', 'Mimarlık', 'Tasarım Teorisi', 'Kültürel Miras', 'Sosyal Ortamlar',
+            'Sürdürülebilir Tasarım', 'Kamusal Mekanlar', 'Dijital Mimarlık', 'Tarihi Koruma',
+            'Kentsel Altyapı', 'Sosyal Konut', 'Mimarlık Eğitimi', 'Mekansal Bilişim',
+            'Yapı Malzemeleri', 'Kentsel Ekoloji', 'Akıllı Şehirler', 'Mimarlık Psikolojisi',
+            'Peyzaj Tasarımı', 'Kültürel Mekanlar', 'Kentsel Mobilite'
+        ]
+        
         article_approaches = [
             'Analysis of', 'Study on', 'Review of', 'Perspective on', 'Evaluation of', 
             'Critical View of', 'Case Study on', 'Comparison of', 'Development in', 
             'Survey of', 'Historical Analysis of', 'Methodology for', 'New Approaches to',
             'Theoretical Framework for', 'Implementation of', 'Design Principles for'
+        ]
+        
+        article_approaches_tr = [
+            'Analizi', 'Çalışması', 'İncelemesi', 'Bakış Açısı', 'Değerlendirmesi', 
+            'Eleştirel Görüşü', 'Vaka Çalışması', 'Karşılaştırması', 'Gelişimi', 
+            'Araştırması', 'Tarihsel Analizi', 'Metodolojisi', 'Yeni Yaklaşımlar',
+            'Teorik Çerçeve', 'Uygulaması', 'Tasarım İlkeleri'
         ]
         
         for j_id in range(100, 112):  # For each journal (now with IDs 100-111)
@@ -636,10 +663,18 @@ def seed_database():
                 # publication_date will be after created_date
                 publication_date = created_date + timedelta(days=random.randint(30, 180))
                 
+                # Generate paired titles in Turkish and English
+                selected_theme_index = random.randint(0, len(article_themes) - 1)
+                selected_approach_index = random.randint(0, len(article_approaches) - 1)
+                
+                tr_title = f"Makale {entry_id}: {article_themes_tr[selected_theme_index]} {article_approaches_tr[selected_approach_index]}"
+                en_title = f"Article {entry_id}: {article_approaches[selected_approach_index]} {article_themes[selected_theme_index]}"
+                
                 journal_entries.append(
                     JournalEntry(
                         id=entry_id,
-                        title=f"Article {entry_id}: {random.choice(article_approaches)} {random.choice(article_themes)}",
+                        title=tr_title,
+                        title_en=en_title,
                         created_date=created_date,
                         publication_date=publication_date,
                         abstract_tr=f"TR Abstract for article {entry_id} exploring important aspects of the subject matter with detailed methodology and findings.",
@@ -719,7 +754,7 @@ def seed_database():
                     author_updates.append(
                         AuthorUpdate(
                             id=author_update_id,
-                            title=f"Updated: {je.title}",
+                            title=f"Güncellendi: {je.title}",
                             abstract_en=f"Updated EN abstract version {update_version} with improved clarity and detail.",
                             abstract_tr=f"TR özeti versiyon {update_version} - güncellenmiş ve genişletilmiştir.",
                             keywords=je.keywords + f", updated-v{update_version}",

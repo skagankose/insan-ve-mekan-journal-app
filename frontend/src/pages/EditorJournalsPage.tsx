@@ -26,7 +26,7 @@ const EditorJournalsPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const { isAuthenticated, isLoading: authLoading, user } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { activeJournal } = useActiveJournal();
 
     useEffect(() => {
@@ -342,7 +342,7 @@ const EditorJournalsPage: React.FC = () => {
                                                     )}
                                                 </div>
                                                 <h3 style={{ margin: 0, fontSize: '28px', fontWeight: '700', color: journal.isExpanded ? 'white' : '#1E293B', letterSpacing: '-0.025em', transition: 'color 0.4s ease' }}>
-                                                    {journal.title}
+                                                    {language === 'en' && journal.title_en ? journal.title_en : journal.title}
                                                     {activeJournal?.id === journal.id && (
                                                         <span style={{
                                                             marginLeft: '12px',
@@ -473,7 +473,7 @@ const EditorJournalsPage: React.FC = () => {
                                                             letterSpacing: '-0.025em',
                                                             position: 'relative',
                                                             zIndex: 1
-                                                        }}>{entry.title}</h4>
+                                                        }}>{language === 'en' && entry.title_en ? entry.title_en : entry.title}</h4>
                                                         
                                                         {entry.authors && entry.authors.length > 0 && (
                                                             <p style={{

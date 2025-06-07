@@ -15,7 +15,7 @@ interface GroupedEntries {
 
 const UserProfilePage: React.FC = () => {
     const { user } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { id: userId } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [userEntries, setUserEntries] = useState<apiService.JournalEntryRead[]>([]);
@@ -227,7 +227,7 @@ const UserProfilePage: React.FC = () => {
         return (
             <Link key={entry.id} to={`/entries/${entry.id}`} className="entry-link">
                 <div className="entry-item">
-                    <h4 className="entry-title">{entry.title}</h4>
+                    <h4 className="entry-title">{language === 'en' && entry.title_en ? entry.title_en : entry.title}</h4>
                     <p className="entry-abstract">{entry.abstract_tr}</p>
                     <div className="entry-meta">
                         <span className="entry-date">
@@ -394,7 +394,7 @@ const UserProfilePage: React.FC = () => {
                 {journals.map(journal => (
                     <div key={journal.id} className="journal-item" onClick={() => navigate(`/journals/${journal.id}`)}>
                         <div className="journal-header">
-                            <h3>{journal.title}</h3>
+                            <h3>{language === 'en' && journal.title_en ? journal.title_en : journal.title}</h3>
                         </div>
                         <div className="journal-issue">{t('issue')}: {journal.issue}</div>
                         <div className="journal-meta">

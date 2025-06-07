@@ -278,13 +278,19 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   }
   
   return (
-    <div className="entry-updates-container">
-      <div className="entry-header">
-        <button onClick={() => navigate(-1)} className="back-button">
-          {t('back') || 'Back'}
-        </button>
-        <h1>{entry.title}</h1>
-        <div className="entry-meta">
+    <>
+      {/* Title Section */}
+      <div className="page-title-section" style={{ marginLeft: '60px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <button 
+            onClick={() => navigate(-1)} 
+            className="btn btn-outline back-button"
+          >
+            ← {t('back') || 'Back'}
+          </button>
+          <h1 style={{ margin: 0 }}>{entry.title}</h1>
+        </div>
+        <div style={{ marginTop: '10px', marginLeft: '60px' }}>
           <span className="entry-status">
             <span className={`badge badge-${entry.status?.toLowerCase()}`}>
               {t(entry.status || '') || entry.status}
@@ -292,193 +298,199 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
           </span>
         </div>
       </div>
-      
-      <div className="entry-details">
-        <div className="entry-abstract">
-          <h3>{t('abstract') || 'Abstract'}</h3>
-          <p>{entry.abstract_tr}</p>
-          {entry.abstract_en && (
-            <>
-              <h3>{t('abstractEn') || 'Abstract (English)'}</h3>
-              <p>{entry.abstract_en}</p>
-            </>
-          )}
-        </div>
-        
-        <div className="entry-keywords">
-          <h3>{t('keywords') || 'Keywords'}</h3>
-          <p>{entry.keywords || t('noKeywords') || 'No keywords provided'}</p>
-        </div>
-        
-        <div className="entry-participants">
-          <div className="authors-section">
-            <h3>{t('authors') || 'Authors'}</h3>
-            <ul className="participants-list">
-              {authors.map((author, index) => (
-                <li key={`author-${author.id}-${index}`} className="participant-item">
-                  <span className="participant-name">{author.name}</span>
-                  {author.title && <span className="participant-title">{author.title}</span>}
-                </li>
-              ))}
-            </ul>
+
+      {/* Content Section */}
+      <div className="page-content-section" style={{ paddingBottom: '0px' }}>
+        <div style={{ margin: '0 auto', marginLeft: '60px' }}>
+          
+          <div className="entry-details">
+            <div className="entry-abstract">
+              <h3>{t('abstract') || 'Abstract'}</h3>
+              <p>{entry.abstract_tr}</p>
+              {entry.abstract_en && (
+                <>
+                  <h3>{t('abstractEn') || 'Abstract (English)'}</h3>
+                  <p>{entry.abstract_en}</p>
+                </>
+              )}
+            </div>
+            
+            <div className="entry-keywords">
+              <h3>{t('keywords') || 'Keywords'}</h3>
+              <p>{entry.keywords || t('noKeywords') || 'No keywords provided'}</p>
+            </div>
+            
+            <div className="entry-participants">
+              <div className="authors-section">
+                <h3>{t('authors') || 'Authors'}</h3>
+                <ul className="participants-list">
+                  {authors.map((author, index) => (
+                    <li key={`author-${author.id}-${index}`} className="participant-item">
+                      <span className="participant-name">{author.name}</span>
+                      {author.title && <span className="participant-title">{author.title}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="referees-section">
+                <h3>{t('referees') || 'Referees'}</h3>
+                <ul className="participants-list">
+                  {referees.map((referee, index) => (
+                    <li key={`referee-${referee.id}-${index}`} className="participant-item">
+                      <span className="participant-name">{referee.name}</span>
+                      {referee.title && <span className="participant-title">{referee.title}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
           
-          <div className="referees-section">
-            <h3>{t('referees') || 'Referees'}</h3>
-            <ul className="participants-list">
-              {referees.map((referee, index) => (
-                <li key={`referee-${referee.id}-${index}`} className="participant-item">
-                  <span className="participant-name">{referee.name}</span>
-                  {referee.title && <span className="participant-title">{referee.title}</span>}
-                </li>
-              ))}
-            </ul>
+          <div className="updates-section">
+            <h2>{t('entryUpdates') || 'Entry Updates'}</h2>
+            
+            {combinedUpdates.length === 0 ? (
+              <div className="empty-state">
+                <p>{t('noUpdates') || 'No updates found for this entry.'}</p>
+              </div>
+            ) : (
+              <div className="chat-updates-container">
+                {combinedUpdates.map((update, index) => {
+                  const updateId = `${update.type}-${update.id}-${index}`;
+                  const isExpanded = expandedUpdates.has(updateId);
+                  
+                  return (
+                    <div 
+                      key={updateId} 
+                      className={`chat-message ${update.type === 'author' ? 'author-message' : 'referee-message'}`}
+                    >
+                      <div className="chat-message-header">
+                        <span className="message-sender">
+                          {update.type === 'author' ? update.authorName : update.refereeName}
+                        </span>
+                        <span className="message-date">
+                          {formatDate(update.created_date)}
+                        </span>
+                        
+                        {update.canDelete && (
+                          <button 
+                            className="delete-update-button" 
+                            onClick={() => handleDeleteUpdate(update)}
+                            aria-label={t('deleteUpdate') || 'Delete Update'}
+                          >
+                            <span className="delete-icon">×</span>
+                          </button>
+                        )}
+                      </div>
+                      
+                      <div className="chat-message-content">
+                        {/* Always show notes if available */}
+                        {update.notes && update.canViewNotes ? (
+                          <div className="update-notes">
+                            <strong>{t('notes') || 'Notes'}: </strong>
+                            <p>{update.notes}</p>
+                          </div>
+                        ) : update.notes && !update.canViewNotes ? (
+                          <div className="update-notes restricted">
+                            <p>{t('privateNotes') || 'Private notes (visible only to the referee who created them, editors, and admins)'}</p>
+                          </div>
+                        ) : null}
+                        
+                        {/* Toggle icon */}
+                        <button 
+                          className={`toggle-details-icon ${isExpanded ? 'expanded' : ''}`}
+                          onClick={() => toggleUpdateExpansion(updateId)}
+                          aria-label={isExpanded ? (t('hideDetails') || 'Hide Details') : (t('showDetails') || 'Show Details')}
+                        >
+                          <span className="chevron"></span>
+                        </button>
+                        
+                        {/* Expanded details */}
+                        {isExpanded && (
+                          <div className="expanded-details">
+                            {update.type === 'author' && (
+                              <>
+                                {update.title && (
+                                  <div className="update-title">
+                                    <strong>{t('updatedTitle') || 'Updated Title'}: </strong>
+                                    <span>{update.title}</span>
+                                  </div>
+                                )}
+                                
+                                {update.abstract_tr && (
+                                  <div className="update-abstract">
+                                    <strong>{t('updatedAbstract') || 'Updated Abstract'}: </strong>
+                                    <p>{update.abstract_tr}</p>
+                                  </div>
+                                )}
+                                
+                                {update.abstract_en && (
+                                  <div className="update-abstract-en">
+                                    <strong>{t('updatedAbstractEn') || 'Updated Abstract (English)'}: </strong>
+                                    <p>{update.abstract_en}</p>
+                                  </div>
+                                )}
+                                
+                                {update.keywords && (
+                                  <div className="update-keywords">
+                                    <strong>{t('updatedKeywords') || 'Updated Keywords'}: </strong>
+                                    <span>{update.keywords}</span>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                            
+                            {update.file_path && update.canViewFile ? (
+                              <div className="update-file">
+                                <strong>
+                                  {update.type === 'author' 
+                                    ? (t('updatedFile') || 'Updated File') 
+                                    : (t('reviewFile') || 'Review File')
+                                  }: 
+                                </strong>
+                                <a href={`/api${update.file_path}`} target="_blank" rel="noopener noreferrer">
+                                  {t('viewFile') || 'View File'}
+                                </a>
+                              </div>
+                            ) : update.file_path && !update.canViewFile ? (
+                              <div className="update-file restricted">
+                                <p>{t('privateFile') || 'Private file (visible only to the referee who uploaded it, editors, and admins)'}</p>
+                              </div>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          
+          {/* Actions Section (Add new update, etc.) */}
+          <div className="entry-actions">
+            {(isAuthorForEntry || user?.role === 'owner' || user?.role === 'admin' || isJournalEditor) && (
+              <Link to={`/entries/${entryId}/author-update/new`} className="action-button">
+                {t('addAuthorUpdate') || 'Add Author Update'}
+              </Link>
+            )}
+            
+            {(isRefereeForEntry || user?.role === 'owner' || user?.role === 'admin' || isJournalEditor) && (
+              <Link to={`/entries/${entryId}/referee-update/new`} className="action-button">
+                {t('addRefereeUpdate') || 'Add Referee Update'}
+              </Link>
+            )}
+            
+            {(user?.role === 'admin' || user?.role === 'editor' || user?.role === 'owner' || isJournalEditor) && (
+              <Link to={`/entries/edit/${entryId}`} className="action-button secondary">
+                {t('editEntry') || 'Edit Entry'}
+              </Link>
+            )}
           </div>
         </div>
       </div>
-      
-      <div className="updates-section">
-        <h2>{t('entryUpdates') || 'Entry Updates'}</h2>
-        
-        {combinedUpdates.length === 0 ? (
-          <div className="empty-state">
-            <p>{t('noUpdates') || 'No updates found for this entry.'}</p>
-          </div>
-        ) : (
-          <div className="chat-updates-container">
-            {combinedUpdates.map((update, index) => {
-              const updateId = `${update.type}-${update.id}-${index}`;
-              const isExpanded = expandedUpdates.has(updateId);
-              
-              return (
-                <div 
-                  key={updateId} 
-                  className={`chat-message ${update.type === 'author' ? 'author-message' : 'referee-message'}`}
-                >
-                  <div className="chat-message-header">
-                    <span className="message-sender">
-                      {update.type === 'author' ? update.authorName : update.refereeName}
-                    </span>
-                    <span className="message-date">
-                      {formatDate(update.created_date)}
-                    </span>
-                    
-                    {update.canDelete && (
-                      <button 
-                        className="delete-update-button" 
-                        onClick={() => handleDeleteUpdate(update)}
-                        aria-label={t('deleteUpdate') || 'Delete Update'}
-                      >
-                        <span className="delete-icon">×</span>
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="chat-message-content">
-                    {/* Always show notes if available */}
-                    {update.notes && update.canViewNotes ? (
-                      <div className="update-notes">
-                        <strong>{t('notes') || 'Notes'}: </strong>
-                        <p>{update.notes}</p>
-                      </div>
-                    ) : update.notes && !update.canViewNotes ? (
-                      <div className="update-notes restricted">
-                        <p>{t('privateNotes') || 'Private notes (visible only to the referee who created them, editors, and admins)'}</p>
-                      </div>
-                    ) : null}
-                    
-                    {/* Toggle icon */}
-                    <button 
-                      className={`toggle-details-icon ${isExpanded ? 'expanded' : ''}`}
-                      onClick={() => toggleUpdateExpansion(updateId)}
-                      aria-label={isExpanded ? (t('hideDetails') || 'Hide Details') : (t('showDetails') || 'Show Details')}
-                    >
-                      <span className="chevron"></span>
-                    </button>
-                    
-                    {/* Expanded details */}
-                    {isExpanded && (
-                      <div className="expanded-details">
-                        {update.type === 'author' && (
-                          <>
-                            {update.title && (
-                              <div className="update-title">
-                                <strong>{t('updatedTitle') || 'Updated Title'}: </strong>
-                                <span>{update.title}</span>
-                              </div>
-                            )}
-                            
-                            {update.abstract_tr && (
-                              <div className="update-abstract">
-                                <strong>{t('updatedAbstract') || 'Updated Abstract'}: </strong>
-                                <p>{update.abstract_tr}</p>
-                              </div>
-                            )}
-                            
-                            {update.abstract_en && (
-                              <div className="update-abstract-en">
-                                <strong>{t('updatedAbstractEn') || 'Updated Abstract (English)'}: </strong>
-                                <p>{update.abstract_en}</p>
-                              </div>
-                            )}
-                            
-                            {update.keywords && (
-                              <div className="update-keywords">
-                                <strong>{t('updatedKeywords') || 'Updated Keywords'}: </strong>
-                                <span>{update.keywords}</span>
-                              </div>
-                            )}
-                          </>
-                        )}
-                        
-                        {update.file_path && update.canViewFile ? (
-                          <div className="update-file">
-                            <strong>
-                              {update.type === 'author' 
-                                ? (t('updatedFile') || 'Updated File') 
-                                : (t('reviewFile') || 'Review File')
-                              }: 
-                            </strong>
-                            <a href={`/api${update.file_path}`} target="_blank" rel="noopener noreferrer">
-                              {t('viewFile') || 'View File'}
-                            </a>
-                          </div>
-                        ) : update.file_path && !update.canViewFile ? (
-                          <div className="update-file restricted">
-                            <p>{t('privateFile') || 'Private file (visible only to the referee who uploaded it, editors, and admins)'}</p>
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-      
-      {/* Actions Section (Add new update, etc.) */}
-      <div className="entry-actions">
-        {(isAuthorForEntry || user?.role === 'owner' || user?.role === 'admin' || isJournalEditor) && (
-          <Link to={`/entries/${entryId}/author-update/new`} className="action-button">
-            {t('addAuthorUpdate') || 'Add Author Update'}
-          </Link>
-        )}
-        
-        {(isRefereeForEntry || user?.role === 'owner' || user?.role === 'admin' || isJournalEditor) && (
-          <Link to={`/entries/${entryId}/referee-update/new`} className="action-button">
-            {t('addRefereeUpdate') || 'Add Referee Update'}
-          </Link>
-        )}
-        
-        {(user?.role === 'admin' || user?.role === 'editor' || user?.role === 'owner' || isJournalEditor) && (
-          <Link to={`/entries/edit/${entryId}`} className="action-button secondary">
-            {t('editEntry') || 'Edit Entry'}
-          </Link>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 
