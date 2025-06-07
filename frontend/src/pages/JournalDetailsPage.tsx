@@ -550,6 +550,8 @@ const JournalDetailsPage: React.FC = () => {
                     </div>
                 )}
 
+
+
                 <div style={{
                     background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
                     backdropFilter: 'blur(20px)',
@@ -608,7 +610,7 @@ const JournalDetailsPage: React.FC = () => {
                                 background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent'
-                            }}>Journal Information</h3>
+                            }}>{t('publicationDetails') || 'Publication Details'}</h3>
                         </div>
                         <div style={{
                             width: '60px',
@@ -619,16 +621,177 @@ const JournalDetailsPage: React.FC = () => {
                         }}></div>
                     </div>
                     
-                                        {/* Information Cards Grid - Two Rows */}
+                    {/* Editorial Team - Right below title */}
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gridTemplateRows: 'auto auto',
+                        gridTemplateColumns: '1fr 2fr',
+                        gap: '20px',
+                        marginBottom: '28px',
+                        position: 'relative',
+                        zIndex: 1
+                    }}>
+                        {/* Editor-in-Chief */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '16px 20px',
+                            background: 'rgba(255, 255, 255, 0.7)',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(226, 232, 240, 0.6)',
+                            transition: 'all 0.3s ease',
+                            position: 'relative'
+                        }}>
+                            <div style={{
+                                width: '36px',
+                                height: '36px',
+                                background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                borderRadius: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0
+                            }}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L3 7V17C3 17.5304 3.21071 18.0391 3.58579 18.4142C3.96086 18.7893 4.46957 19 5 19H19C19.5304 19 20.0391 18.7893 20.4142 18.4142C20.7893 18.0391 21 17.5304 21 17V7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M9 21V12H15V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ 
+                                    fontSize: '13px', 
+                                    fontWeight: '600', 
+                                    color: '#64748B',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                    marginBottom: '4px'
+                                }}>{t('editorInChief') || 'Editor-in-Chief'}</div>
+                                <div style={{ 
+                                    fontSize: '16px', 
+                                    fontWeight: '600', 
+                                    color: '#1E293B'
+                                }}>
+                                    {editorInChief ? `${editorInChief.title ? editorInChief.title + ' ' : ''}${editorInChief.name}` : (t('none') || 'None')}
+                                </div>
+                            </div>
+                            {isAdmin && (
+                                <button
+                                    onClick={() => setShowEditorInChiefModal(true)}
+                                    style={{
+                                        position: 'absolute',
+                                        top: '8px',
+                                        right: '8px',
+                                        padding: '4px 8px',
+                                        background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        fontSize: '11px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: '0 2px 8px rgba(20, 184, 166, 0.3)',
+                                        flexShrink: 0
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-1px)';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(20, 184, 166, 0.3)';
+                                    }}
+                                >
+                                    {t('change') || 'Change'}
+                                </button>
+                            )}
+                        </div>
+                        
+                        {/* Editors */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '16px 20px',
+                            background: 'rgba(255, 255, 255, 0.7)',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(226, 232, 240, 0.6)',
+                            transition: 'all 0.3s ease',
+                            position: 'relative'
+                        }}>
+                            <div style={{
+                                width: '36px',
+                                height: '36px',
+                                background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                borderRadius: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0
+                            }}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ 
+                                    fontSize: '13px', 
+                                    fontWeight: '600', 
+                                    color: '#64748B',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                    marginBottom: '4px'
+                                }}>{t('editors') || 'Editors'}</div>
+                                <div style={{ 
+                                    fontSize: '16px', 
+                                    fontWeight: '600', 
+                                    color: '#1E293B'
+                                }}>
+                                    {editors.length > 0 ? editors.map(editor => `${editor.title ? editor.title + ' ' : ''}${editor.name}`).join(', ') : (t('none') || 'None')}
+                                </div>
+                            </div>
+                            {isAdmin && (
+                                <button
+                                    onClick={() => setShowEditorsModal(true)}
+                                    style={{
+                                        position: 'absolute',
+                                        top: '8px',
+                                        right: '8px',
+                                        padding: '4px 8px',
+                                        background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        fontSize: '11px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+                                        flexShrink: 0
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-1px)';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
+                                    }}
+                                >
+                                    {t('manage') || 'Manage'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    
+                    {/* Publication Information Cards Grid */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                         gap: '20px',
                         position: 'relative',
                         zIndex: 1
                     }}>
-                        {/* First Row: Issue, Date, Place */}
                                 {/* Issue Number */}
                                 <div style={{
                                     display: 'flex',
@@ -869,427 +1032,421 @@ const JournalDetailsPage: React.FC = () => {
                                         {journal.is_published ? (t('published') || 'Published') : (t('notPublished') || 'Not Published')}
                                     </div>
                                 </div>
-                                        </div>
+                                                                                </div>
                                                                         </>
                                 )}
-                        
-                        {/* Second Row: Editor-in-Chief and Editors */}
-                        {/* Editor-in-Chief */}
-                        <div style={{
-                            padding: '20px',
-                            background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.08) 0%, rgba(13, 148, 136, 0.05) 100%)',
-                            borderRadius: '16px',
-                            border: '1px solid rgba(20, 184, 166, 0.2)',
-                            transition: 'all 0.3s ease',
-                            gridColumn: '1 / 2',
-                            gridRow: '2'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        marginBottom: '8px'
-                                    }}>
-                                        <div style={{
-                                            width: '24px',
-                                            height: '24px',
-                                            background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-                                            borderRadius: '6px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            flexShrink: 0
-                                        }}>
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                                                <path d="M12 2L3 7V17C3 17.5304 3.21071 18.0391 3.58579 18.4142C3.96086 18.7893 4.46957 19 5 19H19C19.5304 19 20.0391 18.7893 20.4142 18.4142C20.7893 18.0391 21 17.5304 21 17V7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <path d="M9 21V12H15V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
-                                        </div>
-                                        <div style={{ 
-                                            fontSize: '14px', 
-                                            fontWeight: '700', 
-                                            color: '#0D9488',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.5px'
-                                        }}>{t('editorInChief') || 'Editor-in-Chief'}</div>
-                                    </div>
-                                    <div style={{ 
-                                        fontSize: '18px', 
-                                        fontWeight: '700', 
-                                        color: '#1E293B',
-                                        marginBottom: '4px'
-                                    }}>
-                                        {editorInChief ? editorInChief.name : (t('none') || 'None')}
-                                    </div>
-                                    {editorInChief && (
-                                        <div style={{ 
-                                            fontSize: '14px', 
-                                            color: '#64748B',
-                                            fontWeight: '500'
-                                        }}>
-                                            Chief Editorial Officer
-                                        </div>
-                                    )}
-                                </div>
-                                {isAdmin && (
-                                    <button
-                                        onClick={() => setShowEditorInChiefModal(true)}
-                                        style={{
-                                            padding: '8px 16px',
-                                            background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '10px',
-                                            fontSize: '13px',
-                                            fontWeight: '600',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.3s ease',
-                                            boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
-                                            flexShrink: 0
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(20, 184, 166, 0.4)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.3)';
-                                        }}
-                                    >
-                                        {t('change') || 'Change'}
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                        
-                        {/* Editors */}
-                        <div style={{
-                            padding: '20px',
-                            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(29, 78, 216, 0.05) 100%)',
-                            borderRadius: '16px',
-                            border: '1px solid rgba(59, 130, 246, 0.2)',
-                            transition: 'all 0.3s ease',
-                            gridColumn: '2 / 4',
-                            gridRow: '2'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        marginBottom: '8px'
-                                    }}>
-                                        <div style={{
-                                            width: '24px',
-                                            height: '24px',
-                                            background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                                            borderRadius: '6px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            flexShrink: 0
-                                        }}>
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                                                <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
-                                        </div>
-                                        <div style={{ 
-                                            fontSize: '14px', 
-                                            fontWeight: '700', 
-                                            color: '#1D4ED8',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.5px'
-                                        }}>{t('editors') || 'Editors'}</div>
-                                    </div>
-                                    <div style={{ 
-                                        fontSize: '16px', 
-                                        fontWeight: '600', 
-                                        color: '#1E293B',
-                                        lineHeight: '1.5',
-                                        marginBottom: '4px'
-                                    }}>
-                                        {editors.length > 0 ? editors.map(editor => editor.name).join(', ') : (t('none') || 'None')}
-                                    </div>
-                                    <div style={{ 
-                                        fontSize: '14px', 
-                                        color: '#64748B',
-                                        fontWeight: '500'
-                                    }}>
-                                        {editors.length > 0 ? `${editors.length} Active Editor${editors.length > 1 ? 's' : ''}` : 'No editors assigned'}
-                                    </div>
-                                </div>
-                                {isAdmin && (
-                                    <button
-                                        onClick={() => setShowEditorsModal(true)}
-                                        style={{
-                                            padding: '8px 16px',
-                                            background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '10px',
-                                            fontSize: '13px',
-                                            fontWeight: '600',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.3s ease',
-                                            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
-                                            flexShrink: 0
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.4)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
-                                        }}
-                                    >
-                                        {t('manage') || 'Manage'}
-                                    </button>
-                                )}
-                            </div>
-                                                </div>
                     </div>
-
-                    {canViewJournalFiles && (
-                        <div style={{ marginBottom: '32px' }}>
-                            <h3 style={{
-                                fontSize: '20px',
-                                fontWeight: '700',
-                                color: '#1E293B',
-                                marginBottom: '20px',
-                                letterSpacing: '-0.025em'
-                            }}>{t('journalFiles') || 'Journal Files'}</h3>
-                            
-                            <div style={{ 
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                                gap: '12px'
-                            }}>
-                                {journal.cover_photo && (
-                                    <a 
-                                        href={`/api${journal.cover_photo}`} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            padding: '12px 16px',
-                                            background: 'rgba(248, 250, 252, 0.8)',
-                                            border: '1px solid #E2E8F0',
-                                            borderRadius: '10px',
-                                            color: '#0D9488',
-                                            textDecoration: 'none',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                            e.currentTarget.style.borderColor = '#14B8A6';
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                            e.currentTarget.style.borderColor = '#E2E8F0';
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                        }}
-                                    >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                            <path d="M4 16L4 10C4 7.79086 5.79086 6 8 6L16 6C18.2091 6 20 7.79086 20 10L20 16M4 16C4 18.2091 5.79086 20 8 20L16 20C18.2091 20 20 18.2091 20 16M4 16L8.5 10.5L13 15L15.5 12.5L20 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        {t('viewCoverPhoto') || 'Cover Photo'}
-                                    </a>
-                                )}
-                                {journal.meta_files && (
-                                    <a 
-                                        href={`/api${journal.meta_files}`} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            padding: '12px 16px',
-                                            background: 'rgba(248, 250, 252, 0.8)',
-                                            border: '1px solid #E2E8F0',
-                                            borderRadius: '10px',
-                                            color: '#0D9488',
-                                            textDecoration: 'none',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                            e.currentTarget.style.borderColor = '#14B8A6';
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                            e.currentTarget.style.borderColor = '#E2E8F0';
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                        }}
-                                    >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        {t('viewMetaFiles') || 'Meta Files'}
-                                    </a>
-                                )}
-                                {canViewJournalFiles && journal.editor_notes && (
-                                    <a 
-                                        href={`/api${journal.editor_notes}`} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            padding: '12px 16px',
-                                            background: 'rgba(248, 250, 252, 0.8)',
-                                            border: '1px solid #E2E8F0',
-                                            borderRadius: '10px',
-                                            color: '#0D9488',
-                                            textDecoration: 'none',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                            e.currentTarget.style.borderColor = '#14B8A6';
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                            e.currentTarget.style.borderColor = '#E2E8F0';
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                        }}
-                                    >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                            <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H16C16.5304 20 17.0391 19.7893 17.4142 19.4142C17.7893 19.0391 18 18.5304 18 18V13M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        {t('viewEditorNotes') || 'Editor Notes'}
-                                    </a>
-                                )}
-                                {journal.full_pdf && (
-                                    <a 
-                                        href={`/api${journal.full_pdf}`} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            padding: '12px 16px',
-                                            background: 'rgba(248, 250, 252, 0.8)',
-                                            border: '1px solid #E2E8F0',
-                                            borderRadius: '10px',
-                                            color: '#0D9488',
-                                            textDecoration: 'none',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                            e.currentTarget.style.borderColor = '#14B8A6';
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                            e.currentTarget.style.borderColor = '#E2E8F0';
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                        }}
-                                    >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        {t('viewFullPdf') || 'Full PDF'}
-                                    </a>
-                                )}
-                                {journal.index_section && (
-                                    <a 
-                                        href={`/api${journal.index_section}`} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            padding: '12px 16px',
-                                            background: 'rgba(248, 250, 252, 0.8)',
-                                            border: '1px solid #E2E8F0',
-                                            borderRadius: '10px',
-                                            color: '#14B8A6',
-                                            textDecoration: 'none',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                            e.currentTarget.style.borderColor = '#14B8A6';
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                            e.currentTarget.style.borderColor = '#E2E8F0';
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                        }}
-                                    >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                            <path d="M6 2V22M18 7V22M4 7H8M4 12H8M4 17H8M16 12H20M16 17H20M11 7H13M11 12H13M11 17H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        {t('viewIndexSection') || 'Index Section'}
-                                    </a>
-                                )}
-                                {journal.file_path && (
-                                    <a 
-                                        href={`/api${journal.file_path}`} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            padding: '12px 16px',
-                                            background: 'rgba(248, 250, 252, 0.8)',
-                                            border: '1px solid #E2E8F0',
-                                            borderRadius: '10px',
-                                            color: '#14B8A6',
-                                            textDecoration: 'none',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                                            e.currentTarget.style.borderColor = '#14B8A6';
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                            e.currentTarget.style.borderColor = '#E2E8F0';
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                        }}
-                                    >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                            <path d="M16 2V8H22L16 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M15 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9H15V2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        {t('viewMergedFile') || 'Merged File'}
-                                    </a>
-                                )}
-                            </div>
-                        </div>
-                    )}
                 </div>
+
+                {/* Publication Files Section */}
+                {canViewJournalFiles && (
+                    <div style={{
+                        background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '24px',
+                        padding: '40px',
+                        marginBottom: '32px',
+                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+                        border: '1px solid rgba(20, 184, 166, 0.15)',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}>
+                        {/* Background Pattern */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '-50%',
+                            right: '-20%',
+                            width: '400px',
+                            height: '400px',
+                            background: 'radial-gradient(circle, rgba(20, 184, 166, 0.03) 0%, transparent 70%)',
+                            borderRadius: '50%',
+                            zIndex: 0
+                        }}></div>
+                        
+                        <div style={{
+                            position: 'relative',
+                            zIndex: 1,
+                            marginBottom: '36px'
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                marginBottom: '8px'
+                            }}>
+                                <div style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                    borderRadius: '12px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 8px 16px rgba(20, 184, 166, 0.3)'
+                                }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M13 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9L13 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M13 2V9H20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M16 13H8M16 17H8M10 9H8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
+                                <h3 style={{
+                                    fontSize: '28px',
+                                    fontWeight: '800',
+                                    color: '#0F172A',
+                                    margin: 0,
+                                    letterSpacing: '-0.025em',
+                                    background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent'
+                                }}>{t('publicationFiles') || 'Publication Files'}</h3>
+                            </div>
+                            <div style={{
+                                width: '60px',
+                                height: '4px',
+                                background: 'linear-gradient(90deg, #14B8A6 0%, #0D9488 100%)',
+                                borderRadius: '2px',
+                                marginLeft: '52px'
+                            }}></div>
+                        </div>
+                        
+                        {/* Files Grid */}
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                            gap: '20px',
+                            position: 'relative',
+                            zIndex: 1
+                        }}>
+                            {journal.cover_photo && (
+                                <button 
+                                    onClick={() => window.open(`/api${journal.cover_photo}`, '_blank')}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '16px 20px',
+                                        background: 'rgba(255, 255, 255, 0.7)',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(226, 232, 240, 0.6)',
+                                        transition: 'all 0.3s ease',
+                                        position: 'relative',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        textAlign: 'left'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
+                                        e.currentTarget.style.borderColor = '#8B5CF6';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(139, 92, 246, 0.2)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                        e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                                        borderRadius: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M4 16L4 10C4 7.79086 5.79086 6 8 6L16 6C18.2091 6 20 7.79086 20 10L20 16M4 16C4 18.2091 5.79086 20 8 20L16 20C18.2091 20 20 18.2091 20 16M4 16L8.5 10.5L13 15L15.5 12.5L20 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ 
+                                            fontSize: '14px', 
+                                            fontWeight: '600', 
+                                            color: '#1E293B',
+                                            letterSpacing: '0.5px'
+                                        }}>{t('coverPhoto')}</div>
+                                    </div>
+                                </button>
+                            )}
+                            
+                            {journal.meta_files && (
+                                <button 
+                                    onClick={() => window.open(`/api${journal.meta_files}`, '_blank')}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '16px 20px',
+                                        background: 'rgba(255, 255, 255, 0.7)',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(226, 232, 240, 0.6)',
+                                        transition: 'all 0.3s ease',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        textAlign: 'left'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(6, 182, 212, 0.1)';
+                                        e.currentTarget.style.borderColor = '#06B6D4';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(6, 182, 212, 0.2)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                        e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        background: 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)',
+                                        borderRadius: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ 
+                                            fontSize: '14px', 
+                                            fontWeight: '600', 
+                                            color: '#1E293B',
+                                            letterSpacing: '0.5px'
+                                        }}>{t('metaFiles')}</div>
+                                    </div>
+                                </button>
+                            )}
+                            
+                            {canViewJournalFiles && journal.editor_notes && (
+                                <button 
+                                    onClick={() => window.open(`/api${journal.editor_notes}`, '_blank')}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '16px 20px',
+                                        background: 'rgba(255, 255, 255, 0.7)',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(226, 232, 240, 0.6)',
+                                        transition: 'all 0.3s ease',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        textAlign: 'left'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(245, 158, 11, 0.1)';
+                                        e.currentTarget.style.borderColor = '#F59E0B';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(245, 158, 11, 0.2)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                        e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                                        borderRadius: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H16C16.5304 20 17.0391 19.7893 17.4142 19.4142C17.7893 19.0391 18 18.5304 18 18V13M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ 
+                                            fontSize: '14px', 
+                                            fontWeight: '600', 
+                                            color: '#1E293B',
+                                            letterSpacing: '0.5px'
+                                        }}>{t('editorNotes')}</div>
+                                    </div>
+                                </button>
+                            )}
+                            
+                            {journal.full_pdf && (
+                                <button 
+                                    onClick={() => window.open(`/api${journal.full_pdf}`, '_blank')}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '16px 20px',
+                                        background: 'rgba(255, 255, 255, 0.7)',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(226, 232, 240, 0.6)',
+                                        transition: 'all 0.3s ease',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        textAlign: 'left'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                        e.currentTarget.style.borderColor = '#EF4444';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(239, 68, 68, 0.2)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                        e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                                        borderRadius: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M14 2V8H20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ 
+                                            fontSize: '14px', 
+                                            fontWeight: '600', 
+                                            color: '#1E293B',
+                                            letterSpacing: '0.5px'
+                                        }}>{t('fullPdf')}</div>
+                                    </div>
+                                </button>
+                            )}
+                            
+                            {journal.index_section && (
+                                <button 
+                                    onClick={() => window.open(`/api${journal.index_section}`, '_blank')}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '16px 20px',
+                                        background: 'rgba(255, 255, 255, 0.7)',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(226, 232, 240, 0.6)',
+                                        transition: 'all 0.3s ease',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        textAlign: 'left'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(16, 185, 129, 0.1)';
+                                        e.currentTarget.style.borderColor = '#10B981';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(16, 185, 129, 0.2)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                        e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                                        borderRadius: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M6 2V22M18 7V22M4 7H8M4 12H8M4 17H8M16 12H20M16 17H20M11 7H13M11 12H13M11 17H13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ 
+                                            fontSize: '14px', 
+                                            fontWeight: '600', 
+                                            color: '#1E293B',
+                                            letterSpacing: '0.5px'
+                                        }}>{t('indexSection')}</div>
+                                    </div>
+                                </button>
+                            )}
+                            
+                            {journal.file_path && (
+                                <button 
+                                    onClick={() => window.open(`/api${journal.file_path}`, '_blank')}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        padding: '16px 20px',
+                                        background: 'rgba(255, 255, 255, 0.7)',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(226, 232, 240, 0.6)',
+                                        transition: 'all 0.3s ease',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        textAlign: 'left'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                                        e.currentTarget.style.borderColor = '#3B82F6';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 16px rgba(59, 130, 246, 0.2)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                        e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                        borderRadius: '10px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0
+                                    }}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M16 2V8H22L16 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M15 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9H15V2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ 
+                                            fontSize: '14px', 
+                                            fontWeight: '600', 
+                                            color: '#1E293B',
+                                            letterSpacing: '0.5px'
+                                        }}>{t('mergedFile')}</div>
+                                    </div>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 <div style={{ marginBottom: '32px' }}>
                     <h3 style={{

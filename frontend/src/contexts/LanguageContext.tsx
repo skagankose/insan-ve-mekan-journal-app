@@ -61,7 +61,8 @@ type TranslationKeys =
   | 'change' | 'manage' | 'journalFiles' | 'viewCoverPhoto' | 'viewMetaFiles' | 'viewEditorNotes' | 'viewFullPdf'
   | 'viewIndexSection' | 'viewMergedFile' | 'downloadJournal' | 'downloadFullPdf' | 'downloadJournalDescription'
   | 'noEntriesInJournal' | 'failedToMergeFiles' | 'mergingFiles' | 'selectEditorInChief' | 'noAdminUsers'
-  | 'manageEditors' | 'noEditorUsers' | 'save';
+  | 'manageEditors' | 'noEditorUsers' | 'save'
+  | 'publicationDetails' | 'publicationFiles' | 'coverPhoto' | 'metaFiles' | 'editorNotes' | 'fullPdf' | 'indexSection' | 'mergedFile';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -380,6 +381,14 @@ const translations: Record<Language, TranslationDictionary> = {
     'manageEditors': 'Manage Editors',
     'noEditorUsers': 'No editor users found',
     'save': 'Save',
+    'publicationDetails': 'Publication Details',
+    'publicationFiles': 'Publication Files',
+    'coverPhoto': 'Cover Photo',
+    'metaFiles': 'Meta Files',
+    'editorNotes': 'Editor Notes',
+    'fullPdf': 'Full PDF',
+    'indexSection': 'Index Section',
+    'mergedFile': 'Merged File',
   },
   tr: {
     // Navigation
@@ -671,9 +680,9 @@ const translations: Record<Language, TranslationDictionary> = {
     'publicationStatus': 'Yayın Durumu',
     'notPublished': 'Yayınlanmadı',
     'publicationPlace': 'Yayın Yeri',
-    'editorInChief': 'Editör',
-    'none': 'Yok',
-    'editors': 'Editörler',
+    'editorInChief': 'BAŞ EDİTÖR',
+    'none': 'YOK',
+    'editors': 'EDİTÖRLER',
     'change': 'Değiştir',
     'manage': 'Yönet',
     'journalFiles': 'Dergi Dosyaları',
@@ -694,6 +703,14 @@ const translations: Record<Language, TranslationDictionary> = {
     'manageEditors': 'Editörleri Yönet',
     'noEditorUsers': 'Editör kullanıcı bulunamadı',
     'save': 'Kaydet',
+    'publicationDetails': 'Yayın Detayları',
+    'publicationFiles': 'Yayın Dosyaları',
+    'coverPhoto': 'Kapak Fotoğrafı',
+    'metaFiles': 'Meta Dosyalar',
+    'editorNotes': 'Editör Notları',
+    'fullPdf': 'Tam PDF',
+    'indexSection': 'İndeks Bölümü',
+    'mergedFile': 'Birleştirilmiş Dosya',
   }
 };
 
