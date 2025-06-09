@@ -19,8 +19,7 @@ const GlobalSearchInput = React.memo(({
     filteredUsers, 
     filteredJournals, 
     filteredJournalEntries,
-    t,
-    language 
+    t
 }: {
     globalSearchTerm: string;
     setGlobalSearchTerm: (term: string) => void;
@@ -28,7 +27,6 @@ const GlobalSearchInput = React.memo(({
     filteredJournals: Journal[];
     filteredJournalEntries: JournalEntryRead[];
     t: (key: string) => string;
-    language: string;
 }) => {
     return (
         <div className="global-search-container">
@@ -666,7 +664,6 @@ const AdminPage: React.FC = () => {
                         filteredJournals={filteredJournals}
                         filteredJournalEntries={filteredJournalEntries}
                         t={t}
-                        language={language}
                     />
 
                     {/* Admin Action Buttons */}

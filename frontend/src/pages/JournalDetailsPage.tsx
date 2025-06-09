@@ -151,6 +151,27 @@ const JournalDetailsPage: React.FC = () => {
         };
     }, [showEditorInChiefModal, showEditorsModal]);
 
+    // Handle ESC key to close modals
+    useEffect(() => {
+        const handleEscapeKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                if (showEditorInChiefModal && !isSubmittingEditors) {
+                    setShowEditorInChiefModal(false);
+                } else if (showEditorsModal && !isSubmittingEditors) {
+                    setShowEditorsModal(false);
+                }
+            }
+        };
+
+        if (showEditorInChiefModal || showEditorsModal) {
+            document.addEventListener('keydown', handleEscapeKey);
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleEscapeKey);
+        };
+    }, [showEditorInChiefModal, showEditorsModal, isSubmittingEditors]);
+
     const handleSetActive = async () => {
         if (!journal) return;
         
@@ -284,37 +305,139 @@ const JournalDetailsPage: React.FC = () => {
     if (error) {
         return (
             <div style={{
-                maxWidth: '600px',
-                margin: '60px auto',
-                padding: '32px',
-                background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
-                borderRadius: '16px',
-                boxShadow: '0 10px 25px rgba(239, 68, 68, 0.1)',
-                textAlign: 'center'
+                minHeight: '70vh',
+                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem',
+                marginLeft: '60px'
             }}>
                 <div style={{
-                    width: '64px',
-                    height: '64px',
-                    margin: '0 auto 24px',
-                    background: '#EF4444',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '32px',
-                    color: 'white'
-                }}>⚠️</div>
-                <h3 style={{
-                    fontSize: '20px',
-                    fontWeight: '600',
-                    color: '#991B1B',
-                    marginBottom: '12px'
-                }}>Error Loading Journal</h3>
-                <p style={{
-                    fontSize: '16px',
-                    color: '#DC2626',
-                    lineHeight: '1.6'
-                }}>{error}</p>
+                    maxWidth: '600px',
+                    width: '100%',
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '32px',
+                    padding: '48px',
+                    textAlign: 'center',
+                    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+                    border: '1px solid rgba(226, 232, 240, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    {/* Background Pattern */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '-50%',
+                        right: '-30%',
+                        width: '300px',
+                        height: '300px',
+                        background: 'radial-gradient(circle, rgba(239, 68, 68, 0.05) 0%, transparent 70%)',
+                        borderRadius: '50%',
+                        zIndex: 0
+                    }}></div>
+                    
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                        <div style={{
+                            width: '120px',
+                            height: '120px',
+                            margin: '0 auto 32px',
+                            background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                            borderRadius: '60px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '48px',
+                            boxShadow: '0 20px 40px rgba(20, 184, 166, 0.2)',
+                            animation: 'bounceIn 0.8s ease-out'
+                        }}>
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V9A2 2 0 0 1 6 7H18A2 2 0 0 1 20 9V17H6.5A2.5 2.5 0 0 0 4 19.5Z" 
+                                    stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M8 11H16M8 15H14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </div>
+                        
+                        <h1 style={{
+                            fontSize: '32px',
+                            fontWeight: '800',
+                            color: '#1E293B',
+                            marginBottom: '16px',
+                            letterSpacing: '-0.025em',
+                            background: 'linear-gradient(135deg, #1E293B 0%, #475569 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
+                        }}>{language === 'en' ? 'Journal Not Found!' : 'Aradığınız Dergi Bulunamadı!'}</h1>
+                        
+                        <p style={{
+                            fontSize: '18px',
+                            color: '#64748B',
+                            lineHeight: '1.6',
+                            marginBottom: '32px',
+                            fontWeight: '500'
+                        }}>{error}</p>
+                        
+                        <div style={{
+                            display: 'flex',
+                            gap: '16px',
+                            justifyContent: 'center',
+                            flexWrap: 'wrap'
+                        }}>
+                            <button
+                                onClick={() => navigate(isEditorOrAdmin ? '/editor/journals' : '/archive')}
+                                style={{
+                                    padding: '16px 32px',
+                                    background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '16px',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: '0 8px 20px rgba(20, 184, 166, 0.3)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 12px 28px rgba(20, 184, 166, 0.4)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(20, 184, 166, 0.3)';
+                                }}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                {isEditorOrAdmin ? (t('backToJournals') || 'Back to Journals') : (t('backToArchive') || 'Back to Archive')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>{`
+                    @keyframes bounceIn {
+                        0% {
+                            opacity: 0;
+                            transform: scale(0.3);
+                        }
+                        50% {
+                            opacity: 1;
+                            transform: scale(1.05);
+                        }
+                        70% {
+                            transform: scale(0.9);
+                        }
+                        100% {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                    }
+                `}</style>
             </div>
         );
     }
@@ -322,37 +445,197 @@ const JournalDetailsPage: React.FC = () => {
     if (!journal) {
         return (
             <div style={{
-                maxWidth: '600px',
-                margin: '60px auto',
-                padding: '32px',
-                background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
-                borderRadius: '16px',
-                boxShadow: '0 10px 25px rgba(239, 68, 68, 0.1)',
-                textAlign: 'center'
+                minHeight: '70vh',
+                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem',
+                marginLeft: '60px'
             }}>
                 <div style={{
-                    width: '64px',
-                    height: '64px',
-                    margin: '0 auto 24px',
-                    background: '#EF4444',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '32px',
-                    color: 'white'
-                }}>📖</div>
-                <h3 style={{
-                    fontSize: '20px',
-                    fontWeight: '600',
-                    color: '#991B1B',
-                    marginBottom: '12px'
-                }}>Journal Not Found</h3>
-                <p style={{
-                    fontSize: '16px',
-                    color: '#DC2626',
-                    lineHeight: '1.6'
-                }}>{t('journalNotFound') || 'Journal not found.'}</p>
+                    maxWidth: '600px',
+                    width: '100%',
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '32px',
+                    padding: '48px',
+                    textAlign: 'center',
+                    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+                    border: '1px solid rgba(226, 232, 240, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    {/* Background Pattern */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '-50%',
+                        right: '-30%',
+                        width: '300px',
+                        height: '300px',
+                        background: 'radial-gradient(circle, rgba(20, 184, 166, 0.05) 0%, transparent 70%)',
+                        borderRadius: '50%',
+                        zIndex: 0
+                    }}></div>
+                    
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                        <div style={{
+                            width: '120px',
+                            height: '120px',
+                            margin: '0 auto 32px',
+                            background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                            borderRadius: '60px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '48px',
+                            boxShadow: '0 20px 40px rgba(20, 184, 166, 0.2)',
+                            animation: 'bounceIn 0.8s ease-out'
+                        }}>
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V9A2 2 0 0 1 6 7H18A2 2 0 0 1 20 9V17H6.5A2.5 2.5 0 0 0 4 19.5Z" 
+                                    stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M8 11H16M8 15H14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </div>
+                        
+                        <h1 style={{
+                            fontSize: '32px',
+                            fontWeight: '800',
+                            color: '#1E293B',
+                            marginBottom: '16px',
+                            letterSpacing: '-0.025em',
+                            background: 'linear-gradient(135deg, #1E293B 0%, #475569 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
+                        }}>Journal Not Found</h1>
+                        
+                        <p style={{
+                            fontSize: '18px',
+                            color: '#64748B',
+                            lineHeight: '1.6',
+                            marginBottom: '32px',
+                            fontWeight: '500'
+                        }}>The journal you're looking for doesn't exist or may have been moved. Let's get you back on track!</p>
+                        
+                        <div style={{
+                            padding: '20px',
+                            background: 'rgba(20, 184, 166, 0.05)',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(20, 184, 166, 0.2)',
+                            marginBottom: '32px'
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                color: '#0D9488',
+                                fontSize: '14px',
+                                fontWeight: '600'
+                            }}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M13 16H12V12H11M12 8H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+                                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                {t('journalNotFound') || 'This journal could not be found in our database'}
+                            </div>
+                        </div>
+                        
+                        <div style={{
+                            display: 'flex',
+                            gap: '16px',
+                            justifyContent: 'center',
+                            flexWrap: 'wrap'
+                        }}>
+                            <button
+                                onClick={() => navigate(isEditorOrAdmin ? '/editor/journals' : '/archive')}
+                                style={{
+                                    padding: '16px 32px',
+                                    background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '16px',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: '0 8px 20px rgba(20, 184, 166, 0.3)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 12px 28px rgba(20, 184, 166, 0.4)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(20, 184, 166, 0.3)';
+                                }}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                {isEditorOrAdmin ? (t('backToJournals') || 'Browse Journals') : (t('backToArchive') || 'Browse Archive')}
+                            </button>
+                            
+                            <button
+                                onClick={() => navigate('/')}
+                                style={{
+                                    padding: '16px 32px',
+                                    background: 'rgba(255, 255, 255, 0.8)',
+                                    color: '#64748B',
+                                    border: '2px solid rgba(100, 116, 139, 0.2)',
+                                    borderRadius: '16px',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(100, 116, 139, 0.1)';
+                                    e.currentTarget.style.borderColor = '#64748B';
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)';
+                                    e.currentTarget.style.borderColor = 'rgba(100, 116, 139, 0.2)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                }}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" 
+                                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                {t('goHome') || 'Go Home'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>{`
+                    @keyframes bounceIn {
+                        0% {
+                            opacity: 0;
+                            transform: scale(0.3);
+                        }
+                        50% {
+                            opacity: 1;
+                            transform: scale(1.05);
+                        }
+                        70% {
+                            transform: scale(0.9);
+                        }
+                        100% {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                    }
+                `}</style>
             </div>
         );
     }
@@ -402,7 +685,7 @@ const JournalDetailsPage: React.FC = () => {
                         {isEditorOrAdmin ? (t('backToJournals') || 'Back to Journals') : (t('backToArchive') || 'Back to Archive')}
                     </button>
                     
-                    <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto', marginRight: '40px' }}>
+                    <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto', marginRight: '60px' }}>
                         {/* Download PDF Button - Available to all users */}
                         {journal.full_pdf && (
                             <a 
@@ -679,14 +962,15 @@ const JournalDetailsPage: React.FC = () => {
                                     onClick={() => setShowEditorInChiefModal(true)}
                                     style={{
                                         position: 'absolute',
-                                        top: '8px',
+                                        top: '50%',
                                         right: '8px',
-                                        padding: '4px 8px',
+                                        transform: 'translateY(-50%)',
+                                        padding: '8px 12px',
                                         background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
                                         color: 'white',
                                         border: 'none',
-                                        borderRadius: '6px',
-                                        fontSize: '11px',
+                                        borderRadius: '8px',
+                                        fontSize: '13px',
                                         fontWeight: '600',
                                         cursor: 'pointer',
                                         transition: 'all 0.3s ease',
@@ -694,11 +978,11 @@ const JournalDetailsPage: React.FC = () => {
                                         flexShrink: 0
                                     }}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-1px)';
+                                        e.currentTarget.style.transform = 'translateY(-50%) translateY(-1px)';
                                         e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.4)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.transform = 'translateY(-50%)';
                                         e.currentTarget.style.boxShadow = '0 2px 8px rgba(20, 184, 166, 0.3)';
                                     }}
                                 >
@@ -755,14 +1039,15 @@ const JournalDetailsPage: React.FC = () => {
                                     onClick={() => setShowEditorsModal(true)}
                                     style={{
                                         position: 'absolute',
-                                        top: '8px',
+                                        top: '50%',
                                         right: '8px',
-                                        padding: '4px 8px',
+                                        transform: 'translateY(-50%)',
+                                        padding: '8px 12px',
                                         background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
                                         color: 'white',
                                         border: 'none',
-                                        borderRadius: '6px',
-                                        fontSize: '11px',
+                                        borderRadius: '8px',
+                                        fontSize: '13px',
                                         fontWeight: '600',
                                         cursor: 'pointer',
                                         transition: 'all 0.3s ease',
@@ -770,11 +1055,11 @@ const JournalDetailsPage: React.FC = () => {
                                         flexShrink: 0
                                     }}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-1px)';
+                                        e.currentTarget.style.transform = 'translateY(-50%) translateY(-1px)';
                                         e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.transform = 'translateY(-50%)';
                                         e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
                                     }}
                                 >
@@ -1572,14 +1857,14 @@ const JournalDetailsPage: React.FC = () => {
                                         position: 'relative',
                                         zIndex: 1
                                     }}>
-                                        {entry.keywords ? (
+                                        {(language === 'en' && entry.keywords_en ? entry.keywords_en : entry.keywords) ? (
                                             <>
                                                 <span style={{ 
                                                     fontWeight: '600', 
                                                     color: '#475569',
                                                     marginRight: '8px'
                                                 }}>Keywords:</span>
-                                                {entry.keywords}
+                                                {language === 'en' && entry.keywords_en ? entry.keywords_en : entry.keywords}
                                             </>
                                         ) : 'No keywords available.'}
                                     </p>
@@ -1722,27 +2007,141 @@ const JournalDetailsPage: React.FC = () => {
              `}</style>
 
             {showEditorInChiefModal && (
-                <div className="modal-overlay">
-                    <div className="modal-container">
-                        <div className="modal-header">
-                            <h3>{t('selectEditorInChief') || 'Select Editor-in-Chief'}</h3>
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.5)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                    padding: '20px'
+                }}>
+                    <div style={{
+                        background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '24px',
+                        padding: '0',
+                        maxWidth: '500px',
+                        width: '100%',
+                        maxHeight: '80vh',
+                        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            padding: '32px 32px 0 32px',
+                            borderBottom: '1px solid rgba(226, 232, 240, 0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                        }}>
+                            <h3 style={{
+                                margin: 0,
+                                fontSize: '24px',
+                                fontWeight: '700',
+                                color: '#1E293B',
+                                letterSpacing: '-0.025em'
+                            }}>{t('selectEditorInChief') || 'Select Editor-in-Chief'}</h3>
                             <button 
-                                className="close-btn" 
                                 onClick={() => setShowEditorInChiefModal(false)}
                                 disabled={isSubmittingEditors}
+                                style={{
+                                    background: 'rgba(148, 163, 184, 0.1)',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    width: '40px',
+                                    height: '40px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: isSubmittingEditors ? 'not-allowed' : 'pointer',
+                                    fontSize: '20px',
+                                    color: '#64748B',
+                                    transition: 'all 0.3s ease',
+                                    marginBottom: '8px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isSubmittingEditors) {
+                                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                        e.currentTarget.style.color = '#EF4444';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isSubmittingEditors) {
+                                        e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
+                                        e.currentTarget.style.color = '#64748B';
+                                    }
+                                }}
                             >
-                                &times;
+                                ×
                             </button>
                         </div>
-                        <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                        <div style={{ 
+                            padding: '32px',
+                            maxHeight: '50vh', 
+                            overflowY: 'auto'
+                        }}>
                             {adminUsers.length === 0 ? (
-                                <div className="empty-state">
-                                    <p>{t('noAdminUsers') || 'No admin users found'}</p>
+                                <div style={{
+                                    textAlign: 'center',
+                                    padding: '40px 20px',
+                                    color: '#64748B'
+                                }}>
+                                    <div style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        margin: '0 auto 16px',
+                                        background: '#F1F5F9',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '24px'
+                                    }}>👥</div>
+                                    <p style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
+                                        {t('noAdminUsers') || 'No admin users found'}
+                                    </p>
                                 </div>
                             ) : (
-                                <div className="radio-group">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     {adminUsers.map(admin => (
-                                        <div key={admin.id} className="radio-item">
+                                        <label 
+                                            key={admin.id} 
+                                            htmlFor={`admin-${admin.id}`}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '16px 20px',
+                                                background: selectedEditorInChiefId === admin.id 
+                                                    ? 'rgba(20, 184, 166, 0.1)' 
+                                                    : 'rgba(255, 255, 255, 0.5)',
+                                                borderRadius: '16px',
+                                                border: `2px solid ${selectedEditorInChiefId === admin.id 
+                                                    ? '#14B8A6' 
+                                                    : 'rgba(226, 232, 240, 0.5)'}`,
+                                                cursor: isSubmittingEditors ? 'not-allowed' : 'pointer',
+                                                transition: 'all 0.3s ease',
+                                                opacity: isSubmittingEditors ? 0.7 : 1
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isSubmittingEditors && selectedEditorInChiefId !== admin.id) {
+                                                    e.currentTarget.style.background = 'rgba(20, 184, 166, 0.05)';
+                                                    e.currentTarget.style.borderColor = '#14B8A6';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isSubmittingEditors && selectedEditorInChiefId !== admin.id) {
+                                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.5)';
+                                                    e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.5)';
+                                                }
+                                            }}
+                                        >
                                             <input
                                                 type="radio"
                                                 id={`admin-${admin.id}`}
@@ -1751,25 +2150,97 @@ const JournalDetailsPage: React.FC = () => {
                                                 checked={selectedEditorInChiefId === admin.id}
                                                 onChange={() => setSelectedEditorInChiefId(admin.id)}
                                                 disabled={isSubmittingEditors}
+                                                style={{
+                                                    width: '18px',
+                                                    height: '18px',
+                                                    accentColor: '#14B8A6'
+                                                }}
                                             />
-                                            <label htmlFor={`admin-${admin.id}`}>{admin.name} ({admin.email})</label>
-                                        </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{
+                                                    fontSize: '16px',
+                                                    fontWeight: '600',
+                                                    color: '#1E293B',
+                                                    marginBottom: '4px'
+                                                }}>{admin.name}</div>
+                                                <div style={{
+                                                    fontSize: '14px',
+                                                    color: '#64748B'
+                                                }}>{admin.email}</div>
+                                            </div>
+                                        </label>
                                     ))}
                                 </div>
                             )}
                         </div>
-                        <div className="modal-footer">
+                        <div style={{
+                            padding: '24px 32px 32px 32px',
+                            borderTop: '1px solid rgba(226, 232, 240, 0.5)',
+                            display: 'flex',
+                            gap: '12px',
+                            justifyContent: 'flex-end'
+                        }}>
                             <button
-                                className="btn btn-secondary"
                                 onClick={() => setShowEditorInChiefModal(false)}
                                 disabled={isSubmittingEditors}
+                                style={{
+                                    padding: '12px 24px',
+                                    background: 'rgba(148, 163, 184, 0.1)',
+                                    color: '#64748B',
+                                    border: '1px solid rgba(148, 163, 184, 0.3)',
+                                    borderRadius: '12px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    cursor: isSubmittingEditors ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    opacity: isSubmittingEditors ? 0.7 : 1
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isSubmittingEditors) {
+                                        e.currentTarget.style.background = 'rgba(148, 163, 184, 0.2)';
+                                        e.currentTarget.style.borderColor = '#94A3B8';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isSubmittingEditors) {
+                                        e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
+                                        e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+                                    }
+                                }}
                             >
                                 {t('cancel') || 'Cancel'}
                             </button>
                             <button
-                                className="btn btn-primary"
                                 onClick={handleSetEditorInChief}
                                 disabled={!selectedEditorInChiefId || isSubmittingEditors}
+                                style={{
+                                    padding: '12px 24px',
+                                    background: (!selectedEditorInChiefId || isSubmittingEditors) 
+                                        ? '#94A3B8' 
+                                        : 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    cursor: (!selectedEditorInChiefId || isSubmittingEditors) ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: (!selectedEditorInChiefId || isSubmittingEditors) 
+                                        ? 'none' 
+                                        : '0 4px 12px rgba(20, 184, 166, 0.3)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (selectedEditorInChiefId && !isSubmittingEditors) {
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(20, 184, 166, 0.4)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (selectedEditorInChiefId && !isSubmittingEditors) {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.3)';
+                                    }
+                                }}
                             >
                                 {isSubmittingEditors ? (t('saving') || 'Saving...') : (t('save') || 'Save')}
                             </button>
@@ -1779,27 +2250,141 @@ const JournalDetailsPage: React.FC = () => {
             )}
             
             {showEditorsModal && (
-                <div className="modal-overlay">
-                    <div className="modal-container">
-                        <div className="modal-header">
-                            <h3>{t('manageEditors') || 'Manage Editors'}</h3>
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0, 0, 0, 0.5)',
+                    backdropFilter: 'blur(8px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                    padding: '20px'
+                }}>
+                    <div style={{
+                        background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '24px',
+                        padding: '0',
+                        maxWidth: '500px',
+                        width: '100%',
+                        maxHeight: '80vh',
+                        boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            padding: '32px 32px 0 32px',
+                            borderBottom: '1px solid rgba(226, 232, 240, 0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                        }}>
+                            <h3 style={{
+                                margin: 0,
+                                fontSize: '24px',
+                                fontWeight: '700',
+                                color: '#1E293B',
+                                letterSpacing: '-0.025em'
+                            }}>{t('manageEditors') || 'Manage Editors'}</h3>
                             <button 
-                                className="close-btn" 
                                 onClick={() => setShowEditorsModal(false)}
                                 disabled={isSubmittingEditors}
+                                style={{
+                                    background: 'rgba(148, 163, 184, 0.1)',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    width: '40px',
+                                    height: '40px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: isSubmittingEditors ? 'not-allowed' : 'pointer',
+                                    fontSize: '20px',
+                                    color: '#64748B',
+                                    transition: 'all 0.3s ease',
+                                    marginBottom: '8px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isSubmittingEditors) {
+                                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                        e.currentTarget.style.color = '#EF4444';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isSubmittingEditors) {
+                                        e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
+                                        e.currentTarget.style.color = '#64748B';
+                                    }
+                                }}
                             >
-                                &times;
+                                ×
                             </button>
                         </div>
-                        <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                        <div style={{ 
+                            padding: '32px',
+                            maxHeight: '50vh', 
+                            overflowY: 'auto'
+                        }}>
                             {editorUsers.length === 0 ? (
-                                <div className="empty-state">
-                                    <p>{t('noEditorUsers') || 'No editor users found'}</p>
+                                <div style={{
+                                    textAlign: 'center',
+                                    padding: '40px 20px',
+                                    color: '#64748B'
+                                }}>
+                                    <div style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        margin: '0 auto 16px',
+                                        background: '#F1F5F9',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '24px'
+                                    }}>✏️</div>
+                                    <p style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
+                                        {t('noEditorUsers') || 'No editor users found'}
+                                    </p>
                                 </div>
                             ) : (
-                                <div className="checkbox-group">
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                     {editorUsers.map(editor => (
-                                        <div key={editor.id} className="checkbox-item">
+                                        <label
+                                            key={editor.id}
+                                            htmlFor={`editor-${editor.id}`}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '12px',
+                                                padding: '16px 20px',
+                                                background: selectedEditorIds.includes(editor.id)
+                                                    ? 'rgba(59, 130, 246, 0.1)'
+                                                    : 'rgba(255, 255, 255, 0.5)',
+                                                borderRadius: '16px',
+                                                border: `2px solid ${selectedEditorIds.includes(editor.id)
+                                                    ? '#3B82F6'
+                                                    : 'rgba(226, 232, 240, 0.5)'}`,
+                                                cursor: isSubmittingEditors ? 'not-allowed' : 'pointer',
+                                                transition: 'all 0.3s ease',
+                                                opacity: isSubmittingEditors ? 0.7 : 1
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isSubmittingEditors && !selectedEditorIds.includes(editor.id)) {
+                                                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.05)';
+                                                    e.currentTarget.style.borderColor = '#3B82F6';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isSubmittingEditors && !selectedEditorIds.includes(editor.id)) {
+                                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.5)';
+                                                    e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.5)';
+                                                }
+                                            }}
+                                        >
                                             <input
                                                 type="checkbox"
                                                 id={`editor-${editor.id}`}
@@ -1813,25 +2398,97 @@ const JournalDetailsPage: React.FC = () => {
                                                     }
                                                 }}
                                                 disabled={isSubmittingEditors}
+                                                style={{
+                                                    width: '18px',
+                                                    height: '18px',
+                                                    accentColor: '#3B82F6'
+                                                }}
                                             />
-                                            <label htmlFor={`editor-${editor.id}`}>{editor.name} ({editor.email})</label>
-                                        </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{
+                                                    fontSize: '16px',
+                                                    fontWeight: '600',
+                                                    color: '#1E293B',
+                                                    marginBottom: '4px'
+                                                }}>{editor.name}</div>
+                                                <div style={{
+                                                    fontSize: '14px',
+                                                    color: '#64748B'
+                                                }}>{editor.email}</div>
+                                            </div>
+                                        </label>
                                     ))}
                                 </div>
                             )}
                         </div>
-                        <div className="modal-footer">
+                        <div style={{
+                            padding: '24px 32px 32px 32px',
+                            borderTop: '1px solid rgba(226, 232, 240, 0.5)',
+                            display: 'flex',
+                            gap: '12px',
+                            justifyContent: 'flex-end'
+                        }}>
                             <button
-                                className="btn btn-secondary"
                                 onClick={() => setShowEditorsModal(false)}
                                 disabled={isSubmittingEditors}
+                                style={{
+                                    padding: '12px 24px',
+                                    background: 'rgba(148, 163, 184, 0.1)',
+                                    color: '#64748B',
+                                    border: '1px solid rgba(148, 163, 184, 0.3)',
+                                    borderRadius: '12px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    cursor: isSubmittingEditors ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    opacity: isSubmittingEditors ? 0.7 : 1
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isSubmittingEditors) {
+                                        e.currentTarget.style.background = 'rgba(148, 163, 184, 0.2)';
+                                        e.currentTarget.style.borderColor = '#94A3B8';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isSubmittingEditors) {
+                                        e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
+                                        e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+                                    }
+                                }}
                             >
                                 {t('cancel') || 'Cancel'}
                             </button>
                             <button
-                                className="btn btn-primary"
                                 onClick={handleUpdateEditors}
                                 disabled={isSubmittingEditors}
+                                style={{
+                                    padding: '12px 24px',
+                                    background: isSubmittingEditors 
+                                        ? '#94A3B8' 
+                                        : 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    cursor: isSubmittingEditors ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: isSubmittingEditors 
+                                        ? 'none' 
+                                        : '0 4px 12px rgba(59, 130, 246, 0.3)'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isSubmittingEditors) {
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.4)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isSubmittingEditors) {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                                    }
+                                }}
                             >
                                 {isSubmittingEditors ? (t('saving') || 'Saving...') : (t('save') || 'Save')}
                             </button>

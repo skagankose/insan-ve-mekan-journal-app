@@ -53,6 +53,7 @@ export interface JournalEntryRead {
     abstract_tr: string;
     abstract_en?: string;
     keywords?: string;
+    keywords_en?: string;
     page_number?: string;
     article_type?: string; // Corresponds to ArticleType enum
     language?: string; // Corresponds to ArticleLanguage enum
@@ -74,6 +75,7 @@ export interface JournalEntryCreate {
     abstract_tr: string;
     abstract_en?: string;
     keywords?: string;
+    keywords_en?: string;
     article_type?: string;
     language?: string;
     journal_id?: number;
@@ -87,6 +89,7 @@ interface JournalEntryUpdate {
     abstract_tr?: string;
     abstract_en?: string;
     keywords?: string;
+    keywords_en?: string;
     article_type?: string;
     language?: string;
     authors_ids?: number[];
@@ -182,6 +185,7 @@ interface AuthorUpdateRead {
     abstract_en?: string;
     abstract_tr?: string;
     keywords?: string;
+    keywords_en?: string;
     file_path?: string;
     notes?: string;
     created_date: string; // ISO format string for datetime

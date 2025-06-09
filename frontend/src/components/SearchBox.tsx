@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { searchAll, SearchResults } from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { FaUser, FaBook, FaFileAlt, FaSearch } from 'react-icons/fa';
 import '../styles/SearchBox.css';
+import { FaUser, FaBook, FaFileAlt, FaSearch } from 'react-icons/fa';
 
 const SearchBox: React.FC = () => {
   const [query, setQuery] = useState<string>('');
@@ -16,7 +16,7 @@ const SearchBox: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -163,7 +163,9 @@ const SearchBox: React.FC = () => {
                     onClick={() => handleResultClick('journal', journal.id)}
                   >
                     <FaBook className="result-icon" />
-                    <span className="result-text">{journal.title}</span>
+                    <span className="result-text">
+                      {language === 'en' && journal.title_en ? journal.title_en : journal.title}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -182,7 +184,9 @@ const SearchBox: React.FC = () => {
                     onClick={() => handleResultClick('entry', entry.id)}
                   >
                     <FaFileAlt className="result-icon" />
-                    <span className="result-text">{entry.title}</span>
+                    <span className="result-text">
+                      {language === 'en' && entry.title_en ? entry.title_en : entry.title}
+                    </span>
                   </li>
                 ))}
               </ul>

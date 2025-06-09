@@ -351,7 +351,7 @@ const translations: Record<Language, TranslationDictionary> = {
     // Journal Details Page
     'backToJournals': 'Back to Journals',
     'backToArchive': 'Back to Archive',
-    'failedToLoadJournalData': 'Failed to load journal data',
+    'failedToLoadJournalData': 'Failed to load journal data from the server. This could be due to a temporary network issue, server maintenance, or the journal may have been moved or deleted. Please check your internet connection and try refreshing the page. If the problem persists, please contact our technical support team.',
     'loadingJournalData': 'Loading journal data...',
     'journalNotFound': 'Journal not found',
     'createdDate': 'Created Date',
@@ -673,7 +673,7 @@ const translations: Record<Language, TranslationDictionary> = {
     // Journal Details Page
     'backToJournals': 'Dergilere Dön',
     'backToArchive': 'Arşive Dön',
-    'failedToLoadJournalData': 'Dergi verileri yüklenemedi',
+    'failedToLoadJournalData': 'Dergi verileri sunucudan yüklenemedi. Bu durum geçici bir ağ sorunu, sunucu bakımı veya derginin taşınmış ya da silinmiş olması nedeniyle ortaya çıkabilir. Lütfen internet bağlantınızı kontrol edin ve sayfayı yenilemeyi deneyin. Sorun devam ederse, teknik destek ekibimizle iletişime geçin.',
     'loadingJournalData': 'Dergi verileri yükleniyor...',
     'journalNotFound': 'Dergi bulunamadı',
     'createdDate': 'Oluşturulma Tarihi',

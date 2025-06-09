@@ -203,31 +203,38 @@ async def search(
             users = db.exec(users_statement).all()
             results.users = users
     
-    # Search journals by title (case-insensitive)
+    # Search journals by title or title_en (case-insensitive)
     if has_limited_access:
         # For limited access, only show published journals
         journals_statement = select(models.Journal).where(
             and_(
-                models.Journal.title.ilike(search_pattern),
+                or_(
+                    models.Journal.title.ilike(search_pattern),
+                    models.Journal.title_en.ilike(search_pattern)
+                ),
                 models.Journal.is_published == True
             )
         ).limit(limit)
     else:
         # For admin/editor/owner, show all journals
         journals_statement = select(models.Journal).where(
-            models.Journal.title.ilike(search_pattern)
+            or_(
+                models.Journal.title.ilike(search_pattern),
+                models.Journal.title_en.ilike(search_pattern)
+            )
         ).limit(limit)
     
     journals = db.exec(journals_statement).all()
     results.journals = journals
     
-    # Search entries by title or random_token (case-insensitive)
+    # Search entries by title, title_en, or random_token (case-insensitive)
     if has_limited_access:
         # For limited access, only show completed/published entries
         entries_statement = select(models.JournalEntry).where(
             and_(
                 or_(
                     models.JournalEntry.title.ilike(search_pattern),
+                    models.JournalEntry.title_en.ilike(search_pattern),
                     models.JournalEntry.random_token.ilike(search_pattern)
                 ),
                 models.JournalEntry.status == JournalEntryStatus.ACCEPTED
@@ -238,6 +245,7 @@ async def search(
         entries_statement = select(models.JournalEntry).where(
             or_(
                 models.JournalEntry.title.ilike(search_pattern),
+                models.JournalEntry.title_en.ilike(search_pattern),
                 models.JournalEntry.random_token.ilike(search_pattern)
             )
         ).limit(limit)

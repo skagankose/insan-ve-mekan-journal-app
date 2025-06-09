@@ -9,7 +9,8 @@ import {
   FaSearchPlus,
   FaComments,
   FaCreditCard,
-  FaListOl
+  FaListOl,
+  FaExclamationTriangle
 } from 'react-icons/fa';
 import { MdPolicy, MdHelp, MdSecurity } from 'react-icons/md';
 import Footer from '../components/Footer';
@@ -177,7 +178,7 @@ const GeneralInfoPage: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.5rem' }}>
               <FaCreditCard size={40} color="#14b8a6" style={{ marginRight: '1rem' }} />
               <h3 style={{ fontSize: '1.8rem', margin: 0, color: '#1E293B' }}>
-                {language === 'en' ? 'Payment Information' : 'Ödeme Bilgileri'}
+                {language === 'en' ? 'Processing Fee Information' : 'İşleme Ücreti Bilgileri'}
               </h3>
             </div>
             
@@ -298,36 +299,37 @@ const GeneralInfoPage: React.FC = () => {
               <div style={{ 
                 padding: '1.5rem', 
                 borderRadius: '12px', 
-                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%)',
-                border: '1px solid rgba(59, 130, 246, 0.15)'
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%)',
+                border: '1px solid rgba(245, 158, 11, 0.3)'
               }}>
-                <h4 style={{ color: '#2563EB', marginBottom: '1rem' }}>
-                  {language === 'en' ? '⚠️ Important Payment Instructions' : '⚠️ Önemli Ödeme Talimatları'}
+                <h4 style={{ color: '#D97706', marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>
+                  <FaExclamationTriangle size={20} style={{ marginRight: '0.5rem' }} />
+                  {language === 'en' ? 'Important Payment Instructions' : 'Önemli Ödeme Talimatları'}
                 </h4>
                 <ul style={{ color: '#374151', margin: 0, lineHeight: '1.8', paddingLeft: '1.5rem' }}>
                   <li style={{ marginBottom: '0.5rem' }}>
-                    <strong>{language === 'en' ? 'Include Your Unique Token:' : 'Benzersiz Token\'ınızı Dahil Edin:'}</strong>
+                    <strong>{language === 'en' ? 'Include Your Unique Token:' : 'Makalenize Özel Token\'ınızı Dahil Edin:'}</strong>
                     {' ' + (language === 'en' 
                       ? 'You must include your unique submission token in the payment description/reference field.' 
-                      : 'Ödeme açıklama/referans alanında benzersiz gönderim token\'ınızı belirtmelisiniz.')}
+                      : 'Ödeme yaparken açıklama/referans alanında makalenize özel token bilgisini belirtmelisiniz.')}
                   </li>
                   <li style={{ marginBottom: '0.5rem' }}>
                     <strong>{language === 'en' ? 'Find Your Token:' : 'Token\'ınızı Bulun:'}</strong>
                     {' ' + (language === 'en' 
                       ? 'Your unique token will be provided after submitting your paper through the platform.' 
-                      : 'Benzersiz token\'ınız platform üzerinden makalenizi gönderdikten sonra sağlanacaktır.')}
+                      : 'Makalenize özel token bilgisi, platform üzerinden makalenizi oluşturduktan sonra sağlanacaktır.')}
                   </li>
                   <li style={{ marginBottom: '0.5rem' }}>
                     <strong>{language === 'en' ? 'Payment Verification:' : 'Ödeme Doğrulaması:'}</strong>
                     {' ' + (language === 'en' 
                       ? 'Without the correct token, we cannot link your payment to your submission.' 
-                      : 'Doğru token olmadan ödemenizi gönderiminizle eşleştiremeyiz.')}
+                      : 'Doğru token belirtilmeden ödemenizi gönderiminizle eşleştiremeyiz.')}
                   </li>
                   <li>
                     <strong>{language === 'en' ? 'Processing Time:' : 'İşlem Süresi:'}</strong>
                     {' ' + (language === 'en' 
                       ? 'Payment verification typically takes 1-2 business days.' 
-                      : 'Ödeme doğrulaması genellikle 1-2 iş günü sürer.')}
+                      : 'Ödemenin doğrulanması genellikle 1-2 iş günü sürer.')}
                   </li>
                 </ul>
               </div>

@@ -646,12 +646,22 @@ def seed_database():
                     JournalEntryStatus.NOT_ACCEPTED
                 ])
                 
-                # More varied keywords
-                keyword_options = [
+                # Turkish keywords
+                turkish_keyword_options = [
+                    "kentsel", "mimarlık", "tasarım", "kültür", "miras", "mekan", "çevre", 
+                    "sosyal", "planlama", "teori", "sürdürülebilir", "dijital", "tarihi", "kamusal", 
+                    "altyapı", "ekoloji", "akıllı", "mobilite", "peyzaj", "koruma",
+                    "konut", "eğitim", "malzeme", "teknoloji", "yenileme", "restorasyon",
+                    "toplum", "kentleşme", "yaşam", "işlev", "estetik", "yapı", "insan"
+                ]
+                
+                # English keywords
+                english_keyword_options = [
                     "urban", "architecture", "design", "culture", "heritage", "space", "environment", 
                     "social", "planning", "theory", "sustainable", "digital", "historical", "public", 
                     "infrastructure", "ecology", "smart", "mobility", "landscape", "conservation",
-                    "housing", "education", "material", "technology", "renovation", "restoration"
+                    "housing", "education", "material", "technology", "renovation", "restoration",
+                    "community", "urbanization", "living", "function", "aesthetics", "building", "human"
                 ]
                 
                 # More varied page numbers
@@ -670,6 +680,10 @@ def seed_database():
                 tr_title = f"Makale {entry_id}: {article_themes_tr[selected_theme_index]} {article_approaches_tr[selected_approach_index]}"
                 en_title = f"Article {entry_id}: {article_approaches[selected_approach_index]} {article_themes[selected_theme_index]}"
                 
+                # Generate Turkish and English keywords separately
+                turkish_keywords = ", ".join(random.sample(turkish_keyword_options, k=random.randint(3, 6)))
+                english_keywords = ", ".join(random.sample(english_keyword_options, k=random.randint(3, 6)))
+                
                 journal_entries.append(
                     JournalEntry(
                         id=entry_id,
@@ -679,7 +693,8 @@ def seed_database():
                         publication_date=publication_date,
                         abstract_tr=f"TR Abstract for article {entry_id} exploring important aspects of the subject matter with detailed methodology and findings.",
                         abstract_en=f"EN Abstract for article {entry_id} with comprehensive analysis, methodology, and conclusions.",
-                        keywords=", ".join(random.sample(keyword_options, k=random.randint(3, 6))),
+                        keywords=turkish_keywords,
+                        keywords_en=english_keywords,
                         page_number=f"{start_page}-{end_page}",
                         article_type=random.choice(list(ArticleType)),
                         language=random.choice(list(ArticleLanguage)),

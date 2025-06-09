@@ -227,6 +227,7 @@ class JournalEntryBase(SQLModel):
     abstract_tr: str
     abstract_en: Optional[str] = None
     keywords: Optional[str] = None
+    keywords_en: Optional[str] = Field(default="")
     page_number: Optional[str] = None
     article_type: Optional[str] = None
     language: Optional[str] = None
@@ -282,6 +283,7 @@ class JournalEntryUpdate(SQLModel):
     abstract_tr: Optional[str] = None
     abstract_en: Optional[str] = None
     keywords: Optional[str] = None
+    keywords_en: Optional[str] = None
     page_number: Optional[str] = None
     article_type: Optional[str] = None
     language: Optional[str] = None
