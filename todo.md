@@ -49,3 +49,4 @@ Admin Only: 5 pages (requires admin+ role)
 
 Toast Messages in CREATE and EDIT and DELETE forms
 Check Pop Up Windows in All Pages
+Add Not Found Pages for Journal Entries and Users
