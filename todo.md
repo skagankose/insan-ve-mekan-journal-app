@@ -9,7 +9,7 @@ Public/Authentication Pages
 
 Public Content Pages
 [ + ] ArchivedJournalsPage - Journal List - Published
-[ - ] JournalDetailsPage - Journal Details
+[ + ] JournalDetailsPage - Journal Details
 [ + ] JournalEntriesPage - ?????
 [ - ] JournalEntryDetailsPage - Entry Details
 [ + ] About Page
@@ -43,3 +43,8 @@ User Protected: 7 pages (requires login)
 Public Content: 4 pages (viewable by anyone)
 Editor Only: 1 page (requires editor+ role)
 Admin Only: 5 pages (requires admin+ role)
+
+[ - ] Confirmations E-mail
+[ - ] Update E-mails (Referee Assigned, Author Updatem, Referee Update)
+
+Toast Messages in CREATE and EDIT and DELETE forms

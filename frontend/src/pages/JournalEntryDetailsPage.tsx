@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { FaCreditCard, FaExclamationTriangle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import Footer from '../components/Footer';
 
 const JournalEntryDetailsPage: React.FC = () => {
@@ -22,6 +23,56 @@ const JournalEntryDetailsPage: React.FC = () => {
   const isEditorOrAdmin = isAuthenticated && user && (isEditor || isAdmin || isOwner);
   const canViewFullDetails = isEditorOrAdmin;
   
+  // Check if user can view referees and files sections
+  // This should be visible to:
+  // 1. Admin and Owner users (always)
+  // 2. Editors of the specific journal this entry belongs to
+  // Note: For now, we show to all editors. This should be modified to check journal-specific editors
+  const canViewRefereesAndFiles = isAuthenticated && user && (
+    user.role === 'admin' || 
+    user.role === 'owner' || 
+    (user.role === 'editor' && entry?.journal_id) // Editor can see if entry belongs to a journal
+  );
+  
+  // Check if user can view reference token and updates button
+  // This should be visible to:
+  // 1. Authors and referees of the entry
+  // 2. Editors of the related journal
+  // 3. Owner and admin role users
+  const canViewTokenAndUpdates = isAuthenticated && user && (
+    user.role === 'admin' || 
+    user.role === 'owner' || 
+    (user.role === 'editor' && entry?.journal_id) || // Editor can see if entry belongs to a journal
+    entry?.authors?.some(author => author.id === user.id) || // User is an author
+    entry?.referees?.some(referee => referee.id === user.id) // User is a referee
+  );
+  
+  // Check if user can view payment processing fee section
+  // This should be visible to:
+  // 1. Authors and referees of the entry
+  // 2. Editors of the related journal
+  // 3. Owner and admin role users
+  const canViewPaymentSection = isAuthenticated && user && (
+    user.role === 'admin' || 
+    user.role === 'owner' || 
+    (user.role === 'editor' && entry?.journal_id) || // Editor can see if entry belongs to a journal
+    entry?.authors?.some(author => author.id === user.id) || // User is an author
+    entry?.referees?.some(referee => referee.id === user.id) // User is a referee
+  );
+  
+  // Check if user can view status information
+  // This should be visible to:
+  // 1. Authors and referees of the entry
+  // 2. Editors of the related journal
+  // 3. Owner and admin role users
+  const canViewStatus = isAuthenticated && user && (
+    user.role === 'admin' || 
+    user.role === 'owner' || 
+    (user.role === 'editor' && entry?.journal_id) || // Editor can see if entry belongs to a journal
+    entry?.authors?.some(author => author.id === user.id) || // User is an author
+    entry?.referees?.some(referee => referee.id === user.id) // User is a referee
+  );
+  
   // Modal states for managing authors and referees
   const [showAuthorsModal, setShowAuthorsModal] = useState(false);
   const [showRefereesModal, setShowRefereesModal] = useState(false);
@@ -30,6 +81,9 @@ const JournalEntryDetailsPage: React.FC = () => {
   const [selectedAuthorIds, setSelectedAuthorIds] = useState<number[]>([]);
   const [selectedRefereeIds, setSelectedRefereeIds] = useState<number[]>([]);
   const [isSubmittingUsers, setIsSubmittingUsers] = useState(false);
+
+  // Payment accordion state
+  const [isPaymentAccordionOpen, setIsPaymentAccordionOpen] = useState(false);
 
   // Author details modal state
   const [showAuthorDetailsModal, setShowAuthorDetailsModal] = useState(false);
@@ -306,6 +360,11 @@ const JournalEntryDetailsPage: React.FC = () => {
     navigate(`/admin/users/profile/${referee.id}`);
   };
 
+  // Handle author profile navigation
+  const handleAuthorProfileClick = (author: apiService.UserRead) => {
+    navigate(`/admin/users/profile/${author.id}`);
+  };
+
   if (loading) {
     return <div className="loading">{t('loadingEntryData') || 'Loading entry data...'}</div>;
   }
@@ -329,7 +388,15 @@ const JournalEntryDetailsPage: React.FC = () => {
           marginBottom: '16px'
         }}>
           <button 
-            onClick={() => navigate(-1)} 
+            onClick={() => {
+              // If entry has a journal, navigate to that journal
+              if (entry?.journal_id) {
+                navigate(`/journals/${entry.journal_id}`);
+              } else {
+                // Fallback to previous page if no journal is associated
+                navigate(-1);
+              }
+            }} 
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -360,124 +427,161 @@ const JournalEntryDetailsPage: React.FC = () => {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            {t('back') || 'Back'}
+            {entry?.journal_id ? (
+              language === 'tr' ? 'Dergiye Dön' : 'Back to Journal'
+            ) : (
+              language === 'tr' ? 'Geri' : 'Back'
+            )}
           </button>
           
           {/* Action buttons moved to top right */}
-          {user && (
-            // Show action-buttons div if user is author, editor, admin, OR referee for this entry
-            (entry.authors?.some(author => author.id === user.id) || 
-             user.role === 'editor' || 
-             user.role === 'admin' ||
-             user.role === 'owner' ||
-             entry.referees?.some(referee => referee.id === user.id)
-            ) && (
-              <div style={{ 
-                display: 'flex', 
-                gap: '12px', 
-                marginLeft: 'auto', 
-                marginRight: '60px'
+          <div style={{ 
+            display: 'flex', 
+            gap: '12px', 
+            marginLeft: 'auto', 
+            marginRight: '60px'
+          }}>
+            {/* Reference Token - Always visible to all users */}
+            {entry.random_token && (
+              <div style={{
+                padding: '12px 16px',
+                background: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(20, 184, 166, 0.2)',
+                borderRadius: '12px',
+                fontFamily: 'monospace',
+                fontSize: '14px',
+                color: '#0D9488',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
-                {entry.random_token && (
-                  <div style={{
-                    padding: '12px 16px',
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(20, 184, 166, 0.2)',
-                    borderRadius: '12px',
-                    fontFamily: 'monospace',
-                    fontSize: '14px',
-                    color: '#0D9488',
-                    fontWeight: '600',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    {t('referenceToken') || 'Reference Token'}: <strong>{entry.random_token}</strong>
-                  </div>
-                )}
-                
-                {/* Edit Entry Button: Show if user is author, editor, or admin */}
-                {(entry.authors?.some(author => author.id === user.id) ||
-                  user.role === 'editor' ||
-                  user.role === 'admin' ||
-                  user.role === 'owner') && (
-                  <button
-                    onClick={() => navigate(`/entries/edit/${entry.id}`)}
-                    style={{
-                      padding: '12px 20px',
-                      background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '12px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(20, 184, 166, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.3)';
-                    }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H16C16.5304 20 17.0391 19.7893 17.4142 19.4142C17.7893 19.0391 18 18.5304 18 18V13M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    {t('editEntry') || 'Edit Entry'}
-                  </button>
-                )}
-                
-                {/* View Updates Button: Show if user is editor, admin, author, or referee for this entry */}
-                {(user.role === 'editor' || 
-                  user.role === 'admin' ||
-                  user.role === 'owner' ||
-                  entry.authors?.some(author => author.id === user?.id) ||
-                  entry.referees?.some(referee => referee.id === user?.id)) && (
-                  <button
-                    onClick={() => navigate(`/entries/${entry.id}/updates`)}
-                    style={{
-                      padding: '12px 20px',
-                      background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '12px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 20H21L19 18L21 16H12V20ZM4 4V6H20V4H4ZM4 8V10H20V8H4ZM4 12V14H12V12H4Z" fill="currentColor"/>
-                    </svg>
-                    {t('viewUpdates') || 'View Updates'}
-                  </button>
-                )}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {t('referenceToken') || 'Reference Token'}: <strong>{entry.random_token}</strong>
               </div>
-            )
-          )}
+            )}
+            
+            {/* Download PDF Button - Always visible to all users */}
+            {(entry.full_pdf || entry.file_path) && (
+              <a 
+                href={`/api${entry.full_pdf || entry.file_path}`} 
+                download
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px 20px',
+                  background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                  color: 'white',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  borderRadius: '12px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(20, 184, 166, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.3)';
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15L17 10M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {t('downloadPdf') || 'Download PDF'}
+              </a>
+            )}
+            
+            {/* Authenticated user buttons */}
+            {user && (
+              // Show additional action-buttons if user is author, editor, admin, OR referee for this entry
+              (entry.authors?.some(author => author.id === user.id) || 
+               user.role === 'editor' || 
+               user.role === 'admin' ||
+               user.role === 'owner' ||
+               entry.referees?.some(referee => referee.id === user.id)
+              ) && (
+                <>
+                  
+                  {/* Edit Entry Button: Show only to journal editors, admins, and owners */}
+                  {canViewRefereesAndFiles && (
+                    <button
+                      onClick={() => navigate(`/entries/edit/${entry.id}`)}
+                      style={{
+                        padding: '12px 20px',
+                        background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(20, 184, 166, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.3)';
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H16C16.5304 20 17.0391 19.7893 17.4142 19.4142C17.7893 19.0391 18 18.5304 18 18V13M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {t('editEntry') || 'Edit Entry'}
+                    </button>
+                  )}
+                  
+                  {/* View Updates Button: Show to authors, referees, journal editors, admins, and owners */}
+                  {canViewTokenAndUpdates && (
+                    <button
+                      onClick={() => navigate(`/entries/${entry.id}/updates`)}
+                      style={{
+                        padding: '12px 20px',
+                        background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 20H21L19 18L21 16H12V20ZM4 4V6H20V4H4ZM4 8V10H20V8H4ZM4 12V14H12V12H4Z" fill="currentColor"/>
+                      </svg>
+                      {t('viewUpdates') || 'View Updates'}
+                    </button>
+                  )}
+                </>
+              )
+            )}
+          </div>
         </div>
         <h1>{language === 'en' && entry.title_en ? entry.title_en : entry.title}</h1>
       </div>
@@ -557,12 +661,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                     <button
                       onClick={() => setShowAuthorsModal(true)}
                       style={{
-                        padding: '6px 12px',
+                        padding: '8px 12px',
                         background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '8px',
-                        fontSize: '12px',
+                        fontSize: '14px',
                         fontWeight: '600',
                         cursor: 'pointer',
                         transition: 'all 0.3s ease'
@@ -742,12 +846,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                     <button
                       onClick={() => setShowJournalModal(true)}
                       style={{
-                        padding: '6px 12px',
+                        padding: '8px 12px',
                         background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '8px',
-                        fontSize: '12px',
+                        fontSize: '14px',
                         fontWeight: '600',
                         cursor: 'pointer',
                         transition: 'all 0.3s ease'
@@ -1053,6 +1157,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Article Type box - Visible to all users */}
               {entry.article_type && (
                 <div style={{
                   display: 'flex',
@@ -1138,235 +1243,451 @@ const JournalEntryDetailsPage: React.FC = () => {
                 </div>
               )}
 
-              {entry.status && (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '16px 20px',
-                  background: 'rgba(255, 255, 255, 0.7)',
-                  borderRadius: '16px',
-                  border: `1px solid ${entry.status === 'accepted' ? 'rgba(16, 185, 129, 0.3)' : 
-                                      entry.status === 'rejected' ? 'rgba(239, 68, 68, 0.3)' : 
-                                      'rgba(226, 232, 240, 0.6)'}`
-                }}>
-                  <div style={{
-                    width: '36px',
-                    height: '36px',
-                    background: entry.status === 'accepted' 
-                      ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
-                      : entry.status === 'rejected' 
-                      ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)'
-                      : 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                    borderRadius: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    {entry.status === 'accepted' ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    ) : entry.status === 'rejected' ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M18 6L6 18M6 6L18 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ 
-                      fontSize: '13px', 
-                      fontWeight: '600', 
-                      color: '#64748B',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                      marginBottom: '4px'
-                    }}>{t('status') || 'Status'}</div>
-                    <div style={{ 
-                      fontSize: '16px', 
-                      fontWeight: '700', 
-                      color: entry.status === 'accepted' ? '#059669' : 
-                            entry.status === 'rejected' ? '#DC2626' : '#D97706',
+              {/* Status box - Only visible to authors, referees, editors, admins, and owners */}
+              {entry.status && canViewStatus && (
+                    <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px'
+                      gap: '12px',
+                      padding: '16px 20px',
+                      background: entry.status === 'accepted' ? 'rgba(16, 185, 129, 0.1)' : 
+                                 entry.status === 'not_accepted' ? 'rgba(239, 68, 68, 0.1)' :
+                                 entry.status === 'rejected' ? 'rgba(239, 68, 68, 0.1)' :
+                                 entry.status === 'waiting_for_payment' ? 'rgba(253, 230, 138, 0.6)' :
+                                 entry.status === 'waiting_for_authors' ? 'rgba(59, 130, 246, 0.1)' :
+                                 entry.status === 'waiting_for_referees' ? 'rgba(139, 92, 246, 0.1)' :
+                                 entry.status === 'waiting_for_editors' ? 'rgba(254, 215, 170, 0.6)' :
+                                 entry.status === 'pending' ? 'rgba(245, 158, 11, 0.1)' :
+                                 'rgba(148, 163, 184, 0.1)',
+                      borderRadius: '16px',
+                      border: `1px solid ${entry.status === 'accepted' ? 'rgba(16, 185, 129, 0.3)' : 
+                                          entry.status === 'not_accepted' ? 'rgba(239, 68, 68, 0.3)' :
+                                          entry.status === 'rejected' ? 'rgba(239, 68, 68, 0.3)' :
+                                          entry.status === 'waiting_for_payment' ? 'rgba(253, 230, 138, 0.8)' :
+                                          entry.status === 'waiting_for_authors' ? 'rgba(59, 130, 246, 0.3)' :
+                                          entry.status === 'waiting_for_referees' ? 'rgba(139, 92, 246, 0.3)' :
+                                          entry.status === 'waiting_for_editors' ? 'rgba(194, 65, 12, 0.3)' :
+                                          entry.status === 'pending' ? 'rgba(245, 158, 11, 0.3)' :
+                                          'rgba(148, 163, 184, 0.3)'}`
                     }}>
                       <div style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: entry.status === 'accepted' ? '#10B981' : 
-                                   entry.status === 'rejected' ? '#EF4444' : '#F59E0B'
-                      }}></div>
-                      {t(entry.status) || entry.status}
+                        width: '36px',
+                        height: '36px',
+                        background: entry.status === 'accepted' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 
+                                   entry.status === 'not_accepted' ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' :
+                                   entry.status === 'rejected' ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' :
+                                   entry.status === 'waiting_for_payment' ? 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)' :
+                                   entry.status === 'waiting_for_authors' ? 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)' :
+                                   entry.status === 'waiting_for_referees' ? 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)' :
+                                   entry.status === 'waiting_for_editors' ? 'linear-gradient(135deg, #FB923C 0%, #EA580C 100%)' :
+                                   entry.status === 'pending' ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' :
+                                   'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                      }}>
+                        {entry.status === 'accepted' ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : entry.status === 'not_accepted' || entry.status === 'rejected' ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : entry.status === 'waiting_for_payment' ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 1V23M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6312 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6312 13.6815 18 14.5717 18 15.5C18 16.4283 17.6312 17.3185 16.9749 17.9749C16.3185 18.6312 15.4283 19 14.5 19H6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : entry.status === 'waiting_for_authors' ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M12.5 7C12.5 9.20914 10.7091 11 8.5 11C6.29086 11 4.5 9.20914 4.5 7C4.5 4.79086 6.29086 3 8.5 3C10.7091 3 12.5 4.79086 12.5 7ZM20 8V14M23 11H17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : entry.status === 'waiting_for_referees' ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M16 4V2C16 1.44772 15.5523 1 15 1H9C8.44772 1 8 1.44772 8 2V4M16 4H8M16 4C17.1046 4 18 4.89543 18 6V20C18 21.1046 17.1046 22 16 22H8C6.89543 22 6 21.1046 6 20V6C6 4.89543 6.89543 4 8 4M10 9H14M10 13H14M10 17H14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : entry.status === 'waiting_for_editors' ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V18C2 18.5304 2.21071 19.0391 2.58579 19.4142C2.96086 19.7893 3.46957 20 4 20H16C16.5304 20 17.0391 19.7893 17.4142 19.4142C17.7893 19.0391 18 18.5304 18 18V13M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89783 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ 
+                          fontSize: '13px', 
+                          fontWeight: '600', 
+                          color: '#64748B',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          marginBottom: '4px'
+                        }}>{t('status') || 'Status'}</div>
+                        <div style={{ 
+                          fontSize: '16px', 
+                          fontWeight: '700', 
+                          color: '#1E293B',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            background: entry.status === 'accepted' ? '#10B981' : 
+                                       entry.status === 'not_accepted' || entry.status === 'rejected' ? '#EF4444' :
+                                       entry.status === 'waiting_for_payment' ? '#FCD34D' :
+                                       entry.status === 'waiting_for_authors' ? '#3B82F6' :
+                                       entry.status === 'waiting_for_referees' ? '#8B5CF6' :
+                                       entry.status === 'waiting_for_editors' ? '#FB923C' :
+                                       entry.status === 'pending' ? '#F59E0B' :
+                                       '#94A3B8'
+                          }}></div>
+                          {entry.status === 'not_accepted' ? (t('notAccepted') || 'Not Accepted') :
+                           entry.status === 'waiting_for_payment' ? (t('waitingForPayment') || 'Waiting for Payment') :
+                           entry.status === 'waiting_for_authors' ? (t('waitingForAuthors') || 'Waiting for Authors') :
+                           entry.status === 'waiting_for_referees' ? (t('waitingForReferees') || 'Waiting for Referees') :
+                           entry.status === 'waiting_for_editors' ? (t('waitingForEditors') || 'Waiting for Editors') :
+                           entry.status === 'rejected' ? (t('rejected') || 'Rejected') :
+                           entry.status === 'pending' ? (t('pending') || 'Pending') :
+                           entry.status === 'accepted' ? (t('accepted') || 'Accepted') :
+                           (t(entry.status) || entry.status)}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
               )}
 
+              {/* Downloads and Reads boxes - Visible to all users */}
               <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '16px 20px',
-                background: 'rgba(255, 255, 255, 0.7)',
-                borderRadius: '16px',
-                border: '1px solid rgba(226, 232, 240, 0.6)'
-              }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 16.5V18.75C3 19.9926 4.00736 21 5.25 21H18.75C19.9926 21 21 19.9926 21 18.75V16.5M16.5 12L12 16.5M12 16.5L7.5 12M12 16.5V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ 
-                    fontSize: '13px', 
-                    fontWeight: '600', 
-                    color: '#64748B',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    marginBottom: '4px'
-                  }}>{t('downloads') || 'Downloads'}</div>
-                  <div style={{ 
-                    fontSize: '16px', 
-                    fontWeight: '600', 
-                    color: '#1E293B'
-                  }}>{entry.download_count}</div>
-                </div>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '16px 20px',
-                background: 'rgba(255, 255, 255, 0.7)',
-                borderRadius: '16px',
-                border: '1px solid rgba(226, 232, 240, 0.6)'
-              }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  background: 'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ 
-                    fontSize: '13px', 
-                    fontWeight: '600', 
-                    color: '#64748B',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    marginBottom: '4px'
-                  }}>{t('reads') || 'Reads'}</div>
-                  <div style={{ 
-                    fontSize: '16px', 
-                    fontWeight: '600', 
-                    color: '#1E293B'
-                  }}>{entry.read_count}</div>
-                </div>
-              </div>
-            </div>
-
-            {entry.status === 'waiting_for_payment' && (
-              <div style={{
-                padding: '24px',
-                background: 'linear-gradient(145deg, rgba(59, 130, 246, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%)',
-                borderRadius: '16px',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                marginBottom: '24px',
-                position: 'relative',
-                zIndex: 1
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '16px'
-                }}>
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                    borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    gap: '12px',
+                    padding: '16px 20px',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(226, 232, 240, 0.6)'
                   }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 16.5V18.75C3 19.9926 4.00736 21 5.25 21H18.75C19.9926 21 21 19.9926 21 18.75V16.5M16.5 12L12 16.5M12 16.5L7.5 12M12 16.5V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        fontSize: '13px', 
+                        fontWeight: '600', 
+                        color: '#64748B',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>{t('downloads') || 'Downloads'}</div>
+                      <div style={{ 
+                        fontSize: '16px', 
+                        fontWeight: '600', 
+                        color: '#1E293B'
+                      }}>{entry.download_count}</div>
+                    </div>
                   </div>
-                  <h4 style={{ 
-                    margin: 0,
-                    fontSize: '20px',
-                    fontWeight: '700',
-                    color: '#1E40AF'
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '16px 20px',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(226, 232, 240, 0.6)'
                   }}>
-                    {t('paymentRequired') || 'Payment Required'}
-                  </h4>
-                </div>
-                <p style={{
-                  margin: '0 0 16px 0',
-                  fontSize: '14px',
-                  lineHeight: '1.6',
-                  color: '#64748B'
-                }}>
-                  {t('paymentInfoMessage') || 
-                    'To proceed with the publication process, please complete the payment using the following bank information:'}
-                </p>
-                <div style={{ 
-                  background: 'rgba(255, 255, 255, 0.8)', 
-                  padding: '16px', 
-                  borderRadius: '12px',
-                  marginBottom: '16px',
-                  fontFamily: 'monospace',
-                  fontSize: '14px',
-                  border: '1px solid rgba(59, 130, 246, 0.1)'
-                }}>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>{t('bankName') || 'Bank Name'}:</strong> Example Bank</p>
-                  <p style={{ margin: '0 0 8px 0' }}><strong>IBAN:</strong> TR00 0000 0000 0000 0000 0000 00</p>
-                  <p style={{ margin: 0 }}><strong>{t('accountHolder') || 'Account Holder'}:</strong> Journal Name</p>
-                </div>
-                <p style={{ 
-                  margin: 0, 
-                  fontSize: '13px', 
-                  color: '#64748B',
-                  fontWeight: '500'
-                }}>
-                  {t('paymentReference') || 
-                    'Please include your Reference Token as payment reference for proper tracking:'} <strong style={{ color: '#1E40AF' }}>{entry.random_token}</strong>
-                </p>
-              </div>
-            )}
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      background: 'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        fontSize: '13px', 
+                        fontWeight: '600', 
+                        color: '#64748B',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>{t('reads') || 'Reads'}</div>
+                      <div style={{ 
+                        fontSize: '16px', 
+                        fontWeight: '600', 
+                        color: '#1E293B'
+                      }}>{entry.read_count}</div>
+                    </div>
+                  </div>
+
+            </div>
+
+            
 
 
           </div>
 
+          {/* Payment Information Section - Separate from Entry Details */}
+          {entry.status === 'waiting_for_payment' && canViewPaymentSection && (
+            <div style={{
+              padding: '32px',
+              background: isPaymentAccordionOpen 
+                ? 'rgba(255, 255, 255, 0.7)' 
+                : 'linear-gradient(145deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '20px',
+              border: isPaymentAccordionOpen 
+                ? '1px solid rgba(226, 232, 240, 0.6)' 
+                : '1px solid rgba(239, 68, 68, 0.3)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
+              marginBottom: '32px',
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '100%',
+                background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f1f5f9" fill-opacity="0.3"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat',
+                opacity: 0.3,
+                zIndex: 0
+              }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                {/* Clickable Accordion Header */}
+                <div 
+                  onClick={() => setIsPaymentAccordionOpen(!isPaymentAccordionOpen)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    padding: '8px 0',
+                    marginBottom: '8px',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '0.8';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                  }}
+                >
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <FaCreditCard size={16} color="white" />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <h3 style={{
+                        fontSize: '24px',
+                        fontWeight: '800',
+                        color: '#0F172A',
+                        margin: 0,
+                        letterSpacing: '-0.025em',
+                        background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                      }}>{t('paymentRequired') || 'Payment Required'}: 
+                        <span style={{
+                          fontSize: '16px',
+                          fontWeight: '400',
+                          color: '#475569',
+                          marginLeft: '8px'
+                        }}>
+                          {t('paymentInfoMessage') || 
+                            'To proceed with the publication process, please complete the payment using the following bank information.'}
+                        </span>
+                      </h3>
+                    </div>
+                  </div>
+                  
+                  {/* Chevron Icon */}
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(220, 38, 38, 0.1)',
+                    borderRadius: '50%',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    {isPaymentAccordionOpen ? (
+                      <FaChevronUp size={14} color="#DC2626" />
+                    ) : (
+                      <FaChevronDown size={14} color="#DC2626" />
+                    )}
+                  </div>
+                </div>
+                
+                <div style={{
+                  width: '50px',
+                  height: '3px',
+                  background: 'linear-gradient(90deg, #DC2626 0%, #B91C1C 100%)',
+                  borderRadius: '2px',
+                  marginLeft: '44px',
+                  marginBottom: isPaymentAccordionOpen ? '24px' : '0px',
+                  transition: 'margin-bottom 0.3s ease'
+                }}></div>
 
+                {/* Accordion Content */}
+                <div style={{
+                  maxHeight: isPaymentAccordionOpen ? '2000px' : '0px',
+                  overflow: 'hidden',
+                  transition: 'max-height 0.5s ease, opacity 0.3s ease',
+                  opacity: isPaymentAccordionOpen ? 1 : 0
+                }}>
+                  {/* Bank Transfer Information */}
+                  <div style={{ 
+                    padding: '24px', 
+                    borderRadius: '16px', 
+                    background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%)',
+                    border: '1px solid rgba(239, 68, 68, 0.15)',
+                    marginBottom: '24px'
+                  }}>
+                    <h4 style={{ 
+                      color: '#DC2626', 
+                      marginBottom: '20px', 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      fontSize: '18px',
+                      fontWeight: '700'
+                    }}>
+                      <FaCreditCard size={20} style={{ marginRight: '8px' }} />
+                      {t('bankTransferInformation') || 'Bank Transfer Information'}
+                    </h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                      <div>
+                        <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#6b7280', fontWeight: '600' }}>
+                          {t('bankName') || 'Bank Name'}
+                        </p>
+                        <p style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#1E293B', fontWeight: '600' }}>
+                          {t('exampleBank') || 'Example Bank'}
+                        </p>
+                      </div>
+                      <div>
+                        <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#6b7280', fontWeight: '600' }}>
+                          {t('accountHolder') || 'Account Holder'}
+                        </p>
+                        <p style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#1E293B', fontWeight: '600' }}>
+                          {t('insanMekanJournal') || 'İnsan Mekan Journal'}
+                        </p>
+                      </div>
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#6b7280', fontWeight: '600' }}>
+                          {t('ibanNumber') || 'IBAN Number'}
+                        </p>
+                        <p style={{ 
+                          margin: '0', 
+                          fontSize: '18px', 
+                          color: '#1E293B', 
+                          fontWeight: '700',
+                          fontFamily: 'monospace',
+                          padding: '12px',
+                          background: '#F3F4F6',
+                          borderRadius: '8px',
+                          border: '1px solid #E5E7EB'
+                        }}>
+                          TR12 3456 7890 1234 5678 9012 34
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Important Payment Instructions */}
+                  <div style={{ 
+                    padding: '24px', 
+                    borderRadius: '16px', 
+                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)'
+                  }}>
+                    <h4 style={{ 
+                      color: '#D97706', 
+                      marginBottom: '16px', 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      fontSize: '18px',
+                      fontWeight: '700'
+                    }}>
+                      <FaExclamationTriangle size={20} style={{ marginRight: '8px' }} />
+                      {t('importantPaymentInstructions') || 'Important Payment Instructions'}
+                    </h4>
+                    <ul style={{ color: '#374151', margin: 0, lineHeight: '1.8', paddingLeft: '24px' }}>
+                      <li style={{ marginBottom: '12px' }}>
+                        <strong>{t('includeYourUniqueToken') || 'Include Your Unique Token:'}</strong>
+                        {' ' + (t('youMustIncludeYourUniqueToken') || 
+                          'You must include your unique submission token in the payment description/reference field.')}
+                      </li>
+                      <li style={{ marginBottom: '12px' }}>
+                        <strong>{t('yourToken') || 'Your Token:'}</strong>
+                        {' '}
+                        <span style={{ 
+                          fontFamily: 'monospace',
+                          fontSize: '16px',
+                          color: '#DC2626',
+                          fontWeight: '700',
+                          padding: '4px 8px',
+                          background: 'rgba(239, 68, 68, 0.1)',
+                          borderRadius: '4px'
+                        }}>
+                          {entry.random_token}
+                        </span>
+                      </li>
+                      <li style={{ marginBottom: '12px' }}>
+                        <strong>{t('paymentVerification') || 'Payment Verification:'}</strong>
+                        {' ' + (t('withoutTheCorrectToken') || 
+                          'Without the correct token, we cannot link your payment to your submission.')}
+                      </li>
+                      <li>
+                        <strong>{t('processingTime') || 'Processing Time:'}</strong>
+                        {' ' + (t('paymentVerificationTypically') || 
+                          'Payment verification typically takes 1-2 business days.')}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Abstract sections */}
           {(entry.abstract_tr || entry.abstract_en) && (
@@ -1451,7 +1772,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                               paddingTop: '16px',
                               borderTop: '1px solid rgba(226, 232, 240, 0.4)'
                             }}>
-                              <strong style={{ color: '#475569' }}>{t('keywords') || 'Keywords'}:</strong> {entry.keywords}
+                              <strong style={{ color: '#475569' }}>Anahtar Kelimeler:</strong> {entry.keywords}
                             </p>
                           )}
                         </div>
@@ -1481,7 +1802,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                               paddingTop: '16px',
                               borderTop: '1px solid rgba(226, 232, 240, 0.4)'
                             }}>
-                              <strong style={{ color: '#475569' }}>{t('keywords') || 'Keywords'}:</strong> {entry.keywords_en}
+                              <strong style={{ color: '#475569' }}>Keywords:</strong> {entry.keywords_en}
                             </p>
                           )}
                         </div>
@@ -1494,24 +1815,25 @@ const JournalEntryDetailsPage: React.FC = () => {
             </>
           )}
 
-                    {/* Referees and Files Section - Side by Side */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '24px',
-            marginBottom: '32px'
-          }}>
-            {/* Referees Section */}
+                    {/* Referees and Files Section - Side by Side - Only visible to journal editors, admins, and owners */}
+          {canViewRefereesAndFiles && (
             <div style={{
-              padding: '32px',
-              background: 'rgba(255, 255, 255, 0.7)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '20px',
-              border: '1px solid rgba(226, 232, 240, 0.6)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
-              position: 'relative',
-              overflow: 'hidden'
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '24px',
+              marginBottom: '32px'
             }}>
+              {/* Referees Section */}
+              <div style={{
+                padding: '32px',
+                background: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                border: '1px solid rgba(226, 232, 240, 0.6)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
               <div style={{
                 position: 'absolute',
                 top: 0,
@@ -1563,12 +1885,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                     <button
                       onClick={() => setShowRefereesModal(true)}
                       style={{
-                        padding: '6px 12px',
+                        padding: '8px 12px',
                         background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '8px',
-                        fontSize: '12px',
+                        fontSize: '14px',
                         fontWeight: '600',
                         cursor: 'pointer',
                         transition: 'all 0.3s ease'
@@ -1884,6 +2206,7 @@ const JournalEntryDetailsPage: React.FC = () => {
               </div>
             </div>
           </div>
+          )}
           
           {/* Footer */}
           <div style={{ marginTop: '16px', marginBottom: '0px' }}>
@@ -2769,34 +3092,70 @@ const JournalEntryDetailsPage: React.FC = () => {
                     letterSpacing: '-0.025em'
                   }}>{t('authorDetails') || 'Author Details'}</h3>
                 </div>
-                <button
-                  onClick={() => setShowAuthorDetailsModal(false)}
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    border: 'none',
-                    background: 'rgba(148, 163, 184, 0.1)',
-                    color: '#64748B',
-                    fontSize: '20px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                    e.currentTarget.style.color = '#EF4444';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
-                    e.currentTarget.style.color = '#64748B';
-                  }}
-                >
-                  ×
-                </button>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  {/* Go to Profile Button - Only for Admin and Owner users */}
+                  {(isAdmin || isOwner) && (
+                    <button
+                      onClick={() => handleAuthorProfileClick(selectedAuthor)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '10px 12px',
+                        backgroundColor: '#F59E0B',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#D97706';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#F59E0B';
+                      }}
+                      title={language === 'tr' ? 'Kullanıcı Profiline Git' : 'Go to User Profile'}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 13V19C18 19.5304 17.7893 20.0391 17.4142 20.4142C17.0391 20.7893 16.5304 21 16 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V8C3 7.46957 3.21071 6.96086 3.58579 6.58579C3.96086 6.21071 4.46957 6 5 6H11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M15 3H21V9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M10 14L21 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {language === 'tr' ? 'Profile Git' : 'View Profile'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowAuthorDetailsModal(false)}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: 'rgba(148, 163, 184, 0.1)',
+                      color: '#64748B',
+                      fontSize: '20px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                      e.currentTarget.style.color = '#EF4444';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
+                      e.currentTarget.style.color = '#64748B';
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -2808,6 +3167,8 @@ const JournalEntryDetailsPage: React.FC = () => {
               overflowY: 'auto',
               maxHeight: 'calc(80vh - 140px)'
             }}>
+
+
               <div style={{
                 display: 'grid',
                 gap: '24px'
@@ -2819,14 +3180,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                   borderRadius: '16px',
                   border: '1px solid rgba(226, 232, 240, 0.6)'
                 }}>
-                  <div style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#64748B',
-                    marginBottom: '8px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>{t('name') || 'Name'}</div>
+                                          <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#64748B',
+                          marginBottom: '8px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}>{language === 'tr' ? 'İSİM' : 'Name'}</div>
                   <div style={{
                     fontSize: '20px',
                     fontWeight: '700',
@@ -2843,14 +3204,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                     borderRadius: '16px',
                     border: '1px solid rgba(226, 232, 240, 0.6)'
                   }}>
-                    <div style={{
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#64748B',
-                      marginBottom: '8px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>{t('title') || 'Title'}</div>
+                                            <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#64748B',
+                          marginBottom: '8px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}>{language === 'tr' ? 'ÜNVAN' : 'Title'}</div>
                     <div style={{
                       fontSize: '16px',
                       fontWeight: '500',
@@ -2867,14 +3228,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                     borderRadius: '16px',
                     border: '1px solid rgba(226, 232, 240, 0.6)'
                   }}>
-                    <div style={{
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#64748B',
-                      marginBottom: '8px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>{t('bio') || 'Biography'}</div>
+                                            <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#64748B',
+                          marginBottom: '8px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}>{language === 'tr' ? 'BİYOGRAFİ' : 'Biography'}</div>
                     <div style={{
                       fontSize: '16px',
                       fontWeight: '400',
@@ -2908,13 +3269,13 @@ const JournalEntryDetailsPage: React.FC = () => {
                            <path d="M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="#64748B" strokeWidth="2"/>
                            <path d="M2 12C2 13.6394 2.42496 15.1915 3.18414 16.5297C4.70711 19.4183 7.90861 21 12 21C16.0914 21 19.2929 19.4183 20.8159 16.5297C21.575 15.1915 22 13.6394 22 12C22 10.3606 21.575 8.90853 20.8159 7.57031C19.2929 4.68166 16.0914 3.1 12 3.1C7.90861 3.1 4.70711 4.68166 3.18414 7.57031C2.42496 8.90853 2 10.3606 2 12Z" stroke="#64748B" strokeWidth="2"/>
                          </svg>
-                         <div style={{
-                           fontSize: '14px',
-                           fontWeight: '600',
-                           color: '#64748B',
-                           textTransform: 'uppercase',
-                           letterSpacing: '0.05em'
-                         }}>{t('email') || 'Email'}</div>
+                                                    <div style={{
+                             fontSize: '14px',
+                             fontWeight: '600',
+                             color: '#64748B',
+                             textTransform: 'uppercase',
+                             letterSpacing: '0.05em'
+                           }}>{language === 'tr' ? 'E-POSTA ADRESİ' : 'Email'}</div>
                        </div>
                        <div style={{
                          fontSize: '16px',
@@ -2945,13 +3306,13 @@ const JournalEntryDetailsPage: React.FC = () => {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                           <path d="M22 12H18L15 21L9 3L6 12H2" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        <div style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#64748B',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
-                        }}>{t('scienceBranch') || 'Science Branch'}</div>
+                                                  <div style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#64748B',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>{language === 'tr' ? 'BİLİM DALI' : 'Science Branch'}</div>
                       </div>
                       <div style={{
                         fontSize: '16px',
@@ -2978,13 +3339,13 @@ const JournalEntryDetailsPage: React.FC = () => {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                           <path d="M21 2L19 4M19 4L17 2M19 4V8M10 16L8 18M8 18L6 16M8 18V14M12 6C14.2091 6 16 7.79086 16 10C16 12.2091 14.2091 14 12 14C9.79086 14 8 12.2091 8 10C8 7.79086 9.79086 6 12 6Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        <div style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#64748B',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
-                        }}>ORCID ID</div>
+                                                  <div style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#64748B',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>{language === 'tr' ? 'ORCİD ID' : 'ORCID ID'}</div>
                       </div>
                       <div style={{
                         fontSize: '16px',
@@ -3011,13 +3372,13 @@ const JournalEntryDetailsPage: React.FC = () => {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                           <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        <div style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#64748B',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
-                        }}>YOKSIS ID</div>
+                                                  <div style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#64748B',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>{language === 'tr' ? 'YOKSİS ID' : 'YOKSIS ID'}</div>
                       </div>
                       <div style={{
                         fontSize: '16px',

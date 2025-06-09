@@ -311,7 +311,7 @@ const GeneralInfoPage: React.FC = () => {
                     <strong>{language === 'en' ? 'Include Your Unique Token:' : 'Makalenize Özel Token\'ınızı Dahil Edin:'}</strong>
                     {' ' + (language === 'en' 
                       ? 'You must include your unique submission token in the payment description/reference field.' 
-                      : 'Ödeme yaparken açıklama/referans alanında makalenize özel token bilgisini belirtmelisiniz.')}
+                      : 'Ödeme yaparken açıklama alanında makalenize özel token bilgisini yazmalısınız.')}
                   </li>
                   <li style={{ marginBottom: '0.5rem' }}>
                     <strong>{language === 'en' ? 'Find Your Token:' : 'Token\'ınızı Bulun:'}</strong>

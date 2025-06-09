@@ -385,7 +385,7 @@ const JournalDetailsPage: React.FC = () => {
                             flexWrap: 'wrap'
                         }}>
                             <button
-                                onClick={() => navigate(isEditorOrAdmin ? '/editor/journals' : '/archive')}
+                                onClick={() => navigate('/archive')}
                                 style={{
                                     padding: '16px 32px',
                                     background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
@@ -413,7 +413,7 @@ const JournalDetailsPage: React.FC = () => {
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                     <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                {isEditorOrAdmin ? (t('backToJournals') || 'Back to Journals') : (t('backToArchive') || 'Back to Archive')}
+                                {t('backToArchive') || 'Back to Archive'}
                             </button>
                         </div>
                     </div>
@@ -549,7 +549,7 @@ const JournalDetailsPage: React.FC = () => {
                             flexWrap: 'wrap'
                         }}>
                             <button
-                                onClick={() => navigate(isEditorOrAdmin ? '/editor/journals' : '/archive')}
+                                onClick={() => navigate('/archive')}
                                 style={{
                                     padding: '16px 32px',
                                     background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
@@ -577,7 +577,7 @@ const JournalDetailsPage: React.FC = () => {
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                     <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 </svg>
-                                {isEditorOrAdmin ? (t('backToJournals') || 'Browse Journals') : (t('backToArchive') || 'Browse Archive')}
+                                {t('backToArchive') || 'Browse Archive'}
                             </button>
                             
                             <button
@@ -651,7 +651,7 @@ const JournalDetailsPage: React.FC = () => {
                     marginBottom: '16px'
                 }}>
                     <button 
-                        onClick={() => navigate(isEditorOrAdmin ? '/editor/journals' : '/archive')} 
+                        onClick={() => navigate(journal?.is_published ? '/archive' : (isEditorOrAdmin ? '/editor/journals' : '/archive'))} 
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -682,7 +682,7 @@ const JournalDetailsPage: React.FC = () => {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                             <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                        {isEditorOrAdmin ? (t('backToJournals') || 'Back to Journals') : (t('backToArchive') || 'Back to Archive')}
+                        {journal?.is_published ? (t('backToArchive') || 'Back to Archive') : (isEditorOrAdmin ? (t('backToJournals') || 'Back to Journals') : (t('backToArchive') || 'Back to Archive'))}
                     </button>
                     
                     <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto', marginRight: '60px' }}>
@@ -914,17 +914,37 @@ const JournalDetailsPage: React.FC = () => {
                         zIndex: 1
                     }}>
                         {/* Editor-in-Chief */}
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            padding: '16px 20px',
-                            background: 'rgba(255, 255, 255, 0.7)',
-                            borderRadius: '16px',
-                            border: '1px solid rgba(226, 232, 240, 0.6)',
-                            transition: 'all 0.3s ease',
-                            position: 'relative'
-                        }}>
+                        <div 
+                            onClick={isAdmin ? () => setShowEditorInChiefModal(true) : undefined}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '16px 20px',
+                                background: 'rgba(255, 255, 255, 0.7)',
+                                borderRadius: '16px',
+                                border: '1px solid rgba(226, 232, 240, 0.6)',
+                                transition: 'all 0.3s ease',
+                                position: 'relative',
+                                cursor: isAdmin ? 'pointer' : 'default'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (isAdmin) {
+                                    e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                    e.currentTarget.style.borderColor = '#14B8A6';
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(20, 184, 166, 0.2)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (isAdmin) {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                    e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }
+                            }}
+                        >
                             <div style={{
                                 width: '36px',
                                 height: '36px',
@@ -957,52 +977,41 @@ const JournalDetailsPage: React.FC = () => {
                                     {editorInChief ? `${editorInChief.title ? editorInChief.title + ' ' : ''}${editorInChief.name}` : (t('none') || 'None')}
                                 </div>
                             </div>
-                            {isAdmin && (
-                                <button
-                                    onClick={() => setShowEditorInChiefModal(true)}
-                                    style={{
-                                        position: 'absolute',
-                                        top: '50%',
-                                        right: '8px',
-                                        transform: 'translateY(-50%)',
-                                        padding: '8px 12px',
-                                        background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        fontSize: '13px',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease',
-                                        boxShadow: '0 2px 8px rgba(20, 184, 166, 0.3)',
-                                        flexShrink: 0
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-50%) translateY(-1px)';
-                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.4)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-50%)';
-                                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(20, 184, 166, 0.3)';
-                                    }}
-                                >
-                                    {t('change') || 'Change'}
-                                </button>
-                            )}
+
                         </div>
                         
                         {/* Editors */}
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            padding: '16px 20px',
-                            background: 'rgba(255, 255, 255, 0.7)',
-                            borderRadius: '16px',
-                            border: '1px solid rgba(226, 232, 240, 0.6)',
-                            transition: 'all 0.3s ease',
-                            position: 'relative'
-                        }}>
+                        <div 
+                            onClick={isAdmin ? () => setShowEditorsModal(true) : undefined}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '16px 20px',
+                                background: 'rgba(255, 255, 255, 0.7)',
+                                borderRadius: '16px',
+                                border: '1px solid rgba(226, 232, 240, 0.6)',
+                                transition: 'all 0.3s ease',
+                                position: 'relative',
+                                cursor: isAdmin ? 'pointer' : 'default'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (isAdmin) {
+                                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                                    e.currentTarget.style.borderColor = '#3B82F6';
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(59, 130, 246, 0.2)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (isAdmin) {
+                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                    e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }
+                            }}
+                        >
                             <div style={{
                                 width: '36px',
                                 height: '36px',
@@ -1034,38 +1043,7 @@ const JournalDetailsPage: React.FC = () => {
                                     {editors.length > 0 ? editors.map(editor => `${editor.title ? editor.title + ' ' : ''}${editor.name}`).join(', ') : (t('none') || 'None')}
                                 </div>
                             </div>
-                            {isAdmin && (
-                                <button
-                                    onClick={() => setShowEditorsModal(true)}
-                                    style={{
-                                        position: 'absolute',
-                                        top: '50%',
-                                        right: '8px',
-                                        transform: 'translateY(-50%)',
-                                        padding: '8px 12px',
-                                        background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        fontSize: '13px',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease',
-                                        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
-                                        flexShrink: 0
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-50%) translateY(-1px)';
-                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-50%)';
-                                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
-                                    }}
-                                >
-                                    {t('manage') || 'Manage'}
-                                </button>
-                            )}
+
                         </div>
                     </div>
                     

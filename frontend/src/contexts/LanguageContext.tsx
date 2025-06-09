@@ -62,7 +62,13 @@ type TranslationKeys =
   | 'viewIndexSection' | 'viewMergedFile' | 'downloadJournal' | 'downloadFullPdf' | 'downloadJournalDescription'
   | 'noEntriesInJournal' | 'failedToMergeFiles' | 'mergingFiles' | 'selectEditorInChief' | 'noAdminUsers'
   | 'manageEditors' | 'noEditorUsers' | 'save'
-  | 'publicationDetails' | 'publicationFiles' | 'coverPhoto' | 'metaFiles' | 'editorNotes' | 'fullPdf' | 'indexSection' | 'mergedFile';
+  | 'publicationDetails' | 'publicationFiles' | 'coverPhoto' | 'metaFiles' | 'editorNotes' | 'fullPdf' | 'indexSection' | 'mergedFile'
+  | 'paymentRequired' | 'bankTransferInformation' | 'exampleBank' | 'insanMekanJournal' | 'ibanNumber' | 'importantPaymentInstructions'
+  | 'includeYourUniqueToken' | 'youMustIncludeYourUniqueToken' | 'yourToken' | 'paymentVerification' | 'withoutTheCorrectToken'
+  | 'paymentVerificationTypically' | 'paymentInfoMessage'
+  | 'downloadPdf' | 'viewUpdates' | 'authors' | 'publishedIn' | 'entryDetails' | 'pageNumber' | 'articleType' | 'status' | 'downloads' | 'reads'
+  | 'bankName' | 'accountHolder' | 'processingTime' | 'keywords' | 'referees' | 'files' | 'viewFile'
+  | 'referenceToken' | 'manageAuthors' | 'changeJournal' | 'manageReferees';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -389,6 +395,44 @@ const translations: Record<Language, TranslationDictionary> = {
     'fullPdf': 'Full PDF',
     'indexSection': 'Index Section',
     'mergedFile': 'Merged File',
+    
+    // Payment Information
+    'paymentRequired': 'Processing Fee Required',
+    'bankTransferInformation': 'Bank Transfer Information',
+    'exampleBank': 'Example Bank',
+    'insanMekanJournal': 'İnsan Mekan Journal',
+    'ibanNumber': 'IBAN Number',
+    'importantPaymentInstructions': 'Important Payment Instructions',
+    'includeYourUniqueToken': 'Include Your Unique Token:',
+    'youMustIncludeYourUniqueToken': 'You must include your unique submission token in the payment description/reference field.',
+    'yourToken': 'Your Token:',
+    'paymentVerification': 'Payment Verification:',
+    'withoutTheCorrectToken': 'Without the correct token, we cannot link your payment to your submission.',
+    'paymentVerificationTypically': 'Payment verification typically takes 1-2 business days.',
+    'paymentInfoMessage': 'To proceed with the publication process, please complete the payment using the following bank information',
+    
+    // Journal Entry Details Page translations
+    'downloadPdf': 'Download PDF',
+    'viewUpdates': 'View Updates',
+    'authors': 'Authors',
+    'publishedIn': 'Published In',
+    'entryDetails': 'Entry Details',
+    'pageNumber': 'Page Number',
+    'articleType': 'Article Type',
+    'status': 'Status',
+    'downloads': 'Downloads',
+    'reads': 'Reads',
+    'bankName': 'Bank Name',
+    'accountHolder': 'Account Holder',
+    'processingTime': 'Processing Time',
+    'keywords': 'Keywords',
+    'referees': 'Referees',
+    'files': 'Files',
+    'viewFile': 'View File',
+    'referenceToken': 'Reference Token',
+    'manageAuthors': 'Manage Authors',
+    'changeJournal': 'Change Journal',
+    'manageReferees': 'Manage Referees',
   },
   tr: {
     // Navigation
@@ -407,8 +451,8 @@ const translations: Record<Language, TranslationDictionary> = {
     'publishedIssues': 'Arşivler',
     
     // Page titles
-    'createNewEntry': 'Yeni Günlük Kaydı Oluştur',
-    'editEntry': 'Günlük Kaydını Düzenle',
+    'createNewEntry': 'Yeni Makale Oluştur',
+    'editEntry': 'Makaleyi Düzenle',
     'createAccount': 'Hesap Oluştur',
     'welcomeBack': 'Tekrar Hoş Geldiniz',
     'publishedJournals': 'Yayınlanmış Dergiler',
@@ -439,15 +483,15 @@ const translations: Record<Language, TranslationDictionary> = {
     'registerButton': 'Kaydol',
     
     // Messages
-    'noEntries': 'Henüz Günlük Kaydı Yok',
-    'createEntryPrompt': 'Günlük tutmaya başlamak için "Yeni Kayıt Oluştur" düğmesine tıklayın!',
+    'noEntries': 'Henüz Makaleler Mevcut Değil',
+    'createEntryPrompt': 'Makale eklemek için "Yeni Kayıt Oluştur" düğmesine tıklayın!',
     'entrySavedSecurely': 'Kaydınız güvenli bir şekilde saklanacak ve daha sonra düzenlenebilecektir.',
     'alreadyHaveAccount': 'Zaten hesabınız var mı?',
     'dontHaveAccount': 'Hesabınız yok mu?',
     'signUp': 'Kaydolun',
     'loginText': 'Giriş yapın',
-    'pleaseLogin': 'Günlük kayıtlarınızı görmek için lütfen giriş yapın.',
-    'loadingEntries': 'Günlük kayıtlarınız yükleniyor...',
+    'pleaseLogin': 'Makalelerinizi görmek için lütfen giriş yapın.',
+    'loadingEntries': 'Makaleler yükleniyor...',
     'acceptedEntries': 'Yayınlanan Makaleler',
     
     // Status labels
@@ -469,7 +513,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'accepted': 'Kabul Edildi',
     
     // Placeholders
-    'enterTitle': 'Günlük kaydınız için bir başlık girin',
+    'enterTitle': 'Makalenız için bir başlık girin',
     'writeThoughts': 'Düşüncelerinizi buraya yazın...',
     'enterUsername': 'Kullanıcı adınızı girin',
     'enterPassword': 'Şifrenizi girin',
@@ -487,7 +531,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'totalUsers': 'Toplam kullanıcı',
 
     // Language
-    'language': 'Dil',
+    'language': 'DİL',
     'turkish': 'Türkçe',
     'english': 'İngilizce',
 
@@ -561,7 +605,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'yoksisId': 'YÖKSİS ID',
     'orcidId': 'ORCID ID',
     'journalId': 'Dergi ID',
-    'date': 'Tarih',
+    'date': 'TARİH',
     'myRefereeEntries': 'Hakem Olduğum Yazılar',
     'noRefereeEntriesFound': 'Hakem olduğunuz yazı bulunamadı.',
     'myEditedJournals': 'Editör Olduğum Dergiler',
@@ -693,12 +737,12 @@ const translations: Record<Language, TranslationDictionary> = {
     'viewIndexSection': 'İndeks Bölümü',
     'viewMergedFile': 'Birleştirilmiş Dosya',
     'downloadJournal': 'Dergiyi İndir',
-    'downloadFullPdf': 'Tam PDF İndir',
+    'downloadFullPdf': 'PDF İndir',
     'downloadJournalDescription': 'Dergiyi PDF formatında tamamen indirin',
     'noEntriesInJournal': 'Bu dergide hiç makale bulunamadı',
     'failedToMergeFiles': 'Dergi dosyaları birleştirilemedi',
     'mergingFiles': 'Dosyalar Birleştiriliyor...',
-    'selectEditorInChief': 'Editör Seç',
+    'selectEditorInChief': 'Baş Editörü Seç',
     'noAdminUsers': 'Yönetici kullanıcı bulunamadı',
     'manageEditors': 'Editörleri Yönet',
     'noEditorUsers': 'Editör kullanıcı bulunamadı',
@@ -711,6 +755,44 @@ const translations: Record<Language, TranslationDictionary> = {
     'fullPdf': 'Tam PDF',
     'indexSection': 'İndeks Bölümü',
     'mergedFile': 'Birleştirilmiş Dosya',
+    
+    // Payment Information
+    'paymentRequired': 'İşleme Ücreti Gerekli',
+    'bankTransferInformation': 'Banka Havale Bilgileri',
+    'exampleBank': 'Örnek Banka',
+    'insanMekanJournal': 'İnsan Mekan Dergisi',
+    'ibanNumber': 'IBAN Numarası',
+    'importantPaymentInstructions': 'Önemli Ödeme Talimatları',
+    'includeYourUniqueToken': 'Makalenize Özel Token\'ınızı Dahil Edin:',
+    'youMustIncludeYourUniqueToken': 'Ödeme yaparken açıklama alanında makalenize özel token bilgisini yazmalısınız.',
+    'yourToken': 'Token\'ınız:',
+    'paymentVerification': 'Ödeme Doğrulaması:',
+    'withoutTheCorrectToken': 'Doğru token belirtilmeden ödemenizi gönderiminizle eşleştiremeyiz.',
+    'paymentVerificationTypically': 'Ödemenin doğrulanması genellikle 1-2 iş günü sürer.',
+    'paymentInfoMessage': 'Yayım sürecine devam edebilmek için lütfen aşağıdaki banka bilgilerini kullanarak ödemeyi tamamlayınız',
+    
+    // Journal Entry Details Page translations
+    'downloadPdf': 'PDF İndir',
+    'viewUpdates': 'Güncellemeleri Görüntüle',
+    'authors': 'Yazarlar',
+    'publishedIn': 'Yayınlandığı Yer',
+    'entryDetails': 'Makale Detayları',
+    'pageNumber': 'Sayfa Numarası',
+    'articleType': 'Makale Türü',
+    'status': 'Durum',
+    'downloads': 'İNDİRMELER',
+    'reads': 'Okunmalar',
+    'bankName': 'Banka Adı',
+    'accountHolder': 'Hesap Sahibi',
+    'processingTime': 'İşlem Süresi',
+    'keywords': 'Anahtar Kelimeler',
+    'referees': 'Hakemler',
+    'files': 'Dosyalar',
+    'viewFile': 'Dosyayı Görüntüle',
+    'referenceToken': 'Referans Token',
+    'manageAuthors': 'Yazarları Yönet',
+    'changeJournal': 'Dergiyi Değiştir',
+    'manageReferees': 'Hakemleri Yönet',
   }
 };
 
