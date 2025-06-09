@@ -11,7 +11,7 @@ Public Content Pages
 [ + ] ArchivedJournalsPage - Journal List - Published
 [ + ] JournalDetailsPage - Journal Details
 [ + ] JournalEntriesPage - ?????
-[ - ] JournalEntryDetailsPage - Entry Details
+[ + ] JournalEntryDetailsPage - Entry Details
 [ + ] About Page
 [ + ] General Information Page
 
@@ -48,3 +48,4 @@ Admin Only: 5 pages (requires admin+ role)
 [ - ] Update E-mails (Referee Assigned, Author Updatem, Referee Update)
 
 Toast Messages in CREATE and EDIT and DELETE forms
+Check Pop Up Windows in All Pages
