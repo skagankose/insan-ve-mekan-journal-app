@@ -41,7 +41,7 @@ type TranslationKeys =
   | 'changePassword' | 'currentPassword' | 'newPassword' | 'passwordUpdated' | 'changingPassword'
   | 'statusWaitingForPayment' | 'statusWaitingForAuthors' | 'statusWaitingForReferees' | 'statusWaitingForEditors' | 'statusAccepted' | 'statusNotAccepted'
   | 'notAccepted' | 'waitingForPayment' | 'waitingForAuthors' | 'waitingForReferees' | 'waitingForEditors' | 'rejected' | 'pending' | 'accepted'
-  | 'published' | 'or' | 'locale' | 'googleSignIn' | 'googleSignInFailed'
+  | 'published' | 'inProgress' | 'or' | 'locale' | 'googleSignIn' | 'googleSignInFailed'
   | 'pageNotFoundTitle' | 'pageNotFoundDescription' | 'exploreJournalsText' | 'searchContentText'
   | 'forgotPassword' | 'forgotPasswordInstructions' | 'passwordResetLinkSent' | 'backToLogin' | 'enterEmail' | 'sendResetLink' | 'rememberPassword'
   | 'resetPassword' | 'passwordResetSuccess' | 'redirectingToLogin' | 'enterNewPassword' | 'confirmNewPassword' | 'resetting'
@@ -68,7 +68,8 @@ type TranslationKeys =
   | 'paymentVerificationTypically' | 'paymentInfoMessage'
   | 'downloadPdf' | 'viewUpdates' | 'authors' | 'publishedIn' | 'entryDetails' | 'pageNumber' | 'articleType' | 'status' | 'downloads' | 'reads'
   | 'bankName' | 'accountHolder' | 'processingTime' | 'keywords' | 'referees' | 'files' | 'viewFile'
-  | 'referenceToken' | 'manageAuthors' | 'changeJournal' | 'manageReferees';
+  | 'referenceToken' | 'manageAuthors' | 'changeJournal' | 'manageReferees' | 'noPublishedEntries'
+  | 'loadingPublishedJournals' | 'failedToLoadPublishedJournals' | 'noPublishedJournals';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -151,6 +152,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'rejected': 'Rejected',
     'pending': 'Pending',
     'accepted': 'Accepted',
+    'inProgress': 'In Progress',
     
     // Placeholders
     'enterTitle': 'Enter a title for your journal entry',
@@ -373,13 +375,13 @@ const translations: Record<Language, TranslationDictionary> = {
     'viewCoverPhoto': 'Cover Photo',
     'viewMetaFiles': 'Meta Files',
     'viewEditorNotes': 'Editor Notes',
-    'viewFullPdf': 'Full PDF',
+    'viewFullPdf': 'PDF File',
     'viewIndexSection': 'Index Section',
-    'viewMergedFile': 'Merged File',
+    'viewMergedFile': 'Merged DOCX File',
     'downloadJournal': 'Download Journal',
     'downloadFullPdf': 'Download Full PDF',
     'downloadJournalDescription': 'Download the complete journal in PDF format',
-    'noEntriesInJournal': 'No entries found in this journal',
+    'noEntriesInJournal': 'No papers found in this journal',
     'failedToMergeFiles': 'Failed to merge journal files',
     'mergingFiles': 'Merging Files...',
     'selectEditorInChief': 'Select Editor-in-Chief',
@@ -388,13 +390,13 @@ const translations: Record<Language, TranslationDictionary> = {
     'noEditorUsers': 'No editor users found',
     'save': 'Save',
     'publicationDetails': 'Publication Details',
-    'publicationFiles': 'Publication Files',
+    'publicationFiles': 'Files',
     'coverPhoto': 'Cover Photo',
     'metaFiles': 'Meta Files',
     'editorNotes': 'Editor Notes',
-    'fullPdf': 'Full PDF',
+    'fullPdf': 'PDF File',
     'indexSection': 'Index Section',
-    'mergedFile': 'Merged File',
+    'mergedFile': 'Merged DOCX File',
     
     // Payment Information
     'paymentRequired': 'Processing Fee Required',
@@ -415,7 +417,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'downloadPdf': 'Download PDF',
     'viewUpdates': 'View Updates',
     'authors': 'Authors',
-    'publishedIn': 'Published In',
+    'publishedIn': 'Published In Journal',
     'entryDetails': 'Entry Details',
     'pageNumber': 'Page Number',
     'articleType': 'Article Type',
@@ -428,11 +430,15 @@ const translations: Record<Language, TranslationDictionary> = {
     'keywords': 'Keywords',
     'referees': 'Referees',
     'files': 'Files',
-    'viewFile': 'View File',
+    'viewFile': 'DOCX File',
     'referenceToken': 'Reference Token',
     'manageAuthors': 'Manage Authors',
     'changeJournal': 'Change Journal',
     'manageReferees': 'Manage Referees',
+    'noPublishedEntries': 'No published papers found in this journal',
+    'loadingPublishedJournals': 'Loading published journals...',
+    'failedToLoadPublishedJournals': 'Failed to load published journals.',
+    'noPublishedJournals': 'No published journals found.',
   },
   tr: {
     // Navigation
@@ -511,6 +517,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'rejected': 'Kabul Edilmedi',
     'pending': 'Beklemede',
     'accepted': 'Kabul Edildi',
+    'inProgress': 'Devam Ediyor',
     
     // Placeholders
     'enterTitle': 'Makalenız için bir başlık girin',
@@ -733,13 +740,13 @@ const translations: Record<Language, TranslationDictionary> = {
     'viewCoverPhoto': 'Kapak Fotoğrafı',
     'viewMetaFiles': 'Meta Dosyalar',
     'viewEditorNotes': 'Editör Notları',
-    'viewFullPdf': 'Tam PDF',
+    'viewFullPdf': 'PDF Dosyası',
     'viewIndexSection': 'İndeks Bölümü',
-    'viewMergedFile': 'Birleştirilmiş Dosya',
+    'viewMergedFile': 'Birleştirilmiş Dosyas',
     'downloadJournal': 'Dergiyi İndir',
     'downloadFullPdf': 'PDF İndir',
     'downloadJournalDescription': 'Dergiyi PDF formatında tamamen indirin',
-    'noEntriesInJournal': 'Bu dergide hiç makale bulunamadı',
+    'noEntriesInJournal': 'Bu dergide makale bulunmamaktadır',
     'failedToMergeFiles': 'Dergi dosyaları birleştirilemedi',
     'mergingFiles': 'Dosyalar Birleştiriliyor...',
     'selectEditorInChief': 'Baş Editörü Seç',
@@ -748,11 +755,11 @@ const translations: Record<Language, TranslationDictionary> = {
     'noEditorUsers': 'Editör kullanıcı bulunamadı',
     'save': 'Kaydet',
     'publicationDetails': 'Yayın Detayları',
-    'publicationFiles': 'Yayın Dosyaları',
+    'publicationFiles': 'Dosyalar',
     'coverPhoto': 'Kapak Fotoğrafı',
     'metaFiles': 'Meta Dosyalar',
     'editorNotes': 'Editör Notları',
-    'fullPdf': 'Tam PDF',
+    'fullPdf': 'PDF Dosyası',
     'indexSection': 'İndeks Bölümü',
     'mergedFile': 'Birleştirilmiş Dosya',
     
@@ -775,7 +782,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'downloadPdf': 'PDF İndir',
     'viewUpdates': 'Güncellemeleri Görüntüle',
     'authors': 'Yazarlar',
-    'publishedIn': 'Yayınlandığı Yer',
+    'publishedIn': 'Yayınlandığı Dergi',
     'entryDetails': 'Makale Detayları',
     'pageNumber': 'Sayfa Numarası',
     'articleType': 'Makale Türü',
@@ -788,11 +795,15 @@ const translations: Record<Language, TranslationDictionary> = {
     'keywords': 'Anahtar Kelimeler',
     'referees': 'Hakemler',
     'files': 'Dosyalar',
-    'viewFile': 'Dosyayı Görüntüle',
+    'viewFile': 'DOCX Dosyası',
     'referenceToken': 'Referans Token',
     'manageAuthors': 'Yazarları Yönet',
     'changeJournal': 'Dergiyi Değiştir',
     'manageReferees': 'Hakemleri Yönet',
+    'noPublishedEntries': 'Bu dergide yayınlanan makale bulunmamaktadır',
+    'loadingPublishedJournals': 'Yayınlanmış dergiler yükleniyor...',
+    'failedToLoadPublishedJournals': 'Yayınlanmış dergiler yüklenemedi.',
+    'noPublishedJournals': 'Yayınlanmış dergi bulunamadı.',
   }
 };
 

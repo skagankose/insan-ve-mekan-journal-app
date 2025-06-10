@@ -694,7 +694,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                 }}></div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '1fr' : 'repeat(2, 1fr)',
+                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '1fr' : entry.authors && entry.authors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
                   gap: '16px'
                 }}>
                   {entry.authors && entry.authors.length > 0 ? (
@@ -990,21 +990,20 @@ const JournalEntryDetailsPage: React.FC = () => {
                 marginBottom: '8px'
               }}>
                 <div style={{
-                  width: '40px',
-                  height: '40px',
+                  width: '32px',
+                  height: '32px',
                   background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-                  borderRadius: '12px',
+                  borderRadius: '10px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 8px 16px rgba(20, 184, 166, 0.3)'
+                  justifyContent: 'center'
                 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                     <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
                 <h3 style={{
-                  fontSize: '28px',
+                  fontSize: '24px',
                   fontWeight: '800',
                   color: '#0F172A',
                   margin: 0,
@@ -1015,11 +1014,11 @@ const JournalEntryDetailsPage: React.FC = () => {
                 }}>{t('entryDetails') || 'Entry Details'}</h3>
               </div>
               <div style={{
-                width: '60px',
-                height: '4px',
+                width: '50px',
+                height: '3px',
                 background: 'linear-gradient(90deg, #14B8A6 0%, #0D9488 100%)',
                 borderRadius: '2px',
-                marginLeft: '52px'
+                marginLeft: '44px'
               }}></div>
             </div>
             
@@ -1044,7 +1043,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                 <div style={{
                   width: '36px',
                   height: '36px',
-                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
                   borderRadius: '10px',
                   display: 'flex',
                   alignItems: 'center',
@@ -1085,7 +1084,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                   <div style={{
                     width: '36px',
                     height: '36px',
-                    background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                    background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
                     borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
@@ -1127,7 +1126,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                   <div style={{
                     width: '36px',
                     height: '36px',
-                    background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                    background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
                     borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
@@ -1171,7 +1170,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                   <div style={{
                     width: '36px',
                     height: '36px',
-                    background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                    background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
                     borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
@@ -1213,7 +1212,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                   <div style={{
                     width: '36px',
                     height: '36px',
-                    background: 'linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)',
+                    background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
                     borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
@@ -1243,6 +1242,90 @@ const JournalEntryDetailsPage: React.FC = () => {
                 </div>
               )}
 
+
+
+              {/* Downloads and Reads boxes - Visible to all users */}
+              <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '16px 20px',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(226, 232, 240, 0.6)'
+                  }}>
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 16.5V18.75C3 19.9926 4.00736 21 5.25 21H18.75C19.9926 21 21 19.9926 21 18.75V16.5M16.5 12L12 16.5M12 16.5L7.5 12M12 16.5V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        fontSize: '13px', 
+                        fontWeight: '600', 
+                        color: '#64748B',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>{t('downloads') || 'Downloads'}</div>
+                      <div style={{ 
+                        fontSize: '16px', 
+                        fontWeight: '600', 
+                        color: '#1E293B'
+                      }}>{entry.download_count}</div>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '16px 20px',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(226, 232, 240, 0.6)'
+                  }}>
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        fontSize: '13px', 
+                        fontWeight: '600', 
+                        color: '#64748B',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        marginBottom: '4px'
+                      }}>{t('reads') || 'Reads'}</div>
+                      <div style={{ 
+                        fontSize: '16px', 
+                        fontWeight: '600', 
+                        color: '#1E293B'
+                      }}>{entry.read_count}</div>
+                    </div>
+                  </div>
+
               {/* Status box - Only visible to authors, referees, editors, admins, and owners */}
               {entry.status && canViewStatus && (
                     <div style={{
@@ -1250,25 +1333,9 @@ const JournalEntryDetailsPage: React.FC = () => {
                       alignItems: 'center',
                       gap: '12px',
                       padding: '16px 20px',
-                      background: entry.status === 'accepted' ? 'rgba(16, 185, 129, 0.1)' : 
-                                 entry.status === 'not_accepted' ? 'rgba(239, 68, 68, 0.1)' :
-                                 entry.status === 'rejected' ? 'rgba(239, 68, 68, 0.1)' :
-                                 entry.status === 'waiting_for_payment' ? 'rgba(253, 230, 138, 0.6)' :
-                                 entry.status === 'waiting_for_authors' ? 'rgba(59, 130, 246, 0.1)' :
-                                 entry.status === 'waiting_for_referees' ? 'rgba(139, 92, 246, 0.1)' :
-                                 entry.status === 'waiting_for_editors' ? 'rgba(254, 215, 170, 0.6)' :
-                                 entry.status === 'pending' ? 'rgba(245, 158, 11, 0.1)' :
-                                 'rgba(148, 163, 184, 0.1)',
+                      background: 'rgba(255, 255, 255, 0.7)',
                       borderRadius: '16px',
-                      border: `1px solid ${entry.status === 'accepted' ? 'rgba(16, 185, 129, 0.3)' : 
-                                          entry.status === 'not_accepted' ? 'rgba(239, 68, 68, 0.3)' :
-                                          entry.status === 'rejected' ? 'rgba(239, 68, 68, 0.3)' :
-                                          entry.status === 'waiting_for_payment' ? 'rgba(253, 230, 138, 0.8)' :
-                                          entry.status === 'waiting_for_authors' ? 'rgba(59, 130, 246, 0.3)' :
-                                          entry.status === 'waiting_for_referees' ? 'rgba(139, 92, 246, 0.3)' :
-                                          entry.status === 'waiting_for_editors' ? 'rgba(194, 65, 12, 0.3)' :
-                                          entry.status === 'pending' ? 'rgba(245, 158, 11, 0.3)' :
-                                          'rgba(148, 163, 184, 0.3)'}`
+                      border: '1px solid rgba(226, 232, 240, 0.6)'
                     }}>
                       <div style={{
                         width: '36px',
@@ -1362,88 +1429,6 @@ const JournalEntryDetailsPage: React.FC = () => {
                       </div>
                     </div>
               )}
-
-              {/* Downloads and Reads boxes - Visible to all users */}
-              <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '16px 20px',
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    borderRadius: '16px',
-                    border: '1px solid rgba(226, 232, 240, 0.6)'
-                  }}>
-                    <div style={{
-                      width: '36px',
-                      height: '36px',
-                      background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
-                      borderRadius: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M3 16.5V18.75C3 19.9926 4.00736 21 5.25 21H18.75C19.9926 21 21 19.9926 21 18.75V16.5M16.5 12L12 16.5M12 16.5L7.5 12M12 16.5V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ 
-                        fontSize: '13px', 
-                        fontWeight: '600', 
-                        color: '#64748B',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        marginBottom: '4px'
-                      }}>{t('downloads') || 'Downloads'}</div>
-                      <div style={{ 
-                        fontSize: '16px', 
-                        fontWeight: '600', 
-                        color: '#1E293B'
-                      }}>{entry.download_count}</div>
-                    </div>
-                  </div>
-
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '16px 20px',
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    borderRadius: '16px',
-                    border: '1px solid rgba(226, 232, 240, 0.6)'
-                  }}>
-                    <div style={{
-                      width: '36px',
-                      height: '36px',
-                      background: 'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)',
-                      borderRadius: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ 
-                        fontSize: '13px', 
-                        fontWeight: '600', 
-                        color: '#64748B',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        marginBottom: '4px'
-                      }}>{t('reads') || 'Reads'}</div>
-                      <div style={{ 
-                        fontSize: '16px', 
-                        fontWeight: '600', 
-                        color: '#1E293B'
-                      }}>{entry.read_count}</div>
-                    </div>
-                  </div>
 
             </div>
 
@@ -1719,7 +1704,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '12px',
-                      marginBottom: '24px'
+                      marginBottom: '8px'
                     }}>
                       <div style={{
                         width: '32px',
@@ -1736,7 +1721,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                         </svg>
                       </div>
                       <h3 style={{
-                        fontSize: '28px',
+                        fontSize: '24px',
                         fontWeight: '800',
                         color: '#0F172A',
                         margin: 0,
@@ -1746,6 +1731,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                         WebkitTextFillColor: 'transparent'
                       }}>{t('abstract') || 'Abstract'}</h3>
                     </div>
+                    <div style={{
+                      width: '50px',
+                      height: '3px',
+                      background: 'linear-gradient(90deg, #EC4899 0%, #DB2777 100%)',
+                      borderRadius: '2px',
+                      marginLeft: '44px',
+                      marginBottom: '20px'
+                    }}></div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       {entry.abstract_tr && (
                         <div style={{
@@ -1866,8 +1859,8 @@ const JournalEntryDetailsPage: React.FC = () => {
                       justifyContent: 'center'
                     }}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M16 4V2C16 1.44772 15.5523 1 15 1H9C8.44772 1 8 1.44772 8 2V4M4 7H20M6 7V20C6 21.1046 6.89543 22 8 22H16C17.1046 22 18 21.1046 18 20V7H6Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M10 11V17M14 11V17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M9 12L11 14L15 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                     <h3 style={{
@@ -2072,8 +2065,9 @@ const JournalEntryDetailsPage: React.FC = () => {
                   gap: '16px'
                 }}>
                   {entry.file_path && (
-                    <button 
-                      onClick={() => window.open(`/api${entry.file_path}`, '_blank')}
+                    <a 
+                      href={`/api${entry.file_path}`}
+                      download
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -2085,11 +2079,13 @@ const JournalEntryDetailsPage: React.FC = () => {
                         transition: 'all 0.3s ease',
                         cursor: 'pointer',
                         width: '100%',
-                        textAlign: 'left'
+                        textAlign: 'left',
+                        textDecoration: 'none',
+                        color: 'inherit'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                        e.currentTarget.style.borderColor = '#14B8A6';
+                        e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                        e.currentTarget.style.borderColor = '#3B82F6';
                         e.currentTarget.style.transform = 'translateY(-2px)';
                       }}
                       onMouseLeave={(e) => {
@@ -2101,7 +2097,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                       <div style={{
                         width: '32px',
                         height: '32px',
-                        background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                        background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
                         borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
@@ -2109,8 +2105,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                         flexShrink: 0
                       }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <path d="M13 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9L13 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M13 2V9H20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15L17 10M12 15V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
                       <div style={{ flex: 1 }}>
@@ -2118,9 +2113,9 @@ const JournalEntryDetailsPage: React.FC = () => {
                           fontSize: '14px', 
                           fontWeight: '600', 
                           color: '#1E293B'
-                        }}>{t('viewFile') || 'View File'}</div>
+                        }}>{t('viewFile') || 'Download File'}</div>
                       </div>
-                    </button>
+                    </a>
                   )}
                   
                   {entry.full_pdf && (
