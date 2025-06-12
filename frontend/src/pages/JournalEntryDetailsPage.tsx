@@ -4,6 +4,8 @@ import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { FaCreditCard, FaExclamationTriangle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { HiMail, HiUser, HiDocumentText, HiLocationMarker, HiBookOpen, HiAcademicCap, HiFingerPrint, HiIdentification } from 'react-icons/hi';
+import { PiSubtitlesFill } from "react-icons/pi";
 import Footer from '../components/Footer';
 
 const JournalEntryDetailsPage: React.FC = () => {
@@ -596,7 +598,7 @@ const JournalEntryDetailsPage: React.FC = () => {
           {/* Authors and Published In Section - Side by Side */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            gridTemplateColumns: '1.5fr 1fr',
             gap: '24px',
             marginBottom: '32px'
           }}>
@@ -694,7 +696,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                 }}></div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '1fr' : entry.authors && entry.authors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '0.5fr' : entry.authors && entry.authors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
                   gap: '16px'
                 }}>
                   {entry.authors && entry.authors.length > 0 ? (
@@ -733,8 +735,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                             fontSize: '13px',
                             color: '#64748B',
                             margin: '0 0 6px 0',
-                            fontWeight: '500'
-                          }}>{author.title}</p>
+                            fontWeight: '500',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}>
+                            <PiSubtitlesFill size={16} color="#64748B" />
+                            {author.title}
+                          </p>
                         )}
                         {author.email && (
                           <p style={{
@@ -745,6 +753,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                             alignItems: 'center',
                             gap: '6px'
                           }}>
+                            <HiMail size={16} color="#64748B" />
                             {author.email}
                           </p>
                         )}
@@ -910,8 +919,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                       fontSize: '13px',
                       color: '#64748B',
                       margin: '0 0 6px 0',
-                      fontWeight: '500'
+                      fontWeight: '500',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
                     }}>
+                      <HiLocationMarker size={14} color="#64748B" />
                       {journal.publication_place}
                     </p>
                   )}
@@ -919,8 +932,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                     fontSize: '13px',
                     color: '#64748B',
                     margin: 0,
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
                   }}>
+                    <HiBookOpen size={14} color="#64748B" />
                     {journal.issue}
                   </p>
                 </div>
@@ -3175,14 +3192,21 @@ const JournalEntryDetailsPage: React.FC = () => {
                   borderRadius: '16px',
                   border: '1px solid rgba(226, 232, 240, 0.6)'
                 }}>
-                                          <div style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#64748B',
-                          marginBottom: '8px',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
-                        }}>{language === 'tr' ? 'İSİM' : 'Name'}</div>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginBottom: '8px'
+                  }}>
+                    <HiUser size={16} color="#64748B" />
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#64748B',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>{language === 'tr' ? 'İSİM' : 'Name'}</div>
+                  </div>
                   <div style={{
                     fontSize: '20px',
                     fontWeight: '700',
@@ -3199,14 +3223,21 @@ const JournalEntryDetailsPage: React.FC = () => {
                     borderRadius: '16px',
                     border: '1px solid rgba(226, 232, 240, 0.6)'
                   }}>
-                                            <div style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#64748B',
-                          marginBottom: '8px',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
-                        }}>{language === 'tr' ? 'ÜNVAN' : 'Title'}</div>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '8px'
+                    }}>
+                      <PiSubtitlesFill size={16} color="#64748B" />
+                      <div style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#64748B',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>{language === 'tr' ? 'ÜNVAN' : 'Title'}</div>
+                    </div>
                     <div style={{
                       fontSize: '16px',
                       fontWeight: '500',
@@ -3223,14 +3254,21 @@ const JournalEntryDetailsPage: React.FC = () => {
                     borderRadius: '16px',
                     border: '1px solid rgba(226, 232, 240, 0.6)'
                   }}>
-                                            <div style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#64748B',
-                          marginBottom: '8px',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
-                        }}>{language === 'tr' ? 'BİYOGRAFİ' : 'Biography'}</div>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '8px'
+                    }}>
+                      <HiDocumentText size={16} color="#64748B" />
+                      <div style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#64748B',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>{language === 'tr' ? 'BİYOGRAFİ' : 'Biography'}</div>
+                    </div>
                     <div style={{
                       fontSize: '16px',
                       fontWeight: '400',
@@ -3260,17 +3298,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                          gap: '8px',
                          marginBottom: '8px'
                        }}>
-                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                           <path d="M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="#64748B" strokeWidth="2"/>
-                           <path d="M2 12C2 13.6394 2.42496 15.1915 3.18414 16.5297C4.70711 19.4183 7.90861 21 12 21C16.0914 21 19.2929 19.4183 20.8159 16.5297C21.575 15.1915 22 13.6394 22 12C22 10.3606 21.575 8.90853 20.8159 7.57031C19.2929 4.68166 16.0914 3.1 12 3.1C7.90861 3.1 4.70711 4.68166 3.18414 7.57031C2.42496 8.90853 2 10.3606 2 12Z" stroke="#64748B" strokeWidth="2"/>
-                         </svg>
-                                                    <div style={{
-                             fontSize: '14px',
-                             fontWeight: '600',
-                             color: '#64748B',
-                             textTransform: 'uppercase',
-                             letterSpacing: '0.05em'
-                           }}>{language === 'tr' ? 'E-POSTA ADRESİ' : 'Email'}</div>
+                         <HiMail size={16} color="#64748B" />
+                         <div style={{
+                           fontSize: '14px',
+                           fontWeight: '600',
+                           color: '#64748B',
+                           textTransform: 'uppercase',
+                           letterSpacing: '0.05em'
+                         }}>{language === 'tr' ? 'E-POSTA ADRESİ' : 'Email'}</div>
                        </div>
                        <div style={{
                          fontSize: '16px',
@@ -3298,16 +3333,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                         gap: '8px',
                         marginBottom: '8px'
                       }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path d="M22 12H18L15 21L9 3L6 12H2" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                                                  <div style={{
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            color: '#64748B',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em'
-                          }}>{language === 'tr' ? 'BİLİM DALI' : 'Science Branch'}</div>
+                        <HiAcademicCap size={16} color="#64748B" />
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#64748B',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}>{language === 'tr' ? 'BİLİM DALI' : 'Science Branch'}</div>
                       </div>
                       <div style={{
                         fontSize: '16px',
@@ -3331,16 +3364,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                         gap: '8px',
                         marginBottom: '8px'
                       }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path d="M21 2L19 4M19 4L17 2M19 4V8M10 16L8 18M8 18L6 16M8 18V14M12 6C14.2091 6 16 7.79086 16 10C16 12.2091 14.2091 14 12 14C9.79086 14 8 12.2091 8 10C8 7.79086 9.79086 6 12 6Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                                                  <div style={{
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            color: '#64748B',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em'
-                          }}>{language === 'tr' ? 'ORCİD ID' : 'ORCID ID'}</div>
+                        <HiFingerPrint size={16} color="#64748B" />
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#64748B',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}>{language === 'tr' ? 'ORCİD ID' : 'ORCID ID'}</div>
                       </div>
                       <div style={{
                         fontSize: '16px',
@@ -3364,16 +3395,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                         gap: '8px',
                         marginBottom: '8px'
                       }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                                                  <div style={{
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            color: '#64748B',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em'
-                          }}>{language === 'tr' ? 'YOKSİS ID' : 'YOKSIS ID'}</div>
+                        <HiIdentification size={16} color="#64748B" />
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#64748B',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}>{language === 'tr' ? 'YOKSİS ID' : 'YOKSIS ID'}</div>
                       </div>
                       <div style={{
                         fontSize: '16px',

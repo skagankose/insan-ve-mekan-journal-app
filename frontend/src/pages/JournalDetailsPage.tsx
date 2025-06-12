@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveJournal } from '../contexts/ActiveJournalContext';
 import Footer from '../components/Footer';
+import { HiMail, HiUser } from 'react-icons/hi';
+import { PiSubtitlesFill } from "react-icons/pi";
 
 const JournalDetailsPage: React.FC = () => {
     const { journalId } = useParams<{ journalId: string }>();
@@ -845,6 +847,384 @@ const JournalDetailsPage: React.FC = () => {
                     </div>
                 )}
 
+                {/* Editor-in-Chief and Editors Section - Side by Side */}
+                <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1.5fr',
+                        gap: '24px',
+                        marginBottom: '32px'
+                    }}>
+                        {/* Editor-in-Chief Section */}
+                        <div style={{
+                            padding: '32px',
+                            background: 'rgba(255, 255, 255, 0.7)',
+                            backdropFilter: 'blur(10px)',
+                            borderRadius: '20px',
+                            border: '1px solid rgba(226, 232, 240, 0.6)',
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}>
+                            <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                height: '100%',
+                                background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f1f5f9" fill-opacity="0.3"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat',
+                                opacity: 0.3,
+                                zIndex: 0
+                            }} />
+                            <div style={{ position: 'relative', zIndex: 1 }}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    marginBottom: '8px'
+                                }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px'
+                                    }}>
+                                        <div style={{
+                                            width: '32px',
+                                            height: '32px',
+                                            background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                                            borderRadius: '10px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M12 2L3 7V17C3 17.5304 3.21071 18.0391 3.58579 18.4142C3.96086 18.7893 4.46957 19 5 19H19C19.5304 19 20.0391 18.7893 20.4142 18.4142C20.7893 18.0391 21 17.5304 21 17V7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <path d="M9 21V12H15V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        </div>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '800',
+                                            color: '#0F172A',
+                                            margin: 0,
+                                            letterSpacing: '-0.025em',
+                                            background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
+                                            WebkitBackgroundClip: 'text',
+                                            WebkitTextFillColor: 'transparent'
+                                        }}>{t('editorInChief') || 'Editor-in-Chief'}</h3>
+                                    </div>
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => setShowEditorInChiefModal(true)}
+                                            style={{
+                                                padding: '8px 12px',
+                                                background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                fontSize: '14px',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.3s ease'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                            }}
+                                        >
+                                            {t('changeEditorInChief') || 'Change Editor-in-Chief'}
+                                        </button>
+                                    )}
+                                </div>
+                                <div style={{
+                                    width: '50px',
+                                    height: '3px',
+                                    background: 'linear-gradient(90deg, #8B5CF6 0%, #7C3AED 100%)',
+                                    borderRadius: '2px',
+                                    marginLeft: '44px',
+                                    marginBottom: '20px'
+                                }}></div>
+                                
+                                {editorInChief ? (
+                                    <div 
+                                        onClick={() => handleUserClick(editorInChief)}
+                                        style={{
+                                            padding: '20px',
+                                            background: 'rgba(255, 255, 255, 0.7)',
+                                            borderRadius: '16px',
+                                            border: '1px solid rgba(226, 232, 240, 0.6)',
+                                            transition: 'all 0.3s ease',
+                                            cursor: 'pointer'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(139, 92, 246, 0.08)';
+                                            e.currentTarget.style.borderColor = '#8B5CF6';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                            e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
+                                    >
+                                        <h4 style={{
+                                            fontSize: '16px',
+                                            fontWeight: '700',
+                                            color: '#1E293B',
+                                            margin: '0 0 8px 0',
+                                            letterSpacing: '-0.025em'
+                                        }}>{editorInChief.name}</h4>
+                                        {editorInChief.title && (
+                                            <p style={{
+                                                fontSize: '13px',
+                                                color: '#64748B',
+                                                margin: '0 0 6px 0',
+                                                fontWeight: '500',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px'
+                                            }}>
+                                                <PiSubtitlesFill size={16} color="#64748B" />
+                                                {editorInChief.title}
+                                            </p>
+                                        )}
+                                        {editorInChief.email && (
+                                            <p style={{
+                                                fontSize: '13px',
+                                                color: '#64748B',
+                                                margin: 0,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px'
+                                            }}>
+                                                <HiMail size={16} color="#64748B" />
+                                                {editorInChief.email}
+                                            </p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div style={{
+                                        padding: '32px 20px',
+                                        textAlign: 'center',
+                                        background: 'rgba(255, 255, 255, 0.6)',
+                                        borderRadius: '16px',
+                                        border: '2px dashed #E2E8F0'
+                                    }}>
+                                        <div style={{
+                                            width: '40px',
+                                            height: '40px',
+                                            margin: '0 auto 12px',
+                                            background: '#F1F5F9',
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '18px'
+                                        }}>👑</div>
+                                        <p style={{
+                                            margin: 0,
+                                            fontSize: '14px',
+                                            fontWeight: '500',
+                                            color: '#64748B'
+                                        }}>{t('noEditorInChief') || 'No editor-in-chief assigned'}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Editors Section */}
+                        <div style={{
+                            padding: '32px',
+                            background: 'rgba(255, 255, 255, 0.7)',
+                            backdropFilter: 'blur(10px)',
+                            borderRadius: '20px',
+                            border: '1px solid rgba(226, 232, 240, 0.6)',
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
+                            position: 'relative',
+                            overflow: 'hidden'
+                        }}>
+                            <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                height: '100%',
+                                background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f1f5f9" fill-opacity="0.3"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat',
+                                opacity: 0.3,
+                                zIndex: 0
+                            }} />
+                            <div style={{ position: 'relative', zIndex: 1 }}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    marginBottom: '8px'
+                                }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px'
+                                    }}>
+                                        <div style={{
+                                            width: '32px',
+                                            height: '32px',
+                                            background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                            borderRadius: '10px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        </div>
+                                        <h3 style={{
+                                            fontSize: '24px',
+                                            fontWeight: '800',
+                                            color: '#0F172A',
+                                            margin: 0,
+                                            letterSpacing: '-0.025em',
+                                            background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
+                                            WebkitBackgroundClip: 'text',
+                                            WebkitTextFillColor: 'transparent'
+                                        }}>{t('editors') || 'Editors'}</h3>
+                                    </div>
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => setShowEditorsModal(true)}
+                                            style={{
+                                                padding: '8px 12px',
+                                                background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                fontSize: '14px',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.3s ease'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                            }}
+                                        >
+                                            {t('manageEditors') || 'Manage Editors'}
+                                        </button>
+                                    )}
+                                </div>
+                                <div style={{
+                                    width: '50px',
+                                    height: '3px',
+                                    background: 'linear-gradient(90deg, #3B82F6 0%, #1D4ED8 100%)',
+                                    borderRadius: '2px',
+                                    marginLeft: '44px',
+                                    marginBottom: '20px'
+                                }}></div>
+                                
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: editors.length === 1 ? '0.5fr' : editors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(220px, 1fr))',
+                                    gap: '16px'
+                                }}>
+                                    {editors.length > 0 ? (
+                                        editors.map(editor => (
+                                            <div 
+                                                key={editor.id} 
+                                                onClick={() => handleUserClick(editor)}
+                                                style={{
+                                                    padding: '20px',
+                                                    background: 'rgba(255, 255, 255, 0.7)',
+                                                    borderRadius: '16px',
+                                                    border: '1px solid rgba(226, 232, 240, 0.6)',
+                                                    transition: 'all 0.3s ease',
+                                                    cursor: 'pointer'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)';
+                                                    e.currentTarget.style.borderColor = '#3B82F6';
+                                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                                    e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                                    e.currentTarget.style.transform = 'translateY(0)';
+                                                }}
+                                            >
+                                                <h4 style={{
+                                                    fontSize: '16px',
+                                                    fontWeight: '700',
+                                                    color: '#1E293B',
+                                                    margin: '0 0 8px 0',
+                                                    letterSpacing: '-0.025em'
+                                                }}>{editor.name}</h4>
+                                                {editor.title && (
+                                                    <p style={{
+                                                        fontSize: '13px',
+                                                        color: '#64748B',
+                                                        margin: '0 0 6px 0',
+                                                        fontWeight: '500',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px'
+                                                                                                          }}>
+                                                        <PiSubtitlesFill size={16} color="#64748B" />
+                                                        {editor.title}
+                                                    </p>
+                                                )}
+                                                {editor.email && (
+                                                    <p style={{
+                                                        fontSize: '13px',
+                                                        color: '#64748B',
+                                                        margin: 0,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px'
+                                                    }}>
+                                                        <HiMail size={16} color="#64748B" />
+                                                        {editor.email}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div style={{
+                                            gridColumn: '1 / -1',
+                                            padding: '32px 20px',
+                                            textAlign: 'center',
+                                            background: 'rgba(255, 255, 255, 0.6)',
+                                            borderRadius: '16px',
+                                            border: '2px dashed #E2E8F0'
+                                        }}>
+                                            <div style={{
+                                                width: '40px',
+                                                height: '40px',
+                                                margin: '0 auto 12px',
+                                                background: '#F1F5F9',
+                                                borderRadius: '50%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '18px'
+                                            }}>👥</div>
+                                            <p style={{
+                                                margin: 0,
+                                                fontSize: '14px',
+                                                fontWeight: '500',
+                                                color: '#64748B'
+                                            }}>{t('noEditors') || 'No editors assigned'}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
 
                 <div style={{
@@ -915,8 +1295,6 @@ const JournalDetailsPage: React.FC = () => {
                             marginLeft: '52px'
                         }}></div>
                     </div>
-                    
-
                     
                     {/* Publication Information Cards Grid */}
                     <div style={{
@@ -1598,369 +1976,7 @@ const JournalDetailsPage: React.FC = () => {
                 )}
 
                 {/* Editor-in-Chief and Editors Section - Side by Side */}
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '24px',
-                    marginBottom: '32px'
-                }}>
-                    {/* Editor-in-Chief Section */}
-                    <div style={{
-                        padding: '32px',
-                        background: 'rgba(255, 255, 255, 0.7)',
-                        backdropFilter: 'blur(10px)',
-                        borderRadius: '20px',
-                        border: '1px solid rgba(226, 232, 240, 0.6)',
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }}>
-                        <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            height: '100%',
-                            background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f1f5f9" fill-opacity="0.3"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat',
-                            opacity: 0.3,
-                            zIndex: 0
-                        }} />
-                        <div style={{ position: 'relative', zIndex: 1 }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                marginBottom: '8px'
-                            }}>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '12px'
-                                }}>
-                                    <div style={{
-                                        width: '32px',
-                                        height: '32px',
-                                        background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
-                                        borderRadius: '10px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                            <path d="M12 2L3 7V17C3 17.5304 3.21071 18.0391 3.58579 18.4142C3.96086 18.7893 4.46957 19 5 19H19C19.5304 19 20.0391 18.7893 20.4142 18.4142C20.7893 18.0391 21 17.5304 21 17V7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M9 21V12H15V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                    </div>
-                                    <h3 style={{
-                                        fontSize: '24px',
-                                        fontWeight: '800',
-                                        color: '#0F172A',
-                                        margin: 0,
-                                        letterSpacing: '-0.025em',
-                                        background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
-                                        WebkitBackgroundClip: 'text',
-                                        WebkitTextFillColor: 'transparent'
-                                    }}>{t('editorInChief') || 'Editor-in-Chief'}</h3>
-                                </div>
-                                {isAdmin && (
-                                    <button
-                                        onClick={() => setShowEditorInChiefModal(true)}
-                                        style={{
-                                            padding: '8px 12px',
-                                            background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '8px',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(-1px)';
-                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                            e.currentTarget.style.boxShadow = 'none';
-                                        }}
-                                    >
-                                        {t('changeEditorInChief') || 'Change Editor-in-Chief'}
-                                    </button>
-                                )}
-                            </div>
-                            <div style={{
-                                width: '50px',
-                                height: '3px',
-                                background: 'linear-gradient(90deg, #8B5CF6 0%, #7C3AED 100%)',
-                                borderRadius: '2px',
-                                marginLeft: '44px',
-                                marginBottom: '20px'
-                            }}></div>
-                            
-                            {editorInChief ? (
-                                <div 
-                                    onClick={() => handleUserClick(editorInChief)}
-                                    style={{
-                                        padding: '20px',
-                                        background: 'rgba(255, 255, 255, 0.7)',
-                                        borderRadius: '16px',
-                                        border: '1px solid rgba(226, 232, 240, 0.6)',
-                                        transition: 'all 0.3s ease',
-                                        cursor: 'pointer'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.08)';
-                                        e.currentTarget.style.borderColor = '#8B5CF6';
-                                        e.currentTarget.style.transform = 'translateY(-2px)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
-                                        e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                    }}
-                                >
-                                    <h4 style={{
-                                        fontSize: '16px',
-                                        fontWeight: '700',
-                                        color: '#1E293B',
-                                        margin: '0 0 8px 0',
-                                        letterSpacing: '-0.025em'
-                                    }}>{editorInChief.name}</h4>
-                                    {editorInChief.title && (
-                                        <p style={{
-                                            fontSize: '13px',
-                                            color: '#64748B',
-                                            margin: '0 0 6px 0',
-                                            fontWeight: '500'
-                                        }}>{editorInChief.title}</p>
-                                    )}
-                                    {editorInChief.email && (
-                                        <p style={{
-                                            fontSize: '13px',
-                                            color: '#64748B',
-                                            margin: 0,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px'
-                                        }}>
-                                            {editorInChief.email}
-                                        </p>
-                                    )}
-                                </div>
-                            ) : (
-                                <div style={{
-                                    padding: '32px 20px',
-                                    textAlign: 'center',
-                                    background: 'rgba(255, 255, 255, 0.6)',
-                                    borderRadius: '16px',
-                                    border: '2px dashed #E2E8F0'
-                                }}>
-                                    <div style={{
-                                        width: '40px',
-                                        height: '40px',
-                                        margin: '0 auto 12px',
-                                        background: '#F1F5F9',
-                                        borderRadius: '50%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '18px'
-                                    }}>👑</div>
-                                    <p style={{
-                                        margin: 0,
-                                        fontSize: '14px',
-                                        fontWeight: '500',
-                                        color: '#64748B'
-                                    }}>{t('noEditorInChief') || 'No editor-in-chief assigned'}</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
 
-                    {/* Editors Section */}
-                    <div style={{
-                        padding: '32px',
-                        background: 'rgba(255, 255, 255, 0.7)',
-                        backdropFilter: 'blur(10px)',
-                        borderRadius: '20px',
-                        border: '1px solid rgba(226, 232, 240, 0.6)',
-                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }}>
-                        <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            height: '100%',
-                            background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f1f5f9" fill-opacity="0.3"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat',
-                            opacity: 0.3,
-                            zIndex: 0
-                        }} />
-                        <div style={{ position: 'relative', zIndex: 1 }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                marginBottom: '8px'
-                            }}>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '12px'
-                                }}>
-                                    <div style={{
-                                        width: '32px',
-                                        height: '32px',
-                                        background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                                        borderRadius: '10px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                            <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                    </div>
-                                    <h3 style={{
-                                        fontSize: '24px',
-                                        fontWeight: '800',
-                                        color: '#0F172A',
-                                        margin: 0,
-                                        letterSpacing: '-0.025em',
-                                        background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
-                                        WebkitBackgroundClip: 'text',
-                                        WebkitTextFillColor: 'transparent'
-                                    }}>{t('editors') || 'Editors'}</h3>
-                                </div>
-                                {isAdmin && (
-                                    <button
-                                        onClick={() => setShowEditorsModal(true)}
-                                        style={{
-                                            padding: '8px 12px',
-                                            background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '8px',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(-1px)';
-                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                            e.currentTarget.style.boxShadow = 'none';
-                                        }}
-                                    >
-                                        {t('manageEditors') || 'Manage Editors'}
-                                    </button>
-                                )}
-                            </div>
-                            <div style={{
-                                width: '50px',
-                                height: '3px',
-                                background: 'linear-gradient(90deg, #3B82F6 0%, #1D4ED8 100%)',
-                                borderRadius: '2px',
-                                marginLeft: '44px',
-                                marginBottom: '20px'
-                            }}></div>
-                            
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: editors.length === 1 ? '1fr' : editors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(220px, 1fr))',
-                                gap: '16px'
-                            }}>
-                                {editors.length > 0 ? (
-                                    editors.map(editor => (
-                                        <div 
-                                            key={editor.id} 
-                                            onClick={() => handleUserClick(editor)}
-                                            style={{
-                                                padding: '20px',
-                                                background: 'rgba(255, 255, 255, 0.7)',
-                                                borderRadius: '16px',
-                                                border: '1px solid rgba(226, 232, 240, 0.6)',
-                                                transition: 'all 0.3s ease',
-                                                cursor: 'pointer'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)';
-                                                e.currentTarget.style.borderColor = '#3B82F6';
-                                                e.currentTarget.style.transform = 'translateY(-2px)';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
-                                                e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
-                                                e.currentTarget.style.transform = 'translateY(0)';
-                                            }}
-                                        >
-                                            <h4 style={{
-                                                fontSize: '16px',
-                                                fontWeight: '700',
-                                                color: '#1E293B',
-                                                margin: '0 0 8px 0',
-                                                letterSpacing: '-0.025em'
-                                            }}>{editor.name}</h4>
-                                            {editor.title && (
-                                                <p style={{
-                                                    fontSize: '13px',
-                                                    color: '#64748B',
-                                                    margin: '0 0 6px 0',
-                                                    fontWeight: '500'
-                                                }}>{editor.title}</p>
-                                            )}
-                                            {editor.email && (
-                                                <p style={{
-                                                    fontSize: '13px',
-                                                    color: '#64748B',
-                                                    margin: 0,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '6px'
-                                                }}>
-                                                    {editor.email}
-                                                </p>
-                                            )}
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div style={{
-                                        gridColumn: '1 / -1',
-                                        padding: '32px 20px',
-                                        textAlign: 'center',
-                                        background: 'rgba(255, 255, 255, 0.6)',
-                                        borderRadius: '16px',
-                                        border: '2px dashed #E2E8F0'
-                                    }}>
-                                        <div style={{
-                                            width: '40px',
-                                            height: '40px',
-                                            margin: '0 auto 12px',
-                                            background: '#F1F5F9',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontSize: '18px'
-                                        }}>👥</div>
-                                        <p style={{
-                                            margin: 0,
-                                            fontSize: '14px',
-                                            fontWeight: '500',
-                                            color: '#64748B'
-                                        }}>{t('noEditors') || 'No editors assigned'}</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <div style={{ marginBottom: '32px' }}>
                     <h3 style={{
@@ -2855,13 +2871,20 @@ const JournalDetailsPage: React.FC = () => {
                                     border: '1px solid rgba(226, 232, 240, 0.6)'
                                 }}>
                                     <div style={{
-                                        fontSize: '14px',
-                                        fontWeight: '600',
-                                        color: '#64748B',
-                                        marginBottom: '8px',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.05em'
-                                    }}>{language === 'tr' ? 'İSİM' : 'Name'}</div>
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        marginBottom: '8px'
+                                    }}>
+                                        <HiUser size={16} color="#64748B" />
+                                        <div style={{
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            color: '#64748B',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.05em'
+                                        }}>{language === 'tr' ? 'İSİM' : 'Name'}</div>
+                                    </div>
                                     <div style={{
                                         fontSize: '20px',
                                         fontWeight: '700',
@@ -2879,13 +2902,20 @@ const JournalDetailsPage: React.FC = () => {
                                         border: '1px solid rgba(226, 232, 240, 0.6)'
                                     }}>
                                         <div style={{
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            color: '#64748B',
-                                            marginBottom: '8px',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.05em'
-                                        }}>{language === 'tr' ? 'ÜNVAN' : 'Title'}</div>
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            marginBottom: '8px'
+                                        }}>
+                                            <PiSubtitlesFill size={16} color="#64748B" />
+                                            <div style={{
+                                                fontSize: '14px',
+                                                fontWeight: '600',
+                                                color: '#64748B',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.05em'
+                                            }}>{language === 'tr' ? 'ÜNVAN' : 'Title'}</div>
+                                        </div>
                                         <div style={{
                                             fontSize: '16px',
                                             fontWeight: '500',
@@ -2894,30 +2924,7 @@ const JournalDetailsPage: React.FC = () => {
                                     </div>
                                 )}
 
-                                {/* Bio */}
-                                {selectedUser.bio && (
-                                    <div style={{
-                                        padding: '24px',
-                                        background: 'rgba(255, 255, 255, 0.7)',
-                                        borderRadius: '16px',
-                                        border: '1px solid rgba(226, 232, 240, 0.6)'
-                                    }}>
-                                        <div style={{
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            color: '#64748B',
-                                            marginBottom: '8px',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.05em'
-                                        }}>{language === 'tr' ? 'BİYOGRAFİ' : 'Biography'}</div>
-                                        <div style={{
-                                            fontSize: '16px',
-                                            fontWeight: '400',
-                                            color: '#374151',
-                                            lineHeight: '1.6'
-                                        }}>{selectedUser.bio}</div>
-                                    </div>
-                                )}
+
 
                                 {/* Contact Information */}
                                 <div style={{
@@ -2939,10 +2946,7 @@ const JournalDetailsPage: React.FC = () => {
                                                 gap: '8px',
                                                 marginBottom: '8px'
                                             }}>
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12Z" stroke="#64748B" strokeWidth="2"/>
-                                                    <path d="M2 12C2 13.6394 2.42496 15.1915 3.18414 16.5297C4.70711 19.4183 7.90861 21 12 21C16.0914 21 19.2929 19.4183 20.8159 16.5297C21.575 15.1915 22 13.6394 22 12C22 10.3606 21.575 8.90853 20.8159 7.57031C19.2929 4.68166 16.0914 3.1 12 3.1C7.90861 3.1 4.70711 4.68166 3.18414 7.57031C2.42496 8.90853 2 10.3606 2 12Z" stroke="#64748B" strokeWidth="2"/>
-                                                </svg>
+                                                <HiMail size={16} color="#64748B" />
                                                 <div style={{
                                                     fontSize: '14px',
                                                     fontWeight: '600',
@@ -2959,104 +2963,11 @@ const JournalDetailsPage: React.FC = () => {
                                         </div>
                                     )}
 
-                                    {/* Science Branch */}
-                                    {selectedUser.science_branch && (
-                                        <div style={{
-                                            padding: '20px',
-                                            background: 'rgba(255, 255, 255, 0.7)',
-                                            borderRadius: '16px',
-                                            border: '1px solid rgba(226, 232, 240, 0.6)'
-                                        }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                marginBottom: '8px'
-                                            }}>
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M22 12H18L15 21L9 3L6 12H2" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                </svg>
-                                                <div style={{
-                                                    fontSize: '14px',
-                                                    fontWeight: '600',
-                                                    color: '#64748B',
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '0.05em'
-                                                }}>{language === 'tr' ? 'BİLİM DALI' : 'Science Branch'}</div>
-                                            </div>
-                                            <div style={{
-                                                fontSize: '16px',
-                                                fontWeight: '500',
-                                                color: '#374151'
-                                            }}>{selectedUser.science_branch}</div>
-                                        </div>
-                                    )}
 
-                                    {/* ORCID ID */}
-                                    {selectedUser.orcid_id && (
-                                        <div style={{
-                                            padding: '20px',
-                                            background: 'rgba(255, 255, 255, 0.7)',
-                                            borderRadius: '16px',
-                                            border: '1px solid rgba(226, 232, 240, 0.6)'
-                                        }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                marginBottom: '8px'
-                                            }}>
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M21 2L19 4M19 4L17 2M19 4V8M10 16L8 18M8 18L6 16M8 18V14M12 6C14.2091 6 16 7.79086 16 10C16 12.2091 14.2091 14 12 14C9.79086 14 8 12.2091 8 10C8 7.79086 9.79086 6 12 6Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                </svg>
-                                                <div style={{
-                                                    fontSize: '14px',
-                                                    fontWeight: '600',
-                                                    color: '#64748B',
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '0.05em'
-                                                }}>{language === 'tr' ? 'ORCİD ID' : 'ORCID ID'}</div>
-                                            </div>
-                                            <div style={{
-                                                fontSize: '16px',
-                                                fontWeight: '500',
-                                                color: '#374151'
-                                            }}>{selectedUser.orcid_id}</div>
-                                        </div>
-                                    )}
 
-                                    {/* YOKSIS ID */}
-                                    {selectedUser.yoksis_id && (
-                                        <div style={{
-                                            padding: '20px',
-                                            background: 'rgba(255, 255, 255, 0.7)',
-                                            borderRadius: '16px',
-                                            border: '1px solid rgba(226, 232, 240, 0.6)'
-                                        }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                marginBottom: '8px'
-                                            }}>
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                </svg>
-                                                <div style={{
-                                                    fontSize: '14px',
-                                                    fontWeight: '600',
-                                                    color: '#64748B',
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '0.05em'
-                                                }}>{language === 'tr' ? 'YOKSİS ID' : 'YOKSIS ID'}</div>
-                                            </div>
-                                            <div style={{
-                                                fontSize: '16px',
-                                                fontWeight: '500',
-                                                color: '#374151'
-                                            }}>{selectedUser.yoksis_id}</div>
-                                        </div>
-                                    )}
+
+
+
                                 </div>
                             </div>
                         </div>
