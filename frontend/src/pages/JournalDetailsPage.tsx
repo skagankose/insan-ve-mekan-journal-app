@@ -198,6 +198,11 @@ const JournalDetailsPage: React.FC = () => {
         setShowUserDetailsModal(true);
     };
 
+    const handleGoToProfile = (userId: number) => {
+        navigate(`/profile/${userId}`);
+        setShowUserDetailsModal(false);
+    };
+
     const handleSetEditorInChief = async () => {
         if (!journalId || !selectedEditorInChiefId) return;
         
@@ -2750,226 +2755,134 @@ const JournalDetailsPage: React.FC = () => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    backdropFilter: 'blur(8px)',
-                    zIndex: 1000,
+                    background: 'rgba(0, 0, 0, 0.5)',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                    padding: '20px'
                 }}>
                     <div style={{
-                        maxWidth: '600px',
-                        width: '90%',
-                        maxHeight: '80vh',
-                        background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
-                        backdropFilter: 'blur(20px)',
-                        borderRadius: '24px',
-                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
-                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        background: 'white',
+                        borderRadius: '16px',
+                        padding: '24px',
+                        maxWidth: '400px',
+                        width: '100%',
                         position: 'relative',
-                        overflow: 'hidden'
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
                     }}>
-                        {/* Background Pattern */}
+                        <button
+                            onClick={() => setShowUserDetailsModal(false)}
+                            style={{
+                                position: 'absolute',
+                                top: '16px',
+                                right: '16px',
+                                background: 'none',
+                                border: 'none',
+                                fontSize: '20px',
+                                cursor: 'pointer',
+                                color: '#64748B',
+                                padding: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: '50%',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#F1F5F9';
+                                e.currentTarget.style.color = '#1E293B';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'none';
+                                e.currentTarget.style.color = '#64748B';
+                            }}
+                        >
+                            ×
+                        </button>
                         <div style={{
-                            position: 'absolute',
-                            top: '-50%',
-                            right: '-20%',
-                            width: '400px',
-                            height: '400px',
-                            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
-                            borderRadius: '50%',
-                            zIndex: 0
-                        }}></div>
-
-                        {/* Header */}
-                        <div style={{
-                            padding: '32px 32px 24px 32px',
-                            borderBottom: '1px solid rgba(226, 232, 240, 0.5)',
-                            position: 'relative',
-                            zIndex: 1
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px'
                         }}>
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'space-between'
+                                gap: '16px'
                             }}>
+                                <div style={{
+                                    width: '64px',
+                                    height: '64px',
+                                    background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontSize: '24px',
+                                    fontWeight: '600'
+                                }}>
+                                    {selectedUser.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 style={{
+                                        margin: 0,
+                                        fontSize: '20px',
+                                        fontWeight: '700',
+                                        color: '#1E293B'
+                                    }}>{selectedUser.name}</h3>
+                                    {selectedUser.title && (
+                                        <p style={{
+                                            margin: '4px 0 0 0',
+                                            fontSize: '14px',
+                                            color: '#64748B'
+                                        }}>{selectedUser.title}</p>
+                                    )}
+                                </div>
+                            </div>
+                            {selectedUser.email && (
                                 <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '12px'
+                                    gap: '8px',
+                                    color: '#64748B',
+                                    fontSize: '14px'
                                 }}>
-                                    <div style={{
-                                        width: '40px',
-                                        height: '40px',
-                                        background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                                        borderRadius: '12px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        boxShadow: '0 8px 16px rgba(59, 130, 246, 0.3)'
-                                    }}>
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                            <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                    </div>
-                                    <h3 style={{
-                                        fontSize: '24px',
-                                        fontWeight: '700',
-                                        color: '#1E293B',
-                                        margin: 0,
-                                        letterSpacing: '-0.025em'
-                                    }}>{t('userDetails') || 'User Details'}</h3>
+                                    <HiMail size={16} />
+                                    <span>{selectedUser.email}</span>
                                 </div>
+                            )}
+                            {isAdmin && (
                                 <button
-                                    onClick={() => setShowUserDetailsModal(false)}
+                                    onClick={() => handleGoToProfile(selectedUser.id)}
                                     style={{
-                                        width: '40px',
-                                        height: '40px',
-                                        borderRadius: '6px',
+                                        padding: '12px',
+                                        background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                        color: 'white',
                                         border: 'none',
-                                        background: 'rgba(148, 163, 184, 0.1)',
-                                        color: '#64748B',
-                                        fontSize: '20px',
-                                        fontWeight: '500',
+                                        borderRadius: '8px',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
                                         cursor: 'pointer',
                                         transition: 'all 0.3s ease',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        justifyContent: 'center'
+                                        justifyContent: 'center',
+                                        gap: '8px'
                                     }}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                                        e.currentTarget.style.color = '#EF4444';
+                                        e.currentTarget.style.transform = 'translateY(-1px)';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
-                                        e.currentTarget.style.color = '#64748B';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
                                     }}
                                 >
-                                    ×
+                                    <HiUser size={16} />
+                                    {t('goToProfile') || 'Go to Profile'}
                                 </button>
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div style={{
-                            padding: '32px',
-                            position: 'relative',
-                            zIndex: 1,
-                            overflowY: 'auto',
-                            maxHeight: 'calc(80vh - 140px)'
-                        }}>
-                            <div style={{
-                                display: 'grid',
-                                gap: '24px'
-                            }}>
-                                {/* Name */}
-                                <div style={{
-                                    padding: '24px',
-                                    background: 'rgba(255, 255, 255, 0.7)',
-                                    borderRadius: '16px',
-                                    border: '1px solid rgba(226, 232, 240, 0.6)'
-                                }}>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                        marginBottom: '8px'
-                                    }}>
-                                        <HiUser size={16} color="#64748B" />
-                                        <div style={{
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            color: '#64748B',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.05em'
-                                        }}>{language === 'tr' ? 'İSİM' : 'Name'}</div>
-                                    </div>
-                                    <div style={{
-                                        fontSize: '20px',
-                                        fontWeight: '700',
-                                        color: '#1E293B',
-                                        letterSpacing: '-0.025em'
-                                    }}>{selectedUser.name}</div>
-                                </div>
-
-                                {/* Title */}
-                                {selectedUser.title && (
-                                    <div style={{
-                                        padding: '24px',
-                                        background: 'rgba(255, 255, 255, 0.7)',
-                                        borderRadius: '16px',
-                                        border: '1px solid rgba(226, 232, 240, 0.6)'
-                                    }}>
-                                        <div style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                            marginBottom: '8px'
-                                        }}>
-                                            <PiSubtitlesFill size={16} color="#64748B" />
-                                            <div style={{
-                                                fontSize: '14px',
-                                                fontWeight: '600',
-                                                color: '#64748B',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.05em'
-                                            }}>{language === 'tr' ? 'ÜNVAN' : 'Title'}</div>
-                                        </div>
-                                        <div style={{
-                                            fontSize: '16px',
-                                            fontWeight: '500',
-                                            color: '#374151'
-                                        }}>{selectedUser.title}</div>
-                                    </div>
-                                )}
-
-
-
-                                {/* Contact Information */}
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                                    gap: '16px'
-                                }}>
-                                    {/* Email */}
-                                    {selectedUser.email && (
-                                        <div style={{
-                                            padding: '20px',
-                                            background: 'rgba(255, 255, 255, 0.7)',
-                                            borderRadius: '16px',
-                                            border: '1px solid rgba(226, 232, 240, 0.6)'
-                                        }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                marginBottom: '8px'
-                                            }}>
-                                                <HiMail size={16} color="#64748B" />
-                                                <div style={{
-                                                    fontSize: '14px',
-                                                    fontWeight: '600',
-                                                    color: '#64748B',
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '0.05em'
-                                                }}>{language === 'tr' ? 'E-POSTA ADRESİ' : 'Email'}</div>
-                                            </div>
-                                            <div style={{
-                                                fontSize: '16px',
-                                                fontWeight: '500',
-                                                color: '#374151'
-                                            }}>{selectedUser.email}</div>
-                                        </div>
-                                    )}
-
-
-
-
-
-
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>
