@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import * as apiService from '../services/apiService';
 import { Journal, JournalEntryRead } from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import Footer from '../components/Footer';
-import { HiChevronRight, HiChevronDown } from "react-icons/hi2";
+// Using inline SVGs instead of react-icons to avoid import issues
 
 interface JournalWithEntries extends Journal {
     entries: JournalEntryRead[];
@@ -17,6 +18,10 @@ const ArchivedJournalsPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const { t, language } = useLanguage();
+    const { user } = useAuth();
+
+    // Check if user has editor/admin permissions
+    const isEditorOrAdmin = user && (user.role === 'editor' || user.role === 'admin' || user.role === 'owner');
 
     useEffect(() => {
         const fetchPublishedJournals = async () => {
@@ -268,120 +273,84 @@ const ArchivedJournalsPage: React.FC = () => {
                                         padding: '32px',
                                         background: journal.isExpanded 
                                             ? 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)'
-                                            : 'transparent',
+                                            : 'rgba(255,255,255,0.7)',
                                         cursor: 'pointer',
                                         position: 'relative',
                                         overflow: 'hidden',
                                         transition: 'all 0.4s ease'
                                     }}
                                 >
-                                    {/* Background Pattern */}
                                     <div style={{
                                         position: 'absolute',
-                                        top: 0,
-                                        right: 0,
-                                        width: '300px',
-                                        height: '300px',
+                                        top: 0, right: 0, width: '300px', height: '300px',
                                         background: journal.isExpanded 
                                             ? 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)'
-                                            : 'radial-gradient(circle, rgba(20,184,166,0.05) 0%, transparent 70%)',
-                                        transform: 'translate(50%, -50%)',
-                                        pointerEvents: 'none'
+                                            : 'radial-gradient(circle, rgba(20,184,166,0.03) 0%, transparent 70%)',
+                                        transform: 'translate(50%, -50%)', pointerEvents: 'none'
                                     }}></div>
                                     
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        position: 'relative',
-                                        zIndex: 1
-                                    }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
                                         <div style={{ flex: 1 }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '0px',
-                                                marginBottom: '16px',
-                                                marginLeft: '-10px'
-                                            }}>
-                                                {/* Animated Chevron */}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0px', marginBottom: '16px', marginLeft: '-10px' }}>
                                                 <div style={{
-                                                    width: '32px',
-                                                    height: '32px',
+                                                    width: '32px', height: '32px',
                                                     background: 'transparent',
-                                                    borderRadius: '8px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
+                                                    borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                     transition: 'all 0.3s ease',
                                                     opacity: 0.7
                                                 }}>
                                                     {journal.isExpanded ? (
-                                                        <HiChevronDown 
-                                                            size={20} 
-                                                            color={journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B'}
+                                                        <svg 
+                                                            width="20" 
+                                                            height="20" 
+                                                            viewBox="0 0 24 24" 
+                                                            fill="none"
                                                             style={{
                                                                 transition: 'all 0.3s ease'
                                                             }}
-                                                        />
+                                                        >
+                                                            <path 
+                                                                d="M6 9L12 15L18 9" 
+                                                                stroke={journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B'} 
+                                                                strokeWidth="2" 
+                                                                strokeLinecap="round" 
+                                                                strokeLinejoin="round"
+                                                            />
+                                                        </svg>
                                                     ) : (
-                                                        <HiChevronRight 
-                                                            size={20} 
-                                                            color={journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B'}
+                                                        <svg 
+                                                            width="20" 
+                                                            height="20" 
+                                                            viewBox="0 0 24 24" 
+                                                            fill="none"
                                                             style={{
                                                                 transition: 'all 0.3s ease'
                                                             }}
-                                                        />
+                                                        >
+                                                            <path 
+                                                                d="M9 18L15 12L9 6" 
+                                                                stroke={journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B'} 
+                                                                strokeWidth="2" 
+                                                                strokeLinecap="round" 
+                                                                strokeLinejoin="round"
+                                                            />
+                                                        </svg>
                                                     )}
                                                 </div>
-                                                
-                                                <h3 style={{
-                                                    margin: 0,
-                                                    fontSize: '28px',
-                                                    fontWeight: '700',
-                                                    color: journal.isExpanded ? 'white' : '#1E293B',
-                                                    letterSpacing: '-0.025em',
-                                                    transition: 'color 0.4s ease'
-                                                }}>{language === 'en' && journal.title_en ? journal.title_en : journal.title}</h3>
+                                                <h3 style={{ margin: 0, fontSize: '28px', fontWeight: '700', color: journal.isExpanded ? 'white' : '#1E293B', letterSpacing: '-0.025em', transition: 'color 0.4s ease' }}>
+                                                    {language === 'en' && journal.title_en ? journal.title_en : journal.title}
+                                                </h3>
                                             </div>
-                                            
-                                            <div style={{
-                                                display: 'flex',
-                                                gap: '32px',
-                                                alignItems: 'center'
-                                            }}>
-                                                <div style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px',
-                                                    color: journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B',
-                                                    transition: 'color 0.4s ease'
-                                                }}>
+                                            <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B', transition: 'color 0.4s ease' }}>
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                        <path d="M9 11H15M9 15H15M17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V5C19 3.89543 18.1046 3 17 3Z" 
-                                                            stroke="currentColor" 
-                                                            strokeWidth="2" 
-                                                            strokeLinecap="round"
-                                                        />
+                                                        <path d="M9 11H15M9 15H15M17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V5C19 3.89543 18.1046 3 17 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                                     </svg>
-                                                    <span style={{ fontSize: '14px', fontWeight: '400' }}>
-                                                        {t('issue')}: #{journal.issue}
-                                                    </span>
+                                                    <span style={{ fontSize: '14px', fontWeight: '400' }}>{t('issue')}: #{journal.issue}</span>
                                                 </div>
-                                                
-                                                <div style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px',
-                                                    color: journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B',
-                                                    transition: 'color 0.4s ease'
-                                                }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B', transition: 'color 0.4s ease' }}>
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                        <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" 
-                                                            stroke="currentColor" 
-                                                            strokeWidth="2" 
-                                                            strokeLinecap="round"
-                                                        />
+                                                        <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                                     </svg>
                                                     <span style={{ fontSize: '14px', fontWeight: '400' }}>
                                                         {journal.publication_date ? new Date(journal.publication_date).toLocaleDateString(t('locale'), { 
@@ -393,52 +362,25 @@ const ArchivedJournalsPage: React.FC = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        
                                         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                                             <Link 
                                                 to={`/journals/${journal.id}`}
                                                 onClick={(e) => e.stopPropagation()}
                                                 style={{
                                                     padding: '12px 24px',
-                                                    background: journal.isExpanded 
-                                                        ? 'white'
-                                                        : 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                                    background: journal.isExpanded ? 'white' : 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
                                                     color: journal.isExpanded ? '#14B8A6' : 'white',
-                                                    borderRadius: '12px',
-                                                    fontSize: '14px',
-                                                    fontWeight: '600',
-                                                    textDecoration: 'none',
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px',
-                                                    transition: 'all 0.3s ease',
-                                                    boxShadow: journal.isExpanded 
-                                                        ? '0 4px 15px rgba(0, 0, 0, 0.1)'
-                                                        : '0 4px 15px rgba(0, 0, 0, 0.1)',
-                                                    transform: 'translateY(0)',
-                                                    letterSpacing: '0.025em'
+                                                    borderRadius: '12px', fontSize: '14px', fontWeight: '600', textDecoration: 'none',
+                                                    display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease',
+                                                    boxShadow: 'none',
+                                                    transform: 'translateY(0)', letterSpacing: '0.025em'
                                                 }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                                    e.currentTarget.style.boxShadow = journal.isExpanded 
-                                                        ? '0 8px 20px rgba(0, 0, 0, 0.15)'
-                                                        : '0 8px 20px rgba(0, 0, 0, 0.15)';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.transform = 'translateY(0)';
-                                                    e.currentTarget.style.boxShadow = journal.isExpanded 
-                                                        ? '0 4px 15px rgba(0, 0, 0, 0.1)'
-                                                        : '0 4px 15px rgba(0, 0, 0, 0.1)';
-                                                }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'none'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
                                             >
-                                                <span>{t('viewJournal')}</span>
+                                                <span>{t('viewJournal') || 'View Journal'}</span>
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M7 17L17 7M17 7H7M17 7V17" 
-                                                        stroke="currentColor" 
-                                                        strokeWidth="2" 
-                                                        strokeLinecap="round" 
-                                                        strokeLinejoin="round"
-                                                    />
+                                                    <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                                 </svg>
                                             </Link>
                                         </div>

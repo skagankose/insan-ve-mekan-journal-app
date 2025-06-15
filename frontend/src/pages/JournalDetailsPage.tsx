@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveJournal } from '../contexts/ActiveJournalContext';
 import Footer from '../components/Footer';
-import { HiMail, HiUser } from 'react-icons/hi';
+import { HiMail, HiUser, HiCalendar, HiLocationMarker, HiClock, HiCheckCircle } from 'react-icons/hi';
 import { PiSubtitlesFill } from "react-icons/pi";
 
 const JournalDetailsPage: React.FC = () => {
@@ -45,6 +45,7 @@ const JournalDetailsPage: React.FC = () => {
     // User details modal state
     const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<apiService.UserRead | null>(null);
+    const [selectedUserRole, setSelectedUserRole] = useState<'editor-in-chief' | 'editor' | null>(null);
 
     useEffect(() => {
         const fetchJournalAndEntries = async () => {
@@ -193,13 +194,14 @@ const JournalDetailsPage: React.FC = () => {
     };
 
     // Handle clicking on editor-in-chief or editor to show details
-    const handleUserClick = (user: apiService.UserRead) => {
+    const handleUserClick = (user: apiService.UserRead, role: 'editor-in-chief' | 'editor') => {
         setSelectedUser(user);
+        setSelectedUserRole(role);
         setShowUserDetailsModal(true);
     };
 
     const handleGoToProfile = (userId: number) => {
-        navigate(`/profile/${userId}`);
+        navigate(`/admin/users/profile/${userId}`);
         setShowUserDetailsModal(false);
     };
 
@@ -663,48 +665,45 @@ const JournalDetailsPage: React.FC = () => {
         <>
             {/* Title Section */}
             <div className="page-title-section" style={{ marginLeft: '60px' }}>
-                <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '20px',
-                    marginBottom: '16px'
-                }}>
-                    <button 
-                        onClick={() => navigate(journal?.is_published ? '/archive' : (isEditorOrAdmin ? '/editor/journals' : '/archive'))} 
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '12px 20px',
-                            background: 'rgba(255, 255, 255, 0.8)',
-                            backdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(20, 184, 166, 0.2)',
-                            borderRadius: '12px',
-                            color: '#0D9488',
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            textDecoration: 'none'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-                            e.currentTarget.style.borderColor = '#14B8A6';
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)';
-                            e.currentTarget.style.borderColor = 'rgba(20, 184, 166, 0.2)';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                        }}
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        {journal?.is_published ? (t('backToArchive') || 'Back to Archive') : (isEditorOrAdmin ? (t('backToJournals') || 'Back to Journals') : (t('backToArchive') || 'Back to Archive'))}
-                    </button>
+                <div className="page-title-header">
+                    <div className="page-title-back-button">
+                        <button 
+                            onClick={() => navigate(journal?.is_published ? '/archive' : (isEditorOrAdmin ? '/editor/journals' : '/archive'))} 
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '12px 20px',
+                                background: 'rgba(255, 255, 255, 0.8)',
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(20, 184, 166, 0.2)',
+                                borderRadius: '12px',
+                                color: '#0D9488',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                textDecoration: 'none'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                                e.currentTarget.style.borderColor = '#14B8A6';
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)';
+                                e.currentTarget.style.borderColor = 'rgba(20, 184, 166, 0.2)';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {journal?.is_published ? (t('backToArchive') || 'Back to Archive') : (isEditorOrAdmin ? (t('backToJournals') || 'Back to Journals') : (t('backToArchive') || 'Back to Archive'))}
+                        </button>
+                    </div>
                     
-                    <div style={{ display: 'flex', gap: '12px', marginLeft: 'auto', marginRight: '60px' }}>
+                    <div className="page-title-actions">
                         {/* Download PDF Button - Available to all users */}
                         {journal.full_pdf && (
                             <a 
@@ -740,11 +739,65 @@ const JournalDetailsPage: React.FC = () => {
                             </a>
                         )}
                         
-                    {isEditorOrAdmin && (
+                        {isEditorOrAdmin && (
                             <>
-                            {activeJournal?.id !== journal.id && (
+                                {activeJournal?.id !== journal.id && (
+                                    <button
+                                        onClick={handleSetActive}
+                                        style={{
+                                            padding: '12px 20px',
+                                            background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '12px',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
+                                    >
+                                        {t('setAsActive') || 'Set as Active'}
+                                    </button>
+                                )}
                                 <button
-                                    onClick={handleSetActive}
+                                    onClick={handleMergeJournal}
+                                    disabled={isMerging}
+                                    style={{
+                                        padding: '12px 20px',
+                                        background: isMerging ? '#94A3B8' : 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        cursor: isMerging ? 'not-allowed' : 'pointer',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!isMerging) {
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!isMerging) {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }
+                                    }}
+                                >
+                                    {isMerging ? (t('mergingFiles') || 'Merging Files...') : (t('mergeAndCreateToc') || 'Merge Journal Files')}
+                                </button>
+                                <Link 
+                                    to={`/journals/edit/${journal.id}`} 
                                     style={{
                                         padding: '12px 20px',
                                         background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
@@ -753,8 +806,11 @@ const JournalDetailsPage: React.FC = () => {
                                         borderRadius: '12px',
                                         fontSize: '14px',
                                         fontWeight: '600',
+                                        textDecoration: 'none',
                                         cursor: 'pointer',
-                                        transition: 'all 0.3s ease'
+                                        transition: 'all 0.3s ease',
+                                        display: 'inline-flex',
+                                        alignItems: 'center'
                                     }}
                                     onMouseEnter={(e) => {
                                         e.currentTarget.style.transform = 'translateY(-2px)';
@@ -765,67 +821,10 @@ const JournalDetailsPage: React.FC = () => {
                                         e.currentTarget.style.boxShadow = 'none';
                                     }}
                                 >
-                                    {t('setAsActive') || 'Set as Active'}
-                                </button>
-                            )}
-                            <button
-                                onClick={handleMergeJournal}
-                                disabled={isMerging}
-                                style={{
-                                    padding: '12px 20px',
-                                    background: isMerging ? '#94A3B8' : 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    fontSize: '14px',
-                                    fontWeight: '600',
-                                    cursor: isMerging ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.3s ease'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!isMerging) {
-                                        e.currentTarget.style.transform = 'translateY(-2px)';
-                                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!isMerging) {
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                        e.currentTarget.style.boxShadow = 'none';
-                                    }
-                                }}
-                            >
-                                {isMerging ? (t('mergingFiles') || 'Merging Files...') : (t('mergeAndCreateToc') || 'Merge Journal Files')}
-                            </button>
-                            <Link 
-                                to={`/journals/edit/${journal.id}`} 
-                                style={{
-                                    padding: '12px 20px',
-                                    background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '12px',
-                                    fontSize: '14px',
-                                    fontWeight: '600',
-                                    textDecoration: 'none',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s ease',
-                                    display: 'inline-flex',
-                                        alignItems: 'center'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = 'none';
-                                }}
-                            >
-                                {t('editJournal') || 'Edit Journal'}
-                            </Link>
+                                    {t('editJournal') || 'Edit Journal'}
+                                </Link>
                             </>
-                    )}
+                        )}
                     </div>
                 </div>
                 <h1>{language === 'en' && journal.title_en ? journal.title_en : journal.title}</h1>
@@ -940,7 +939,7 @@ const JournalDetailsPage: React.FC = () => {
                                                 e.currentTarget.style.boxShadow = 'none';
                                             }}
                                         >
-                                            {t('changeEditorInChief') || 'Change Editor-in-Chief'}
+                                            {language === 'tr' ? 'Baş Editörü Değiştir' : 'Change Editor-in-Chief'}
                                         </button>
                                     )}
                                 </div>
@@ -955,7 +954,7 @@ const JournalDetailsPage: React.FC = () => {
                                 
                                 {editorInChief ? (
                                     <div 
-                                        onClick={() => handleUserClick(editorInChief)}
+                                        onClick={() => handleUserClick(editorInChief, 'editor-in-chief')}
                                         style={{
                                             padding: '20px',
                                             background: 'rgba(255, 255, 255, 0.7)',
@@ -986,27 +985,10 @@ const JournalDetailsPage: React.FC = () => {
                                             <p style={{
                                                 fontSize: '13px',
                                                 color: '#64748B',
-                                                margin: '0 0 6px 0',
-                                                fontWeight: '500',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '6px'
-                                            }}>
-                                                <PiSubtitlesFill size={16} color="#64748B" />
-                                                {editorInChief.title}
-                                            </p>
-                                        )}
-                                        {editorInChief.email && (
-                                            <p style={{
-                                                fontSize: '13px',
-                                                color: '#64748B',
                                                 margin: 0,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '6px'
+                                                fontWeight: '500'
                                             }}>
-                                                <HiMail size={16} color="#64748B" />
-                                                {editorInChief.email}
+                                                {editorInChief.title}
                                             </p>
                                         )}
                                     </div>
@@ -1142,7 +1124,7 @@ const JournalDetailsPage: React.FC = () => {
                                         editors.map(editor => (
                                             <div 
                                                 key={editor.id} 
-                                                onClick={() => handleUserClick(editor)}
+                                                onClick={() => handleUserClick(editor, 'editor')}
                                                 style={{
                                                     padding: '20px',
                                                     background: 'rgba(255, 255, 255, 0.7)',
@@ -1173,27 +1155,10 @@ const JournalDetailsPage: React.FC = () => {
                                                     <p style={{
                                                         fontSize: '13px',
                                                         color: '#64748B',
-                                                        margin: '0 0 6px 0',
-                                                        fontWeight: '500',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '6px'
-                                                                                                          }}>
-                                                        <PiSubtitlesFill size={16} color="#64748B" />
-                                                        {editor.title}
-                                                    </p>
-                                                )}
-                                                {editor.email && (
-                                                    <p style={{
-                                                        fontSize: '13px',
-                                                        color: '#64748B',
                                                         margin: 0,
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '6px'
+                                                        fontWeight: '500'
                                                     }}>
-                                                        <HiMail size={16} color="#64748B" />
-                                                        {editor.email}
+                                                        {editor.title}
                                                     </p>
                                                 )}
                                             </div>
@@ -1223,7 +1188,7 @@ const JournalDetailsPage: React.FC = () => {
                                                 fontSize: '14px',
                                                 fontWeight: '500',
                                                 color: '#64748B'
-                                            }}>{t('noEditors') || 'No editors assigned'}</p>
+                                            }}>{language === 'tr' ? 'Editör atanmamış' : 'No editors assigned'}</p>
                                         </div>
                                     )}
                                 </div>
@@ -1323,16 +1288,14 @@ const JournalDetailsPage: React.FC = () => {
                                     <div style={{
                                         width: '36px',
                                         height: '36px',
-                                        background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                                        background: 'rgba(100, 116, 139, 0.1)',
                                         borderRadius: '10px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         flexShrink: 0
                                     }}>
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
+                                        <HiCheckCircle size={20} color="#64748B" />
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ 
@@ -1371,16 +1334,14 @@ const JournalDetailsPage: React.FC = () => {
                             <div style={{
                                             width: '36px',
                                             height: '36px',
-                                            background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                                            background: 'rgba(100, 116, 139, 0.1)',
                                             borderRadius: '10px',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             flexShrink: 0
                                         }}>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                <path d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
+                                            <HiCalendar size={20} color="#64748B" />
                             </div>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ 
@@ -1415,17 +1376,14 @@ const JournalDetailsPage: React.FC = () => {
                                         <div style={{
                                             width: '36px',
                                             height: '36px',
-                                            background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                                            background: 'rgba(100, 116, 139, 0.1)',
                                             borderRadius: '10px',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             flexShrink: 0
                                         }}>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                <path d="M21 10C21 17 12 23 12 23S3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.3639 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
+                                            <HiLocationMarker size={20} color="#64748B" />
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ 
@@ -1462,16 +1420,14 @@ const JournalDetailsPage: React.FC = () => {
                                     <div style={{ 
                                                 width: '36px',
                                                 height: '36px',
-                                                background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                                                background: 'rgba(100, 116, 139, 0.1)',
                                                 borderRadius: '10px',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 flexShrink: 0
                                             }}>
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M12 8V12L16 16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                </svg>
+                                                <HiClock size={20} color="#64748B" />
                                             </div>
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ 
@@ -2755,134 +2711,300 @@ const JournalDetailsPage: React.FC = () => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.5)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    backdropFilter: 'blur(8px)',
+                    zIndex: 1000,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    zIndex: 1000,
                     padding: '20px'
                 }}>
                     <div style={{
-                        background: 'white',
-                        borderRadius: '16px',
-                        padding: '24px',
-                        maxWidth: '400px',
-                        width: '100%',
+                        maxWidth: '600px',
+                        width: '90%',
+                        maxHeight: '80vh',
+                        background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '24px',
+                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
                         position: 'relative',
-                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                        overflow: 'hidden'
                     }}>
+                        {/* Background Pattern */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '-50%',
+                            right: '-20%',
+                            width: '400px',
+                            height: '400px',
+                            background: selectedUserRole === 'editor-in-chief' 
+                                ? 'radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%)'
+                                : 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
+                            borderRadius: '50%',
+                            zIndex: 0
+                        }}></div>
+
+                        {/* Header */}
+                        <div style={{
+                            padding: '32px 32px 24px 32px',
+                            borderBottom: '1px solid rgba(226, 232, 240, 0.5)',
+                            position: 'relative',
+                            zIndex: 1
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between'
+                            }}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px'
+                                }}>
+                                    <div style={{
+                                        width: '40px',
+                                        height: '40px',
+                                        background: selectedUserRole === 'editor-in-chief' 
+                                            ? 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)'
+                                            : 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                        borderRadius: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        boxShadow: selectedUserRole === 'editor-in-chief' 
+                                            ? '0 8px 16px rgba(139, 92, 246, 0.3)'
+                                            : '0 8px 16px rgba(59, 130, 246, 0.3)'
+                                    }}>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                            <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <h3 style={{
+                                        fontSize: '24px',
+                                        fontWeight: '700',
+                                        color: '#1E293B',
+                                        margin: 0,
+                                        letterSpacing: '-0.025em'
+                                    }}>{language === 'tr' ? 'Kullanıcı Detayları' : 'User Details'}</h3>
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    {/* Go to Profile Button - Only for Admin users */}
+                                    {isAdmin && (
+                                        <button
+                                            onClick={() => handleGoToProfile(selectedUser.id)}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                padding: '10px 12px',
+                                                backgroundColor: selectedUserRole === 'editor-in-chief' ? '#8B5CF6' : '#3B82F6',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                fontSize: '14px',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.3s ease',
+                                                boxShadow: selectedUserRole === 'editor-in-chief' 
+                                                    ? '0 4px 12px rgba(139, 92, 246, 0.3)'
+                                                    : '0 4px 12px rgba(59, 130, 246, 0.3)'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = selectedUserRole === 'editor-in-chief' ? '#7C3AED' : '#1D4ED8';
+                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                e.currentTarget.style.boxShadow = selectedUserRole === 'editor-in-chief' 
+                                                    ? '0 8px 20px rgba(139, 92, 246, 0.4)'
+                                                    : '0 8px 20px rgba(59, 130, 246, 0.4)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = selectedUserRole === 'editor-in-chief' ? '#8B5CF6' : '#3B82F6';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = selectedUserRole === 'editor-in-chief' 
+                                                    ? '0 4px 12px rgba(139, 92, 246, 0.3)'
+                                                    : '0 4px 12px rgba(59, 130, 246, 0.3)';
+                                            }}
+                                            title={t('goToProfile') || 'Go to Profile'}
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M18 13V19C18 19.5304 17.7893 20.0391 17.4142 20.4142C17.0391 20.7893 16.5304 21 16 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V8C3 7.46957 3.21071 6.96086 3.58579 6.58579C3.96086 6.21071 4.46957 6 5 6H11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <path d="M15 3H21V9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <path d="M10 14L21 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                            {language === 'tr' ? 'Profile Git' : 'View Profile'}
+                                        </button>
+                                    )}
                         <button
                             onClick={() => setShowUserDetailsModal(false)}
                             style={{
-                                position: 'absolute',
-                                top: '16px',
-                                right: '16px',
-                                background: 'none',
+                                            width: '40px',
+                                            height: '40px',
+                                            borderRadius: '8px',
                                 border: 'none',
+                                            background: 'rgba(148, 163, 184, 0.1)',
+                                            color: '#64748B',
                                 fontSize: '20px',
+                                            fontWeight: '500',
                                 cursor: 'pointer',
-                                color: '#64748B',
-                                padding: '4px',
+                                            transition: 'all 0.3s ease',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '50%',
-                                transition: 'all 0.2s ease'
+                                            justifyContent: 'center'
                             }}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#F1F5F9';
-                                e.currentTarget.style.color = '#1E293B';
+                                            e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                            e.currentTarget.style.color = '#EF4444';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'none';
+                                            e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
                                 e.currentTarget.style.color = '#64748B';
                             }}
                         >
                             ×
                         </button>
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '16px'
-                        }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '16px'
-                            }}>
-                                <div style={{
-                                    width: '64px',
-                                    height: '64px',
-                                    background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: 'white',
-                                    fontSize: '24px',
-                                    fontWeight: '600'
-                                }}>
-                                    {selectedUser.name.charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <h3 style={{
-                                        margin: 0,
-                                        fontSize: '20px',
-                                        fontWeight: '700',
-                                        color: '#1E293B'
-                                    }}>{selectedUser.name}</h3>
-                                    {selectedUser.title && (
-                                        <p style={{
-                                            margin: '4px 0 0 0',
-                                            fontSize: '14px',
-                                            color: '#64748B'
-                                        }}>{selectedUser.title}</p>
-                                    )}
                                 </div>
                             </div>
-                            {selectedUser.email && (
+                        </div>
+
+                        {/* Content */}
+                        <div style={{
+                            padding: '32px',
+                            position: 'relative',
+                            zIndex: 1,
+                            overflowY: 'auto',
+                            maxHeight: 'calc(80vh - 140px)'
+                        }}>
+                            <div style={{
+                                display: 'grid',
+                                gap: '24px'
+                            }}>
+                                {/* Name */}
+                                <div style={{
+                                    padding: '24px',
+                                    background: 'rgba(255, 255, 255, 0.7)',
+                                    borderRadius: '16px',
+                                    border: '1px solid rgba(226, 232, 240, 0.6)'
+                                }}>
+                                    <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                        gap: '8px',
+                                        marginBottom: '8px'
+                                    }}>
+                                        <HiUser size={16} color="#64748B" />
+                                        <div style={{
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            color: '#64748B',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.05em'
+                                        }}>{t('name') || 'Name'}</div>
+                                </div>
+                                    <div style={{
+                                        fontSize: '20px',
+                                        fontWeight: '700',
+                                        color: '#1E293B',
+                                        letterSpacing: '-0.025em'
+                                    }}>{selectedUser.name}</div>
+                                </div>
+
+                                {/* Title */}
+                                    {selectedUser.title && (
+                                    <div style={{
+                                        padding: '24px',
+                                        background: 'rgba(255, 255, 255, 0.7)',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(226, 232, 240, 0.6)'
+                                    }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            marginBottom: '8px'
+                                        }}>
+                                            <PiSubtitlesFill size={16} color="#64748B" />
+                                            <div style={{
+                                            fontSize: '14px',
+                                                fontWeight: '600',
+                                                color: '#64748B',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.05em'
+                                            }}>{t('title') || 'Title'}</div>
+                                </div>
+                                        <div style={{
+                                            fontSize: '16px',
+                                            fontWeight: '500',
+                                            color: '#374151'
+                                        }}>{selectedUser.title}</div>
+                            </div>
+                                )}
+
+                                {/* Bio */}
+                                {selectedUser.bio && (
+                                    <div style={{
+                                        padding: '24px',
+                                        background: 'rgba(255, 255, 255, 0.7)',
+                                        borderRadius: '16px',
+                                        border: '1px solid rgba(226, 232, 240, 0.6)'
+                                    }}>
                                 <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px',
-                                    color: '#64748B',
-                                    fontSize: '14px'
-                                }}>
-                                    <HiMail size={16} />
-                                    <span>{selectedUser.email}</span>
-                                </div>
-                            )}
-                            {isAdmin && (
-                                <button
-                                    onClick={() => handleGoToProfile(selectedUser.id)}
-                                    style={{
-                                        padding: '12px',
-                                        background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '8px',
+                                            marginBottom: '8px'
+                                        }}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M9 12H15M9 16H15M17 21H7C6.46957 21 5.96086 20.7893 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 19V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H12.586C12.8512 3.00006 13.1055 3.10545 13.293 3.293L18.707 8.707C18.8946 8.8945 18.9999 9.14884 19 9.414V19C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7893 17.5304 21 17 21Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                            <div style={{
                                         fontSize: '14px',
                                         fontWeight: '600',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease',
+                                                color: '#64748B',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.05em'
+                                            }}>{t('biography') || 'Biography'}</div>
+                                        </div>
+                                        <div style={{
+                                            fontSize: '16px',
+                                            fontWeight: '400',
+                                            color: '#374151',
+                                            lineHeight: '1.6'
+                                        }}>{selectedUser.bio}</div>
+                                    </div>
+                                )}
+
+                                                                 {/* Contact Information */}
+                                 {selectedUser.email && (
+                                     <div style={{
+                                         padding: '20px',
+                                         background: 'rgba(255, 255, 255, 0.7)',
+                                         borderRadius: '16px',
+                                         border: '1px solid rgba(226, 232, 240, 0.6)'
+                                     }}>
+                                         <div style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '8px'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(-1px)';
-                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                        e.currentTarget.style.boxShadow = 'none';
-                                    }}
-                                >
-                                    <HiUser size={16} />
-                                    {t('goToProfile') || 'Go to Profile'}
-                                </button>
-                            )}
+                                             gap: '8px',
+                                             marginBottom: '8px'
+                                         }}>
+                                             <HiMail size={16} color="#64748B" />
+                                             <div style={{
+                                                 fontSize: '14px',
+                                                 fontWeight: '600',
+                                                 color: '#64748B',
+                                                 textTransform: 'uppercase',
+                                                 letterSpacing: '0.05em'
+                                             }}>{t('email') || 'Email'}</div>
+                                         </div>
+                                         <div style={{
+                                             fontSize: '14px',
+                                             fontWeight: '500',
+                                             color: '#374151',
+                                             wordBreak: 'break-word'
+                                         }}>{selectedUser.email}</div>
+                                     </div>
+                                 )}
+                            </div>
                         </div>
                     </div>
                 </div>

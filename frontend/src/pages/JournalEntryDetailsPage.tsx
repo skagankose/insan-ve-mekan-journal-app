@@ -4,7 +4,7 @@ import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { FaCreditCard, FaExclamationTriangle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import { HiMail, HiUser, HiDocumentText, HiLocationMarker, HiBookOpen, HiAcademicCap, HiFingerPrint, HiIdentification } from 'react-icons/hi';
+import { HiMail, HiUser, HiDocumentText, HiAcademicCap, HiFingerPrint, HiIdentification, HiCalendar, HiCheckCircle, HiEye, HiDownload, HiGlobeAlt, HiExternalLink, HiLink } from 'react-icons/hi';
 import { PiSubtitlesFill } from "react-icons/pi";
 import Footer from '../components/Footer';
 
@@ -383,66 +383,57 @@ const JournalEntryDetailsPage: React.FC = () => {
     <>
       {/* Title Section */}
       <div className="page-title-section" style={{ marginLeft: '60px' }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '20px',
-          marginBottom: '16px'
-        }}>
-          <button 
-            onClick={() => {
-              // If entry has a journal, navigate to that journal
-              if (entry?.journal_id) {
-                navigate(`/journals/${entry.journal_id}`);
-              } else {
-                // Fallback to previous page if no journal is associated
-                navigate(-1);
-              }
-            }} 
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 20px',
-              background: 'rgba(255, 255, 255, 0.8)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(20, 184, 166, 0.2)',
-              borderRadius: '12px',
-              color: '#0D9488',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              textDecoration: 'none'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
-              e.currentTarget.style.borderColor = '#14B8A6';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)';
-              e.currentTarget.style.borderColor = 'rgba(20, 184, 166, 0.2)';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            {entry?.journal_id ? (
-              language === 'tr' ? 'Dergiye Dön' : 'Back to Journal'
-            ) : (
-              language === 'tr' ? 'Geri' : 'Back'
-            )}
-          </button>
+        <div className="page-title-header">
+          <div className="page-title-back-button">
+            <button 
+              onClick={() => {
+                // If entry has a journal, navigate to that journal
+                if (entry?.journal_id) {
+                  navigate(`/journals/${entry.journal_id}`);
+                } else {
+                  // Fallback to previous page if no journal is associated
+                  navigate(-1);
+                }
+              }} 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 20px',
+                background: 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(20, 184, 166, 0.2)',
+                borderRadius: '12px',
+                color: '#0D9488',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                textDecoration: 'none'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(20, 184, 166, 0.1)';
+                e.currentTarget.style.borderColor = '#14B8A6';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)';
+                e.currentTarget.style.borderColor = 'rgba(20, 184, 166, 0.2)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {entry?.journal_id ? (
+                language === 'tr' ? 'Dergiye Dön' : 'Back to Journal'
+              ) : (
+                language === 'tr' ? 'Geri' : 'Back'
+              )}
+            </button>
+          </div>
           
-          {/* Action buttons moved to top right */}
-          <div style={{ 
-            display: 'flex', 
-            gap: '12px', 
-            marginLeft: 'auto', 
-            marginRight: '60px'
-          }}>
+          <div className="page-title-actions">
             {/* Reference Token - Always visible to all users */}
             {entry.random_token && (
               <div style={{
@@ -511,7 +502,6 @@ const JournalEntryDetailsPage: React.FC = () => {
                entry.referees?.some(referee => referee.id === user.id)
               ) && (
                 <>
-                  
                   {/* Edit Entry Button: Show only to journal editors, admins, and owners */}
                   {canViewRefereesAndFiles && (
                     <button
@@ -598,7 +588,7 @@ const JournalEntryDetailsPage: React.FC = () => {
           {/* Authors and Published In Section - Side by Side */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '1.5fr 1fr',
+            gridTemplateColumns: '1fr 1fr',
             gap: '24px',
             marginBottom: '32px'
           }}>
@@ -734,27 +724,10 @@ const JournalEntryDetailsPage: React.FC = () => {
                           <p style={{
                             fontSize: '13px',
                             color: '#64748B',
-                            margin: '0 0 6px 0',
-                            fontWeight: '500',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                          }}>
-                            <PiSubtitlesFill size={16} color="#64748B" />
-                            {author.title}
-                          </p>
-                        )}
-                        {author.email && (
-                          <p style={{
-                            fontSize: '13px',
-                            color: '#64748B',
                             margin: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
+                            fontWeight: '500'
                           }}>
-                            <HiMail size={16} color="#64748B" />
-                            {author.email}
+                            {author.title}
                           </p>
                         )}
                       </div>
@@ -784,7 +757,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                         fontSize: '14px',
                         fontWeight: '500',
                         color: '#64748B'
-                      }}>{t('noAuthors') || 'No authors assigned'}</p>
+                      }}>{language === 'tr' ? 'Yazar atanmamış' : 'No authors assigned'}</p>
                     </div>
                   )}
                 </div>
@@ -914,30 +887,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                     margin: '0 0 8px 0',
                     letterSpacing: '-0.025em'
                   }}>{journal.title}</h4>
-                  {journal.publication_place && (
-                    <p style={{
-                      fontSize: '13px',
-                      color: '#64748B',
-                      margin: '0 0 6px 0',
-                      fontWeight: '500',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}>
-                      <HiLocationMarker size={14} color="#64748B" />
-                      {journal.publication_place}
-                    </p>
-                  )}
                   <p style={{
                     fontSize: '13px',
                     color: '#64748B',
                     margin: 0,
-                    fontWeight: '500',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
+                    fontWeight: '500'
                   }}>
-                    <HiBookOpen size={14} color="#64748B" />
                     {journal.issue}
                   </p>
                 </div>
@@ -1060,16 +1015,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                 <div style={{
                   width: '36px',
                   height: '36px',
-                  background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                  background: 'rgba(100, 116, 139, 0.1)',
                   borderRadius: '10px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0
                 }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <HiCalendar size={20} color="#64748B" />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ 
@@ -1101,16 +1054,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                   <div style={{
                     width: '36px',
                     height: '36px',
-                    background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                    background: 'rgba(100, 116, 139, 0.1)',
                     borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M13 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9L13 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <HiDocumentText size={20} color="#64748B" />
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ 
@@ -1143,17 +1094,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                   <div style={{
                     width: '36px',
                     height: '36px',
-                    background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                    background: 'rgba(100, 116, 139, 0.1)',
                     borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M10 13C10 13.5304 10.2107 14.0391 10.5858 14.4142C10.9609 14.7893 11.4696 15 12 15C12.5304 15 13.0391 14.7893 13.4142 14.4142C13.7893 14.0391 14 13.5304 14 13C14 12.4696 13.7893 11.9609 13.4142 11.5858C13.0391 11.2107 12.5304 11 12 11C11.4696 11 10.9609 11.2107 10.5858 11.5858C10.2107 11.9609 10 12.4696 10 13Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M21 13C18.6 16 15.6 17 12 17C8.4 17 5.4 16 3 13C5.4 10 8.4 9 12 9C15.6 9 18.6 10 21 13Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <HiLink size={20} color="#64748B" />
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ 
@@ -1187,16 +1135,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                   <div style={{
                     width: '36px',
                     height: '36px',
-                    background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                    background: 'rgba(100, 116, 139, 0.1)',
                     borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <HiCheckCircle size={20} color="#64748B" />
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ 
@@ -1229,17 +1175,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                   <div style={{
                     width: '36px',
                     height: '36px',
-                    background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                    background: 'rgba(100, 116, 139, 0.1)',
                     borderRadius: '10px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M3 5C3 3.89543 3.89543 3 5 3H19C20.1046 3 21 3.89543 21 5V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M9 9H15M9 13H13M9 17H11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <HiGlobeAlt size={20} color="#64748B" />
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ 
@@ -1274,16 +1217,14 @@ const JournalEntryDetailsPage: React.FC = () => {
                     <div style={{
                       width: '36px',
                       height: '36px',
-                      background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                      background: 'rgba(100, 116, 139, 0.1)',
                       borderRadius: '10px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M3 16.5V18.75C3 19.9926 4.00736 21 5.25 21H18.75C19.9926 21 21 19.9926 21 18.75V16.5M16.5 12L12 16.5M12 16.5L7.5 12M12 16.5V3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      <HiDownload size={20} color="#64748B" />
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ 
@@ -1311,21 +1252,18 @@ const JournalEntryDetailsPage: React.FC = () => {
                     borderRadius: '16px',
                     border: '1px solid rgba(226, 232, 240, 0.6)'
                   }}>
-                    <div style={{
-                      width: '36px',
-                      height: '36px',
-                      background: 'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
-                      borderRadius: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
+                                      <div style={{
+                    width: '36px',
+                    height: '36px',
+                    background: 'rgba(100, 116, 139, 0.1)',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <HiEye size={20} color="#64748B" />
+                  </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ 
                         fontSize: '13px', 
@@ -1966,21 +1904,9 @@ const JournalEntryDetailsPage: React.FC = () => {
                           <p style={{
                             fontSize: '13px',
                             color: '#64748B',
-                            margin: '0 0 6px 0',
+                            margin: 0,
                             fontWeight: '500'
                           }}>{referee.title}</p>
-                        )}
-                        {referee.email && (
-                          <p style={{
-                            fontSize: '13px',
-                            color: '#64748B',
-                            margin: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                          }}>
-                            {referee.email}
-                          </p>
                         )}
                       </div>
                     ))
@@ -2008,7 +1934,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                         fontSize: '14px',
                         fontWeight: '500',
                         color: '#64748B'
-                      }}>{t('noReferees') || 'No referees assigned'}</p>
+                      }}>{language === 'tr' ? 'Hakem atanmamış' : 'No referees assigned'}</p>
                     </div>
                   )}
                 </div>
@@ -2768,7 +2694,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                 fontWeight: '700',
                 color: '#1E293B',
                 letterSpacing: '-0.025em'
-              }}>{t('selectJournal') || 'Select Journal'}</h3>
+              }}>{language === 'tr' ? 'Dergi Seçin' : 'Select Journal'}</h3>
               <button 
                 onClick={() => setShowJournalModal(false)}
                 disabled={isSubmittingJournal}
@@ -2831,58 +2757,6 @@ const JournalEntryDetailsPage: React.FC = () => {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <label
-                    htmlFor="journal-none"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '16px 20px',
-                      background: selectedJournalId === null
-                        ? 'rgba(14, 165, 233, 0.1)'
-                        : 'rgba(255, 255, 255, 0.5)',
-                      borderRadius: '16px',
-                      border: `2px solid ${selectedJournalId === null
-                        ? '#0EA5E9'
-                        : 'rgba(226, 232, 240, 0.5)'}`,
-                      cursor: isSubmittingJournal ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.3s ease',
-                      opacity: isSubmittingJournal ? 0.7 : 1
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSubmittingJournal && selectedJournalId !== null) {
-                        e.currentTarget.style.background = 'rgba(14, 165, 233, 0.05)';
-                        e.currentTarget.style.borderColor = '#0EA5E9';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSubmittingJournal && selectedJournalId !== null) {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.5)';
-                        e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.5)';
-                      }
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      id="journal-none"
-                      name="journal"
-                      checked={selectedJournalId === null}
-                      onChange={() => setSelectedJournalId(null)}
-                      disabled={isSubmittingJournal}
-                      style={{
-                        width: '18px',
-                        height: '18px',
-                        accentColor: '#0EA5E9'
-                      }}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#1E293B'
-                      }}>{t('noJournal') || 'No Journal (Remove from current journal)'}</div>
-                    </div>
-                  </label>
                   {journals.map(journal => (
                     <label
                       key={journal.id}
@@ -2941,8 +2815,8 @@ const JournalEntryDetailsPage: React.FC = () => {
                           fontSize: '14px',
                           color: '#64748B'
                         }}>
-                          {t('issue')}: {journal.issue}
-                          {journal.publication_date && ` - ${t('published')}: ${formatDate(journal.publication_date)}`}
+                          {journal.issue}
+                          
                         </div>
                       </div>
                     </label>
@@ -3102,7 +2976,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                     color: '#1E293B',
                     margin: 0,
                     letterSpacing: '-0.025em'
-                  }}>{t('authorDetails') || 'Author Details'}</h3>
+                  }}>{language === 'tr' ? 'Yazar Detayları' : 'Author Details'}</h3>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   {/* Go to Profile Button - Only for Admin and Owner users */}

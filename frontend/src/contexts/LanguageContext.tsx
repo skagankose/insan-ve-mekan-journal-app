@@ -250,7 +250,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'date': 'Date',
     'myRefereeEntries': 'Entries I Referee',
     'noRefereeEntriesFound': 'No referee entries found.',
-    'myEditedJournals': 'Journals I Edit',
+    'myEditedJournals': 'Editor Journals',
     'noEditedJournalsFound': 'No journals found.',
     'issue': 'Issue',
     'published': 'Published',

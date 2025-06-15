@@ -16,7 +16,7 @@ Public Content Pages
 [ + ] General Information Page
 
 Protected User Pages
-[ - ] UserProfilePage - User Profile
+[ + ] UserProfilePage - User Profile
 [ - ] ProfileEditPage - User Edit Profile
 [ - ] JournalCreatePage - Entry Create
 [ - ] JournalEditPage - Entry Edit

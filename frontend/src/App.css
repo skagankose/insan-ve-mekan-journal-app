@@ -293,6 +293,29 @@ body::before {
   z-index: 10;
 }
 
+/* New three-row layout structure */
+.page-title-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.page-title-back-button {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.page-title-actions {
+  display: flex;
+  gap: 12px;
+  margin-right: 60px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .page-title-section h1 {
   font-size: 36px;
   font-weight: 800;
