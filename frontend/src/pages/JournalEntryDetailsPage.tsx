@@ -4,7 +4,7 @@ import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { FaCreditCard, FaExclamationTriangle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import { HiMail, HiUser, HiDocumentText, HiAcademicCap, HiFingerPrint, HiIdentification, HiCalendar, HiCheckCircle, HiEye, HiDownload, HiGlobeAlt, HiExternalLink, HiLink } from 'react-icons/hi';
+import { HiMail, HiUser, HiDocumentText, HiAcademicCap, HiFingerPrint, HiIdentification, HiCalendar, HiCheckCircle, HiEye, HiDownload, HiGlobeAlt, HiLink } from 'react-icons/hi';
 import { PiSubtitlesFill } from "react-icons/pi";
 import Footer from '../components/Footer';
 
@@ -635,7 +635,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                       justifyContent: 'center'
                     }}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                     <h3 style={{
@@ -686,7 +686,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                 }}></div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '0.5fr' : entry.authors && entry.authors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '1fr' : entry.authors && entry.authors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
                   gap: '16px'
                 }}>
                   {entry.authors && entry.authors.length > 0 ? (
@@ -700,36 +700,77 @@ const JournalEntryDetailsPage: React.FC = () => {
                           borderRadius: '16px',
                           border: '1px solid rgba(226, 232, 240, 0.6)',
                           transition: 'all 0.3s ease',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = 'rgba(245, 158, 11, 0.08)';
                           e.currentTarget.style.borderColor = '#F59E0B';
                           e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 8px 24px rgba(245, 158, 11, 0.15)';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
                           e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
                           e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
-                        <h4 style={{
-                          fontSize: '16px',
-                          fontWeight: '700',
-                          color: '#1E293B',
-                          margin: '0 0 8px 0',
-                          letterSpacing: '-0.025em'
-                        }}>{author.name}</h4>
-                        {author.title && (
-                          <p style={{
-                            fontSize: '13px',
-                            color: '#64748B',
-                            margin: 0,
-                            fontWeight: '500'
+                        {/* Subtle background pattern */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '-50%',
+                          right: '-30%',
+                          width: '120px',
+                          height: '120px',
+                          background: 'radial-gradient(circle, rgba(245, 158, 11, 0.05) 0%, transparent 70%)',
+                          borderRadius: '50%',
+                          zIndex: 0
+                        }}></div>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, zIndex: 1 }}>
+                          {/* User Avatar/Icon */}
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            background: 'rgba(100, 116, 139, 0.1)',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            border: '1px solid rgba(100, 116, 139, 0.2)'
                           }}>
-                            {author.title}
-                          </p>
-                        )}
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                              <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          
+                          {/* User Info */}
+                          <div style={{ flex: 1 }}>
+                            <div style={{ 
+                              fontSize: '16px', 
+                              fontWeight: '600', 
+                              color: '#1E293B'
+                            }}>{author.name}</div>
+                            {author.title && (
+                              <p style={{
+                                fontSize: '13px',
+                                color: '#64748B',
+                                margin: '4px 0 0 0',
+                                fontWeight: '500'
+                              }}>
+                                {author.title}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        
+
                       </div>
                     ))
                   ) : (
@@ -874,27 +915,55 @@ const JournalEntryDetailsPage: React.FC = () => {
                     background: isJournalHovered ? 'rgba(59, 130, 246, 0.08)' : 'rgba(255, 255, 255, 0.7)',
                     border: `1px solid ${isJournalHovered ? '#3B82F6' : 'rgba(226, 232, 240, 0.6)'}`,
                     transform: isJournalHovered ? 'translateY(-2px)' : 'translateY(0)',
+                    boxShadow: isJournalHovered ? '0 8px 24px rgba(59, 130, 246, 0.15)' : 'none',
                     position: 'relative',
-                    zIndex: 1
+                    zIndex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
                   }}
                   role="link"
                   aria-label={`View details for journal: ${journal.title}`}
                 >
-                  <h4 style={{
-                    fontSize: '16px',
-                    fontWeight: '700',
-                    color: '#1E293B',
-                    margin: '0 0 8px 0',
-                    letterSpacing: '-0.025em'
-                  }}>{journal.title}</h4>
-                  <p style={{
-                    fontSize: '13px',
-                    color: '#64748B',
-                    margin: 0,
-                    fontWeight: '500'
-                  }}>
-                    {journal.issue}
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                    {/* Journal Icon */}
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      background: 'rgba(100, 116, 139, 0.1)',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      border: '1px solid rgba(100, 116, 139, 0.2)'
+                    }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M14 2V8H20" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M16 13H8M16 17H8M10 9H8" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    
+                    {/* Journal Info */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        fontSize: '16px', 
+                        fontWeight: '600', 
+                        color: '#1E293B'
+                      }}>{journal.title}</div>
+                      <p style={{
+                        fontSize: '13px',
+                        color: '#64748B',
+                        margin: '4px 0 0 0',
+                        fontWeight: '500'
+                      }}>
+                        {journal.issue}
+                      </p>
+                    </div>
+                  </div>
+                  
+
                 </div>
               ) : (
                 <div style={{

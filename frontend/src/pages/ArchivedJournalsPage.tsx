@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import * as apiService from '../services/apiService';
 import { Journal, JournalEntryRead } from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useAuth } from '../contexts/AuthContext';
 import Footer from '../components/Footer';
 // Using inline SVGs instead of react-icons to avoid import issues
 
@@ -18,10 +17,6 @@ const ArchivedJournalsPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const { t, language } = useLanguage();
-    const { user } = useAuth();
-
-    // Check if user has editor/admin permissions
-    const isEditorOrAdmin = user && (user.role === 'editor' || user.role === 'admin' || user.role === 'owner');
 
     useEffect(() => {
         const fetchPublishedJournals = async () => {

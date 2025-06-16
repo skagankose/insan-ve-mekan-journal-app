@@ -961,36 +961,77 @@ const JournalDetailsPage: React.FC = () => {
                                             borderRadius: '16px',
                                             border: '1px solid rgba(226, 232, 240, 0.6)',
                                             transition: 'all 0.3s ease',
-                                            cursor: 'pointer'
+                                            cursor: 'pointer',
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between'
                                         }}
                                         onMouseEnter={(e) => {
                                             e.currentTarget.style.background = 'rgba(139, 92, 246, 0.08)';
                                             e.currentTarget.style.borderColor = '#8B5CF6';
                                             e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.boxShadow = '0 8px 24px rgba(139, 92, 246, 0.15)';
                                         }}
                                         onMouseLeave={(e) => {
                                             e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
                                             e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
                                             e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = 'none';
                                         }}
                                     >
-                                        <h4 style={{
-                                            fontSize: '16px',
-                                            fontWeight: '700',
-                                            color: '#1E293B',
-                                            margin: '0 0 8px 0',
-                                            letterSpacing: '-0.025em'
-                                        }}>{editorInChief.name}</h4>
-                                        {editorInChief.title && (
-                                            <p style={{
-                                                fontSize: '13px',
-                                                color: '#64748B',
-                                                margin: 0,
-                                                fontWeight: '500'
+                                        {/* Subtle background pattern */}
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '-50%',
+                                            right: '-30%',
+                                            width: '120px',
+                                            height: '120px',
+                                            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%)',
+                                            borderRadius: '50%',
+                                            zIndex: 0
+                                        }}></div>
+                                        
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, zIndex: 1 }}>
+                                            {/* User Avatar/Icon */}
+                                            <div style={{
+                                                width: '40px',
+                                                height: '40px',
+                                                background: 'rgba(100, 116, 139, 0.1)',
+                                                borderRadius: '12px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexShrink: 0,
+                                                border: '1px solid rgba(100, 116, 139, 0.2)'
                                             }}>
-                                                {editorInChief.title}
-                                            </p>
-                                        )}
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                </svg>
+                                            </div>
+                                            
+                                            {/* User Info */}
+                                                                        <div style={{ flex: 1 }}>
+                                <div style={{ 
+                                    fontSize: '16px', 
+                                    fontWeight: '600', 
+                                    color: '#1E293B'
+                                }}>{editorInChief.name}</div>
+                                {editorInChief.title && (
+                                    <p style={{
+                                        fontSize: '13px',
+                                        color: '#64748B',
+                                        margin: '4px 0 0 0',
+                                        fontWeight: '500'
+                                    }}>
+                                        {editorInChief.title}
+                                    </p>
+                                )}
+                            </div>
+                                        </div>
+                                        
+
                                     </div>
                                 ) : (
                                     <div style={{
@@ -1117,7 +1158,7 @@ const JournalDetailsPage: React.FC = () => {
                                 
                                 <div style={{
                                     display: 'grid',
-                                    gridTemplateColumns: editors.length === 1 ? '0.5fr' : editors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(220px, 1fr))',
+                                    gridTemplateColumns: editors.length === 1 ? '1fr' : editors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(220px, 1fr))',
                                     gap: '16px'
                                 }}>
                                     {editors.length > 0 ? (
@@ -1131,36 +1172,77 @@ const JournalDetailsPage: React.FC = () => {
                                                     borderRadius: '16px',
                                                     border: '1px solid rgba(226, 232, 240, 0.6)',
                                                     transition: 'all 0.3s ease',
-                                                    cursor: 'pointer'
+                                                    cursor: 'pointer',
+                                                    position: 'relative',
+                                                    overflow: 'hidden',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between'
                                                 }}
                                                 onMouseEnter={(e) => {
                                                     e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)';
                                                     e.currentTarget.style.borderColor = '#3B82F6';
                                                     e.currentTarget.style.transform = 'translateY(-2px)';
+                                                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.15)';
                                                 }}
                                                 onMouseLeave={(e) => {
                                                     e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
                                                     e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
                                                     e.currentTarget.style.transform = 'translateY(0)';
+                                                    e.currentTarget.style.boxShadow = 'none';
                                                 }}
                                             >
-                                                <h4 style={{
-                                                    fontSize: '16px',
-                                                    fontWeight: '700',
-                                                    color: '#1E293B',
-                                                    margin: '0 0 8px 0',
-                                                    letterSpacing: '-0.025em'
-                                                }}>{editor.name}</h4>
-                                                {editor.title && (
-                                                    <p style={{
-                                                        fontSize: '13px',
-                                                        color: '#64748B',
-                                                        margin: 0,
-                                                        fontWeight: '500'
+                                                {/* Subtle background pattern */}
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: '-50%',
+                                                    right: '-30%',
+                                                    width: '120px',
+                                                    height: '120px',
+                                                    background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
+                                                    borderRadius: '50%',
+                                                    zIndex: 0
+                                                }}></div>
+                                                
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, zIndex: 1 }}>
+                                                    {/* User Avatar/Icon */}
+                                                    <div style={{
+                                                        width: '40px',
+                                                        height: '40px',
+                                                        background: 'rgba(100, 116, 139, 0.1)',
+                                                        borderRadius: '12px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        flexShrink: 0,
+                                                        border: '1px solid rgba(100, 116, 139, 0.2)'
                                                     }}>
-                                                        {editor.title}
-                                                    </p>
-                                                )}
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                                            <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                        </svg>
+                                                    </div>
+                                                    
+                                                    {/* User Info */}
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ 
+                                                            fontSize: '16px', 
+                                                            fontWeight: '600', 
+                                                            color: '#1E293B'
+                                                        }}>{editor.name}</div>
+                                                        {editor.title && (
+                                                            <p style={{
+                                                                fontSize: '13px',
+                                                                color: '#64748B',
+                                                                margin: '4px 0 0 0',
+                                                                fontWeight: '500'
+                                                            }}>
+                                                                {editor.title}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                
+
                                             </div>
                                         ))
                                     ) : (
@@ -2786,7 +2868,7 @@ const JournalDetailsPage: React.FC = () => {
                                         color: '#1E293B',
                                         margin: 0,
                                         letterSpacing: '-0.025em'
-                                    }}>{language === 'tr' ? 'Kullanıcı Detayları' : 'User Details'}</h3>
+                                    }}>{language === 'tr' ? 'Editör Detayları' : 'User Details'}</h3>
                                 </div>
                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                     {/* Go to Profile Button - Only for Admin users */}
