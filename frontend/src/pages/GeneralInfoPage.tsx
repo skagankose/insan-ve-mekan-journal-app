@@ -36,7 +36,7 @@ const GeneralInfoPage: React.FC = () => {
   return (
     <>
       {/* Title Section */}
-      <div className="page-title-section" style={{ textAlign: 'center' }}>
+      <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
         <h1>{t('generalInformation')}</h1>
       </div>
 

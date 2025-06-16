@@ -265,232 +265,260 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   const isAuthorForEntry = authors.some(author => author.id === user?.id);
   const isRefereeForEntry = referees.some(referee => referee.id === user?.id);
   
+  // Helper function to get user initials
+  const getUserInitials = (name: string): string => {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .map(part => part.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2); // Limit to 2 characters
+  };
+  
   if (loading) {
-    return <div className="loading">{t('loading') || 'Loading...'}</div>;
+    return (
+      <div className="chat-loading">
+        <div className="loading-spinner"></div>
+        <p>{t('loading') || 'Loading conversation...'}</p>
+      </div>
+    );
   }
   
   if (error) {
-    return <div className="error-message">{error}</div>;
+    return <div className="chat-error">{error}</div>;
   }
   
   if (!entry) {
-    return <div className="message-container">{t('journalEntryNotFound') || 'Journal entry not found.'}</div>;
+    return <div className="chat-error">{t('journalEntryNotFound') || 'Journal entry not found.'}</div>;
   }
   
   return (
-    <>
-      {/* Title Section */}
-      <div className="page-title-section" style={{ marginLeft: '60px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+    <div className="chat-container">
+      {/* Chat Header */}
+      <div className="chat-header">
+        <div className="chat-header-left">
           <button 
             onClick={() => navigate(-1)} 
-            className="btn btn-outline back-button"
+            className="chat-back-button"
+            aria-label={t('back') || 'Back'}
           >
-            ← {t('back') || 'Back'}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5"/>
+              <path d="M12 19l-7-7 7-7"/>
+            </svg>
           </button>
-          <h1 style={{ margin: 0 }}>{entry.title}</h1>
+          <div className="chat-header-info">
+            <h1 className="chat-title">{entry.title}</h1>
+            <div className="chat-subtitle">
+              <span className={`status-indicator status-${entry.status?.toLowerCase()}`}>
+                {t(entry.status || '') || entry.status}
+              </span>
+              <span className="participants-count">
+                {authors.length + referees.length} {t('participants') || 'participants'}
+              </span>
+            </div>
+          </div>
         </div>
-        <div style={{ marginTop: '10px', marginLeft: '60px' }}>
-          <span className="entry-status">
-            <span className={`badge badge-${entry.status?.toLowerCase()}`}>
-              {t(entry.status || '') || entry.status}
-            </span>
-          </span>
+        
+        <div className="chat-header-actions">
+          {(isAuthorForEntry || user?.role === 'owner' || user?.role === 'admin' || isJournalEditor) && (
+            <Link to={`/entries/${entryId}/author-update/new`} className="chat-action-button author">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 5v14"/>
+                <path d="M5 12h14"/>
+              </svg>
+              {t('addAuthorUpdate') || 'Author Update'}
+            </Link>
+          )}
+          
+          {(isRefereeForEntry || user?.role === 'owner' || user?.role === 'admin' || isJournalEditor) && (
+            <Link to={`/entries/${entryId}/referee-update/new`} className="chat-action-button referee">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 5v14"/>
+                <path d="M5 12h14"/>
+              </svg>
+              {t('addRefereeUpdate') || 'Review'}
+            </Link>
+          )}
+          
+          {(user?.role === 'admin' || user?.role === 'editor' || user?.role === 'owner' || isJournalEditor) && (
+            <Link to={`/entries/edit/${entryId}`} className="chat-action-button secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              {t('editEntry') || 'Edit'}
+            </Link>
+          )}
         </div>
       </div>
 
-      {/* Content Section */}
-      <div className="page-content-section" style={{ paddingBottom: '0px' }}>
-        <div style={{ margin: '0 auto', marginLeft: '60px' }}>
-          
-          <div className="entry-details">
-            <div className="entry-abstract">
-              <h3>{t('abstract') || 'Abstract'}</h3>
-              <p>{entry.abstract_tr}</p>
-              {entry.abstract_en && (
-                <>
-                  <h3>{t('abstractEn') || 'Abstract (English)'}</h3>
-                  <p>{entry.abstract_en}</p>
-                </>
-              )}
-            </div>
-            
-            <div className="entry-keywords">
-              <h3>{t('keywords') || 'Keywords'}</h3>
-              <p>{entry.keywords || t('noKeywords') || 'No keywords provided'}</p>
-            </div>
-            
-            <div className="entry-participants">
-              <div className="authors-section">
-                <h3>{t('authors') || 'Authors'}</h3>
-                <ul className="participants-list">
-                  {authors.map((author, index) => (
-                    <li key={`author-${author.id}-${index}`} className="participant-item">
-                      <span className="participant-name">{author.name}</span>
-                      {author.title && <span className="participant-title">{author.title}</span>}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div className="referees-section">
-                <h3>{t('referees') || 'Referees'}</h3>
-                <ul className="participants-list">
-                  {referees.map((referee, index) => (
-                    <li key={`referee-${referee.id}-${index}`} className="participant-item">
-                      <span className="participant-name">{referee.name}</span>
-                      {referee.title && <span className="participant-title">{referee.title}</span>}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+      {/* Chat Messages */}
+      <div className="chat-messages">
+        {combinedUpdates.length === 0 ? (
+          <div className="chat-empty-state">
+            <div className="empty-icon">💬</div>
+            <h3>{t('noUpdates') || 'No updates yet'}</h3>
+            <p>{t('startConversation') || 'Start the conversation by adding an update'}</p>
           </div>
-          
-          <div className="updates-section">
-            <h2>{t('entryUpdates') || 'Entry Updates'}</h2>
-            
-            {combinedUpdates.length === 0 ? (
-              <div className="empty-state">
-                <p>{t('noUpdates') || 'No updates found for this entry.'}</p>
-              </div>
-            ) : (
-              <div className="chat-updates-container">
-                {combinedUpdates.map((update, index) => {
-                  const updateId = `${update.type}-${update.id}-${index}`;
-                  const isExpanded = expandedUpdates.has(updateId);
+        ) : (
+          <div className="chat-messages-list">
+            {combinedUpdates.map((update, index) => {
+              const updateId = `${update.type}-${update.id}-${index}`;
+              const isExpanded = expandedUpdates.has(updateId);
+              
+              return (
+                <div 
+                  key={updateId} 
+                  className={`chat-message ${update.type === 'author' ? 'message-author' : 'message-referee'}`}
+                >
+                  <div className="message-avatar">
+                    <div className={`avatar-circle ${update.type}`}>
+                      {update.type === 'author' 
+                        ? getUserInitials(update.authorName || '') 
+                        : getUserInitials(update.refereeName || '')
+                      }
+                    </div>
+                  </div>
                   
-                  return (
-                    <div 
-                      key={updateId} 
-                      className={`chat-message ${update.type === 'author' ? 'author-message' : 'referee-message'}`}
-                    >
-                      <div className="chat-message-header">
-                        <span className="message-sender">
+                  <div className="message-content">
+                    <div className="message-header">
+                      <div className="message-sender">
+                        <span className="sender-name">
                           {update.type === 'author' ? update.authorName : update.refereeName}
                         </span>
-                        <span className="message-date">
-                          {formatDate(update.created_date)}
+                        <span className={`sender-role ${update.type}`}>
+                          {update.type === 'author' ? (t('author') || 'Author') : (t('referee') || 'Reviewer')}
                         </span>
-                        
                         {update.canDelete && (
                           <button 
-                            className="delete-update-button" 
+                            className="delete-message-button" 
                             onClick={() => handleDeleteUpdate(update)}
                             aria-label={t('deleteUpdate') || 'Delete Update'}
                           >
-                            <span className="delete-icon">×</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M3 6h18"/>
+                              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            </svg>
                           </button>
                         )}
                       </div>
-                      
-                      <div className="chat-message-content">
-                        {/* Always show notes if available */}
-                        {update.notes && update.canViewNotes ? (
-                          <div className="update-notes">
-                            <strong>{t('notes') || 'Notes'}: </strong>
-                            <p>{update.notes}</p>
-                          </div>
-                        ) : update.notes && !update.canViewNotes ? (
-                          <div className="update-notes restricted">
-                            <p>{t('privateNotes') || 'Private notes (visible only to the referee who created them, editors, and admins)'}</p>
-                          </div>
-                        ) : null}
-                        
-                        {/* Toggle icon */}
-                        <button 
-                          className={`toggle-details-icon ${isExpanded ? 'expanded' : ''}`}
-                          onClick={() => toggleUpdateExpansion(updateId)}
-                          aria-label={isExpanded ? (t('hideDetails') || 'Hide Details') : (t('showDetails') || 'Show Details')}
-                        >
-                          <span className="chevron"></span>
-                        </button>
-                        
-                        {/* Expanded details */}
-                        {isExpanded && (
-                          <div className="expanded-details">
-                            {update.type === 'author' && (
-                              <>
-                                {update.title && (
-                                  <div className="update-title">
-                                    <strong>{t('updatedTitle') || 'Updated Title'}: </strong>
-                                    <span>{update.title}</span>
-                                  </div>
-                                )}
-                                
-                                {update.abstract_tr && (
-                                  <div className="update-abstract">
-                                    <strong>{t('updatedAbstract') || 'Updated Abstract'}: </strong>
-                                    <p>{update.abstract_tr}</p>
-                                  </div>
-                                )}
-                                
-                                {update.abstract_en && (
-                                  <div className="update-abstract-en">
-                                    <strong>{t('updatedAbstractEn') || 'Updated Abstract (English)'}: </strong>
-                                    <p>{update.abstract_en}</p>
-                                  </div>
-                                )}
-                                
-                                {update.keywords && (
-                                  <div className="update-keywords">
-                                    <strong>{t('updatedKeywords') || 'Updated Keywords'}: </strong>
-                                    <span>{update.keywords}</span>
-                                  </div>
-                                )}
-                              </>
-                            )}
-                            
-                            {update.file_path && update.canViewFile ? (
-                              <div className="update-file">
-                                <strong>
-                                  {update.type === 'author' 
-                                    ? (t('updatedFile') || 'Updated File') 
-                                    : (t('reviewFile') || 'Review File')
-                                  }: 
-                                </strong>
-                                <a href={`/api${update.file_path}`} target="_blank" rel="noopener noreferrer">
-                                  {t('viewFile') || 'View File'}
-                                </a>
-                              </div>
-                            ) : update.file_path && !update.canViewFile ? (
-                              <div className="update-file restricted">
-                                <p>{t('privateFile') || 'Private file (visible only to the referee who uploaded it, editors, and admins)'}</p>
-                              </div>
-                            ) : null}
-                          </div>
-                        )}
+                      <div className="message-actions">
+                        <span className="message-timestamp">
+                          {formatDate(update.created_date)}
+                        </span>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                    
+                    <div className="message-body">
+                      {/* Main content - always show notes if available */}
+                      {update.notes && update.canViewNotes ? (
+                        <div className="message-text">
+                          <p>{update.notes}</p>
+                        </div>
+                      ) : update.notes && !update.canViewNotes ? (
+                        <div className="message-text private">
+                          <p>{t('privateNotes') || 'Private notes (visible only to the reviewer who created them, editors, and admins)'}</p>
+                        </div>
+                      ) : null}
+                      
+                      {/* Expandable details */}
+                      {(update.type === 'author' && (update.title || update.abstract_tr || update.abstract_en || update.keywords)) || 
+                       (update.file_path && update.canViewFile) ? (
+                        <div className="message-expandable">
+                          <button 
+                            className={`expand-button ${isExpanded ? 'expanded' : ''}`}
+                            onClick={() => toggleUpdateExpansion(updateId)}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M6 9l6 6 6-6"/>
+                            </svg>
+                            <span>
+                              {isExpanded 
+                                ? (t('hideDetails') || 'Hide Details') 
+                                : (t('showDetails') || 'Show Details')
+                              }
+                            </span>
+                          </button>
+                          
+                          {isExpanded && (
+                            <div className="expanded-content">
+                              {update.type === 'author' && (
+                                <>
+                                  {update.title && (
+                                    <div className="detail-item">
+                                      <strong>{t('updatedTitle') || 'Updated Title'}: </strong>
+                                      <span>{update.title}</span>
+                                    </div>
+                                  )}
+                                  
+                                  {update.abstract_tr && (
+                                    <div className="detail-item">
+                                      <strong>{t('updatedAbstract') || 'Updated Abstract'}: </strong>
+                                      <p>{update.abstract_tr}</p>
+                                    </div>
+                                  )}
+                                  
+                                  {update.abstract_en && (
+                                    <div className="detail-item">
+                                      <strong>{t('updatedAbstractEn') || 'Updated Abstract (English)'}: </strong>
+                                      <p>{update.abstract_en}</p>
+                                    </div>
+                                  )}
+                                  
+                                  {update.keywords && (
+                                    <div className="detail-item">
+                                      <strong>{t('updatedKeywords') || 'Updated Keywords'}: </strong>
+                                      <span>{update.keywords}</span>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                              
+                              {update.file_path && update.canViewFile ? (
+                                <div className="detail-item">
+                                  <strong>
+                                    {update.type === 'author' 
+                                      ? (t('updatedFile') || 'Updated File') 
+                                      : (t('reviewFile') || 'Review File')
+                                    }: 
+                                  </strong>
+                                  <a 
+                                    href={`/api${update.file_path}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="file-link"
+                                  >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                      <path d="M14 2v6h6"/>
+                                      <path d="M16 13H8"/>
+                                      <path d="M16 17H8"/>
+                                      <path d="M10 9H8"/>
+                                    </svg>
+                                    {t('viewFile') || 'View File'}
+                                  </a>
+                                </div>
+                              ) : update.file_path && !update.canViewFile ? (
+                                <div className="detail-item private">
+                                  <p>{t('privateFile') || 'Private file (visible only to the reviewer who uploaded it, editors, and admins)'}</p>
+                                </div>
+                              ) : null}
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          
-          {/* Actions Section (Add new update, etc.) */}
-          <div className="entry-actions">
-            {(isAuthorForEntry || user?.role === 'owner' || user?.role === 'admin' || isJournalEditor) && (
-              <Link to={`/entries/${entryId}/author-update/new`} className="action-button">
-                {t('addAuthorUpdate') || 'Add Author Update'}
-              </Link>
-            )}
-            
-            {(isRefereeForEntry || user?.role === 'owner' || user?.role === 'admin' || isJournalEditor) && (
-              <Link to={`/entries/${entryId}/referee-update/new`} className="action-button">
-                {t('addRefereeUpdate') || 'Add Referee Update'}
-              </Link>
-            )}
-            
-            {(user?.role === 'admin' || user?.role === 'editor' || user?.role === 'owner' || isJournalEditor) && (
-              <Link to={`/entries/edit/${entryId}`} className="action-button secondary">
-                {t('editEntry') || 'Edit Entry'}
-              </Link>
-            )}
-          </div>
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -447,8 +447,8 @@ const RegisterPage: React.FC = () => {
     return (
         <>
             {/* Title Section */}
-            <div className="page-title-section">
-                <h1 style={{textAlign: 'center'}}>{t('createAccount')}</h1>
+            <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
+                <h1>{t('createAccount')}</h1>
             </div>
 
             {/* Content Section */}
