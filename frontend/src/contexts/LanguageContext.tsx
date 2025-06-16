@@ -547,7 +547,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'editor': 'Editör',
     'arbitrator': 'Hakem',
     'admin': 'Yönetici',
-    'owner': 'Sahip',
+    'owner': 'Kurucu',
     'roleAuthor': 'Yazar',
     'roleAdmin': 'Site Yöneticisi',
     'roleOwner': 'Site Sahibi',

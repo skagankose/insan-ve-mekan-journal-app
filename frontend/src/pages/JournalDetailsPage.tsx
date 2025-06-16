@@ -8,6 +8,17 @@ import Footer from '../components/Footer';
 import { HiMail, HiUser, HiCalendar, HiLocationMarker, HiClock, HiCheckCircle } from 'react-icons/hi';
 import { PiSubtitlesFill } from "react-icons/pi";
 
+// Utility function to get a deterministic background pattern based on ID
+const getPatternForId = (id: number) => {
+    const patterns = [
+        '/pattern_transparent.png',
+        '/pattern_v2.png',
+        '/pattern_v3.png',
+        '/pattern_v4.png'
+    ];
+    return patterns[id % patterns.length];
+};
+
 const JournalDetailsPage: React.FC = () => {
     const { journalId } = useParams<{ journalId: string }>();
     const navigate = useNavigate();
@@ -1248,7 +1259,7 @@ const JournalDetailsPage: React.FC = () => {
                                     ) : (
                                         <div style={{
                                             gridColumn: '1 / -1',
-                                            padding: '32px 20px',
+                                            padding: '12px 20px',
                                             textAlign: 'center',
                                             background: 'rgba(255, 255, 255, 0.6)',
                                             borderRadius: '16px',
@@ -1257,7 +1268,7 @@ const JournalDetailsPage: React.FC = () => {
                                             <div style={{
                                                 width: '40px',
                                                 height: '40px',
-                                                margin: '0 auto 12px',
+                                                margin: '0 auto 8px',
                                                 background: '#F1F5F9',
                                                 borderRadius: '50%',
                                                 display: 'flex',
@@ -2068,7 +2079,7 @@ const JournalDetailsPage: React.FC = () => {
                                     key={entry.id} 
                                     style={{
                                         background: 'rgba(255, 255, 255, 0.8)',
-                                        backgroundImage: 'url(/pattern_transparent.png)',
+                                        backgroundImage: `url(${getPatternForId(entry.id)})`,
                                         backgroundSize: '190px 190px',
                                         backgroundPosition: '127% -87%',
                                         backgroundRepeat: 'no-repeat',
@@ -2191,18 +2202,20 @@ const JournalDetailsPage: React.FC = () => {
                                             ) : entry.status ? (
                                                 <span style={{
                                                     padding: '4px 8px',
-                                                    background: entry.status === 'not_accepted' ? '#FCA5A5' : 
+                                                    background: entry.status === 'accepted' ? '#10B981' :
+                                                               entry.status === 'not_accepted' ? '#FCA5A5' : 
                                                                entry.status === 'waiting_for_payment' ? '#FDE68A' : 
-                                                               entry.status === 'waiting_for_authors' ? '#BFDBFE' :
+                                                               entry.status === 'waiting_for_authors' ? '#FED7AA' :
                                                                entry.status === 'waiting_for_referees' ? '#DDD6FE' :
-                                                               entry.status === 'waiting_for_editors' ? '#FED7AA' :
+                                                               entry.status === 'waiting_for_editors' ? '#BFDBFE' :
                                                                entry.status === 'rejected' ? '#FCA5A5' : 
                                                                entry.status === 'pending' ? '#FDE68A' : '#D1D5DB',
-                                                    color: entry.status === 'not_accepted' ? '#991B1B' : 
+                                                    color: entry.status === 'accepted' ? 'white' :
+                                                          entry.status === 'not_accepted' ? '#991B1B' : 
                                                           entry.status === 'waiting_for_payment' ? '#92400E' : 
-                                                          entry.status === 'waiting_for_authors' ? '#1E40AF' :
+                                                          entry.status === 'waiting_for_authors' ? '#C2410C' :
                                                           entry.status === 'waiting_for_referees' ? '#6B21A8' :
-                                                          entry.status === 'waiting_for_editors' ? '#C2410C' :
+                                                          entry.status === 'waiting_for_editors' ? '#1E40AF' :
                                                           entry.status === 'rejected' ? '#991B1B' : 
                                                           entry.status === 'pending' ? '#92400E' : '#374151',
                                                     borderRadius: '6px',

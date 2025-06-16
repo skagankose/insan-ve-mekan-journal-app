@@ -17,7 +17,19 @@ import {
     MdLibraryBooks,
     MdArticle 
 } from 'react-icons/md';
+import Footer from '../components/Footer';
 import './UserProfilePage.css';
+
+// Utility function to get a deterministic background pattern based on ID
+const getPatternForId = (id: number) => {
+    const patterns = [
+        '/pattern_transparent.png',
+        '/pattern_v2.png',
+        '/pattern_v3.png',
+        '/pattern_v4.png'
+    ];
+    return patterns[id % patterns.length];
+};
 
 const UserProfilePage: React.FC = () => {
     const { user } = useAuth();
@@ -40,6 +52,19 @@ const UserProfilePage: React.FC = () => {
     // Get rejected entries separately
     const getRejectedEntries = (entries: apiService.JournalEntryRead[]): apiService.JournalEntryRead[] => {
         return entries.filter(entry => entry.status === 'not_accepted');
+    };
+
+    // Helper function to get proper role translation with Turkish uppercase handling
+    const getRoleTranslation = (role: string): string => {
+        const roleTranslations = {
+            'author': language === 'tr' ? 'Yazar' : 'Author',
+            'editor': language === 'tr' ? 'EDİTÖR' : 'Editor',
+            'referee': language === 'tr' ? 'Hakem' : 'Referee',
+            'admin': language === 'tr' ? 'YÖNETİCİ' : 'Admin',
+            'owner': language === 'tr' ? 'Kurucu' : 'Owner'
+        };
+        
+        return roleTranslations[role as keyof typeof roleTranslations] || role;
     };
 
     // Fetch all necessary data
@@ -228,7 +253,7 @@ const UserProfilePage: React.FC = () => {
                 key={entry.id} 
                 style={{
                     background: 'rgba(255, 255, 255, 0.8)',
-                    backgroundImage: 'url(/pattern_transparent.png)',
+                    backgroundImage: `url(${getPatternForId(entry.id)})`,
                     backgroundSize: '190px 190px',
                     backgroundPosition: '127% -87%',
                     backgroundRepeat: 'no-repeat',
@@ -342,16 +367,16 @@ const UserProfilePage: React.FC = () => {
                                 padding: '4px 8px',
                                 background: entry.status === 'not_accepted' ? '#FCA5A5' : 
                                            entry.status === 'waiting_for_payment' ? '#FDE68A' : 
-                                           entry.status === 'waiting_for_authors' ? '#BFDBFE' :
+                                           entry.status === 'waiting_for_authors' ? '#FED7AA' :
                                            entry.status === 'waiting_for_referees' ? '#DDD6FE' :
-                                           entry.status === 'waiting_for_editors' ? '#FED7AA' :
+                                           entry.status === 'waiting_for_editors' ? '#BFDBFE' :
                                            entry.status === 'rejected' ? '#FCA5A5' : 
                                            entry.status === 'pending' ? '#FDE68A' : '#D1D5DB',
                                 color: entry.status === 'not_accepted' ? '#991B1B' : 
                                       entry.status === 'waiting_for_payment' ? '#92400E' : 
-                                      entry.status === 'waiting_for_authors' ? '#1E40AF' :
+                                      entry.status === 'waiting_for_authors' ? '#C2410C' :
                                       entry.status === 'waiting_for_referees' ? '#6B21A8' :
-                                      entry.status === 'waiting_for_editors' ? '#C2410C' :
+                                      entry.status === 'waiting_for_editors' ? '#1E40AF' :
                                       entry.status === 'rejected' ? '#991B1B' : 
                                       entry.status === 'pending' ? '#92400E' : '#374151',
                                 borderRadius: '6px',
@@ -406,7 +431,7 @@ const UserProfilePage: React.FC = () => {
                 key={journal.id} 
                 style={{
                     background: 'rgba(255, 255, 255, 0.8)',
-                    backgroundImage: 'url(/pattern_transparent.png)',
+                    backgroundImage: `url(${getPatternForId(journal.id)})`,
                     backgroundSize: '190px 190px',
                     backgroundPosition: '127% -87%',
                     backgroundRepeat: 'no-repeat',
@@ -978,11 +1003,11 @@ const UserProfilePage: React.FC = () => {
                             )}
                             <div className="profile-badges">
                                 <span className={`badge badge-${profileUser.role}`}>
-                                    {t(profileUser.role) || profileUser.role}
+                                    {getRoleTranslation(profileUser.role)}
                                 </span>
                                 {profileUser.is_auth && (
                                     <span className="badge badge-verified">
-                                        {t('verified') || 'Verified'}
+                                        {language === 'tr' ? 'Doğrulanmış' : 'Verified'}
                                     </span>
                                 )}
                             </div>
@@ -1058,7 +1083,7 @@ const UserProfilePage: React.FC = () => {
             {/* Show editor journals section only if user has editor journals */}
             {(profileUser.role === 'editor' || profileUser.role === 'admin' || profileUser.role === 'owner') && editorJournals.length > 0 && (
                 <div className="entries-section">
-                    <h2>{userId ? (language === 'tr' ? 'Editör Dergileri' : 'Editor Journals') : (language === 'tr' ? 'Editör Olduğum Dergiler' : 'Editor Journals')}</h2>
+                    <h2>{userId ? (language === 'tr' ? 'Editör Olunan Dergiler' : 'Editor Journals') : (language === 'tr' ? 'Editör Olduğum Dergiler' : 'Editor Journals')}</h2>
                     {renderGroupedJournals(
                         editorJournals,
                         language === 'tr' ? 'Dergi Bulunamadı' : 'No Journals Found',
@@ -1073,7 +1098,7 @@ const UserProfilePage: React.FC = () => {
             {/* Show journal entries section only if user has author entries */}
             {(profileUser.role === 'author' || profileUser.role === 'admin' || profileUser.role === 'owner') && userEntries.length > 0 && (
                     <div className="entries-section">
-                    <h2>{userId ? (language === 'tr' ? 'Yazar Makaleleri' : 'Author Entries') : (language === 'tr' ? 'Yazar Olduğum Makalelerim' : 'My Journal Entries')}</h2>
+                    <h2>{userId ? (language === 'tr' ? 'Yazar Olunan Makaleler' : 'Author Entries') : (language === 'tr' ? 'Yazar Olduğum Makalelerim' : 'Author Entries')}</h2>
                     {renderGroupedEntries(
                         userEntries,
                         language === 'tr' ? 'Makale Bulunamadı' : 'No Entries Found', 
@@ -1090,7 +1115,7 @@ const UserProfilePage: React.FC = () => {
             {/* Show referee entries section only if user has referee entries */}
             {(profileUser.role === 'referee' || profileUser.role === 'admin' || profileUser.role === 'owner') && refereeEntries.length > 0 && (
                     <div className="entries-section">
-                    <h2>{userId ? (language === 'tr' ? 'Hakem Makaleleri' : 'Referee Entries') : (language === 'tr' ? 'Hakem Olduğum Makaleler' : 'Entries I Referee')}</h2>
+                    <h2>{userId ? (language === 'tr' ? 'Hakem Olunan Makaleler' : 'Referee Entries') : (language === 'tr' ? 'Hakem Olduğum Makaleler' : 'Referee Entries')}</h2>
                     {renderGroupedEntries(
                         refereeEntries,
                         language === 'tr' ? 'Makale Bulunamadı' : 'No Entries Found', 
@@ -1103,7 +1128,22 @@ const UserProfilePage: React.FC = () => {
                     )}
                 </div>
             )}
+                
+                {/* Footer Section */}
+                <div style={{ marginTop: '16px', marginBottom: '0px' }}>
+                    <div className="transparent-footer">
+                        <Footer />
+                    </div>
+                </div>
         </div>
+        
+        {/* CSS Styles for transparent footer */}
+        <style>{`
+            .transparent-footer .footer-content {
+                background: transparent !important;
+                border-top: none !important;
+            }
+        `}</style>
         </>
     );
 };

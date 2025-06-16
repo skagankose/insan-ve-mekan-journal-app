@@ -279,9 +279,9 @@
 }
 
 .badge-pending {
-    background: linear-gradient(135deg, #FbbF24 0%, #F59E0B 100%);
+    background: linear-gradient(135deg, #FDE68A 0%, #FCD34D 100%);
     color: #92400E;
-    box-shadow: 0 2px 4px rgba(251, 191, 36, 0.3);
+    box-shadow: 0 2px 4px rgba(253, 230, 138, 0.3);
 }
 
 .badge-accepted {
@@ -291,9 +291,9 @@
 }
 
 .badge-rejected {
-    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-    color: white;
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, #FCA5A5 0%, #F87171 100%);
+    color: #991B1B;
+    box-shadow: 0 2px 4px rgba(252, 165, 165, 0.3);
 }
 
 .badge-published {

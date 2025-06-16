@@ -66,13 +66,13 @@
 }
 
 .badge-pending {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: #FDE68A;
+  color: #92400E;
 }
 
 .badge-rejected {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: #FCA5A5;
+  color: #991B1B;
 }
 
 .badge-approved {

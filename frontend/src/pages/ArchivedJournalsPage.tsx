@@ -12,6 +12,17 @@ interface JournalWithEntries extends Journal {
     isLoading: boolean;
 }
 
+// Utility function to get a deterministic background pattern based on ID
+const getPatternForId = (id: number) => {
+    const patterns = [
+        '/pattern_transparent.png',
+        '/pattern_v2.png',
+        '/pattern_v3.png',
+        '/pattern_v4.png'
+    ];
+    return patterns[id % patterns.length];
+};
+
 const ArchivedJournalsPage: React.FC = () => {
     const [journalsWithEntries, setJournalsWithEntries] = useState<JournalWithEntries[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -168,13 +179,13 @@ const ArchivedJournalsPage: React.FC = () => {
                     justifyContent: 'center',
                     fontSize: '32px',
                     color: 'white'
-                }}>⚠️</div>
+                }}>!</div>
                 <h3 style={{
                     fontSize: '20px',
                     fontWeight: '600',
                     color: '#991B1B',
                     marginBottom: '12px'
-                }}>Error Loading Journals</h3>
+                }}>{language === 'tr' ? 'Dergiler Bulunamadı' : 'Error Loading Journals'}</h3>
                 <p style={{
                     fontSize: '16px',
                     color: '#DC2626',
@@ -499,7 +510,7 @@ const ArchivedJournalsPage: React.FC = () => {
                                                     >
                                                         <div style={{
                                                             background: 'rgba(255, 255, 255, 0.8)',
-                                                            backgroundImage: 'url(/pattern_transparent.png)',
+                                                            backgroundImage: `url(${getPatternForId(entry.id)})`,
                                                             backgroundSize: '190px 190px',
                                                             backgroundPosition: '131% -100%',
                                                             backgroundRepeat: 'no-repeat',

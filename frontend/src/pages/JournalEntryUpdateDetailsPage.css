@@ -25,12 +25,12 @@
   letter-spacing: 1px;
 }
 
-.badge-waiting_for_payment { background-color: #ffec59; color: #333; }
-.badge-waiting_for_authors { background-color: #ffb74d; color: #333; }
-.badge-waiting_for_referees { background-color: #f48fb1; color: #333; }
-.badge-waiting_for_editors { background-color: #90caf9; color: #333; }
-.badge-accepted { background-color: #81c784; color: #333; }
-.badge-not_accepted { background-color: #ef5350; color: #fff; }
+.badge-waiting_for_payment { background-color: #FDE68A; color: #92400E; }
+.badge-waiting_for_authors { background-color: #FED7AA; color: #C2410C; }
+.badge-waiting_for_referees { background-color: #DDD6FE; color: #6B21A8; }
+.badge-waiting_for_editors { background-color: #BFDBFE; color: #1E40AF; }
+.badge-accepted { background-color: #10B981; color: #fff; }
+.badge-not_accepted { background-color: #FCA5A5; color: #991B1B; }
 
 .entry-details {
   margin-bottom: 30px;

@@ -776,7 +776,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                   ) : (
                     <div style={{
                       gridColumn: '1 / -1',
-                      padding: '32px 20px',
+                      padding: '12px 20px',
                       textAlign: 'center',
                       background: 'rgba(255, 255, 255, 0.6)',
                       borderRadius: '16px',
@@ -785,7 +785,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                       <div style={{
                         width: '40px',
                         height: '40px',
-                        margin: '0 auto 12px',
+                        margin: '0 auto 8px',
                         background: '#F1F5F9',
                         borderRadius: '50%',
                         display: 'flex',
@@ -1367,12 +1367,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                         background: entry.status === 'accepted' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 
                                    entry.status === 'not_accepted' ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' :
                                    entry.status === 'rejected' ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' :
-                                   entry.status === 'waiting_for_payment' ? 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)' :
-                                   entry.status === 'waiting_for_authors' ? 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)' :
+                                   entry.status === 'waiting_for_payment' ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' :
+                                   entry.status === 'waiting_for_authors' ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' :
                                    entry.status === 'waiting_for_referees' ? 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)' :
-                                   entry.status === 'waiting_for_editors' ? 'linear-gradient(135deg, #FB923C 0%, #EA580C 100%)' :
+                                   entry.status === 'waiting_for_editors' ? 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)' :
                                    entry.status === 'pending' ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' :
-                                   'linear-gradient(135deg, #94A3B8 0%, #64748B 100%)',
+                                   'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)',
                         borderRadius: '10px',
                         display: 'flex',
                         alignItems: 'center',
@@ -1433,12 +1433,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                             borderRadius: '50%',
                             background: entry.status === 'accepted' ? '#10B981' : 
                                        entry.status === 'not_accepted' || entry.status === 'rejected' ? '#EF4444' :
-                                       entry.status === 'waiting_for_payment' ? '#FCD34D' :
-                                       entry.status === 'waiting_for_authors' ? '#3B82F6' :
+                                       entry.status === 'waiting_for_payment' ? '#F59E0B' :
+                                       entry.status === 'waiting_for_authors' ? '#F59E0B' :
                                        entry.status === 'waiting_for_referees' ? '#8B5CF6' :
-                                       entry.status === 'waiting_for_editors' ? '#FB923C' :
+                                       entry.status === 'waiting_for_editors' ? '#3B82F6' :
                                        entry.status === 'pending' ? '#F59E0B' :
-                                       '#94A3B8'
+                                       '#6B7280'
                           }}></div>
                           {entry.status === 'not_accepted' ? (t('notAccepted') || 'Not Accepted') :
                            entry.status === 'waiting_for_payment' ? (t('waitingForPayment') || 'Waiting for Payment') :
@@ -1705,22 +1705,23 @@ const JournalEntryDetailsPage: React.FC = () => {
                 <div style={{
                   marginBottom: '32px',
                   padding: '32px',
-                  background: 'rgba(255, 255, 255, 0.7)',
-                  backdropFilter: 'blur(10px)',
+                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                  backdropFilter: 'blur(20px)',
                   borderRadius: '20px',
-                  border: '1px solid rgba(226, 232, 240, 0.6)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
+                  border: '1px solid rgba(20, 184, 166, 0.15)',
+                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
                   position: 'relative',
                   overflow: 'hidden'
                 }}>
+                  {/* Background Pattern */}
                   <div style={{
                     position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '100%',
-                    background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f1f5f9" fill-opacity="0.3"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat',
-                    opacity: 0.3,
+                    top: '-50%',
+                    right: '-20%',
+                    width: '300px',
+                    height: '300px',
+                    background: 'radial-gradient(circle, rgba(20, 184, 166, 0.03) 0%, transparent 70%)',
+                    borderRadius: '50%',
                     zIndex: 0
                   }} />
                   <div style={{ position: 'relative', zIndex: 1 }}>
@@ -1981,7 +1982,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                     ))
                   ) : (
                     <div style={{
-                      padding: '32px 20px',
+                      padding: '12px 20px',
                       textAlign: 'center',
                       background: 'rgba(255, 255, 255, 0.6)',
                       borderRadius: '16px',
@@ -1990,7 +1991,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                       <div style={{
                         width: '40px',
                         height: '40px',
-                        margin: '0 auto 12px',
+                        margin: '0 auto 8px',
                         background: '#F1F5F9',
                         borderRadius: '50%',
                         display: 'flex',
@@ -3089,8 +3090,8 @@ const JournalEntryDetailsPage: React.FC = () => {
                       height: '40px',
                       borderRadius: '6px',
                       border: 'none',
-                      background: 'rgba(148, 163, 184, 0.1)',
-                      color: '#64748B',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      color: '#DC2626',
                       fontSize: '20px',
                       fontWeight: '500',
                       cursor: 'pointer',
@@ -3104,8 +3105,8 @@ const JournalEntryDetailsPage: React.FC = () => {
                       e.currentTarget.style.color = '#EF4444';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
-                      e.currentTarget.style.color = '#64748B';
+                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                      e.currentTarget.style.color = '#DC2626';
                     }}
                   >
                     ×

@@ -89,7 +89,7 @@
     border-radius: 24px;
     padding: 32px;
     margin: 0 auto 40px auto;
-    max-width: 45%;
+    max-width: 38%;
     border: 1px solid rgba(226, 232, 240, 0.3);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
     position: relative;
@@ -188,7 +188,10 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
     margin-bottom: 16px;
+    width: 100%;
 }
 
 .profile-title {
@@ -650,42 +653,53 @@
 .badge {
     display: inline-flex;
     align-items: center;
-    padding: var(--spacing-1) var(--spacing-2);
-    border-radius: var(--border-radius-md);
-    font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    min-height: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .badge-admin {
-    background-color: var(--color-danger);
-    color: var(--color-text-inverse);
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .badge-owner {
-    background-color: var(--color-primary);
-    color: var(--color-text-inverse);
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
 }
 
 .badge-editor {
-    background-color: var(--color-primary);
-    color: var(--color-text-inverse);
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .badge-author {
-    background-color: var(--color-success);
-    color: var(--color-text-inverse);
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
 .badge-referee {
-    background-color: var(--color-warning);
-    color: var(--color-text-primary);
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
 }
 
 .badge-verified {
-    background-color: var(--color-success);
-    color: var(--color-text-inverse);
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .badge-published {
@@ -693,22 +707,34 @@
     color: var(--color-text-inverse);
 }
 
-.badge-waiting_for_payment,
-.badge-waiting_for_authors,
-.badge-waiting_for_referees,
+.badge-waiting_for_payment {
+    background-color: #FDE68A;
+    color: #92400E;
+}
+
+.badge-waiting_for_authors {
+    background-color: #FED7AA;
+    color: #C2410C;
+}
+
+.badge-waiting_for_referees {
+    background-color: #DDD6FE;
+    color: #6B21A8;
+}
+
 .badge-waiting_for_editors {
-    background-color: var(--color-warning);
-    color: var(--color-text-primary);
+    background-color: #BFDBFE;
+    color: #1E40AF;
 }
 
 .badge-accepted {
-    background-color: var(--color-success);
-    color: var(--color-text-inverse);
+    background-color: #10B981;
+    color: white;
 }
 
 .badge-not_accepted {
-    background-color: var(--color-danger);
-    color: var(--color-text-inverse);
+    background-color: #FCA5A5;
+    color: #991B1B;
 }
 
 .badge-completed {
