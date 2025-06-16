@@ -198,6 +198,7 @@ interface AuthorUpdateCreate {
     abstract_en?: string;
     abstract_tr?: string;
     keywords?: string;
+    keywords_en?: string;
     file_path?: string;
     notes?: string;
 }

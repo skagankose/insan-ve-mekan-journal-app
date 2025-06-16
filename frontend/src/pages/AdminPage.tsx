@@ -8,6 +8,7 @@ import type {
     JournalEntryRead,
 } from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
+import { formatDate, getStatusTranslation } from '../utils/dateUtils';
 import './AdminPage.css';
 
 // Interfaces will now directly use the more detailed types from apiService
@@ -240,21 +241,8 @@ const AdminPage: React.FC = () => {
 
     // Translation function for journal entry status
     const translateStatus = (status: string | undefined): string => {
-        if (!status) return t('pending');
-        
-        const statusTranslations: { [key: string]: string } = {
-            'accepted': t('accepted'),
-            'waiting_for_referees': t('waitingForReferees'),
-            'waiting_for_authors': t('waitingForAuthors'), 
-            'waiting_for_editors': t('waitingForEditors'),
-            'not_accepted': t('notAccepted'),
-            'waiting_for_payment': t('waitingForPayment'),
-            'pending': t('pending'),
-            'published': t('published'),
-            'rejected': t('rejected')
-        };
-        
-        return statusTranslations[status.toLowerCase()] || status;
+        if (!status) return getStatusTranslation('pending', language);
+        return getStatusTranslation(status, language);
     };
 
     // Global Search Input Component moved outside to prevent re-creation
@@ -449,7 +437,7 @@ const AdminPage: React.FC = () => {
                 </div>
                 <div className="detail-field">
                     <label>Created Date:</label>
-                    <span>{journal.created_date ? new Date(journal.created_date).toLocaleDateString() : '-'}</span>
+                    <span>{journal.created_date ? formatDate(journal.created_date, language) : '-'}</span>
                 </div>
                 <div className="detail-field">
                     <label>Publication Date:</label>

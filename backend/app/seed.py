@@ -773,6 +773,7 @@ def seed_database():
                             abstract_en=f"Updated EN abstract version {update_version} with improved clarity and detail.",
                             abstract_tr=f"TR özeti versiyon {update_version} - güncellenmiş ve genişletilmiştir.",
                             keywords=je.keywords + f", updated-v{update_version}",
+                            keywords_en=je.keywords_en + f", updated-v{update_version}" if je.keywords_en else f"updated-v{update_version}",
                             file_path=f"entry{je.id}_v{update_version}.pdf",
                             notes=f"{specific_note} (Update v{update_version})",
                             created_date=datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None),

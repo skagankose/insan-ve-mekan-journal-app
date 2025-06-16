@@ -67,7 +67,7 @@ type TranslationKeys =
   | 'includeYourUniqueToken' | 'youMustIncludeYourUniqueToken' | 'yourToken' | 'paymentVerification' | 'withoutTheCorrectToken'
   | 'paymentVerificationTypically' | 'paymentInfoMessage'
   | 'downloadPdf' | 'viewUpdates' | 'authors' | 'publishedIn' | 'entryDetails' | 'pageNumber' | 'articleType' | 'status' | 'downloads' | 'reads'
-  | 'bankName' | 'accountHolder' | 'processingTime' | 'keywords' | 'referees' | 'files' | 'viewFile'
+  | 'bankName' | 'accountHolder' | 'processingTime' | 'keywords' | 'keywordsEn' | 'keywordsSeparatedByCommasEn' | 'updatedKeywordsEn' | 'referees' | 'files' | 'viewFile'
   | 'referenceToken' | 'manageAuthors' | 'changeJournal' | 'manageReferees' | 'noPublishedEntries'
   | 'loadingPublishedJournals' | 'failedToLoadPublishedJournals' | 'noPublishedJournals';
 
@@ -428,6 +428,9 @@ const translations: Record<Language, TranslationDictionary> = {
     'accountHolder': 'Account Holder',
     'processingTime': 'Processing Time',
     'keywords': 'Keywords',
+    'keywordsEn': 'Keywords (English)',
+    'keywordsSeparatedByCommasEn': 'Separate English keywords with commas',
+    'updatedKeywordsEn': 'Updated Keywords (English)',
     'referees': 'Referees',
     'files': 'Files',
     'viewFile': 'DOCX File',
@@ -793,6 +796,9 @@ const translations: Record<Language, TranslationDictionary> = {
     'accountHolder': 'Hesap Sahibi',
     'processingTime': 'İşlem Süresi',
     'keywords': 'Anahtar Kelimeler',
+    'keywordsEn': 'Anahtar Kelimeler (İngilizce)',
+    'keywordsSeparatedByCommasEn': 'İngilizce anahtar kelimeleri virgülle ayırın',
+    'updatedKeywordsEn': 'Güncellenmiş Anahtar Kelimeler (İngilizce)',
     'referees': 'Hakemler',
     'files': 'Dosyalar',
     'viewFile': 'DOCX Dosyası',

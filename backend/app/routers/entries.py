@@ -294,6 +294,7 @@ async def create_author_update_with_file(
     abstract_en: Optional[str] = Form(None),
     abstract_tr: Optional[str] = Form(None),
     keywords: Optional[str] = Form(None),
+    keywords_en: Optional[str] = Form(None),
     notes: Optional[str] = Form(None),
     db: Session = Depends(get_session),
     current_user: models.User = Depends(auth.get_current_active_user)
@@ -318,7 +319,7 @@ async def create_author_update_with_file(
         )
     
     # Make sure at least one field is filled or a file is uploaded
-    if not title and not abstract_en and not abstract_tr and not keywords and not notes and not file:
+    if not title and not abstract_en and not abstract_tr and not keywords and not keywords_en and not notes and not file:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="At least one field must be filled or a file must be uploaded."
@@ -342,6 +343,7 @@ async def create_author_update_with_file(
         abstract_en=abstract_en,
         abstract_tr=abstract_tr,
         keywords=keywords,
+        keywords_en=keywords_en,
         notes=notes,
         file_path=file_path
     )

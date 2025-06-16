@@ -16,6 +16,7 @@ const AuthorUpdateFormPage: React.FC = () => {
     abstract_en: '',
     abstract_tr: '',
     keywords: '',
+    keywords_en: '',
     notes: '',
   });
   
@@ -40,6 +41,7 @@ const AuthorUpdateFormPage: React.FC = () => {
           abstract_en: entryData.abstract_en || '',
           abstract_tr: entryData.abstract_tr || '',
           keywords: entryData.keywords || '',
+          keywords_en: entryData.keywords_en || '',
           notes: '', // Keep notes empty as requested
         });
       } catch (error) {
@@ -79,8 +81,10 @@ const AuthorUpdateFormPage: React.FC = () => {
     }
     
     // Make sure at least one field is filled or a file is selected
-    if (!formData.title && !formData.abstract_en && !formData.abstract_tr && 
-        !formData.keywords && !formData.notes && !selectedFile) {
+    const hasAnyContent = formData.title || formData.abstract_en || formData.abstract_tr || 
+                         formData.keywords || formData.keywords_en || formData.notes || selectedFile;
+    
+    if (!hasAnyContent) {
       toast.error(t('pleaseCompleteAtLeastOneField') || 'Please complete at least one field');
       return;
     }
@@ -91,9 +95,12 @@ const AuthorUpdateFormPage: React.FC = () => {
       // Create FormData object for file upload
       const uploadData = new FormData();
       
-      // Add form fields to FormData
+      // Add form fields to FormData - ensure all fields including keywords_en are included
       Object.entries(formData).forEach(([key, value]) => {
-        uploadData.append(key, value);
+        if (value) { // Only append non-empty values
+          uploadData.append(key, value);
+          // console.log(`Added to FormData: ${key} = "${value}"`);
+        }
       });
       
       // Add file if selected
@@ -101,8 +108,14 @@ const AuthorUpdateFormPage: React.FC = () => {
         uploadData.append('file', selectedFile);
       }
       
+      // Debug: Log all FormData entries
+      // console.log('FormData contents:');
+      // for (let [key, value] of uploadData.entries()) {
+      //   console.log(`${key}: ${value}`);
+      // }
+      
       // First, create the author update
-      console.log('Submitting author update with data:', formData, 'and file:', selectedFile?.name);
+      // console.log('Submitting author update with data:', formData, 'keywords_en:', formData.keywords_en, 'and file:', selectedFile?.name);
       await apiService.createAuthorUpdateWithFile(parseInt(entryId), uploadData);
       
       // Then, update the entry itself with the same information
@@ -111,12 +124,15 @@ const AuthorUpdateFormPage: React.FC = () => {
         abstract_en: formData.abstract_en || undefined,
         abstract_tr: formData.abstract_tr || undefined,
         keywords: formData.keywords || undefined,
+        keywords_en: formData.keywords_en || undefined,
       };
       
       // Only include fields that have values to avoid overwriting with empty strings
       const filteredEntryUpdateData = Object.fromEntries(
-        Object.entries(entryUpdateData).filter(([_, value]) => value !== undefined)
+        Object.entries(entryUpdateData).filter(([_, value]) => value !== undefined && value !== '')
       );
+      
+      // console.log('Entry update data includes keywords_en:', filteredEntryUpdateData.keywords_en);
       
       // Update the entry if there are any fields to update
       if (Object.keys(filteredEntryUpdateData).length > 0) {
@@ -216,7 +232,7 @@ const AuthorUpdateFormPage: React.FC = () => {
             </div>
             
             <div className="form-group">
-              <label htmlFor="keywords" className="form-label">{t('keywords') || 'Keywords'}</label>
+              <label htmlFor="keywords" className="form-label">{t('keywords') || 'Keywords (Turkish)'}</label>
               <input
                 type="text"
                 id="keywords"
@@ -225,6 +241,21 @@ const AuthorUpdateFormPage: React.FC = () => {
                 onChange={handleChange}
                 className="form-input"
                 placeholder={t('keywordsSeparatedByCommas') || 'Separate keywords with commas'}
+                maxLength={100}
+                disabled={isSubmitting}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="keywords_en" className="form-label">{t('keywordsEn') || 'Keywords (English)'}</label>
+              <input
+                type="text"
+                id="keywords_en"
+                name="keywords_en"
+                value={formData.keywords_en}
+                onChange={handleChange}
+                className="form-input"
+                placeholder={t('keywordsSeparatedByCommasEn') || 'Separate English keywords with commas'}
                 maxLength={100}
                 disabled={isSubmitting}
               />

@@ -303,6 +303,7 @@ class AuthorUpdateBase(SQLModel):
     abstract_en: Optional[str] = None
     abstract_tr: Optional[str] = None
     keywords: Optional[str] = None
+    keywords_en: Optional[str] = None
     file_path: Optional[str] = None
     notes: Optional[str] = Field(default=None, sa_column=Column(Text))
     created_date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
@@ -317,6 +318,7 @@ class AuthorUpdateCreate(SQLModel):
     abstract_en: Optional[str] = Field(default=None, sa_column=Column(Text))
     abstract_tr: Optional[str] = Field(default=None, sa_column=Column(Text))
     keywords: Optional[str] = Field(default=None, sa_column=Column(Text))
+    keywords_en: Optional[str] = Field(default=None, sa_column=Column(Text))
     file_path: Optional[str] = None
     notes: Optional[str] = Field(default=None, sa_column=Column(Text))
 

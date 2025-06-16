@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as apiService from '../services/apiService';
+import { formatDate, getRoleTranslation } from '../utils/dateUtils';
 import './JournalEntryUpdateDetailsPage.css';
 
 // Define a combined type for chat display
@@ -18,6 +19,7 @@ type CombinedUpdate = {
   abstract_tr?: string;
   abstract_en?: string;
   keywords?: string;
+  keywords_en?: string;
   file_path?: string;
   notes?: string;
   canViewNotes: boolean;
@@ -27,7 +29,7 @@ type CombinedUpdate = {
 };
 
 const JournalEntryUpdateDetailsPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { entryId } = useParams<{ entryId: string }>();
@@ -157,8 +159,8 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   const isWithinDeletionWindow = (createdDate: string) => {
     const createdTime = new Date(createdDate).getTime();
     const currentTime = new Date().getTime();
-    const oneMinuteInMs = (60 * 1000); // 1 minutes
-    return currentTime - createdTime <= oneMinuteInMs;
+    const fifteenMinutesInMs = (15 * 60 * 1000); // 15 minutes
+    return currentTime - createdTime <= fifteenMinutesInMs;
   };
 
   // Combine and sort updates for chat display
@@ -186,6 +188,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
         abstract_tr: update.abstract_tr,
         abstract_en: update.abstract_en,
         keywords: update.keywords,
+        keywords_en: update.keywords_en,
         file_path: update.file_path,
         notes: update.notes,
         canViewNotes: true, // Author notes are always visible
@@ -199,10 +202,11 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
     const refereeUpdatesCombined = refereeUpdates.map(update => {
       const updateReferee = referees.find(r => r.id === update.referee_id);
       const refereeName = updateReferee?.name || refereeNamesMap.get(update.referee_id) || 'Unknown Referee';
+      const isWithinWindow = isWithinDeletionWindow(update.created_date);
       // Allow admins, editors, authors, and the referee who wrote the update to see it
       const canViewUpdate = isAdminOrEditor || isAuthorForEntry || update.referee_id === user?.id;
-      // User can delete if they're admin/owner or are the referee who created the update
-      const canDelete = isAdmin || update.referee_id === user?.id;
+      // User can delete if they're admin/owner or if they're the referee and within the time window
+      const canDelete = isAdmin || (update.referee_id === user?.id && isWithinWindow);
       
       return {
         id: update.id,
@@ -215,19 +219,19 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
         canViewNotes: canViewUpdate,
         canViewFile: canViewUpdate, // Apply the same visibility rule to files as notes
         canDelete,
-        isWithinDeletionWindow: false // Referee updates don't have a deletion window
+        isWithinDeletionWindow: isWithinWindow // Referee updates now have a deletion window
       };
     });
 
-    // Combine both update types and sort by date (oldest first)
+    // Combine both update types and sort by date (newest first)
     const combined = [...authorUpdatesCombined, ...refereeUpdatesCombined]
-      .sort((a, b) => new Date(a.created_date).getTime() - new Date(b.created_date).getTime());
+      .sort((a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime());
     
     setCombinedUpdates(combined);
   }, [authorUpdates, refereeUpdates, authors, referees, user, authorNamesMap, refereeNamesMap]);
   
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+  const formatLocalizedDate = (dateString: string) => {
+    return formatDate(dateString, language, { includeTime: true });
   };
   
   const toggleUpdateExpansion = (updateId: string) => {
@@ -384,30 +388,56 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                   
                   <div className="message-content">
                     <div className="message-header">
-                      <div className="message-sender">
-                        <span className="sender-name">
-                          {update.type === 'author' ? update.authorName : update.refereeName}
-                        </span>
-                        <span className={`sender-role ${update.type}`}>
-                          {update.type === 'author' ? (t('author') || 'Author') : (t('referee') || 'Reviewer')}
-                        </span>
-                        {update.canDelete && (
-                          <button 
-                            className="delete-message-button" 
-                            onClick={() => handleDeleteUpdate(update)}
-                            aria-label={t('deleteUpdate') || 'Delete Update'}
-                          >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M3 6h18"/>
-                              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                            </svg>
-                          </button>
-                        )}
-                      </div>
+                      {update.type === 'author' ? (
+                        // Author layout: name, role, delete button on left
+                        <div className="message-sender">
+                          <span className="sender-name">
+                            {update.authorName}
+                          </span>
+                          <span className={`sender-role ${update.type}`}>
+                            {getRoleTranslation('author', language)}
+                          </span>
+                          {update.canDelete && (
+                            <button 
+                              className="delete-message-button" 
+                              onClick={() => handleDeleteUpdate(update)}
+                              aria-label={t('deleteUpdate') || 'Delete Update'}
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M3 6h18"/>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        // Referee layout: delete button, role, name
+                        <div className="message-sender referee-sender">
+                          {update.canDelete && (
+                            <button 
+                              className="delete-message-button" 
+                              onClick={() => handleDeleteUpdate(update)}
+                              aria-label={t('deleteUpdate') || 'Delete Update'}
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M3 6h18"/>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                              </svg>
+                            </button>
+                          )}
+                          <span className={`sender-role ${update.type}`}>
+                            {getRoleTranslation('referee', language)}
+                          </span>
+                          <span className="sender-name">
+                            {update.refereeName}
+                          </span>
+                        </div>
+                      )}
                       <div className="message-actions">
                         <span className="message-timestamp">
-                          {formatDate(update.created_date)}
+                          {formatLocalizedDate(update.created_date)}
                         </span>
                       </div>
                     </div>
@@ -425,7 +455,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                       ) : null}
                       
                       {/* Expandable details */}
-                      {(update.type === 'author' && (update.title || update.abstract_tr || update.abstract_en || update.keywords)) || 
+                      {(update.type === 'author' && (update.title || update.abstract_tr || update.abstract_en || update.keywords || update.keywords_en)) || 
                        (update.file_path && update.canViewFile) ? (
                         <div className="message-expandable">
                           <button 
@@ -470,8 +500,15 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                                   
                                   {update.keywords && (
                                     <div className="detail-item">
-                                      <strong>{t('updatedKeywords') || 'Updated Keywords'}: </strong>
+                                      <strong>{t('updatedKeywords') || 'Updated Keywords (Turkish)'}: </strong>
                                       <span>{update.keywords}</span>
+                                    </div>
+                                  )}
+                                  
+                                  {update.keywords_en && (
+                                    <div className="detail-item">
+                                      <strong>{t('updatedKeywordsEn') || 'Updated Keywords (English)'}: </strong>
+                                      <span>{update.keywords_en}</span>
                                     </div>
                                   )}
                                 </>

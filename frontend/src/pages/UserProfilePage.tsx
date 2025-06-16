@@ -17,6 +17,7 @@ import {
     MdLibraryBooks,
     MdArticle 
 } from 'react-icons/md';
+import { formatDate, getRoleTranslation as getRoleTranslationUtil, getStatusTranslation } from '../utils/dateUtils';
 import Footer from '../components/Footer';
 import './UserProfilePage.css';
 
@@ -56,15 +57,7 @@ const UserProfilePage: React.FC = () => {
 
     // Helper function to get proper role translation with Turkish uppercase handling
     const getRoleTranslation = (role: string): string => {
-        const roleTranslations = {
-            'author': language === 'tr' ? 'Yazar' : 'Author',
-            'editor': language === 'tr' ? 'EDİTÖR' : 'Editor',
-            'referee': language === 'tr' ? 'Hakem' : 'Referee',
-            'admin': language === 'tr' ? 'YÖNETİCİ' : 'Admin',
-            'owner': language === 'tr' ? 'Kurucu' : 'Owner'
-        };
-        
-        return roleTranslations[role as keyof typeof roleTranslations] || role;
+        return getRoleTranslationUtil(role, language);
     };
 
     // Fetch all necessary data
@@ -384,15 +377,7 @@ const UserProfilePage: React.FC = () => {
                                 fontWeight: '600',
                                 letterSpacing: '0.5px'
                             }}>
-                                {entry.status === 'not_accepted' ? (t('notAccepted') || 'Not Accepted') :
-                                 entry.status === 'waiting_for_payment' ? (t('waitingForPayment') || 'Waiting for Payment') :
-                                 entry.status === 'waiting_for_authors' ? (t('waitingForAuthors') || 'Waiting for Authors') :
-                                 entry.status === 'waiting_for_referees' ? (t('waitingForReferees') || 'Waiting for Referees') :
-                                 entry.status === 'waiting_for_editors' ? (t('waitingForEditors') || 'Waiting for Editors') :
-                                 entry.status === 'rejected' ? (t('rejected') || 'Rejected') :
-                                 entry.status === 'pending' ? (t('pending') || 'Pending') :
-                                 entry.status === 'accepted' ? (t('accepted') || 'Accepted') :
-                                 (t(entry.status) || entry.status)}
+                                {getStatusTranslation(entry.status || '', language)}
                             </span>
                         ) : (
                             <div style={{
@@ -403,7 +388,7 @@ const UserProfilePage: React.FC = () => {
                                 fontSize: '12px'
                             }}>
                                 <MdCalendarToday size={14} />
-                                <span>{new Date(entry.created_date).toLocaleDateString()}</span>
+                                <span>{formatDate(entry.created_date, language)}</span>
                             </div>
                         )}
                     </div>
@@ -530,11 +515,7 @@ const UserProfilePage: React.FC = () => {
                                 fontWeight: '500'
                             }}>
                                 <MdCalendarToday size={14} />
-                                <span>{new Date(journal.publication_date).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                })}</span>
+                                                                    <span>{formatDate(journal.publication_date, language)}</span>
                             </div>
                         ) : (
                             <span style={{

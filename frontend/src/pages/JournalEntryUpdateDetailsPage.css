@@ -110,11 +110,8 @@
   height: calc(100vh - 90px - 32px); /* Account for navbar and margins */
   max-height: calc(100vh - 90px - 32px);
   background: transparent; /* Make background transparent */
-  backdrop-filter: blur(8px); /* Add small blur effect */
   border-radius: 0px;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05), 0 8px 32px rgba(20, 184, 166, 0.03); /* Lighter shadows for transparent bg */
-  border: 1px solid rgba(20, 184, 166, 0.15); /* More subtle border */
   margin: -5px 0px 0px 65px; /* Reduced left margin to 50px, increased right margin to 90px */
   width: calc(100% - 65px); /* Adjust width to account for new margins (50px + 90px = 140px) */
 }
@@ -125,13 +122,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: rgba(255, 255, 255, 0.7); /* More transparent */
-  backdrop-filter: blur(15px); /* Stronger blur for header */
-  border-bottom: 1px solid rgba(20, 184, 166, 0.15);
+  background: rgba(255, 255, 255, 0.1); /* Really transparent */
+  border-bottom: 1px solid rgba(20, 184, 166, 0.08); /* Very subtle border */
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03); /* Lighter shadow */
 }
 
 .chat-header-left {
@@ -232,14 +227,14 @@
 }
 
 .chat-action-button.author {
-  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+  background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(194, 65, 12, 0.3);
 }
 
 .chat-action-button.author:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 6px 16px rgba(194, 65, 12, 0.4);
 }
 
 .chat-action-button.referee {
@@ -272,6 +267,7 @@
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  background: transparent;
 }
 
 .chat-messages-list {
@@ -388,8 +384,8 @@
 }
 
 .avatar-circle.author {
-  background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
-  border-color: rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%);
+  border-color: rgba(194, 65, 12, 0.3);
 }
 
 .avatar-circle.referee {
@@ -425,6 +421,15 @@
   min-width: 0;
 }
 
+.message-sender.referee-sender {
+  justify-content: flex-start;
+}
+
+.message-sender.referee-sender .delete-message-button {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
 .sender-name {
   font-weight: 700;
   font-size: 15px;
@@ -447,8 +452,8 @@
 }
 
 .sender-role.author {
-  background: rgba(59, 130, 246, 0.1);
-  color: #1E40AF;
+  background: rgba(194, 65, 12, 0.1);
+  color: #C2410C;
 }
 
 .sender-role.referee {
@@ -474,49 +479,115 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px; /* Slightly smaller */
-  height: 24px; /* Slightly smaller */
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 6px; /* Smaller border radius */
+  width: 28px;
+  height: 28px;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1.5px solid rgba(220, 38, 38, 0.15);
+  border-radius: 8px;
   color: #DC2626;
   cursor: pointer;
-  transition: all 0.2s ease;
-  opacity: 0.7;
-  margin-left: 6px; /* Add small margin from role badge */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.6;
+  margin-left: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.delete-message-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s;
 }
 
 .delete-message-button:hover {
   opacity: 1;
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.3);
-  transform: scale(1.05);
+  background: rgba(220, 38, 38, 0.12);
+  border-color: rgba(220, 38, 38, 0.25);
+  transform: scale(1.08) rotate(-2deg);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+}
+
+.delete-message-button:hover::before {
+  left: 100%;
+}
+
+.delete-message-button:active {
+  transform: scale(1.02);
+  transition: transform 0.1s;
+}
+
+/* Context-aware styling for author and referee delete buttons */
+.message-author .delete-message-button {
+  background: rgba(194, 65, 12, 0.08);
+  border-color: rgba(194, 65, 12, 0.15);
+  color: #C2410C;
+}
+
+.message-author .delete-message-button:hover {
+  background: rgba(194, 65, 12, 0.12);
+  border-color: rgba(194, 65, 12, 0.25);
+  box-shadow: 0 4px 12px rgba(194, 65, 12, 0.15);
+}
+
+.message-referee .delete-message-button {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.15);
+  color: #7C3AED;
+}
+
+.message-referee .delete-message-button:hover {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.25);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+}
+
+/* Delete button SVG icon styling */
+.delete-message-button svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.delete-message-button:hover svg {
+  stroke-width: 3;
+  transform: scale(1.1);
 }
 
 /* Message Body */
 .message-body {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.3);
   border-radius: 16px;
   padding: 16px 20px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.02);
   position: relative;
+  backdrop-filter: blur(5px);
 }
 
 .message-author .message-body {
-  background: rgba(59, 130, 246, 0.05);
-  border-color: rgba(59, 130, 246, 0.1);
-  border-left: 4px solid #3B82F6; /* Add colored left border for authors */
-  border-radius: 16px 16px 16px 4px; /* Slightly different radius for left-aligned */
+  background: rgba(194, 65, 12, 0.02);
+  border-color: rgba(194, 65, 12, 0.05);
+  border-left: 2px solid rgba(194, 65, 12, 0.3); /* Add colored left border for authors */
+  border-top: 2px solid rgba(194, 65, 12, 0.3); /* Add colored top border for authors */
+  border-right: 2px solid rgba(194, 65, 12, 0.3); /* Add colored right border for authors */
+  border-bottom: 2px solid rgba(194, 65, 12, 0.3); /* Add colored bottom border for authors */
+  border-radius: 4px 16px 16px 16px; /* Slightly different radius for left-aligned */
 }
 
 .message-referee .message-body {
-  background: rgba(139, 92, 246, 0.05);
-  border-color: rgba(139, 92, 246, 0.1);
-  border-right: 4px solid #8B5CF6; /* Add colored right border for referees */
-  border-left: none; /* Remove left border for right-aligned */
-  border-radius: 16px 16px 4px 16px; /* Slightly different radius for right-aligned */
+  background: rgba(139, 92, 246, 0.02);
+  border-color: rgba(139, 92, 246, 0.05);
+  border-right: 2px solid rgba(139, 92, 246, 0.3); /* Add colored right border for referees */
+  border-top: 2px solid rgba(139, 92, 246, 0.3); /* Add colored top border for referees */
+  border-left: 2px solid rgba(139, 92, 246, 0.3); /* Add colored left border for referees */
+  border-bottom: 2px solid rgba(139, 92, 246, 0.3); /* Add colored bottom border for referees */
+  border-radius: 16px 4px 16px 16px; /* Slightly different radius for right-aligned */
 }
 
 .message-text {
@@ -552,32 +623,38 @@
 /* Expandable Content */
 .message-expandable {
   margin-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(20, 184, 166, 0.1);
   padding-top: 12px;
 }
 
 .expand-button {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  color: #64748B;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(13, 148, 136, 0.02) 100%);
+  border: 1px solid rgba(20, 184, 166, 0.15);
+  color: #0D9488;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  padding: 6px 0;
+  padding: 10px 16px;
+  border-radius: 12px;
   transition: all 0.2s ease;
   width: 100%;
-  justify-content: flex-start;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.08);
 }
 
 .expand-button:hover {
-  color: #0D9488;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.10) 0%, rgba(13, 148, 136, 0.05) 100%);
+  border-color: rgba(20, 184, 166, 0.25);
+  color: #0F766E;
 }
 
 .expand-button svg {
   transition: transform 0.2s ease;
+  color: #14B8A6;
 }
 
 .expand-button.expanded svg {
@@ -586,11 +663,26 @@
 
 .expanded-content {
   margin-top: 12px;
-  padding: 16px;
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  animation: expandIn 0.3s ease-out;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.03) 0%, rgba(255, 255, 255, 0.8) 100%);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(20, 184, 166, 0.15);
+  box-shadow: 0 4px 20px rgba(20, 184, 166, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  animation: expandIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.expanded-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #14B8A6, #0D9488, #14B8A6);
+  opacity: 0.6;
 }
 
 @keyframes expandIn {
@@ -599,17 +691,32 @@
     max-height: 0;
     padding-top: 0;
     padding-bottom: 0;
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
     max-height: 500px;
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    transform: translateY(0);
   }
 }
 
 .detail-item {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(20, 184, 166, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.detail-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(20, 184, 166, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(20, 184, 166, 0.08);
 }
 
 .detail-item:last-child {
@@ -617,31 +724,57 @@
 }
 
 .detail-item strong {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-weight: 700;
-  color: #374151;
+  color: #0D9488;
   font-size: 13px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  position: relative;
+}
+
+.detail-item strong::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: linear-gradient(135deg, #14B8A6, #0D9488);
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .detail-item span,
 .detail-item p {
   font-size: 14px;
-  line-height: 1.5;
-  color: #4B5563;
+  line-height: 1.6;
+  color: #374151;
   margin: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
 .detail-item.private {
-  background: rgba(100, 116, 139, 0.08);
+  background: linear-gradient(135deg, rgba(100, 116, 139, 0.05) 0%, rgba(255, 255, 255, 0.6) 100%);
   border: 1px solid rgba(100, 116, 139, 0.15);
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 12px;
+  padding: 16px;
   font-style: italic;
+  position: relative;
+}
+
+.detail-item.private::before {
+  content: '🔒';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.detail-item.private strong {
+  color: #64748B;
 }
 
 .detail-item.private p {
