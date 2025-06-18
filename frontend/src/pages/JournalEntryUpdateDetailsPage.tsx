@@ -389,60 +389,125 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                   <div className="message-content">
                     <div className="message-header">
                       {update.type === 'author' ? (
-                        // Author layout: name, role, delete button on left
-                        <div className="message-sender">
-                          <span className="sender-name">
-                            {update.authorName}
-                          </span>
-                          <span className={`sender-role ${update.type}`}>
-                            {getRoleTranslation('author', language)}
-                          </span>
-                          {update.canDelete && (
-                            <button 
-                              className="delete-message-button" 
-                              onClick={() => handleDeleteUpdate(update)}
-                              aria-label={t('deleteUpdate') || 'Delete Update'}
-                            >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M3 6h18"/>
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                              </svg>
-                            </button>
-                          )}
-                        </div>
+                        // Author layout: name/role on left, buttons on right
+                        <>
+                          <div className="message-sender">
+                            <span className="sender-name">
+                              {update.authorName}
+                            </span>
+                            <span className={`sender-role ${update.type}`}>
+                              {getRoleTranslation('author', language)}
+                            </span>
+                          </div>
+                          <div className="message-buttons">
+                            {/* Expand/Collapse button for expandable messages */}
+                            {((update.type === 'author' && (update.title || update.abstract_tr || update.abstract_en || update.keywords || update.keywords_en)) || 
+                              (update.file_path && update.canViewFile)) && (
+                              <button 
+                                className="expand-collapse-button" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleUpdateExpansion(updateId);
+                                }}
+                                aria-label={isExpanded ? (t('hideDetails') || 'Hide Details') : (t('showDetails') || 'Show Details')}
+                              >
+                                <svg 
+                                  width="14" 
+                                  height="14" 
+                                  viewBox="0 0 24 24" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  strokeWidth="2"
+                                  className={isExpanded ? 'expanded' : ''}
+                                >
+                                  <path d="M6 9l6 6 6-6"/>
+                                </svg>
+                              </button>
+                            )}
+                            {update.canDelete && (
+                              <button 
+                                className="delete-message-button" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteUpdate(update);
+                                }}
+                                aria-label={t('deleteUpdate') || 'Delete Update'}
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M3 6h18"/>
+                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </>
                       ) : (
-                        // Referee layout: delete button, role, name
-                        <div className="message-sender referee-sender">
-                          {update.canDelete && (
-                            <button 
-                              className="delete-message-button" 
-                              onClick={() => handleDeleteUpdate(update)}
-                              aria-label={t('deleteUpdate') || 'Delete Update'}
-                            >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M3 6h18"/>
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                              </svg>
-                            </button>
-                          )}
-                          <span className={`sender-role ${update.type}`}>
-                            {getRoleTranslation('referee', language)}
-                          </span>
-                          <span className="sender-name">
-                            {update.refereeName}
-                          </span>
-                        </div>
+                        // Referee layout: buttons on left, name/role on right
+                        <>
+                          <div className="message-buttons referee-buttons">
+                            {/* Expand/Collapse button for expandable messages */}
+                            {(update.file_path && update.canViewFile) && (
+                              <button 
+                                className="expand-collapse-button" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleUpdateExpansion(updateId);
+                                }}
+                                aria-label={isExpanded ? (t('hideDetails') || 'Hide Details') : (t('showDetails') || 'Show Details')}
+                              >
+                                <svg 
+                                  width="14" 
+                                  height="14" 
+                                  viewBox="0 0 24 24" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  strokeWidth="2"
+                                  className={isExpanded ? 'expanded' : ''}
+                                >
+                                  <path d="M6 9l6 6 6-6"/>
+                                </svg>
+                              </button>
+                            )}
+                            {update.canDelete && (
+                              <button 
+                                className="delete-message-button" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteUpdate(update);
+                                }}
+                                aria-label={t('deleteUpdate') || 'Delete Update'}
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M3 6h18"/>
+                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                          <div className="message-sender referee-sender">
+                            <span className={`sender-role ${update.type}`}>
+                              {getRoleTranslation('referee', language)}
+                            </span>
+                            <span className="sender-name">
+                              {update.refereeName}
+                            </span>
+                          </div>
+                        </>
                       )}
-                      <div className="message-actions">
-                        <span className="message-timestamp">
-                          {formatLocalizedDate(update.created_date)}
-                        </span>
-                      </div>
                     </div>
                     
-                    <div className="message-body">
+                    <div 
+                      className={`message-body ${((update.type === 'author' && (update.title || update.abstract_tr || update.abstract_en || update.keywords || update.keywords_en)) || (update.file_path && update.canViewFile)) ? 'expandable' : ''}`}
+                      onClick={() => {
+                        // Only make clickable if there are expandable details
+                        if ((update.type === 'author' && (update.title || update.abstract_tr || update.abstract_en || update.keywords || update.keywords_en)) || 
+                            (update.file_path && update.canViewFile)) {
+                          toggleUpdateExpansion(updateId);
+                        }
+                      }}
+                    >
                       {/* Main content - always show notes if available */}
                       {update.notes && update.canViewNotes ? (
                         <div className="message-text">
@@ -454,99 +519,86 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                         </div>
                       ) : null}
                       
-                      {/* Expandable details */}
-                      {(update.type === 'author' && (update.title || update.abstract_tr || update.abstract_en || update.keywords || update.keywords_en)) || 
-                       (update.file_path && update.canViewFile) ? (
-                        <div className="message-expandable">
-                          <button 
-                            className={`expand-button ${isExpanded ? 'expanded' : ''}`}
-                            onClick={() => toggleUpdateExpansion(updateId)}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M6 9l6 6 6-6"/>
-                            </svg>
-                            <span>
-                              {isExpanded 
-                                ? (t('hideDetails') || 'Hide Details') 
-                                : (t('showDetails') || 'Show Details')
-                              }
-                            </span>
-                          </button>
-                          
-                          {isExpanded && (
-                            <div className="expanded-content">
-                              {update.type === 'author' && (
-                                <>
-                                  {update.title && (
-                                    <div className="detail-item">
-                                      <strong>{t('updatedTitle') || 'Updated Title'}: </strong>
-                                      <span>{update.title}</span>
-                                    </div>
-                                  )}
-                                  
-                                  {update.abstract_tr && (
-                                    <div className="detail-item">
-                                      <strong>{t('updatedAbstract') || 'Updated Abstract'}: </strong>
-                                      <p>{update.abstract_tr}</p>
-                                    </div>
-                                  )}
-                                  
-                                  {update.abstract_en && (
-                                    <div className="detail-item">
-                                      <strong>{t('updatedAbstractEn') || 'Updated Abstract (English)'}: </strong>
-                                      <p>{update.abstract_en}</p>
-                                    </div>
-                                  )}
-                                  
-                                  {update.keywords && (
-                                    <div className="detail-item">
-                                      <strong>{t('updatedKeywords') || 'Updated Keywords (Turkish)'}: </strong>
-                                      <span>{update.keywords}</span>
-                                    </div>
-                                  )}
-                                  
-                                  {update.keywords_en && (
-                                    <div className="detail-item">
-                                      <strong>{t('updatedKeywordsEn') || 'Updated Keywords (English)'}: </strong>
-                                      <span>{update.keywords_en}</span>
-                                    </div>
-                                  )}
-                                </>
+                      {/* Expandable details - no separate button needed */}
+                      {isExpanded && ((update.type === 'author' && (update.title || update.abstract_tr || update.abstract_en || update.keywords || update.keywords_en)) || 
+                       (update.file_path && update.canViewFile)) && (
+                        <div className="expanded-content">
+                          {update.type === 'author' && (
+                            <>
+                              {update.title && (
+                                <div className="detail-item">
+                                  <strong>{t('updatedTitle') || 'Updated Title'}: </strong>
+                                  <span>{update.title}</span>
+                                </div>
                               )}
                               
-                              {update.file_path && update.canViewFile ? (
+                              {update.abstract_tr && (
                                 <div className="detail-item">
-                                  <strong>
-                                    {update.type === 'author' 
-                                      ? (t('updatedFile') || 'Updated File') 
-                                      : (t('reviewFile') || 'Review File')
-                                    }: 
-                                  </strong>
-                                  <a 
-                                    href={`/api${update.file_path}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="file-link"
-                                  >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                      <path d="M14 2v6h6"/>
-                                      <path d="M16 13H8"/>
-                                      <path d="M16 17H8"/>
-                                      <path d="M10 9H8"/>
-                                    </svg>
-                                    {t('viewFile') || 'View File'}
-                                  </a>
+                                  <strong>{t('updatedAbstract') || 'Updated Abstract'}: </strong>
+                                  <p>{update.abstract_tr}</p>
                                 </div>
-                              ) : update.file_path && !update.canViewFile ? (
-                                <div className="detail-item private">
-                                  <p>{t('privateFile') || 'Private file (visible only to the reviewer who uploaded it, editors, and admins)'}</p>
+                              )}
+                              
+                              {update.abstract_en && (
+                                <div className="detail-item">
+                                  <strong>{t('updatedAbstractEn') || 'Updated Abstract (English)'}: </strong>
+                                  <p>{update.abstract_en}</p>
                                 </div>
-                              ) : null}
-                            </div>
+                              )}
+                              
+                              {update.keywords && (
+                                <div className="detail-item">
+                                  <strong>{t('updatedKeywords') || 'Updated Keywords (Turkish)'}: </strong>
+                                  <span>{update.keywords}</span>
+                                </div>
+                              )}
+                              
+                              {update.keywords_en && (
+                                <div className="detail-item">
+                                  <strong>{t('updatedKeywordsEn') || 'Updated Keywords (English)'}: </strong>
+                                  <span>{update.keywords_en}</span>
+                                </div>
+                              )}
+                            </>
                           )}
+                          
+                          {update.file_path && update.canViewFile ? (
+                            <div className="detail-item">
+                              <strong>
+                                {update.type === 'author' 
+                                  ? (t('updatedFile') || 'Updated File') 
+                                  : (t('reviewFile') || 'Review File')
+                                }: 
+                              </strong>
+                              <a 
+                                href={`/api${update.file_path}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="file-link"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                  <path d="M14 2v6h6"/>
+                                  <path d="M16 13H8"/>
+                                  <path d="M16 17H8"/>
+                                  <path d="M10 9H8"/>
+                                </svg>
+                                {t('viewFile') || 'View File'}
+                              </a>
+                            </div>
+                          ) : update.file_path && !update.canViewFile ? (
+                            <div className="detail-item private">
+                              <p>{t('privateFile') || 'Private file (visible only to the reviewer who uploaded it, editors, and admins)'}</p>
+                            </div>
+                          ) : null}
                         </div>
-                      ) : null}
+                      )}
+                      
+                      {/* Timestamp moved to bottom of message */}
+                      <div className={`message-timestamp-bottom ${update.type}`}>
+                        {formatLocalizedDate(update.created_date)}
+                      </div>
                     </div>
                   </div>
                 </div>

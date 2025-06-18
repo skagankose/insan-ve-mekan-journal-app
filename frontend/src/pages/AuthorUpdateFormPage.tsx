@@ -20,6 +20,15 @@ const AuthorUpdateFormPage: React.FC = () => {
     notes: '',
   });
   
+  // Store original entry data for comparison
+  const [originalEntryData, setOriginalEntryData] = useState({
+    title: '',
+    abstract_en: '',
+    abstract_tr: '',
+    keywords: '',
+    keywords_en: '',
+  });
+  
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,13 +44,20 @@ const AuthorUpdateFormPage: React.FC = () => {
         setIsLoading(true);
         const entryData = await apiService.getEntryById(parseInt(entryId));
         
-        // Pre-fill form data with entry information
-        setFormData({
+        // Store original entry data for comparison
+        const originalData = {
           title: entryData.title || '',
           abstract_en: entryData.abstract_en || '',
           abstract_tr: entryData.abstract_tr || '',
           keywords: entryData.keywords || '',
           keywords_en: entryData.keywords_en || '',
+        };
+        
+        setOriginalEntryData(originalData);
+        
+        // Pre-fill form data with entry information
+        setFormData({
+          ...originalData,
           notes: '', // Keep notes empty as requested
         });
       } catch (error) {
@@ -80,26 +96,47 @@ const AuthorUpdateFormPage: React.FC = () => {
       return;
     }
     
-    // Make sure at least one field is filled or a file is selected
-    const hasAnyContent = formData.title || formData.abstract_en || formData.abstract_tr || 
-                         formData.keywords || formData.keywords_en || formData.notes || selectedFile;
-    
-    if (!hasAnyContent) {
-      toast.error(t('pleaseCompleteAtLeastOneField') || 'Please complete at least one field');
-      return;
-    }
+
     
     setIsSubmitting(true);
     
     try {
-      // Create FormData object for file upload
+      // Compare current form data with original entry data to identify changes
+      const changedFields: { [key: string]: string } = {};
+      
+      // Check each field for changes (excluding notes which should always be included if not empty)
+      const fieldsToCheck = ['title', 'abstract_en', 'abstract_tr', 'keywords', 'keywords_en'] as const;
+      
+      fieldsToCheck.forEach(field => {
+        const currentValue = formData[field] || '';
+        const originalValue = originalEntryData[field] || '';
+        
+        // Only include field if it has changed from the original
+        if (currentValue !== originalValue) {
+          changedFields[field] = currentValue;
+        }
+      });
+      
+      // Always include notes if provided (notes are not compared as they're always new)
+      if (formData.notes) {
+        changedFields.notes = formData.notes;
+      }
+      
+      // Check if we have any changes or a file to upload
+      const hasChanges = Object.keys(changedFields).length > 0 || selectedFile;
+      
+      if (!hasChanges) {
+        toast.error(t('noChangesDetected') || 'No changes detected. Please modify at least one field or upload a file.');
+        return;
+      }
+      
+      // Create FormData object for file upload with only changed fields
       const uploadData = new FormData();
       
-      // Add form fields to FormData - ensure all fields including keywords_en are included
-      Object.entries(formData).forEach(([key, value]) => {
+      // Add only changed fields to FormData
+      Object.entries(changedFields).forEach(([key, value]) => {
         if (value) { // Only append non-empty values
           uploadData.append(key, value);
-          // console.log(`Added to FormData: ${key} = "${value}"`);
         }
       });
       
@@ -108,31 +145,22 @@ const AuthorUpdateFormPage: React.FC = () => {
         uploadData.append('file', selectedFile);
       }
       
-      // Debug: Log all FormData entries
-      // console.log('FormData contents:');
-      // for (let [key, value] of uploadData.entries()) {
-      //   console.log(`${key}: ${value}`);
-      // }
-      
-      // First, create the author update
-      // console.log('Submitting author update with data:', formData, 'keywords_en:', formData.keywords_en, 'and file:', selectedFile?.name);
+      // Create the author update with only changed data
       await apiService.createAuthorUpdateWithFile(parseInt(entryId), uploadData);
       
-      // Then, update the entry itself with the same information
+      // Then, update the entry itself with the same changed information
       const entryUpdateData = {
-        title: formData.title || undefined,
-        abstract_en: formData.abstract_en || undefined,
-        abstract_tr: formData.abstract_tr || undefined,
-        keywords: formData.keywords || undefined,
-        keywords_en: formData.keywords_en || undefined,
+        title: changedFields.title || undefined,
+        abstract_en: changedFields.abstract_en || undefined,
+        abstract_tr: changedFields.abstract_tr || undefined,
+        keywords: changedFields.keywords || undefined,
+        keywords_en: changedFields.keywords_en || undefined,
       };
       
       // Only include fields that have values to avoid overwriting with empty strings
       const filteredEntryUpdateData = Object.fromEntries(
         Object.entries(entryUpdateData).filter(([_, value]) => value !== undefined && value !== '')
       );
-      
-      // console.log('Entry update data includes keywords_en:', filteredEntryUpdateData.keywords_en);
       
       // Update the entry if there are any fields to update
       if (Object.keys(filteredEntryUpdateData).length > 0) {
