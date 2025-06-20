@@ -69,7 +69,9 @@ type TranslationKeys =
   | 'downloadPdf' | 'viewUpdates' | 'authors' | 'publishedIn' | 'entryDetails' | 'pageNumber' | 'articleType' | 'status' | 'downloads' | 'reads'
   | 'bankName' | 'accountHolder' | 'processingTime' | 'keywords' | 'keywordsEn' | 'keywordsSeparatedByCommasEn' | 'updatedKeywordsEn' | 'referees' | 'files' | 'viewFile'
   | 'referenceToken' | 'manageAuthors' | 'changeJournal' | 'manageReferees' | 'noPublishedEntries'
-  | 'loadingPublishedJournals' | 'failedToLoadPublishedJournals' | 'noPublishedJournals';
+  | 'loadingPublishedJournals' | 'failedToLoadPublishedJournals' | 'noPublishedJournals'
+  | 'reviewFile' | 'updatedTitle' | 'updatedAbstract' | 'updatedAbstractEn' | 'updatedKeywords' | 'updatedFile'
+  | 'updateCopied';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -442,6 +444,13 @@ const translations: Record<Language, TranslationDictionary> = {
     'loadingPublishedJournals': 'Loading published journals...',
     'failedToLoadPublishedJournals': 'Failed to load published journals.',
     'noPublishedJournals': 'No published journals found.',
+    'reviewFile': 'Review File',
+    'updatedTitle': 'Updated Title',
+    'updatedAbstract': 'Updated Abstract',
+    'updatedAbstractEn': 'Updated Abstract (English)',
+    'updatedKeywords': 'Updated Keywords',
+    'updatedFile': 'Updated File',
+    'updateCopied': 'Update content copied to clipboard!',
   },
   tr: {
     // Navigation
@@ -810,6 +819,13 @@ const translations: Record<Language, TranslationDictionary> = {
     'loadingPublishedJournals': 'Yayınlanmış dergiler yükleniyor...',
     'failedToLoadPublishedJournals': 'Yayınlanmış dergiler yüklenemedi.',
     'noPublishedJournals': 'Yayınlanmış dergi bulunamadı.',
+    'reviewFile': 'Değerlendirme Dosyası',
+    'updatedTitle': 'Güncellenmiş Başlık',
+    'updatedAbstract': 'Güncellenmiş Özet',
+    'updatedAbstractEn': 'Güncellenmiş Özet (İngilizce)',
+    'updatedKeywords': 'Güncellenmiş Anahtar Kelimeler',
+    'updatedFile': 'Güncellenmiş Dosya',
+    'updateCopied': 'Güncelleme içeriği panoya kopyalandı!',
   }
 };
 

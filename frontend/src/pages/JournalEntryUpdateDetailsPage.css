@@ -461,9 +461,7 @@
   text-align: left;
 }
 
-.message-author .delete-message-button {
-  order: 2; /* Move it to the right within the header */
-}
+
 
 .delete-message-button {
   display: flex;
@@ -516,6 +514,12 @@
   cursor: pointer;
   transition: all 0.2s ease;
   opacity: 0.5;
+  outline: none; /* Remove focus outline */
+}
+
+.expand-collapse-button:focus {
+  outline: none; /* Remove focus outline */
+  border: 1px solid transparent; /* Keep border transparent even when focused */
 }
 
 .expand-collapse-button:hover {
@@ -592,6 +596,7 @@
 }
 
 .message-text {
+  margin-top: 12px;
   margin-bottom: 12px;
 }
 
@@ -905,6 +910,7 @@
 }
 
 .message-text {
+  margin-top: 12px;
   margin-bottom: 12px;
 }
 
@@ -1190,6 +1196,81 @@
 .sender-role.referee {
   background: rgba(139, 92, 246, 0.1);
   color: #6D28D9;
+}
+
+/* Right-align the file section in referee message boxes only */
+.detail-item-file-referee {
+  text-align: right;
+  padding-top: 0px; /* Reduced from default 12px */
+}
+
+.detail-item-file-referee strong {
+  text-align: right;
+  display: block;
+}
+
+.detail-item-file-referee .file-link {
+  justify-content: flex-end;
+  margin-left: auto;
+  display: inline-flex;
+}
+
+/* Copy button styling - similar to delete and expand buttons */
+.copy-message-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #94A3B8; /* Muted color */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.5;
+  outline: none; /* Remove focus outline */
+}
+
+.copy-message-button:focus {
+  outline: none; /* Remove focus outline */
+  border: 1px solid transparent; /* Keep border transparent even when focused */
+}
+
+.copy-message-button:hover {
+  opacity: 1;
+  background-color: #F1F5F9;
+  color: #475569;
+}
+
+.copy-message-button:active {
+  transform: scale(0.95);
+  transition: transform 0.1s;
+}
+
+/* Context-aware styling for author and referee copy buttons */
+.message-author .copy-message-button:hover {
+  background-color: #FFEBE0; /* Light Orange */
+  color: #C2410C;
+}
+
+.message-referee .copy-message-button:hover {
+  background-color: #F5F3FF; /* Light Purple */
+  color: #7C3AED;
+}
+
+/* Copy button SVG icon styling */
+.copy-message-button svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.copy-message-button:hover svg {
+  stroke-width: 2.5;
+  transform: none;
 }
 
 .message-actions {

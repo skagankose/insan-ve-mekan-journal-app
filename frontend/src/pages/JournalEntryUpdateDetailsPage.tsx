@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as apiService from '../services/apiService';
 import { formatDate, getRoleTranslation } from '../utils/dateUtils';
+import { toast } from 'react-toastify';
 import './JournalEntryUpdateDetailsPage.css';
 
 // Define a combined type for chat display
@@ -228,6 +229,21 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
       .sort((a, b) => new Date(b.created_date).getTime() - new Date(a.created_date).getTime());
     
     setCombinedUpdates(combined);
+    
+    // Initialize all expandable message boxes as expanded by default
+    const newExpandedUpdates = new Set<string>();
+    combined.forEach((update, index) => {
+      const updateId = `${update.type}-${update.id}-${index}`;
+      // Check if the update has expandable content
+      const hasExpandableContent = 
+        (update.type === 'author' && (update.title || update.abstract_tr || update.abstract_en || update.keywords || update.keywords_en)) || 
+        (update.file_path && update.canViewFile);
+      
+      if (hasExpandableContent) {
+        newExpandedUpdates.add(updateId);
+      }
+    });
+    setExpandedUpdates(newExpandedUpdates);
   }, [authorUpdates, refereeUpdates, authors, referees, user, authorNamesMap, refereeNamesMap]);
   
   const formatLocalizedDate = (dateString: string) => {
@@ -262,6 +278,52 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
     } catch (err) {
       console.error('Error deleting update:', err);
       alert(t('deleteUpdateError') || 'Failed to delete the update');
+    }
+  };
+
+  const handleCopyUpdate = async (update: CombinedUpdate) => {
+    let copyText = '';
+    
+    // Add basic info
+    copyText += `${update.type === 'author' ? 'Author' : 'Referee'} Update\n`;
+    copyText += `Date: ${formatLocalizedDate(update.created_date)}\n`;
+    copyText += `By: ${update.type === 'author' ? update.authorName : update.refereeName}\n\n`;
+    
+    // Add notes if available
+    if (update.notes && update.canViewNotes) {
+      copyText += `Notes:\n${update.notes}\n\n`;
+    }
+    
+    // Add author-specific fields
+    if (update.type === 'author') {
+      if (update.title) {
+        copyText += `${t('updatedTitle')}:\n${update.title}\n\n`;
+      }
+      if (update.abstract_tr) {
+        copyText += `${t('updatedAbstract')}:\n${update.abstract_tr}\n\n`;
+      }
+      if (update.abstract_en) {
+        copyText += `${t('updatedAbstractEn')}:\n${update.abstract_en}\n\n`;
+      }
+      if (update.keywords) {
+        copyText += `${t('updatedKeywords')}:\n${update.keywords}\n\n`;
+      }
+      if (update.keywords_en) {
+        copyText += `${t('updatedKeywordsEn')}:\n${update.keywords_en}\n\n`;
+      }
+    }
+    
+    // Note about file (but don't include actual file)
+    if (update.file_path && update.canViewFile) {
+      copyText += `${update.type === 'author' ? t('updatedFile') : t('reviewFile')}: Attached\n`;
+    }
+    
+    try {
+      await navigator.clipboard.writeText(copyText.trim());
+      toast.success(t('updateCopied') || 'Update content copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+      toast.error(t('copyFailed') || 'Failed to copy to clipboard');
     }
   };
   
@@ -400,7 +462,38 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                             </span>
                           </div>
                           <div className="message-buttons">
-                            {/* Expand/Collapse button for expandable messages */}
+                            {/* Delete button first for author messages */}
+                            {update.canDelete && (
+                              <button 
+                                className="delete-message-button" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteUpdate(update);
+                                }}
+                                aria-label={t('deleteUpdate') || 'Delete Update'}
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M3 6h18"/>
+                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                </svg>
+                              </button>
+                            )}
+                            {/* Copy button for author messages */}
+                            <button 
+                              className="copy-message-button" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopyUpdate(update);
+                              }}
+                              aria-label={t('copyUpdate') || 'Copy Update'}
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                              </svg>
+                            </button>
+                            {/* Expand/Collapse button second for author messages */}
                             {((update.type === 'author' && (update.title || update.abstract_tr || update.abstract_en || update.keywords || update.keywords_en)) || 
                               (update.file_path && update.canViewFile)) && (
                               <button 
@@ -421,22 +514,6 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                                   className={isExpanded ? 'expanded' : ''}
                                 >
                                   <path d="M6 9l6 6 6-6"/>
-                                </svg>
-                              </button>
-                            )}
-                            {update.canDelete && (
-                              <button 
-                                className="delete-message-button" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteUpdate(update);
-                                }}
-                                aria-label={t('deleteUpdate') || 'Delete Update'}
-                              >
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <path d="M3 6h18"/>
-                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
                                 </svg>
                               </button>
                             )}
@@ -485,6 +562,20 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                                 </svg>
                               </button>
                             )}
+                            {/* Copy button for referee messages */}
+                            <button 
+                              className="copy-message-button" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopyUpdate(update);
+                              }}
+                              aria-label={t('copyUpdate') || 'Copy Update'}
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                              </svg>
+                            </button>
                           </div>
                           <div className="message-sender referee-sender">
                             <span className={`sender-role ${update.type}`}>
@@ -563,7 +654,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                           )}
                           
                           {update.file_path && update.canViewFile ? (
-                            <div className="detail-item">
+                            <div className={`detail-item ${update.type === 'referee' ? 'detail-item-file-referee' : 'detail-item-file-author'}`}>
                               <strong>
                                 {update.type === 'author' 
                                   ? (t('updatedFile') || 'Updated File') 
@@ -576,6 +667,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                                 rel="noopener noreferrer"
                                 className="file-link"
                                 onClick={(e) => e.stopPropagation()}
+                                download={update.file_path?.toLowerCase().endsWith('.docx') ? true : undefined}
                               >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
