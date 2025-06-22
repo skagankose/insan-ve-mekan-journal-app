@@ -3,20 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 interface JournalFormData {
     title: string;
     issue: string;
-    is_published: boolean;
 }
 
 const JournalCreateFormPage: React.FC = () => {
     const [formData, setFormData] = useState<JournalFormData>({
         title: '',
-        issue: '',
-        is_published: false
+        issue: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
@@ -47,14 +43,17 @@ const JournalCreateFormPage: React.FC = () => {
         setSubmitError(null);
 
         try {
-            // Create the journal
-            const newJournal = await apiService.createJournal(formData);
-            toast.success(t('journalCreatedSuccessfully') || 'Journal created successfully');
-            navigate(`/journals/${newJournal.id}`);
+            // Create the journal (with is_published set to false by default)
+            const journalData = {
+                ...formData,
+                is_published: false
+            };
+            const newJournal = await apiService.createJournal(journalData);
+            // Navigate to journal details page with success parameter
+            navigate(`/journals/${newJournal.id}?created=true`);
         } catch (err: any) {
             console.error('Error creating journal:', err);
             setSubmitError(err.message || 'Failed to create journal');
-            toast.error(err.message || t('errorCreatingJournal') || 'Error creating journal');
         } finally {
             setIsSubmitting(false);
         }
@@ -78,8 +77,8 @@ const JournalCreateFormPage: React.FC = () => {
     return (
         <>
             {/* Title Section */}
-            <div className="page-title-section">
-                <h1 style={{textAlign: 'center'}}>{t('createNewJournal') || 'Create New Journal'}</h1>
+            <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
+                <h1>{t('createNewJournal') || 'Create New Journal'}</h1>
             </div>
 
             {/* Content Section */}
@@ -89,7 +88,7 @@ const JournalCreateFormPage: React.FC = () => {
                         {submitError && <div className="error-message">{submitError}</div>}
                         
                         <div className="form-group">
-                            <label htmlFor="title" className="form-label">{t('title') || 'Title'}</label>
+                            <label htmlFor="title" className="form-label">{t('journalTitle') || 'Journal Title'}</label>
                             <input
                                 type="text"
                                 id="title"
@@ -120,28 +119,7 @@ const JournalCreateFormPage: React.FC = () => {
                             />
                         </div>
                         
-                        <div className="form-group">
-                            <label className="form-label" style={{ 
-                                display: 'flex', 
-                                alignItems: 'center',
-                                gap: 'var(--spacing-2)',
-                                cursor: 'pointer'
-                            }}>
-                                <input
-                                    type="checkbox"
-                                    name="is_published"
-                                    checked={formData.is_published}
-                                    onChange={handleChange}
-                                    disabled={isSubmitting}
-                                    style={{
-                                        width: '18px',
-                                        height: '18px',
-                                        cursor: 'pointer'
-                                    }}
-                                />
-                                <span>{t('isPublished') || 'Is Published'}</span>
-                            </label>
-                        </div>
+
                         
                         <div style={{ 
                             display: 'flex',

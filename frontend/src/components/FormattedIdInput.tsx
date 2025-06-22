@@ -11,6 +11,7 @@ interface FormattedIdInputProps {
     id?: string;
     name?: string;
     className?: string;
+    showValidationErrors?: boolean;
 }
 
 const FormattedIdInput: React.FC<FormattedIdInputProps> = ({
@@ -79,13 +80,7 @@ const FormattedIdInput: React.FC<FormattedIdInputProps> = ({
                 name={name}
                 className={`${className} ${!isValid && !isFocused ? 'invalid' : ''}`}
             />
-            {!isValid && !isFocused && (
-                <div className="error-message">
-                    {type === 'yoksis' 
-                        ? 'YÖKSİS ID must be 5-8 digits'
-                        : 'ORCID must be in 0000-0000-0000-0000 format'}
-                </div>
-            )}
+
             {type === 'orcid' && value && (
                 <div className="help-text">
                     <a 

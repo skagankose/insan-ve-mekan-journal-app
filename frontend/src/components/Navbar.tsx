@@ -231,12 +231,11 @@ const Navbar: React.FC = () => {
                     }
                     
                     .navbar-logo:hover .navbar-title-text {
-                        color: #0D9488 !important;
                         transform: scale(1.05);
                     }
                     
                     .navbar-logo:hover .navbar-subtitle-text {
-                        color: #0D9488 !important;
+                        /* No color change on hover */
                     }
                     
                     .${primaryButtonClass} {

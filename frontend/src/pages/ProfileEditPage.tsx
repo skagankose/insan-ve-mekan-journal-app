@@ -5,6 +5,8 @@ import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import FormattedIdInput from '../components/FormattedIdInput';
 import LocationInput from '../components/LocationInput';
+import ConfirmationModal from '../components/ConfirmationModal';
+import { validateYoksisId, validateOrcidId, validatePhoneNumber } from '../utils/validation';
 import '../styles/FormattedIdInput.css';
 
 // Country code to flag mapping (copied from RegisterPage)
@@ -50,10 +52,10 @@ const ProfileEditPage: React.FC = () => {
     
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<boolean>(false);
+    const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
     
     // Phone input state (separate country code and phone number)
-    const [countryCode, setCountryCode] = useState('+90');
+    const [countryCode, setCountryCode] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [currentFlag, setCurrentFlag] = useState('🇹🇷');
     
@@ -62,9 +64,15 @@ const ProfileEditPage: React.FC = () => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
     const [passwordError, setPasswordError] = useState<string | null>(null);
-    const [passwordSuccess, setPasswordSuccess] = useState<boolean>(false);
     const [isChangingPassword, setIsChangingPassword] = useState<boolean>(false);
     
+    // Collapsible sections state
+    const [isPasswordSectionExpanded, setIsPasswordSectionExpanded] = useState<boolean>(false);
+    const [isDeletionSectionExpanded, setIsDeletionSectionExpanded] = useState<boolean>(false);
+    
+    // Deletion confirmation modal state
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
+
     const [formData, setFormData] = useState<UserForm>({
         name: '',
         title: '',
@@ -96,13 +104,21 @@ const ProfileEditPage: React.FC = () => {
 
     // Update flag when country code changes
     useEffect(() => {
-        setCurrentFlag(getFlagForCountryCode(countryCode));
+        if (countryCode) {
+            setCurrentFlag(getFlagForCountryCode(countryCode));
+        } else {
+            setCurrentFlag('🇹🇷'); // Default to Turkey flag when empty
+        }
     }, [countryCode]);
 
     // Handle country code change
     const handleCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newCode = e.target.value;
         setCountryCode(newCode);
+        // Clear errors when user starts typing
+        if (hasAttemptedSubmit) {
+            setError(null);
+        }
     };
 
     // Format phone number as user types
@@ -131,11 +147,15 @@ const ProfileEditPage: React.FC = () => {
     const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const formatted = formatPhoneNumber(e.target.value);
         setPhoneNumber(formatted);
+        // Clear errors when user starts typing
+        if (hasAttemptedSubmit) {
+            setError(null);
+        }
     };
 
     // Parse existing phone number to separate country code and number
     const parsePhoneNumber = (fullPhone: string) => {
-        if (!fullPhone) return { code: '+90', number: '' };
+        if (!fullPhone) return { code: '', number: '' }; // Return empty strings if no phone
         
         // Find the longest matching country code
         let bestMatch = '+90';
@@ -210,6 +230,10 @@ const ProfileEditPage: React.FC = () => {
             ...formData,
             [name]: value
         });
+        // Clear errors when user starts typing
+        if (hasAttemptedSubmit) {
+            setError(null);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -223,7 +247,28 @@ const ProfileEditPage: React.FC = () => {
         try {
             setLoading(true);
             setError(null);
-            setSuccess(false);
+            setHasAttemptedSubmit(true);
+            
+            // Validate YÖKSİS ID if provided
+            if (formData.yoksis_id && !validateYoksisId(formData.yoksis_id)) {
+                setError(t('yoksisValidationError'));
+                setLoading(false);
+                return;
+            }
+            
+            // Validate ORCID ID if provided
+            if (formData.orcid_id && !validateOrcidId(formData.orcid_id)) {
+                setError(t('orcidValidationError'));
+                setLoading(false);
+                return;
+            }
+            
+            // Validate phone number if provided
+            if (!validatePhoneNumber(countryCode, phoneNumber)) {
+                setError(t('phoneValidationError'));
+                setLoading(false);
+                return;
+            }
             
             // Combine country code and phone number
             const telephone = countryCode + phoneNumber.replace(/\s/g, '');
@@ -248,12 +293,10 @@ const ProfileEditPage: React.FC = () => {
                 await refreshUser();
             }
             
-            setSuccess(true);
-            
             // Navigate back to profile page after a short delay
             setTimeout(() => {
-                navigate('/profile');
-            }, 1500);
+                navigate('/profile?updated=true');
+            }, 500);
             
         } catch (err: any) {
             const errorMessage = err.response?.data?.detail || 'Failed to update profile';
@@ -273,44 +316,53 @@ const ProfileEditPage: React.FC = () => {
         try {
             setIsChangingPassword(true);
             setPasswordError(null);
-            setPasswordSuccess(false);
 
             await apiService.changePassword(currentPassword, newPassword);
             
-            setPasswordSuccess(true);
             setCurrentPassword('');
             setNewPassword('');
             setConfirmNewPassword('');
+            
+            // Navigate to profile page with password updated parameter
+            navigate('/profile?passwordUpdated=true');
 
         } catch (err: any) {
-            const errorMessage = err.response?.data?.detail || 'Failed to update password';
-            setPasswordError(errorMessage);
+            const detail = err.response?.data?.detail;
+            if (detail === 'Incorrect current password') {
+                setPasswordError(t('incorrectCurrentPassword'));
+            } else {
+                setPasswordError(t('passwordUpdateFailed'));
+            }
         } finally {
             setIsChangingPassword(false);
         }
     };
 
-    const handleAccountDeletion = async () => {
-        const shouldProceed = user?.marked_for_deletion ? true : 
-            window.confirm(t('confirmMarkForDeletion') || 'Are you sure you want to mark your account for deletion? This action will be reviewed by an administrator.');
+    const handleAccountDeletion = () => {
+        // Just open the modal, don't perform the action yet
+        setIsConfirmModalOpen(true);
+    };
 
-        if (shouldProceed) {
-            try {
-                if (user?.marked_for_deletion) {
-                    await apiService.unmarkUserForDeletion();
-                    if (refreshUser) {
-                        await refreshUser();
-                    }
-                } else {
-                    await apiService.markUserForDeletion();
-                    if (refreshUser) {
-                        await refreshUser();
-                    }
-                }
-                navigate('/profile');
-            } catch (err: any) {
-                setError(err.response?.data?.detail || (user?.marked_for_deletion ? 'Failed to unmark account for deletion' : 'Failed to mark account for deletion'));
+    const confirmAccountDeletion = async () => {
+        setIsConfirmModalOpen(false); // Close the modal first
+        try {
+            const wasMarkedForDeletion = user?.marked_for_deletion;
+            
+            if (wasMarkedForDeletion) {
+                await apiService.unmarkUserForDeletion();
+            } else {
+                await apiService.markUserForDeletion();
             }
+            
+            if (refreshUser) {
+                await refreshUser();
+            }
+            
+            // Navigate with appropriate parameter based on the action performed
+            const param = wasMarkedForDeletion ? 'unmarkedForDeletion=true' : 'markedForDeletion=true';
+            navigate(`/profile?${param}`);
+        } catch (err: any) {
+            setError(err.response?.data?.detail || (user?.marked_for_deletion ? 'Failed to unmark account for deletion' : 'Failed to mark account for deletion'));
         }
     };
 
@@ -321,8 +373,8 @@ const ProfileEditPage: React.FC = () => {
     return (
         <>
             {/* Title Section */}
-            <div className="page-title-section">
-                <h1>{t('editProfile') || 'Edit Profile'}</h1>
+            <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
+                <h1>{t('editProfile')}</h1>
             </div>
 
             {/* Content Section */}
@@ -330,19 +382,8 @@ const ProfileEditPage: React.FC = () => {
                 {/* Profile Information Form */}
                 <div className="register-form-container" style={{ marginBottom: '2rem' }}>
                     <form className="register-form" onSubmit={handleSubmit}>
-                        <div style={{ marginBottom: '2rem' }}>
-                            <h2 style={{ 
-                                margin: '0 0 1.5rem 0', 
-                                fontSize: '1.5rem', 
-                                fontWeight: '600', 
-                                color: '#374151',
-                                borderBottom: '2px solid #E5E7EB',
-                                paddingBottom: '0.5rem'
-                            }}>
-                                {t('personalInformation') || 'Personal Information'}
-                            </h2>
-                            
-                            <div className="form-group">
+                        <div style={{ marginBottom: '-2rem' }}>
+                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                                 <label htmlFor="name">{t('name') || 'Name'}</label>
                                 <input
                                     type="text"
@@ -357,8 +398,8 @@ const ProfileEditPage: React.FC = () => {
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label htmlFor="title">{t('academicTitle') || 'Academic Title'}</label>
+                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                                <label htmlFor="title">{t('academicTitle')}</label>
                                 <input
                                     type="text"
                                     id="title"
@@ -371,7 +412,7 @@ const ProfileEditPage: React.FC = () => {
                                 />
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                                 <label htmlFor="bio">{t('biography') || 'Biography'}</label>
                                 <textarea
                                     id="bio"
@@ -384,21 +425,8 @@ const ProfileEditPage: React.FC = () => {
                                     disabled={loading}
                                 />
                             </div>
-                        </div>
 
-                        <div style={{ marginBottom: '2rem' }}>
-                            <h2 style={{ 
-                                margin: '0 0 1.5rem 0', 
-                                fontSize: '1.5rem', 
-                                fontWeight: '600', 
-                                color: '#374151',
-                                borderBottom: '2px solid #E5E7EB',
-                                paddingBottom: '0.5rem'
-                            }}>
-                                {t('contactInformation') || 'Contact Information'}
-                            </h2>
-                            
-                            <div className="form-group">
+                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                                 <label htmlFor="telephone">{t('telephone') || 'Phone Number'}</label>
                                 <div className="phone-input-group">
                                     <div className="country-flag-display">
@@ -427,33 +455,22 @@ const ProfileEditPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                                 <label htmlFor="location">{t('location') || 'Location'}</label>
                                 <LocationInput
                                     value={formData.location}
-                                    onChange={(value) => handleInputChange({
-                                        target: { name: 'location', value }
-                                    } as React.ChangeEvent<HTMLInputElement>)}
+                                    onChange={(value) => {
+                                        handleInputChange({
+                                            target: { name: 'location', value }
+                                        } as React.ChangeEvent<HTMLInputElement>);
+                                    }}
                                     id="location"
                                     name="location"
                                     disabled={loading}
                                 />
                             </div>
-                        </div>
 
-                        <div style={{ marginBottom: '2rem' }}>
-                            <h2 style={{ 
-                                margin: '0 0 1.5rem 0', 
-                                fontSize: '1.5rem', 
-                                fontWeight: '600', 
-                                color: '#374151',
-                                borderBottom: '2px solid #E5E7EB',
-                                paddingBottom: '0.5rem'
-                            }}>
-                                {t('academicInformation') || 'Academic Information'}
-                            </h2>
-                            
-                            <div className="form-group">
+                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                                 <label htmlFor="science_branch">{t('scienceBranch') || 'Science Branch'}</label>
                                 <input
                                     type="text"
@@ -467,44 +484,44 @@ const ProfileEditPage: React.FC = () => {
                                 />
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                                 <label htmlFor="yoksis_id">{t('yoksisId') || 'YÖKSİS ID'}</label>
                                 <FormattedIdInput
                                     type="yoksis"
                                     value={formData.yoksis_id}
-                                    onChange={(value) => handleInputChange({
-                                        target: { name: 'yoksis_id', value }
-                                    } as React.ChangeEvent<HTMLInputElement>)}
+                                    onChange={(value) => {
+                                        handleInputChange({
+                                            target: { name: 'yoksis_id', value }
+                                        } as React.ChangeEvent<HTMLInputElement>);
+                                    }}
                                     id="yoksis_id"
                                     name="yoksis_id"
                                     disabled={loading}
+                                    showValidationErrors={hasAttemptedSubmit}
                                 />
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                                 <label htmlFor="orcid_id">{t('orcidId') || 'ORCID ID'}</label>
                                 <FormattedIdInput
                                     type="orcid"
                                     value={formData.orcid_id}
-                                    onChange={(value) => handleInputChange({
-                                        target: { name: 'orcid_id', value }
-                                    } as React.ChangeEvent<HTMLInputElement>)}
+                                    onChange={(value) => {
+                                        handleInputChange({
+                                            target: { name: 'orcid_id', value }
+                                        } as React.ChangeEvent<HTMLInputElement>);
+                                    }}
                                     id="orcid_id"
                                     name="orcid_id"
                                     disabled={loading}
+                                    showValidationErrors={hasAttemptedSubmit}
                                 />
                             </div>
                         </div>
 
-                        {error && (
+                        {hasAttemptedSubmit && error && (
                             <div className="error-message">
                                 {error}
-                            </div>
-                        )}
-
-                        {success && (
-                            <div className="success-message">
-                                {t('profileUpdated') || 'Profile updated successfully!'}
                             </div>
                         )}
 
@@ -540,30 +557,59 @@ const ProfileEditPage: React.FC = () => {
                 </div>
 
                 {/* Password Change Section */}
-                <div className="register-form-container" style={{ marginBottom: '2rem' }}>
-                    <form className="register-form" onSubmit={handlePasswordChange}>
+                <div className="register-form-container" style={{ 
+                    marginBottom: '2rem', 
+                    padding: '0', 
+                    overflow: 'hidden',
+                    border: '2px solid #FEF3C7',
+                    backgroundColor: 'rgba(254, 243, 199, 0.3)'
+                }}>
+                    <div 
+                        onClick={() => setIsPasswordSectionExpanded(!isPasswordSectionExpanded)}
+                        style={{ 
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'relative',
+                            padding: '1.5rem',
+                            backgroundColor: 'rgba(254, 243, 199, 0.5)',
+                            borderBottom: isPasswordSectionExpanded ? '2px solid #F59E0B' : 'none',
+                            margin: '0',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgba(254, 243, 199, 0.7)';
+                        }}
+                        onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = 'rgba(254, 243, 199, 0.5)';
+                        }}
+                    >
                         <h2 style={{ 
-                            margin: '0 0 1.5rem 0', 
+                            margin: '0', 
                             fontSize: '1.5rem', 
                             fontWeight: '600', 
-                            color: '#374151',
-                            borderBottom: '2px solid #E5E7EB',
-                            paddingBottom: '0.5rem'
+                            color: '#D97706'
                         }}>
                             {t('changePassword') || 'Change Password'}
                         </h2>
-
-                        {passwordError && (
-                            <div className="error-message">
-                                {passwordError}
-                            </div>
-                        )}
-
-                        {passwordSuccess && (
-                            <div className="success-message">
-                                {t('passwordUpdated') || 'Password updated successfully!'}
-                            </div>
-                        )}
+                        <span style={{ 
+                            position: 'absolute',
+                            right: '1.5rem',
+                            fontSize: '2.5rem',
+                            fontWeight: '300',
+                            lineHeight: '1',
+                            color: '#D97706',
+                            transition: 'transform 0.3s ease',
+                            transform: isPasswordSectionExpanded ? 'rotate(45deg)' : 'rotate(0deg)'
+                        }}>
+                            +
+                        </span>
+                    </div>
+                    
+                    {isPasswordSectionExpanded && (
+                        <div style={{ padding: '1.5rem' }}>
+                            <form className="register-form password-change-section" onSubmit={handlePasswordChange} style={{ padding: '0' }}>
 
                         <div className="form-group">
                             <label htmlFor="currentPassword">{t('currentPassword') || 'Current Password'}</label>
@@ -571,7 +617,10 @@ const ProfileEditPage: React.FC = () => {
                                 type="password"
                                 id="currentPassword"
                                 value={currentPassword}
-                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setCurrentPassword(e.target.value);
+                                    setPasswordError(null);
+                                }}
                                 className="form-input"
                                 required
                                 disabled={isChangingPassword}
@@ -586,17 +635,15 @@ const ProfileEditPage: React.FC = () => {
                                 value={newPassword}
                                 onChange={(e) => {
                                     setNewPassword(e.target.value);
-                                    if (confirmNewPassword) {
-                                        validatePassword(e.target.value);
-                                    }
+                                    setPasswordError(null);
                                 }}
                                 className="form-input"
                                 required
                                 disabled={isChangingPassword}
                                 minLength={8}
                             />
-                            <div className="password-requirements">
-                                <div className="password-requirements-list" style={{ color: '#6B7280', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                            <div className="password-requirements" style={{ background: 'rgba(254, 243, 199, 0.4)', border: '1px solid #F59E0B' }}>
+                                <div className="password-requirements-list" style={{ color: '#B45309', fontSize: '0.875rem', marginTop: '0.5rem' }}>
                                     <div>• {t('passwordMinLength') || 'At least 8 characters long'}</div>
                                     <div>• {t('passwordCase') || 'Contains uppercase and lowercase letters'}</div>
                                     <div>• {t('passwordNumber') || 'Contains at least one number'}</div>
@@ -612,9 +659,7 @@ const ProfileEditPage: React.FC = () => {
                                 value={confirmNewPassword}
                                 onChange={(e) => {
                                     setConfirmNewPassword(e.target.value);
-                                    if (newPassword) {
-                                        validatePassword(newPassword);
-                                    }
+                                    setPasswordError(null);
                                 }}
                                 className="form-input"
                                 required
@@ -623,42 +668,106 @@ const ProfileEditPage: React.FC = () => {
                             />
                         </div>
 
+                        {passwordError && (
+                            <div className="error-message" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                                {passwordError}
+                            </div>
+                        )}
+
                         <div style={{ 
                             display: 'flex', 
-                            justifyContent: 'flex-end',
+                            justifyContent: 'center',
                             marginTop: '2rem'
                         }}>
                             <button 
                                 type="submit" 
                                 className="register-submit-button"
                                 disabled={isChangingPassword}
-                                style={{ width: 'auto', margin: 0 }}
+                                style={{ 
+                                    width: 'auto', 
+                                    margin: 0,
+                                    background: '#F59E0B',
+                                    borderColor: '#F59E0B',
+                                    boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)'
+                                }}
+                                onMouseOver={(e) => {
+                                    const target = e.target as HTMLButtonElement;
+                                    if (!target.disabled) {
+                                        target.style.background = '#D97706';
+                                        target.style.boxShadow = '0 4px 16px rgba(245, 158, 11, 0.4)';
+                                    }
+                                }}
+                                onMouseOut={(e) => {
+                                    const target = e.target as HTMLButtonElement;
+                                    if (!target.disabled) {
+                                        target.style.background = '#F59E0B';
+                                        target.style.boxShadow = '0 2px 8px rgba(245, 158, 11, 0.3)';
+                                    }
+                                }}
                             >
                                 {isChangingPassword ? (t('changingPassword') || 'Changing Password...') : (t('changePassword') || 'Change Password')}
                             </button>
                         </div>
-                    </form>
+                            </form>
+                        </div>
+                    )}
                 </div>
 
                 {/* Account Deletion Section */}
                 <div className="register-form-container" style={{ 
-                    border: '2px solid #FEE2E2', 
-                    backgroundColor: 'rgba(254, 226, 226, 0.3)' 
+                    border: user?.marked_for_deletion ? '2px solid #BBF7D0' : '2px solid #FEE2E2', 
+                    backgroundColor: user?.marked_for_deletion ? 'rgba(187, 247, 208, 0.3)' : 'rgba(254, 226, 226, 0.3)',
+                    padding: '0',
+                    overflow: 'hidden'
                 }}>
-                    <div style={{ textAlign: 'center' }}>
+                    <div 
+                        onClick={() => setIsDeletionSectionExpanded(!isDeletionSectionExpanded)}
+                        style={{ 
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'relative',
+                            padding: '1.5rem',
+                            backgroundColor: user?.marked_for_deletion ? 'rgba(187, 247, 208, 0.5)' : 'rgba(254, 226, 226, 0.5)',
+                            borderBottom: isDeletionSectionExpanded ? (user?.marked_for_deletion ? '2px solid #86EFAC' : '2px solid #FCA5A5') : 'none',
+                            margin: '0',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = user?.marked_for_deletion ? 'rgba(187, 247, 208, 0.7)' : 'rgba(254, 226, 226, 0.7)';
+                        }}
+                        onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = user?.marked_for_deletion ? 'rgba(187, 247, 208, 0.5)' : 'rgba(254, 226, 226, 0.5)';
+                        }}
+                    >
                         <h2 style={{ 
-                            margin: '0 0 1.5rem 0', 
+                            margin: '0', 
                             fontSize: '1.5rem', 
                             fontWeight: '600', 
-                            color: '#DC2626',
-                            borderBottom: '2px solid #FCA5A5',
-                            paddingBottom: '0.5rem'
+                            color: user?.marked_for_deletion ? '#059669' : '#DC2626'
                         }}>
                             {user?.marked_for_deletion 
                                 ? (t('unmarkForDeletion') || 'Unmark Account for Deletion')
                                 : (t('markForDeletion') || 'Mark Account for Deletion')
                             }
                         </h2>
+                        <span style={{ 
+                            position: 'absolute',
+                            right: '1.5rem',
+                            fontSize: '2.5rem',
+                            fontWeight: '300',
+                            lineHeight: '1',
+                            color: user?.marked_for_deletion ? '#059669' : '#DC2626',
+                            transition: 'transform 0.3s ease',
+                            transform: isDeletionSectionExpanded ? 'rotate(45deg)' : 'rotate(0deg)'
+                        }}>
+                            +
+                        </span>
+                    </div>
+                    
+                    {isDeletionSectionExpanded && (
+                        <div style={{ textAlign: 'center', padding: '1.5rem' }}>
                         
                         <p style={{ 
                             color: '#6B7280', 
@@ -710,9 +819,22 @@ const ProfileEditPage: React.FC = () => {
                                 : (t('markForDeletion') || 'Mark for Deletion')
                             }
                         </button>
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={confirmAccountDeletion}
+                title={user?.marked_for_deletion ? t('unmarkForDeletion') : t('markForDeletion')}
+                message={user?.marked_for_deletion ? t('unmarkForDeletionWarning') : t('markForDeletionWarning')}
+                confirmText={user?.marked_for_deletion ? t('unmarkForDeletion') : t('markForDeletion')}
+                cancelText={t('cancel')}
+                variant={user?.marked_for_deletion ? 'success' : 'danger'}
+                icon={user?.marked_for_deletion ? '✓' : '⚠'}
+            />
         </>
     );
 };

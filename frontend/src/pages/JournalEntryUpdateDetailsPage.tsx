@@ -47,6 +47,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   const [isJournalEditor, setIsJournalEditor] = useState<boolean>(false);
   const [authorNamesMap, setAuthorNamesMap] = useState<Map<number, string>>(new Map());
   const [refereeNamesMap, setRefereeNamesMap] = useState<Map<number, string>>(new Map());
+  const [showParticipantsTooltip, setShowParticipantsTooltip] = useState<boolean>(false);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -352,11 +353,271 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   }
   
   if (error) {
-    return <div className="chat-error">{error}</div>;
+    return (
+      <div style={{
+        minHeight: '70vh',
+        background: 'transparent',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        marginLeft: '60px'
+      }}>
+        <div style={{
+          maxWidth: '600px',
+          width: '100%',
+          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '32px',
+          padding: '48px',
+          textAlign: 'center',
+          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+          border: '1px solid rgba(226, 232, 240, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Background Pattern */}
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            right: '-30%',
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(239, 68, 68, 0.05) 0%, transparent 70%)',
+            borderRadius: '50%',
+            zIndex: 0
+          }}></div>
+          
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{
+              width: '120px',
+              height: '120px',
+              margin: '0 auto 32px',
+              background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+              borderRadius: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '48px',
+              boxShadow: '0 20px 40px rgba(239, 68, 68, 0.2)',
+              animation: 'bounceIn 0.8s ease-out'
+            }}>
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                <path d="M9 2H15L20 7V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V4C4 2.89543 4.89543 2 6 2H9Z" 
+                  stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15 2V7H20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15 9L9 15M9 9L15 15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            
+            <h1 style={{
+              fontSize: '32px',
+              fontWeight: '800',
+              color: '#1E293B',
+              marginBottom: '16px',
+              letterSpacing: '-0.025em',
+              background: 'linear-gradient(135deg, #1E293B 0%, #475569 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>{t('paperNotFoundTitle') || 'Journal Paper Not Found'}</h1>
+            
+            <p style={{
+              fontSize: '18px',
+              color: '#64748B',
+              lineHeight: '1.6',
+              marginBottom: '32px',
+              fontWeight: '500'
+            }}>{t('paperNotFoundUpdateExplanation') || "We encountered an issue while loading this journal entry's updates."}</p>
+            
+            <button
+              onClick={() => navigate('/archive')}
+              style={{
+                padding: '16px 32px',
+                background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '16px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 8px 20px rgba(239, 68, 68, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                margin: '0 auto'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 12px 28px rgba(239, 68, 68, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(239, 68, 68, 0.3)';
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {t('backToArchive') || 'Browse Archive'}
+            </button>
+          </div>
+        </div>
+        
+        <style>{`
+          @keyframes bounceIn {
+            0% {
+              opacity: 0;
+              transform: scale(0.3);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(1.05);
+            }
+            70% {
+              transform: scale(0.9);
+            }
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+        `}</style>
+      </div>
+    );
   }
   
   if (!entry) {
-    return <div className="chat-error">{t('journalEntryNotFound') || 'Journal entry not found.'}</div>;
+    return (
+      <div style={{
+        minHeight: '70vh',
+        background: 'transparent',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        marginLeft: '60px'
+      }}>
+        <div style={{
+          maxWidth: '600px',
+          width: '100%',
+          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '32px',
+          padding: '48px',
+          textAlign: 'center',
+          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+          border: '1px solid rgba(226, 232, 240, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Background Pattern */}
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            right: '-30%',
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
+            borderRadius: '50%',
+            zIndex: 0
+          }}></div>
+          
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{
+              width: '120px',
+              height: '120px',
+              margin: '0 auto 32px',
+              background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+              borderRadius: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '48px',
+              boxShadow: '0 20px 40px rgba(59, 130, 246, 0.2)',
+              animation: 'bounceIn 0.8s ease-out'
+            }}>
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                <path d="M9 12H15M9 16H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L19.7071 9.70711C19.8946 9.89464 20 10.149 20 10.4142V19C20 20.1046 19.1046 21 18 21H17ZM17 21V10L13 6H7V19H17Z" 
+                  stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            
+            <h1 style={{
+              fontSize: '32px',
+              fontWeight: '800',
+              color: '#1E293B',
+              marginBottom: '16px',
+              letterSpacing: '-0.025em',
+              background: 'linear-gradient(135deg, #1E293B 0%, #475569 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>{t('entryNotFoundTitle') || 'Journal Entry Not Found'}</h1>
+            
+            <p style={{
+              fontSize: '18px',
+              color: '#64748B',
+              lineHeight: '1.6',
+              marginBottom: '32px',
+              fontWeight: '500'
+            }}>{t('entryNotFoundExplanation') || "The journal entry you're looking for doesn't exist or may have been removed."}</p>
+            
+            <button
+              onClick={() => navigate('/archive')}
+              style={{
+                padding: '16px 32px',
+                background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '16px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 8px 20px rgba(59, 130, 246, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                margin: '0 auto'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 12px 28px rgba(59, 130, 246, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.3)';
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {t('backToArchive') || 'Browse Archive'}
+            </button>
+          </div>
+        </div>
+        
+        <style>{`
+          @keyframes bounceIn {
+            0% {
+              opacity: 0;
+              transform: scale(0.3);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(1.05);
+            }
+            70% {
+              transform: scale(0.9);
+            }
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+        `}</style>
+      </div>
+    );
   }
   
   return (
@@ -365,13 +626,12 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
       <div className="chat-header">
         <div className="chat-header-left">
           <button 
-            onClick={() => navigate(-1)} 
+            onClick={() => navigate(`/entries/${entryId}`)} 
             className="chat-back-button"
-            aria-label={t('back') || 'Back'}
+            aria-label={t('backToEntry') || 'Back to Entry'}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5"/>
-              <path d="M12 19l-7-7 7-7"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
           <div className="chat-header-info">
@@ -380,9 +640,156 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
               <span className={`status-indicator status-${entry.status?.toLowerCase()}`}>
                 {t(entry.status || '') || entry.status}
               </span>
-              <span className="participants-count">
-                {authors.length + referees.length} {t('participants') || 'participants'}
-              </span>
+              <div 
+                className="participants-count participants-hover"
+                style={{ position: 'relative', display: 'inline-block' }}
+                onMouseEnter={() => setShowParticipantsTooltip(true)}
+                onMouseLeave={() => setShowParticipantsTooltip(false)}
+              >
+                <span style={{ cursor: 'default' }}>
+                  {authors.length + referees.length} {t('participants') || 'participants'}
+                </span>
+                
+                {/* Participants Tooltip */}
+                {showParticipantsTooltip && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    marginTop: '8px',
+                    background: 'white',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    minWidth: '150px',
+                    maxWidth: '400px',
+                    width: 'max-content',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                    border: '1px solid #E5E7EB',
+                    zIndex: 1000,
+                    fontSize: '14px'
+                  }}>
+                    {/* Arrow */}
+                    <div style={{
+                      position: 'absolute',
+                      top: '-6px',
+                      left: '50%',
+                      width: '12px',
+                      height: '12px',
+                      background: 'white',
+                      border: '1px solid #E5E7EB',
+                      borderRight: 'none',
+                      borderBottom: 'none',
+                      transform: 'translateX(-50%) rotate(45deg)'
+                    }}></div>
+                    
+                    {/* Authors */}
+                    {authors.length > 0 && (
+                      <div style={{ marginBottom: referees.length > 0 ? '16px' : '0' }}>
+                        <h4 style={{
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          color: '#6B7280',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          margin: '0 0 8px 0'
+                        }}>{t('authors') || 'Authors'} ({authors.length})</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {authors.map((author) => (
+                            <div key={`author-${author.id}`} style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '4px 0'
+                            }}>
+                              <div style={{
+                                width: '24px',
+                                height: '24px',
+                                background: '#F59E0B',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                flexShrink: 0
+                              }}>
+                                {getUserInitials(author.name)}
+                              </div>
+                              <span style={{
+                                fontSize: '13px',
+                                fontWeight: '500',
+                                color: '#374151',
+                                display: 'block',
+                                minWidth: 'max-content'
+                              }}>{author.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Referees */}
+                    {referees.length > 0 && (
+                      <div>
+                        <h4 style={{
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          color: '#6B7280',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          margin: '0 0 8px 0'
+                        }}>{t('referees') || 'Referees'} ({referees.length})</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {referees.map((referee) => (
+                            <div key={`referee-${referee.id}`} style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              padding: '4px 0'
+                            }}>
+                              <div style={{
+                                width: '24px',
+                                height: '24px',
+                                background: '#8B5CF6',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                flexShrink: 0
+                              }}>
+                                {getUserInitials(referee.name)}
+                              </div>
+                              <span style={{
+                                fontSize: '13px',
+                                fontWeight: '500',
+                                color: '#374151',
+                                display: 'block',
+                                minWidth: 'max-content'
+                              }}>{referee.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {authors.length === 0 && referees.length === 0 && (
+                      <div style={{
+                        textAlign: 'center',
+                        padding: '8px',
+                        color: '#9CA3AF',
+                        fontSize: '12px'
+                      }}>
+                        {t('noParticipants') || 'No participants found'}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -394,7 +801,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                 <path d="M12 5v14"/>
                 <path d="M5 12h14"/>
               </svg>
-              {t('addAuthorUpdate') || 'Author Update'}
+              {t('addAuthorUpdate')}
             </Link>
           )}
           
@@ -404,7 +811,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
                 <path d="M12 5v14"/>
                 <path d="M5 12h14"/>
               </svg>
-              {t('addRefereeUpdate') || 'Review'}
+              {t('addRefereeUpdate')}
             </Link>
           )}
           
@@ -699,6 +1106,8 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+
     </div>
   );
 };

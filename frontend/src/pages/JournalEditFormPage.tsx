@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { toast } from 'react-toastify';
+import ConfirmationModal from '../components/ConfirmationModal';
 import 'react-toastify/dist/ReactToastify.css';
 
 interface JournalFormData {
@@ -54,6 +55,7 @@ const JournalEditFormPage: React.FC = () => {
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     
     const navigate = useNavigate();
     const { isAuthenticated, user } = useAuth();
@@ -207,7 +209,7 @@ const JournalEditFormPage: React.FC = () => {
         }
     };
 
-    const handleDeleteJournal = async () => {
+    const handleDeleteJournal = () => {
         if (isNaN(journalId)) {
             setError("Invalid journal ID for deletion.");
             return;
@@ -218,15 +220,11 @@ const JournalEditFormPage: React.FC = () => {
             return;
         }
 
-        const confirmDelete = window.confirm(
-            t('confirmDeleteJournal') || 
-            'Are you sure you want to delete this journal? All related entries will be reassigned to the default journal (ID: 1). This action cannot be undone.'
-        );
+        setIsConfirmModalOpen(true);
+    };
 
-        if (!confirmDelete) {
-            return;
-        }
-        
+    const confirmDeleteJournal = async () => {
+        setIsConfirmModalOpen(false);
         setIsDeleting(true);
         try {
             await apiService.deleteJournal(journalId);
@@ -272,45 +270,13 @@ const JournalEditFormPage: React.FC = () => {
     return (
         <>
             {/* Title Section */}
-            <div className="page-title-section">
-                <h1 style={{textAlign: 'center'}}>{t('editJournal') || 'Edit Journal'}</h1>
+            <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
+                <h1>{t('editJournal') || 'Edit Journal'}</h1>
             </div>
 
             {/* Content Section */}
             <div className="page-content-section">
                 <div className="register-form-container">
-                    {isAdminOrOwner && (
-                        <div className="form-header" style={{ 
-                            display: 'flex', 
-                            justifyContent: 'flex-end', 
-                            marginBottom: 'var(--spacing-4)',
-                            paddingBottom: 'var(--spacing-3)',
-                            borderBottom: '1px solid rgba(226, 232, 240, 0.6)'
-                        }}>
-                            <button 
-                                onClick={handleDeleteJournal}
-                                disabled={isDeleting}
-                                className="btn btn-danger btn-sm"
-                                style={{
-                                    background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    padding: '8px 16px',
-                                    fontSize: '0.875rem',
-                                    fontWeight: '600',
-                                    color: 'white',
-                                    cursor: isDeleting ? 'not-allowed' : 'pointer',
-                                    opacity: isDeleting ? 0.6 : 1,
-                                    transition: 'all 0.3s ease',
-                                    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
-                                }}
-                            >
-                                {isDeleting 
-                                    ? (t('deletingJournal') || 'Deleting Journal...') 
-                                    : (t('deleteJournal') || 'Delete Journal')}
-                            </button>
-                        </div>
-                    )}
                     
                     <form onSubmit={handleSubmit} className="register-form">
                         {submitError && <div className="error-message">{submitError}</div>}
@@ -594,9 +560,54 @@ const JournalEditFormPage: React.FC = () => {
                                     : (t('saveChanges') || 'Save Changes')}
                             </button>
                         </div>
+
+                        {/* Delete Journal Button */}
+                        {isAdminOrOwner && (
+                            <div style={{ 
+                                display: 'flex', 
+                                justifyContent: 'center', 
+                                marginTop: 'var(--spacing-6)',
+                                paddingTop: 'var(--spacing-4)',
+                                borderTop: '1px solid rgba(226, 232, 240, 0.6)'
+                            }}>
+                                <button 
+                                    type="button"
+                                    onClick={handleDeleteJournal}
+                                    disabled={isDeleting}
+                                    className="btn btn-danger btn-sm"
+                                    style={{
+                                        background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        padding: '12px 24px',
+                                        fontSize: '0.875rem',
+                                        fontWeight: '600',
+                                        color: 'white',
+                                        cursor: isDeleting ? 'not-allowed' : 'pointer',
+                                        opacity: isDeleting ? 0.6 : 1,
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                                    }}
+                                >
+                                    {isDeleting 
+                                        ? (t('deletingJournal') || 'Deleting Journal...') 
+                                        : (t('deleteJournal') || 'Delete Journal')}
+                                </button>
+                            </div>
+                        )}
                     </form>
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={confirmDeleteJournal}
+                title={t('deleteJournal') || 'Delete Journal'}
+                message={t('confirmDeleteJournal') || 'Are you sure you want to delete this journal? All related entries will be reassigned to the default journal (ID: 1). This action cannot be undone.'}
+                confirmText={t('deleteJournal') || 'Delete Journal'}
+                cancelText={t('cancel') || 'Cancel'}
+            />
         </>
     );
 };

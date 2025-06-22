@@ -45,7 +45,12 @@ import Sidebar from './components/Sidebar';
 
 // Admin route wrapper component
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
+  
+  // If still loading auth state, show a loading spinner
+  if (isLoading) {
+    return <div className="loading-container"><div className="loading-spinner"></div></div>;
+  }
   
   // Check if user is authenticated and has admin or owner role
   if (!isAuthenticated || !user || (user.role !== 'admin' && user.role !== 'owner')) {
@@ -57,7 +62,12 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Editor route wrapper component
 const EditorRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading } = useAuth();
+  
+  // If still loading auth state, show a loading spinner
+  if (isLoading) {
+    return <div className="loading-container"><div className="loading-spinner"></div></div>;
+  }
   
   // Check if user is authenticated and has editor, admin, or owner role
   if (!isAuthenticated || !user || (user.role !== 'editor' && user.role !== 'admin' && user.role !== 'owner')) {

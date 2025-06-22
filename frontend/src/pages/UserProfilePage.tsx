@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as apiService from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
     MdEmail, 
     MdLocationOn, 
@@ -18,7 +18,7 @@ import {
     MdArticle 
 } from 'react-icons/md';
 import { formatDate, getRoleTranslation as getRoleTranslationUtil, getStatusTranslation } from '../utils/dateUtils';
-import Footer from '../components/Footer';
+
 import './UserProfilePage.css';
 
 // Utility function to get a deterministic background pattern based on ID
@@ -37,6 +37,7 @@ const UserProfilePage: React.FC = () => {
     const { t, language } = useLanguage();
     const { id: userId } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [userEntries, setUserEntries] = useState<apiService.JournalEntryRead[]>([]);
     const [refereeEntries, setRefereeEntries] = useState<apiService.JournalEntryRead[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -49,6 +50,9 @@ const UserProfilePage: React.FC = () => {
     const [showAcceptedEntries, setShowAcceptedEntries] = useState<boolean>(true);
     const [showPublishedJournals, setShowPublishedJournals] = useState<boolean>(true);
     const [showDraftJournals, setShowDraftJournals] = useState<boolean>(true);
+    const [showToast, setShowToast] = useState<boolean>(false);
+    const [toastMessage, setToastMessage] = useState<string>('');
+    const [toastType, setToastType] = useState<'success' | 'warning'>('success');
     
     // Get rejected entries separately
     const getRejectedEntries = (entries: apiService.JournalEntryRead[]): apiService.JournalEntryRead[] => {
@@ -209,7 +213,8 @@ const UserProfilePage: React.FC = () => {
                             }
                             // Owner users should not see any journals since they can't be editors or editor-in-chief
                         } else {
-                            setError('User not found');
+                            // User not found - this will trigger the "User Not Found" box
+                            setProfileUser(null);
                         }
                     } catch (err: any) {
                         console.error("Failed to fetch admin data:", err);
@@ -227,16 +232,336 @@ const UserProfilePage: React.FC = () => {
         fetchAllData();
     }, [userId, user, navigate]);
 
+    // Check for success parameter and show toast
+    useEffect(() => {
+        const updated = searchParams.get('updated');
+        const passwordUpdated = searchParams.get('passwordUpdated');
+        const markedForDeletion = searchParams.get('markedForDeletion');
+        const unmarkedForDeletion = searchParams.get('unmarkedForDeletion');
+        
+        if (updated === 'true') {
+            setToastMessage(t('profileUpdated') || 'Profile updated successfully!');
+            setToastType('success');
+            setShowToast(true);
+            
+            // Remove the parameter from URL
+            searchParams.delete('updated');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+        } else if (passwordUpdated === 'true') {
+            setToastMessage(t('passwordUpdated') || 'Password updated successfully!');
+            setToastType('success');
+            setShowToast(true);
+            
+            // Remove the parameter from URL
+            searchParams.delete('passwordUpdated');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+        } else if (markedForDeletion === 'true') {
+            setToastMessage(t('accountMarkedForDeletion') || 'Account marked for deletion successfully!');
+            setToastType('warning');
+            setShowToast(true);
+            
+            // Remove the parameter from URL
+            searchParams.delete('markedForDeletion');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+        } else if (unmarkedForDeletion === 'true') {
+            setToastMessage(t('accountUnmarkedForDeletion') || 'Account unmarked for deletion successfully!');
+            setToastType('success');
+            setShowToast(true);
+            
+            // Remove the parameter from URL
+            searchParams.delete('unmarkedForDeletion');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+        }
+    }, [searchParams, setSearchParams, t]);
+
     if (loading) {
         return <div className="loading">{t('loadingUserData') || 'Loading user data...'}</div>;
     }
 
     if (error) {
-        return <div className="error-message">{error}</div>;
+        return (
+            <div style={{
+                minHeight: '70vh',
+                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem',
+                marginLeft: '60px'
+            }}>
+                <div style={{
+                    maxWidth: '600px',
+                    width: '100%',
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '32px',
+                    padding: '48px',
+                    textAlign: 'center',
+                    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+                    border: '1px solid rgba(226, 232, 240, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    {/* Background Pattern */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '-50%',
+                        right: '-30%',
+                        width: '300px',
+                        height: '300px',
+                        background: 'radial-gradient(circle, rgba(239, 68, 68, 0.05) 0%, transparent 70%)',
+                        borderRadius: '50%',
+                        zIndex: 0
+                    }}></div>
+                    
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                        <div style={{
+                            width: '120px',
+                            height: '120px',
+                            margin: '0 auto 32px',
+                            background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                            borderRadius: '60px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '48px',
+                            boxShadow: '0 20px 40px rgba(239, 68, 68, 0.2)',
+                            animation: 'bounceIn 0.8s ease-out'
+                        }}>
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 9V11M12 15H12.01M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" 
+                                    stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </div>
+                        
+                        <h1 style={{
+                            fontSize: '32px',
+                            fontWeight: '800',
+                            color: '#1E293B',
+                            marginBottom: '16px',
+                            letterSpacing: '-0.025em',
+                            background: 'linear-gradient(135deg, #1E293B 0%, #475569 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
+                        }}>Error Loading User</h1>
+                        
+                        <p style={{
+                            fontSize: '18px',
+                            color: '#64748B',
+                            lineHeight: '1.6',
+                            marginBottom: '32px',
+                            fontWeight: '500'
+                        }}>We encountered an issue while loading this user profile.</p>
+                        
+                        <button
+                            onClick={() => navigate('/archive')}
+                            style={{
+                                padding: '16px 32px',
+                                background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '16px',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 8px 20px rgba(239, 68, 68, 0.3)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                margin: '0 auto'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 12px 28px rgba(239, 68, 68, 0.4)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(239, 68, 68, 0.3)';
+                            }}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {t('backToArchive') || 'Browse Archive'}
+                        </button>
+                    </div>
+                </div>
+                
+                <style>{`
+                    @keyframes bounceIn {
+                        0% {
+                            opacity: 0;
+                            transform: scale(0.3);
+                        }
+                        50% {
+                            opacity: 1;
+                            transform: scale(1.05);
+                        }
+                        70% {
+                            transform: scale(0.9);
+                        }
+                        100% {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                    }
+                `}</style>
+            </div>
+        );
     }
 
     if (!profileUser) {
-        return <div className="loading">{t('userNotFound') || 'User not found.'}</div>;
+        return (
+            <div style={{
+                minHeight: '70vh',
+                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem',
+                marginLeft: '60px'
+            }}>
+                <div style={{
+                    maxWidth: '600px',
+                    width: '100%',
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '32px',
+                    padding: '48px',
+                    textAlign: 'center',
+                    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+                    border: '1px solid rgba(226, 232, 240, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    {/* Background Pattern */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '-50%',
+                        right: '-30%',
+                        width: '300px',
+                        height: '300px',
+                        background: 'radial-gradient(circle, rgba(168, 85, 247, 0.05) 0%, transparent 70%)',
+                        borderRadius: '50%',
+                        zIndex: 0
+                    }}></div>
+                    
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                        <div style={{
+                            width: '120px',
+                            height: '120px',
+                            margin: '0 auto 32px',
+                            background: 'linear-gradient(135deg, #A855F7 0%, #9333EA 100%)',
+                            borderRadius: '60px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '48px',
+                            boxShadow: '0 20px 40px rgba(168, 85, 247, 0.2)',
+                            animation: 'bounceIn 0.8s ease-out'
+                        }}>
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" 
+                                    stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </div>
+                        
+                        <h1 style={{
+                            fontSize: '32px',
+                            fontWeight: '800',
+                            color: '#1E293B',
+                            marginBottom: '16px',
+                            letterSpacing: '-0.025em',
+                            background: 'linear-gradient(135deg, #1E293B 0%, #475569 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
+                        }}>{t('userNotFoundTitle') || 'User Not Found'}</h1>
+                        
+                        <p style={{
+                            fontSize: '18px',
+                            color: '#64748B',
+                            lineHeight: '1.6',
+                            marginBottom: '32px',
+                            fontWeight: '500'
+                        }}>{t('userNotFoundExplanation') || "The user profile you're looking for doesn't exist or may have been removed."}</p>
+                        
+                        <button
+                            onClick={() => navigate('/archive')}
+                            style={{
+                                padding: '16px 32px',
+                                background: 'linear-gradient(135deg, #A855F7 0%, #9333EA 100%)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '16px',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 8px 20px rgba(168, 85, 247, 0.3)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                margin: '0 auto'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 12px 28px rgba(168, 85, 247, 0.4)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 8px 20px rgba(168, 85, 247, 0.3)';
+                            }}
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {t('backToArchive') || 'Browse Archive'}
+                        </button>
+                    </div>
+                </div>
+                
+                <style>{`
+                    @keyframes bounceIn {
+                        0% {
+                            opacity: 0;
+                            transform: scale(0.3);
+                        }
+                        50% {
+                            opacity: 1;
+                            transform: scale(1.05);
+                        }
+                        70% {
+                            transform: scale(0.9);
+                        }
+                        100% {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                    }
+                `}</style>
+            </div>
+        );
     }
 
     // Helper function to render entry item
@@ -934,6 +1259,25 @@ const UserProfilePage: React.FC = () => {
     
     return (
         <>
+            {/* Toast Notification */}
+            {showToast && (
+                <div className="toast-notification">
+                    <div className={`toast-content toast-${toastType}`}>
+                        <div className="toast-icon">
+                            {toastType === 'success' ? '✓' : '⚠'}
+                        </div>
+                        <span className="toast-message">{toastMessage}</span>
+                        <button 
+                            className="toast-close"
+                            onClick={() => setShowToast(false)}
+                            aria-label="Close"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
+            
             <div className="page-content-section" style={{ marginLeft: '60px' }}>
                 {/* User Information Card */}
                 <div className="user-info-card">
@@ -986,11 +1330,6 @@ const UserProfilePage: React.FC = () => {
                                 <span className={`badge badge-${profileUser.role}`}>
                                     {getRoleTranslation(profileUser.role)}
                                 </span>
-                                {profileUser.is_auth && (
-                                    <span className="badge badge-verified">
-                                        {language === 'tr' ? 'Doğrulanmış' : 'Verified'}
-                                    </span>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -1110,21 +1449,7 @@ const UserProfilePage: React.FC = () => {
                 </div>
             )}
                 
-                {/* Footer Section */}
-                <div style={{ marginTop: '16px', marginBottom: '0px' }}>
-                    <div className="transparent-footer">
-                        <Footer />
-                    </div>
-                </div>
         </div>
-        
-        {/* CSS Styles for transparent footer */}
-        <style>{`
-            .transparent-footer .footer-content {
-                background: transparent !important;
-                border-top: none !important;
-            }
-        `}</style>
         </>
     );
 };

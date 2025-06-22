@@ -1,17 +1,41 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { GoogleLogin } from '@react-oauth/google';
 import '../styles/LoginPage.css';
+import '../pages/UserProfilePage.css'; // Import toast styles
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [showToast, setShowToast] = useState(false);
+    const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     const { login, loginWithGoogle, isLoading } = useAuth();
     const { t } = useLanguage();
+
+    // Check if user came from registration
+    useEffect(() => {
+        if (searchParams.get('registered') === 'true') {
+            setShowToast(true);
+            // Remove the parameter from URL
+            searchParams.delete('registered');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Auto-hide toast after 8 seconds
+            const timer = setTimeout(() => {
+                setShowToast(false);
+            }, 8000);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [searchParams, setSearchParams]);
+
+    const handleToastClose = () => {
+        setShowToast(false);
+    };
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -24,9 +48,9 @@ const LoginPage: React.FC = () => {
             console.error("Login failed:", err);
             const detail = err.response?.data?.detail;
             if (err.response?.status === 403 && detail === "Please confirm your email address to login.") {
-                setError(detail);
+                setError(t('pleaseConfirmEmail'));
             } else {
-                setError(detail || 'Login failed. Please check your credentials.');
+                setError(t('incorrectCredentials'));
             }
         }
     };
@@ -37,12 +61,12 @@ const LoginPage: React.FC = () => {
             navigate('/', { replace: true });
         } catch (err: any) {
             console.error("Google login failed:", err);
-            setError('Google login failed. Please try again.');
+            setError(t('googleSignInFailed'));
         }
     };
 
     const handleGoogleError = () => {
-        setError('Google login failed. Please try again.');
+        setError(t('googleSignInFailed'));
     };
 
     if (isLoading) {
@@ -51,6 +75,25 @@ const LoginPage: React.FC = () => {
 
     return (
         <div className="login-container">
+            {/* Toast Notification */}
+            {showToast && (
+                <div className="toast-notification">
+                    <div className="toast-content toast-success">
+                        <div className="toast-icon">✓</div>
+                        <div className="toast-message">
+                            {t('registrationToastMessage')}
+                        </div>
+                        <button 
+                            className="toast-close"
+                            onClick={handleToastClose}
+                            type="button"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="login-box">
                 <h2>{t('login')}</h2>
                 <form onSubmit={handleSubmit}>

@@ -7,6 +7,7 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import FormattedIdInput from '../components/FormattedIdInput';
 import LocationInput from '../components/LocationInput';
 import CountrySelector from '../components/CountrySelector';
+import { validateYoksisId, validateOrcidId, validatePhoneNumber } from '../utils/validation';
 import '../styles/FormattedIdInput.css';
 
 // Country code to flag mapping
@@ -234,14 +235,23 @@ const RegisterPage: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [captchaValue, setCaptchaValue] = useState<string | null>(null);
     const [currentFlag, setCurrentFlag] = useState('🇹🇷');
+    const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
     const navigate = useNavigate();
     const { register } = useAuth(); // Get register function
     const { t } = useLanguage();
     const formRef = useRef<HTMLFormElement>(null);
+    const recaptchaRef = useRef<ReCAPTCHA>(null);
+
+    // Helper function to reset reCAPTCHA both state and component
+    const resetRecaptcha = () => {
+        setCaptchaValue(null);
+        if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+        }
+    };
 
     // Function to get flag for country code
     const getFlagForCountryCode = (code: string): string => {
@@ -314,6 +324,11 @@ const RegisterPage: React.FC = () => {
     const handleCountryCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newCode = e.target.value;
         setCountryCode(newCode);
+        // Clear errors when user starts typing
+        if (hasAttemptedSubmit) {
+            setError(null);
+            setPasswordError(null);
+        }
     };
 
     // Format phone number as user types
@@ -342,6 +357,11 @@ const RegisterPage: React.FC = () => {
     const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const formatted = formatPhoneNumber(e.target.value);
         setPhoneNumber(formatted);
+        // Clear errors when user starts typing
+        if (hasAttemptedSubmit) {
+            setError(null);
+            setPasswordError(null);
+        }
     };
 
     const validatePassword = (password: string): boolean => {
@@ -371,11 +391,46 @@ const RegisterPage: React.FC = () => {
         return true;
     };
 
+    // Add input change handlers that clear errors
+    const handleInputChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const value = e.target.value;
+        
+        switch (field) {
+            case 'email':
+                setEmail(value);
+                break;
+            case 'name':
+                setName(value);
+                break;
+            case 'title':
+                setTitle(value);
+                break;
+            case 'bio':
+                setBio(value);
+                break;
+            case 'scienceBranch':
+                setScienceBranch(value);
+                break;
+            case 'password':
+                setPassword(value);
+                break;
+            case 'confirmPassword':
+                setConfirmPassword(value);
+                break;
+        }
+        
+        // Clear errors when user starts typing
+        if (hasAttemptedSubmit) {
+            setError(null);
+            setPasswordError(null);
+        }
+    };
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setError(null);
-        setSuccess(null);
         setPasswordError(null);
+        setHasAttemptedSubmit(true);
 
         const form = event.target as HTMLFormElement;
         
@@ -394,7 +449,32 @@ const RegisterPage: React.FC = () => {
             return;
         }
 
+        // Validate YÖKSİS ID if provided
+        if (yoksisId && !validateYoksisId(yoksisId)) {
+            setError(t('yoksisValidationError') || 'YÖKSİS ID must be 5-8 digits');
+            resetRecaptcha(); // Reset reCAPTCHA on error
+            setIsSubmitting(false);
+            return;
+        }
+        
+        // Validate ORCID ID if provided
+        if (orcidId && !validateOrcidId(orcidId)) {
+            setError(t('orcidValidationError') || 'ORCID ID must be in format 0000-0000-0000-0000');
+            resetRecaptcha(); // Reset reCAPTCHA on error
+            setIsSubmitting(false);
+            return;
+        }
+        
+        // Validate phone number if provided
+        if (!validatePhoneNumber(countryCode, phoneNumber)) {
+            setError(t('phoneValidationError') || 'Phone number format is invalid');
+            resetRecaptcha(); // Reset reCAPTCHA on error
+            setIsSubmitting(false);
+            return;
+        }
+
         if (!validatePassword(password)) {
+            resetRecaptcha(); // Reset reCAPTCHA on error
             setIsSubmitting(false);
             return;
         }
@@ -418,18 +498,37 @@ const RegisterPage: React.FC = () => {
                 recaptcha_token: captchaValue
             };
             await register(userData); // Call register from context
-            setSuccess('Registration successful! Redirecting to login...');
             // Clear form
             setEmail(''); setName(''); setTitle(''); setBio(''); 
             setCountryCode('+90'); setPhoneNumber(''); setScienceBranch(''); 
             setCountry(''); setLocation(''); 
             setYoksisId(''); setOrcidId(''); setPassword(''); setConfirmPassword('');
             setCaptchaValue(null);
-            // Redirect to login after a short delay
-            navigate('/login');
+            setHasAttemptedSubmit(false);
+            // Redirect to login with registration success parameter
+            navigate('/login?registered=true');
         } catch (err: any) {
             console.error("Registration failed:", err);
-            setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+            // Reset reCAPTCHA on any server error
+            resetRecaptcha();
+            // Handle specific error messages
+            if (err.response?.data?.detail) {
+                // Check for email already registered error
+                if (err.response.data.detail.includes('email') && 
+                    (err.response.data.detail.includes('already') || 
+                     err.response.data.detail.includes('exists') ||
+                     err.response.data.detail.includes('registered'))) {
+                    setError(t('emailAlreadyRegistered'));
+                } 
+                // Check for reCAPTCHA verification failed error
+                else if (err.response.data.detail.includes('reCAPTCHA verification failed')) {
+                    setError(t('captchaVerificationFailed'));
+                } else {
+                    setError(err.response.data.detail);
+                }
+            } else {
+                setError(t('registrationFailed'));
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -439,7 +538,7 @@ const RegisterPage: React.FC = () => {
         setCaptchaValue(value);
         if (!value) {
             setError(t('captchaExpired') || 'CAPTCHA verification expired. Please verify again.');
-        } else {
+        } else if (hasAttemptedSubmit) {
             setError(null);
         }
     };
@@ -461,7 +560,7 @@ const RegisterPage: React.FC = () => {
                                 type="email"
                                 id="email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={handleInputChange('email')}
                                 required
                                 disabled={isSubmitting}
                                 maxLength={200}
@@ -475,7 +574,7 @@ const RegisterPage: React.FC = () => {
                                 type="text"
                                 id="name"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={handleInputChange('name')}
                                 required
                                 disabled={isSubmitting}
                                 maxLength={200}
@@ -489,7 +588,7 @@ const RegisterPage: React.FC = () => {
                                 type="text"
                                 id="title"
                                 value={title}
-                                onChange={(e) => setTitle(e.target.value)}
+                                onChange={handleInputChange('title')}
                                 disabled={isSubmitting}
                                 maxLength={200}
                                 className="form-input"
@@ -502,7 +601,7 @@ const RegisterPage: React.FC = () => {
                                 id="bio"
                                 className="form-textarea"
                                 value={bio}
-                                onChange={(e) => setBio(e.target.value)}
+                                onChange={handleInputChange('bio')}
                                 disabled={isSubmitting}
                                 rows={3}
                                 maxLength={400}
@@ -546,7 +645,7 @@ const RegisterPage: React.FC = () => {
                                 type="text"
                                 id="scienceBranch"
                                 value={scienceBranch}
-                                onChange={(e) => setScienceBranch(e.target.value)}
+                                onChange={handleInputChange('scienceBranch')}
                                 disabled={isSubmitting}
                                 maxLength={300}
                                 className="form-input"
@@ -557,7 +656,13 @@ const RegisterPage: React.FC = () => {
                             <label htmlFor="country">{t('country') || 'Country'}</label>
                             <CountrySelector
                                 value={country}
-                                onChange={setCountry}
+                                onChange={(value) => {
+                                    setCountry(value);
+                                    if (hasAttemptedSubmit) {
+                                        setError(null);
+                                        setPasswordError(null);
+                                    }
+                                }}
                                 id="country"
                                 disabled={isSubmitting}
                                 required
@@ -568,7 +673,13 @@ const RegisterPage: React.FC = () => {
                             <label htmlFor="location">{t('location') || 'City/Location'}</label>
                             <LocationInput
                                 value={location}
-                                onChange={setLocation}
+                                onChange={(value) => {
+                                    setLocation(value);
+                                    if (hasAttemptedSubmit) {
+                                        setError(null);
+                                        setPasswordError(null);
+                                    }
+                                }}
                                 id="location"
                                 disabled={isSubmitting}
                                 required
@@ -580,9 +691,16 @@ const RegisterPage: React.FC = () => {
                             <FormattedIdInput
                                 type="yoksis"
                                 value={yoksisId}
-                                onChange={setYoksisId}
+                                onChange={(value) => {
+                                    setYoksisId(value);
+                                    if (hasAttemptedSubmit) {
+                                        setError(null);
+                                        setPasswordError(null);
+                                    }
+                                }}
                                 id="yoksisId"
                                 disabled={isSubmitting}
+                                showValidationErrors={false}
                             />
                         </div>
                         
@@ -591,9 +709,16 @@ const RegisterPage: React.FC = () => {
                             <FormattedIdInput
                                 type="orcid"
                                 value={orcidId}
-                                onChange={setOrcidId}
+                                onChange={(value) => {
+                                    setOrcidId(value);
+                                    if (hasAttemptedSubmit) {
+                                        setError(null);
+                                        setPasswordError(null);
+                                    }
+                                }}
                                 id="orcidId"
                                 disabled={isSubmitting}
+                                showValidationErrors={false}
                             />
                         </div>
                         
@@ -603,12 +728,7 @@ const RegisterPage: React.FC = () => {
                                 type="password"
                                 id="password"
                                 value={password}
-                                onChange={(e) => {
-                                    setPassword(e.target.value);
-                                    if (confirmPassword) {
-                                        validatePassword(e.target.value);
-                                    }
-                                }}
+                                onChange={handleInputChange('password')}
                                 required
                                 disabled={isSubmitting}
                                 minLength={8}
@@ -630,12 +750,7 @@ const RegisterPage: React.FC = () => {
                                 type="password"
                                 id="confirmPassword"
                                 value={confirmPassword}
-                                onChange={(e) => {
-                                    setConfirmPassword(e.target.value);
-                                    if (password) {
-                                        validatePassword(password);
-                                    }
-                                }}
+                                onChange={handleInputChange('confirmPassword')}
                                 required
                                 disabled={isSubmitting}
                                 minLength={8}
@@ -645,14 +760,17 @@ const RegisterPage: React.FC = () => {
 
                         <div className="form-group" style={{ display: 'flex', justifyContent: 'center', marginTop: '15px' }}>
                             <ReCAPTCHA
+                                ref={recaptchaRef}
                                 sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
                                 onChange={handleCaptchaChange}
                             />
                         </div>
                         
-                        {error && <div className="error-message">{error}</div>}
-                        {success && <div className="success-message">{success}</div>}
-                        {passwordError && <div className="error-message">{passwordError}</div>}
+                        {hasAttemptedSubmit && (error || passwordError) && (
+                            <div className="error-message">
+                                {error || passwordError}
+                            </div>
+                        )}
                         
                         <button 
                             type="submit" 

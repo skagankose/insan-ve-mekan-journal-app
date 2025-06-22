@@ -30,11 +30,12 @@ type TranslationKeys =
   | 'theme' | 'lightMode' | 'darkMode' | 'switchToDark' | 'switchToLight'
   | 'previousIssues' | 'publishedJournals' | 'acceptedEntries'
   | 'createUser' | 'userCreatedSuccessfully' | 'cancel' | 'editUser' | 'userUpdatedSuccessfully' | 'createJournal'
+  | 'createNewJournal' | 'enterJournalTitle' | 'enterIssueNumber' | 'journalCreatedSuccessfully' | 'errorCreatingJournal' | 'journalTitle'
   | 'directLogin' | 'directLoginDescription' | 'generateLoginLink' | 'copyLink' | 'linkCopied' | 'generating' | 'saveChanges'
   | 'invalidLoginLink' | 'loginFailed' | 'autoLoginFailed' | 'autoLoginProcessing' | 'loginError' | 'goToLogin' | 'loginSuccessful' | 'redirecting'
   | 'loginSuccessButUserInfoFailed'
   | 'profile' | 'userProfile' | 'myJournalEntries' | 'noEntriesFound' | 'loadingUserData' | 'failedToLoadUserEntries'
-  | 'biography' | 'scienceBranch' | 'location' | 'telephone' | 'yoksisId' | 'orcidId' | 'journalId' | 'date'
+  | 'biography' | 'scienceBranch' | 'location' | 'telephone' | 'profileInformation' | 'yoksisId' | 'orcidId' | 'journalId' | 'date'
   | 'myRefereeEntries' | 'noRefereeEntriesFound' | 'myEditedJournals' | 'noEditedJournalsFound' | 'issue'
   | 'entriesInJournal'
   | 'passwordRequirements' | 'passwordMinLength' | 'passwordCase' | 'passwordNumber' | 'passwordMatch' | 'confirmPassword'
@@ -47,7 +48,7 @@ type TranslationKeys =
   | 'resetPassword' | 'passwordResetSuccess' | 'redirectingToLogin' | 'enterNewPassword' | 'confirmNewPassword' | 'resetting'
   | 'createAccountHere'
   | 'country' | 'selectCountry' | 'searchCountries' | 'noCountriesFound' | 'enterLocation'
-  | 'pleaseVerifyCaptcha' | 'captchaExpired'
+  | 'pleaseVerifyCaptcha' | 'captchaExpired' | 'captchaVerificationFailed'
   | 'editorJournals' | 'submitPaper' | 'publishedIssues' | 'searchPlaceholder' | 'viewJournal' | 'readMore'
   | 'about' | 'generalInformation'
   | 'footer.contact' | 'footer.quickLinks' | 'footer.aboutUs' | 'footer.generalInformation' | 'footer.archive' | 'footer.connectWithUs'
@@ -69,9 +70,20 @@ type TranslationKeys =
   | 'downloadPdf' | 'viewUpdates' | 'authors' | 'publishedIn' | 'entryDetails' | 'pageNumber' | 'articleType' | 'status' | 'downloads' | 'reads'
   | 'bankName' | 'accountHolder' | 'processingTime' | 'keywords' | 'keywordsEn' | 'keywordsSeparatedByCommasEn' | 'updatedKeywordsEn' | 'referees' | 'files' | 'viewFile'
   | 'referenceToken' | 'manageAuthors' | 'changeJournal' | 'manageReferees' | 'noPublishedEntries'
-  | 'loadingPublishedJournals' | 'failedToLoadPublishedJournals' | 'noPublishedJournals'
+  | 'loadingPublishedJournals' | 'failedToLoadPublishedJournals' | 'noPublishedJournals' | 'checkBackLaterForPublications'
   | 'reviewFile' | 'updatedTitle' | 'updatedAbstract' | 'updatedAbstractEn' | 'updatedKeywords' | 'updatedFile'
-  | 'updateCopied';
+  | 'updateCopied' | 'privateNotes'
+  | 'unmarkForDeletion' | 'unmarkForDeletionWarning' | 'markForDeletion' | 'markForDeletionWarning'
+  | 'editProfile' | 'academicTitle'
+  | 'incorrectCurrentPassword' | 'passwordUpdateFailed'
+  | 'yoksisValidationError' | 'orcidValidationError' | 'phoneValidationError'
+  | 'profileUpdated' | 'accountMarkedForDeletion' | 'accountUnmarkedForDeletion'
+  | 'entryNotFoundTitle' | 'entryNotFoundExplanation' | 'userNotFoundTitle' | 'userNotFoundExplanation'
+  | 'errorLoadingEntryTitle' | 'errorLoadingEntryExplanation' | 'errorLoadingUserTitle' | 'errorLoadingUserExplanation'
+  | 'paperNotFoundTitle' | 'paperNotFoundExplanation'
+  | 'tryAgain' | 'addAuthorUpdate' | 'addRefereeUpdate' | 'participants' | 'noParticipants'
+  | 'pleaseConfirmEmail' | 'incorrectCredentials'
+  | 'registrationSuccessful' | 'registrationFailed' | 'emailAlreadyRegistered' | 'accountCreated' | 'registrationToastMessage';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -215,6 +227,14 @@ const translations: Record<Language, TranslationDictionary> = {
     'cancel': 'Cancel',
     'createJournal': 'Create Journal',
 
+    // Journal creation
+    'createNewJournal': 'Create New Journal',
+    'journalTitle': 'Journal Title',
+    'enterJournalTitle': 'Enter journal title',
+    'enterIssueNumber': 'Enter issue number',
+    'journalCreatedSuccessfully': 'Journal created successfully',
+    'errorCreatingJournal': 'Error creating journal',
+
     // Login link feature
     'directLogin': 'Direct Login Link',
     'directLoginDescription': 'Generate a temporary link that will automatically log in this user without requiring a password.',
@@ -246,6 +266,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'scienceBranch': 'Science Branch',
     'location': 'Location',
     'telephone': 'Telephone',
+    'profileInformation': 'Profile Information',
     'yoksisId': 'YÖKSİS ID',
     'orcidId': 'ORCID ID',
     'journalId': 'Journal ID',
@@ -311,6 +332,7 @@ const translations: Record<Language, TranslationDictionary> = {
     // CAPTCHA
     'pleaseVerifyCaptcha': 'Please verify that you are human',
     'captchaExpired': 'CAPTCHA verification expired. Please verify again.',
+    'captchaVerificationFailed': 'reCAPTCHA verification failed. Please try again.',
     'searchPlaceholder': 'Search...',
     'readMore': 'Read More',
     
@@ -444,6 +466,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'loadingPublishedJournals': 'Loading published journals...',
     'failedToLoadPublishedJournals': 'Failed to load published journals.',
     'noPublishedJournals': 'No published journals found.',
+    'checkBackLaterForPublications': 'Check back later for new publications',
     'reviewFile': 'Review File',
     'updatedTitle': 'Updated Title',
     'updatedAbstract': 'Updated Abstract',
@@ -451,6 +474,51 @@ const translations: Record<Language, TranslationDictionary> = {
     'updatedKeywords': 'Updated Keywords',
     'updatedFile': 'Updated File',
     'updateCopied': 'Update content copied to clipboard!',
+    'privateNotes': 'Private Referee Notes (Visible Only to the Referee Who Created Them and Authors)',
+    
+    // Deletion
+    'markForDeletion': 'Mark Account for Deletion',
+    'unmarkForDeletion': 'Unmark Account for Deletion',
+    'markForDeletionWarning': 'Warning: This action will mark your account for deletion. This is the first step in the account deletion process. An administrator will review and process your request.',
+    'unmarkForDeletionWarning': 'Your account is currently marked for deletion. Click the button below to cancel the deletion request.',
+    'editProfile': 'Edit Profile',
+    'academicTitle': 'Academic Title',
+    'incorrectCurrentPassword': 'The current password you entered is incorrect. Please try again.',
+    'passwordUpdateFailed': 'Failed to update password. Please check your details and try again.',
+    'yoksisValidationError': 'YÖKSİS ID must be 5-8 digits',
+    'orcidValidationError': 'ORCID must be in 0000-0000-0000-0000 format',
+    'phoneValidationError': 'Phone number must be in valid international format (country code + 7-15 digits)',
+    'profileUpdated': 'Profile updated successfully!',
+    'accountMarkedForDeletion': 'Account marked for deletion successfully!',
+    'accountUnmarkedForDeletion': 'Account unmarked for deletion successfully!',
+    
+    // Not Found Messages
+    'entryNotFoundTitle': 'Journal Entry Not Found',
+    'entryNotFoundExplanation': "The journal entry you're looking for doesn't exist or may have been removed.",
+    'userNotFoundTitle': 'User Not Found',
+    'userNotFoundExplanation': "The user profile you're looking for doesn't exist or may have been removed.",
+    
+    // Error Loading Messages
+    'errorLoadingEntryTitle': 'Error Loading Entry',
+    'errorLoadingEntryExplanation': 'Unable to load the journal entry. Please check your connection and try again.',
+    'errorLoadingUserTitle': 'Error Loading User',
+    'errorLoadingUserExplanation': 'Unable to load the user profile. Please check your connection and try again.',
+    'paperNotFoundTitle': 'Journal Paper Not Found',
+    'paperNotFoundExplanation': 'We encountered an issue while loading this journal entry.',
+    'tryAgain': 'Try Again',
+    'addAuthorUpdate': 'Add Author Update',
+    'addRefereeUpdate': 'Add Referee Update',
+    'participants': 'Participants',
+    'noParticipants': 'No participants Found',
+    'pleaseConfirmEmail': 'Please confirm your email address to login.',
+    'incorrectCredentials': 'Incorrect email or password. Please check your credentials.',
+    
+    // Registration messages
+    'registrationSuccessful': 'Registration successful! Redirecting to login...',
+    'registrationFailed': 'Registration failed. Please try again.',
+    'emailAlreadyRegistered': 'Email already registered. Please use a different email or login.',
+    'accountCreated': 'Account created successfully!',
+    'registrationToastMessage': 'Account created successfully! Please check your email and confirm your address to complete registration.',
   },
   tr: {
     // Navigation
@@ -590,6 +658,14 @@ const translations: Record<Language, TranslationDictionary> = {
     'cancel': 'İptal',
     'createJournal': 'Dergi Oluştur',
 
+    // Journal creation
+    'createNewJournal': 'Yeni Dergi Oluştur',
+    'journalTitle': 'Dergi İsmi',
+    'enterJournalTitle': 'Dergi başlığını giriniz',
+    'enterIssueNumber': 'Sayı ismini giriniz',
+    'journalCreatedSuccessfully': 'Dergi başarıyla oluşturuldu',
+    'errorCreatingJournal': 'Dergi oluşturulurken hata oluştu',
+
     // Login link feature
     'directLogin': 'Doğrudan Giriş Bağlantısı',
     'directLoginDescription': 'Bu kullanıcının şifre gerektirmeden otomatik olarak giriş yapabileceği geçici bir bağlantı oluşturun.',
@@ -621,6 +697,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'scienceBranch': 'Bilim Dalı',
     'location': 'Konum',
     'telephone': 'Telefon',
+    'profileInformation': 'Profil Bilgileri',
     'yoksisId': 'YÖKSİS ID',
     'orcidId': 'ORCID ID',
     'journalId': 'Dergi ID',
@@ -686,6 +763,7 @@ const translations: Record<Language, TranslationDictionary> = {
     // CAPTCHA
     'pleaseVerifyCaptcha': 'Lütfen insan olduğunuzu doğrulayın',
     'captchaExpired': 'CAPTCHA doğrulaması süresi doldu. Lütfen tekrar doğrulayın.',
+    'captchaVerificationFailed': 'reCAPTCHA doğrulaması başarısız. Lütfen tekrar deneyin.',
     'searchPlaceholder': 'Ara...',
     'readMore': 'Devamını Oku',
     
@@ -735,7 +813,7 @@ const translations: Record<Language, TranslationDictionary> = {
     
     // Journal Details Page
     'backToJournals': 'Dergilere Dön',
-    'backToArchive': 'Arşive Dön',
+    'backToArchive': 'Yayınlanan Dergilere Dön',
     'failedToLoadJournalData': 'Dergi verileri sunucudan yüklenemedi. Bu durum geçici bir ağ sorunu, sunucu bakımı veya derginin taşınmış ya da silinmiş olması nedeniyle ortaya çıkabilir. Lütfen internet bağlantınızı kontrol edin ve sayfayı yenilemeyi deneyin. Sorun devam ederse, teknik destek ekibimizle iletişime geçin.',
     'loadingJournalData': 'Dergi verileri yükleniyor...',
     'journalNotFound': 'Dergi bulunamadı',
@@ -758,7 +836,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'downloadJournal': 'Dergiyi İndir',
     'downloadFullPdf': 'PDF İndir',
     'downloadJournalDescription': 'Dergiyi PDF formatında tamamen indirin',
-    'noEntriesInJournal': 'Bu dergide makale bulunmamaktadır',
+    'noEntriesInJournal': 'Bu Dergide Makale Bulunmamaktadır',
     'failedToMergeFiles': 'Dergi dosyaları birleştirilemedi',
     'mergingFiles': 'Dosyalar Birleştiriliyor...',
     'selectEditorInChief': 'Baş Editörü Seç',
@@ -818,7 +896,8 @@ const translations: Record<Language, TranslationDictionary> = {
     'noPublishedEntries': 'Bu dergide yayınlanan makale bulunmamaktadır',
     'loadingPublishedJournals': 'Yayınlanmış dergiler yükleniyor...',
     'failedToLoadPublishedJournals': 'Yayınlanmış dergiler yüklenemedi.',
-    'noPublishedJournals': 'Yayınlanmış dergi bulunamadı.',
+    'noPublishedJournals': 'Yayınlanan Dergiler Bulunamadı',
+    'checkBackLaterForPublications': 'Yayınlanan dergiler kısa bir zaman içinde burada görüntülenecektir. Bizi takipte kalmanızı tavsiye ederiz.',
     'reviewFile': 'Değerlendirme Dosyası',
     'updatedTitle': 'Güncellenmiş Başlık',
     'updatedAbstract': 'Güncellenmiş Özet',
@@ -826,6 +905,51 @@ const translations: Record<Language, TranslationDictionary> = {
     'updatedKeywords': 'Güncellenmiş Anahtar Kelimeler',
     'updatedFile': 'Güncellenmiş Dosya',
     'updateCopied': 'Güncelleme içeriği panoya kopyalandı!',
+    'privateNotes': 'Özel Notlar (Oluşturan Hakem ve Yazarlar Tarafından Görünütlenebilir)',
+    
+    // Deletion
+    'markForDeletion': 'Hesabı Sil',
+    'unmarkForDeletion': 'Hesap Silme İşlemini Durdur',
+    'markForDeletionWarning': 'Bu işlem, hesabınızı silinmek üzere işaretleyecektir. İnsan ve Mekan platformu yöneticileri talebinizi inceleyip işleme alacaktır.',
+    'unmarkForDeletionWarning': 'Hesabınız şu anda silinmek üzere işaretlenmiştir. Silme talebini iptal etmek için aşağıdaki düğmeye tıklayın.',
+    'editProfile': 'Profili Düzenle',
+    'academicTitle': 'Akademik Ünvan',
+    'incorrectCurrentPassword': 'Girilen mevcut şifre yanlış',
+    'passwordUpdateFailed': 'Girilen mevcut şifre yanlış',
+    'yoksisValidationError': 'YÖKSİS ID 5-8 haneli olmalıdır',
+    'orcidValidationError': 'ORCID 0000-0000-0000-0000 formatında olmalıdır',
+    'phoneValidationError': 'Telefon numarası 555 55 55 formatta olmalıdır',
+    'profileUpdated': 'Profil başarıyla güncellendi!',
+    'accountMarkedForDeletion': 'Hesap silme için işaretlendi!',
+    'accountUnmarkedForDeletion': 'Hesap silme işlemi iptal edildi!',
+    
+    // Not Found Messages
+    'entryNotFoundTitle': 'Journal Entry Bulunamadı',
+    'entryNotFoundExplanation': 'Aradığınız makale mevcut değil veya kaldırılmış olabilir.',
+    'userNotFoundTitle': 'Kullanıcı Bulunamadı!',
+    'userNotFoundExplanation': 'Kullanıcı verileri sunucudan yüklenemedi. Bu durum geçici bir ağ sorunu, sunucu bakımı veya derginin taşınmış ya da silinmiş olması nedeniyle ortaya çıkabilir. Lütfen internet bağlantınızı kontrol edin ve sayfayı yenilemeyi deneyin. Sorun devam ederse, teknik destek ekibimizle iletişime geçin.',
+    
+    // Error Loading Messages
+    'errorLoadingEntryTitle': 'Makale Yüklenirken Hata',
+    'errorLoadingEntryExplanation': 'Makale yüklenemedi. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
+    'errorLoadingUserTitle': 'Kullanıcı Yüklenirken Hata',
+    'errorLoadingUserExplanation': 'Kullanıcı profili yüklenemedi. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
+    'paperNotFoundTitle': 'Makale Bulunamadı!',
+    'paperNotFoundExplanation': 'Makale verileri sunucudan yüklenemedi. Bu durum geçici bir ağ sorunu, sunucu bakımı veya derginin taşınmış ya da silinmiş olması nedeniyle ortaya çıkabilir. Lütfen internet bağlantınızı kontrol edin ve sayfayı yenilemeyi deneyin. Sorun devam ederse, teknik destek ekibimizle iletişime geçin.',
+          'tryAgain': 'Tekrar Dene',
+      'addAuthorUpdate': 'Yazar Güncellemesi',
+      'addRefereeUpdate': 'Hakem Değerlendirmesi',
+      'participants': 'Katılımcı',
+      'noParticipants': 'Katılımcı Bulunamadı',
+          'pleaseConfirmEmail': 'Giriş yapmak için lütfen e-posta adresinizi onaylayın.',
+    'incorrectCredentials': 'Hatalı e-posta veya şifre. Lütfen bilgilerinizi kontrol edin.',
+    
+    // Registration messages
+    'registrationSuccessful': 'Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...',
+    'registrationFailed': 'Kayıt başarısız. Lütfen tekrar deneyin.',
+    'emailAlreadyRegistered': 'E-posta adresi zaten kayıtlı. Farklı bir e-posta kullanın veya giriş yapın.',
+    'accountCreated': 'Hesap başarıyla oluşturuldu!',
+    'registrationToastMessage': 'Hesap başarıyla oluşturuldu! Aktivasyon için e-postanızı onaylayınız.',
   }
 };
 

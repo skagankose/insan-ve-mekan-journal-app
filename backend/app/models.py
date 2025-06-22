@@ -159,6 +159,7 @@ class JournalBase(SQLModel):
     title_en: Optional[str] = Field(default="")
     created_date: datetime = Field(default_factory=lambda: datetime.now(pytz.timezone('Europe/Istanbul')).replace(tzinfo=None))
     issue: str
+    issue_en: Optional[str] = Field(default="")
     is_published: bool = Field(default=False)
     publication_date: Optional[datetime] = Field(default=None)  # Manually set publication date
     publication_place: Optional[str] = None
@@ -189,6 +190,7 @@ class JournalCreate(SQLModel):
     title: str
     title_en: Optional[str] = ""
     issue: str
+    issue_en: Optional[str] = ""
     is_published: bool = False
     publication_date: Optional[datetime] = None
     publication_place: Optional[str] = None
@@ -204,6 +206,7 @@ class JournalUpdate(SQLModel):
     title: Optional[str] = None
     title_en: Optional[str] = None
     issue: Optional[str] = None
+    issue_en: Optional[str] = None
     created_date: Optional[datetime] = None
     is_published: Optional[bool] = None
     publication_date: Optional[datetime] = None

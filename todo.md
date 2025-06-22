@@ -3,9 +3,12 @@ All Pages in the Project
 Public/Authentication Pages
 [ + ] LoginPage - User Login
 [ + ] RegisterPage - User Register
+--------------------------------------------------------------- Secondary Pages & Mails
 [ - ] AutoLoginPage - Automatic Login
 [ - ] ForgotPasswordPage - Password Recovery
 [ - ] ResetPasswordPage - Password Reset (with token parameter)
+[ - ] Confirmations E-mail
+[ - ] Update E-mails (Referee Assigned, Author Updatem, Referee Update)
 
 Public Content Pages
 [ + ] ArchivedJournalsPage - Journal List - Published
@@ -17,15 +20,17 @@ Public Content Pages
 
 Protected User Pages
 [ + ] UserProfilePage - User Profile
-[ - ] ProfileEditPage - User Edit Profile
+[ + ] JournalEntryUpdateDetailsPage - Entry Update Details
+--------------------------------------------------------------- Create & Edit & Delete
+[ + ] ProfileEditPage - User Edit Profile
 [ - ] JournalCreatePage - Entry Create
 [ - ] JournalEditPage - Entry Edit
-[ - ] JournalEntryUpdateDetailsPage - Entry Update Details
 [ - ] AuthorUpdateFormPage - Author Update Create
 [ - ] RefereeUpdateFormPage - Referee Update Create
 
 Admin-Only Pages
 [ - ] AdminPage - Dashboard
+--------------------------------------------------------------- Create & Edit & Delete
 [ - ] JournalCreateFormPage - Journal Create
 [ - ] JournalEditFormPage - Journal Edit
 [ - ] EditUserPage - User Edit
@@ -43,9 +48,6 @@ User Protected: 7 pages (requires login)
 Public Content: 4 pages (viewable by anyone)
 Editor Only: 1 page (requires editor+ role)
 Admin Only: 5 pages (requires admin+ role)
-
-[ - ] Confirmations E-mail
-[ - ] Update E-mails (Referee Assigned, Author Updatem, Referee Update)
 
 Toast Messages in CREATE and EDIT and DELETE forms
 Check Pop Up Windows in All Pages

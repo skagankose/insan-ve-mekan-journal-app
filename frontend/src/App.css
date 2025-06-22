@@ -1402,3 +1402,9 @@ body::before {
     padding: var(--spacing-4);
   }
 }
+
+/* Custom focus styles for password change section */
+.password-change-section .form-input:focus {
+  border-color: #F59E0B; /* Amber-700 */
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2); /* Lighter amber shadow */
+}

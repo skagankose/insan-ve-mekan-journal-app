@@ -4,7 +4,6 @@ import * as apiService from '../services/apiService';
 import { Journal, JournalEntryRead } from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import Footer from '../components/Footer';
-// Using inline SVGs instead of react-icons to avoid import issues
 
 interface JournalWithEntries extends Journal {
     entries: JournalEntryRead[];
@@ -197,10 +196,12 @@ const ArchivedJournalsPage: React.FC = () => {
 
     return (
         <>
-            {/* Title Section */}
-            <div className="page-title-section" style={{ marginLeft: '60px' }}>
-                <h1>{t('publishedJournals')}</h1>
-            </div>
+            {/* Title Section - Only show when there are published journals */}
+            {journalsWithEntries.length > 0 && (
+                <div className="page-title-section" style={{ marginLeft: '60px' }}>
+                    <h1>{t('publishedJournals')}</h1>
+                </div>
+            )}
 
             {/* Content Section */}
             <div className="page-content-section" style={{
@@ -221,13 +222,28 @@ const ArchivedJournalsPage: React.FC = () => {
                             width: '120px',
                             height: '120px',
                             margin: '0 auto 32px',
-                            background: 'linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%)',
+                            background: 'linear-gradient(135deg, #F0FDFA 0%, #CCFBF1 100%)',
                             borderRadius: '50%',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '48px'
-                        }}>🗄️</div>
+                            boxShadow: '0 8px 32px rgba(20, 184, 166, 0.15)',
+                            border: '2px solid rgba(20, 184, 166, 0.2)'
+                        }}>
+                            <svg 
+                                width="56" 
+                                height="56" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="#14B8A6" 
+                                strokeWidth="2"
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                            >
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                        </div>
                         <h3 style={{
                             fontSize: '24px',
                             fontWeight: '700',
@@ -238,7 +254,7 @@ const ArchivedJournalsPage: React.FC = () => {
                             fontSize: '16px',
                             color: '#64748B',
                             lineHeight: '1.6'
-                        }}>Check back later for new publications</p>
+                        }}>{t('checkBackLaterForPublications') || 'Check back later for new publications'}</p>
                     </div>
                 ) : (
                     <div style={{

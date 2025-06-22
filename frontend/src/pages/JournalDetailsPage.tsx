@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import * as apiService from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveJournal } from '../contexts/ActiveJournalContext';
 import Footer from '../components/Footer';
-import { HiMail, HiUser, HiCalendar, HiLocationMarker, HiClock, HiCheckCircle } from 'react-icons/hi';
+import { HiMail, HiUser, HiCalendar, HiLocationMarker, HiClock, HiCheckCircle, HiUserGroup, HiDocumentText, HiAcademicCap } from 'react-icons/hi';
 import { PiSubtitlesFill } from "react-icons/pi";
+import './JournalEntryUpdateDetailsPage.css'; // Import toast styles
 
 // Utility function to get a deterministic background pattern based on ID
 const getPatternForId = (id: number) => {
@@ -22,12 +23,19 @@ const getPatternForId = (id: number) => {
 const JournalDetailsPage: React.FC = () => {
     const { journalId } = useParams<{ journalId: string }>();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [journal, setJournal] = useState<apiService.Journal | null>(null);
     const [entries, setEntries] = useState<apiService.JournalEntryRead[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [editorInChief, setEditorInChief] = useState<apiService.UserRead | null>(null);
     const [editors, setEditors] = useState<apiService.UserRead[]>([]);
+    
+    // Toast notification state
+    const [showToast, setShowToast] = useState<boolean>(false);
+    const [toastMessage, setToastMessage] = useState<string>('');
+    const [toastType, setToastType] = useState<'success' | 'warning'>('success');
+    
     const { isAuthenticated, user } = useAuth();
     const { t, language } = useLanguage();
     const { activeJournal, setActiveJournal } = useActiveJournal();
@@ -57,6 +65,26 @@ const JournalDetailsPage: React.FC = () => {
     const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<apiService.UserRead | null>(null);
     const [selectedUserRole, setSelectedUserRole] = useState<'editor-in-chief' | 'editor' | null>(null);
+
+    // Check for success parameter and show toast
+    useEffect(() => {
+        const created = searchParams.get('created');
+        
+        if (created === 'true') {
+            setToastMessage(t('journalCreatedSuccessfully') || 'Journal created successfully!');
+            setToastType('success');
+            setShowToast(true);
+            
+            // Remove the parameter from URL
+            searchParams.delete('created');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+        }
+    }, [searchParams, setSearchParams, t]);
 
     useEffect(() => {
         const fetchJournalAndEntries = async () => {
@@ -902,20 +930,17 @@ const JournalDetailsPage: React.FC = () => {
                                         alignItems: 'center',
                                         gap: '12px'
                                     }}>
-                                        <div style={{
-                                            width: '32px',
-                                            height: '32px',
-                                            background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
-                                            borderRadius: '10px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                <path d="M12 2L3 7V17C3 17.5304 3.21071 18.0391 3.58579 18.4142C3.96086 18.7893 4.46957 19 5 19H19C19.5304 19 20.0391 18.7893 20.4142 18.4142C20.7893 18.0391 21 17.5304 21 17V7L12 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <path d="M9 21V12H15V21" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
-                                        </div>
+                                                                <div style={{
+                            width: '32px',
+                            height: '32px',
+                            background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                            borderRadius: '10px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <HiAcademicCap size={16} color="white" />
+                        </div>
                                         <h3 style={{
                                             fontSize: '24px',
                                             fontWeight: '800',
@@ -1046,7 +1071,7 @@ const JournalDetailsPage: React.FC = () => {
                                     </div>
                                 ) : (
                                     <div style={{
-                                        padding: '32px 20px',
+                                        padding: '12px 20px',
                                         textAlign: 'center',
                                         background: 'rgba(255, 255, 255, 0.6)',
                                         borderRadius: '16px',
@@ -1055,20 +1080,20 @@ const JournalDetailsPage: React.FC = () => {
                                         <div style={{
                                             width: '40px',
                                             height: '40px',
-                                            margin: '0 auto 12px',
+                                            margin: '0 auto 8px',
                                             background: '#F1F5F9',
                                             borderRadius: '50%',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             fontSize: '18px'
-                                        }}>👑</div>
+                                        }}><HiAcademicCap size={20} color="#64748B" /></div>
                                         <p style={{
                                             margin: 0,
                                             fontSize: '14px',
                                             fontWeight: '500',
                                             color: '#64748B'
-                                        }}>{t('noEditorInChief') || 'No editor-in-chief assigned'}</p>
+                                        }}>{language === 'tr' ? 'Baş Editör Atanmamıştır' : 'No Editor-in-Chief Assigned'}</p>
                                     </div>
                                 )}
                             </div>
@@ -1275,13 +1300,13 @@ const JournalDetailsPage: React.FC = () => {
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 fontSize: '18px'
-                                            }}>👥</div>
+                                            }}><HiUserGroup size={20} color="#64748B" /></div>
                                             <p style={{
                                                 margin: 0,
                                                 fontSize: '14px',
                                                 fontWeight: '500',
                                                 color: '#64748B'
-                                            }}>{language === 'tr' ? 'Editör atanmamış' : 'No editors assigned'}</p>
+                                            }}>{language === 'tr' ? 'Dergiye Editör Atanmamıştır' : 'No Editors Assigned to this Journal'}</p>
                                         </div>
                                     )}
                                 </div>
@@ -2060,7 +2085,7 @@ const JournalDetailsPage: React.FC = () => {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontSize: '32px'
-                            }}>📝</div>
+                            }}><HiDocumentText size={36} color="#64748B" /></div>
                             <h3 style={{
                                 fontSize: '18px',
                                 fontWeight: '600',
@@ -3101,6 +3126,23 @@ const JournalDetailsPage: React.FC = () => {
                                  )}
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Toast Notification */}
+            {showToast && (
+                <div className="toast-notification">
+                    <div className={`toast-content toast-${toastType}`}>
+                        <div className="toast-icon">
+                            {toastType === 'success' ? '✓' : '⚠'}
+                        </div>
+                        <div className="toast-message">
+                            {toastMessage}
+                        </div>
+                        <button className="toast-close" onClick={() => setShowToast(false)}>
+                            ×
+                        </button>
                     </div>
                 </div>
             )}

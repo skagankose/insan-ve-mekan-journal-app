@@ -29,4 +29,43 @@ export const formatOrcidId = (id: string): string => {
     
     // Take only first 16 digits and format them
     return digits.slice(0, 16).match(/.{4}/g)?.join('-') || digits;
+};
+
+// Phone number validation (basic validation for international format)
+export const validatePhoneNumber = (countryCode: string, phoneNumber: string): boolean => {
+    // Clean the inputs
+    const trimmedCountryCode = countryCode?.trim() || '';
+    const trimmedPhoneNumber = phoneNumber?.trim() || '';
+    
+    // If both are empty, it's valid (optional field)
+    if (!trimmedCountryCode && !trimmedPhoneNumber) {
+        return true;
+    }
+    
+    // If one is provided, both must be provided
+    if (!trimmedCountryCode || !trimmedPhoneNumber) {
+        return false;
+    }
+    
+    // Country code should start with + and have 1-4 digits
+    const countryCodePattern = /^\+\d{1,4}$/;
+    if (!countryCodePattern.test(trimmedCountryCode)) {
+        return false;
+    }
+    
+    // Phone number should have at least 7 digits (removing spaces and other non-digit characters)
+    const digitsOnly = trimmedPhoneNumber.replace(/\D/g, '');
+    
+    // Must have between 7 and 15 digits
+    if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+        return false;
+    }
+    
+    // The formatted input should only contain digits and spaces
+    const phonePattern = /^[\d\s]+$/;
+    if (!phonePattern.test(trimmedPhoneNumber)) {
+        return false;
+    }
+    
+    return true;
 }; 
