@@ -18,12 +18,12 @@
     --admin-badge-referee-text: white;
     --admin-badge-author-bg: #0d6efd;
     --admin-badge-author-text: white;
-    --admin-badge-pending-bg: #ffc107;
-    --admin-badge-pending-text: black;
-    --admin-badge-accepted-bg: #28a745;
+    --admin-badge-pending-bg: #FDE68A;
+    --admin-badge-pending-text: #92400E;
+    --admin-badge-accepted-bg: #10B981;
     --admin-badge-accepted-text: white;
-    --admin-badge-rejected-bg: #dc3545;
-    --admin-badge-rejected-text: white;
+    --admin-badge-rejected-bg: #FCA5A5;
+    --admin-badge-rejected-text: #991B1B;
     --admin-badge-published-bg: #0d6efd;
     --admin-badge-published-text: white;
     --admin-error-text-color: #dc3545;
@@ -239,6 +239,7 @@
 .badge {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     padding: 0.25rem 0.5rem;
     border-radius: 20px;
     font-size: 0.7rem;
@@ -259,53 +260,84 @@
 }
 
 .badge-editor {
-    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
     color: white;
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.4);
 }
 
 .badge-referee,
 .badge-arbitrator {
-    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    background: linear-gradient(135deg, #A855F7 0%, #7C3AED 100%);
     color: white;
-    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 2px 4px rgba(168, 85, 247, 0.4);
 }
 
 .badge-author,
 .badge-writer {
-    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
     color: white;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.4);
 }
 
 .badge-pending {
-    background: linear-gradient(135deg, #FDE68A 0%, #FCD34D 100%);
-    color: #92400E;
-    box-shadow: 0 2px 4px rgba(253, 230, 138, 0.3);
+    background: #FDE68A;
+    color: #92400E !important;
+    box-shadow: 0 2px 4px rgba(253, 230, 138, 0.4);
 }
 
 .badge-accepted {
-    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    color: white;
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    background: #10B981;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.5);
 }
 
 .badge-rejected {
-    background: linear-gradient(135deg, #FCA5A5 0%, #F87171 100%);
-    color: #991B1B;
-    box-shadow: 0 2px 4px rgba(252, 165, 165, 0.3);
+    background: #FCA5A5;
+    color: #991B1B !important;
+    box-shadow: 0 2px 4px rgba(252, 165, 165, 0.5);
 }
 
 .badge-published {
-    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
-    color: white;
-    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(20, 184, 166, 0.4);
 }
 
 .badge-owner {
     background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
-    color: white;
+    color: white !important;
     box-shadow: 0 2px 4px rgba(20, 184, 166, 0.3);
+}
+
+/* Additional paper status badges to match JournalDetailsPage */
+.badge-not_accepted {
+    background: #FCA5A5;
+    color: #991B1B !important;
+    box-shadow: 0 2px 4px rgba(252, 165, 165, 0.5);
+}
+
+.badge-waiting_for_payment {
+    background: #FDE68A;
+    color: #92400E !important;
+    box-shadow: 0 2px 4px rgba(253, 230, 138, 0.4);
+}
+
+.badge-waiting_for_authors {
+    background: #FED7AA;
+    color: #C2410C !important;
+    box-shadow: 0 2px 4px rgba(254, 215, 170, 0.4);
+}
+
+.badge-waiting_for_referees {
+    background: #DDD6FE;
+    color: #6B21A8 !important;
+    box-shadow: 0 2px 4px rgba(221, 214, 254, 0.4);
+}
+
+.badge-waiting_for_editors {
+    background: #BFDBFE;
+    color: #1E40AF !important;
+    box-shadow: 0 2px 4px rgba(191, 219, 254, 0.4);
 }
 
 /* Loading and error states */
@@ -734,10 +766,10 @@ html {
 
 .search-results-summary {
     margin-top: 1rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 12px;
-    border: 1px solid rgba(20, 184, 166, 0.2);
+    padding: 0.75rem 0;
+    background: transparent;
+    border-radius: 0;
+    border: none;
 }
 
 .search-results-info {
@@ -746,46 +778,30 @@ html {
     gap: 0.75rem;
     font-size: 14px;
     font-weight: 500;
-    color: #374151;
+    color: #6B7280;
 }
 
 .search-results-info svg {
-    color: #14B8A6;
+    color: #6B7280;
     flex-shrink: 0;
 }
 
 .search-results-info > span:first-child {
-    color: #14B8A6;
+    color: #374151;
     font-weight: 600;
 }
 
 .search-results-info > span:not(:first-child):not(:nth-child(odd)) {
-    color: #1F2937;
-    background: rgba(20, 184, 166, 0.1);
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
+    color: #374151;
     font-weight: 600;
 }
 
 .search-results-info > span:nth-child(odd):not(:first-child) {
     color: #9CA3AF;
-    font-size: 12px;
+    font-size: 14px;
 }
 
 /* Search results styling */
-.search-results-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 1rem;
-    padding: 8px 12px;
-    background: rgba(20, 184, 166, 0.1);
-    border-radius: 8px;
-    font-size: 0.875rem;
-    color: #0D9488;
-    font-weight: 500;
-}
-
 .search-results-info svg {
     width: 16px;
     height: 16px;
@@ -858,19 +874,44 @@ html {
     background: linear-gradient(90deg, #14B8A6, #0D9488);
 }
 
+/* Section-specific title line colors */
+.search-section.users-section .section-title {
+    border-bottom-color: #3B82F6;
+}
+
+.search-section.users-section .section-title::after {
+    background: linear-gradient(90deg, #3B82F6, #2563EB);
+}
+
+.search-section.journals-section .section-title {
+    border-bottom-color: #A855F7;
+}
+
+.search-section.journals-section .section-title::after {
+    background: linear-gradient(90deg, #A855F7, #7C3AED);
+}
+
+.search-section.papers-section .section-title {
+    border-bottom-color: #22C55E;
+}
+
+.search-section.papers-section .section-title::after {
+    background: linear-gradient(90deg, #22C55E, #16A34A);
+}
+
 /* Cards Grid */
 .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
     margin-top: 1rem;
 }
 
 /* Card Styles */
 .search-card {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    padding: 1.5rem;
+    border-radius: 12px;
+    padding: 1.25rem;
     border: 1px solid rgba(20, 184, 166, 0.15);
     cursor: pointer;
     transition: all 0.3s ease;
@@ -907,7 +948,7 @@ html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .card-type {
@@ -923,9 +964,9 @@ html {
 
 .card-content h3.card-title {
     color: #1F2937;
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 700;
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.375rem 0;
     line-height: 1.3;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -935,7 +976,7 @@ html {
 .card-subtitle {
     color: #6B7280;
     font-size: 0.875rem;
-    margin: 0 0 1rem 0;
+    margin: 0 0 0.75rem 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1008,7 +1049,7 @@ html {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1017,40 +1058,164 @@ html {
 }
 
 .detail-modal {
-    background: white;
-    border-radius: 20px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
     width: 100%;
-    max-width: 800px;
-    max-height: 90vh;
+    max-width: 700px;
+    max-height: 85vh;
     overflow: hidden;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(20, 184, 166, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+}
+
+.detail-modal::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* User modal background pattern */
+.detail-modal.user-modal::before {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+}
+
+/* Journal modal background pattern */
+.detail-modal.journal-modal::before {
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.05) 0%, transparent 70%);
+}
+
+/* Paper modal background pattern */
+.detail-modal.paper-modal::before {
+    background: radial-gradient(circle, rgba(34, 197, 94, 0.05) 0%, transparent 70%);
 }
 
 .detail-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 2rem 2rem 1rem 2rem;
-    border-bottom: 1px solid #E5E7EB;
-    background: linear-gradient(135deg, rgba(20, 184, 166, 0.05) 0%, rgba(13, 148, 136, 0.02) 100%);
+    padding: 32px 32px 24px 32px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+    position: relative;
+    z-index: 1;
+    gap: 16px;
 }
 
 .detail-modal-header h2 {
     color: #1F2937;
-    font-size: 1.5rem;
+    font-size: 24px;
     font-weight: 700;
     margin: 0;
+    letter-spacing: -0.025em;
+    flex: 1;
+}
+
+/* Modal header icon container */
+.detail-modal-header-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* User modal header icon */
+.detail-modal.user-modal .detail-modal-header-icon {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+    color: white;
+}
+
+/* Journal modal header icon */
+.detail-modal.journal-modal .detail-modal-header-icon {
+    background: linear-gradient(135deg, #A855F7 0%, #7C3AED 100%);
+    box-shadow: 0 8px 16px rgba(168, 85, 247, 0.3);
+    color: white;
+}
+
+/* Paper modal header icon */
+.detail-modal.paper-modal .detail-modal-header-icon {
+    background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+    box-shadow: 0 8px 16px rgba(34, 197, 94, 0.3);
+    color: white;
+}
+
+.detail-modal-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.detail-modal-navigate {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* User modal navigate button */
+.detail-modal.user-modal .detail-modal-navigate {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+}
+
+.detail-modal.user-modal .detail-modal-navigate:hover {
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Journal modal navigate button */
+.detail-modal.journal-modal .detail-modal-navigate {
+    background: linear-gradient(135deg, #A855F7 0%, #7C3AED 100%);
+    box-shadow: 0 4px 8px rgba(168, 85, 247, 0.2);
+}
+
+.detail-modal.journal-modal .detail-modal-navigate:hover {
+    background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(168, 85, 247, 0.3);
+}
+
+/* Paper modal navigate button */
+.detail-modal.paper-modal .detail-modal-navigate {
+    background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+    box-shadow: 0 4px 8px rgba(34, 197, 94, 0.2);
+}
+
+.detail-modal.paper-modal .detail-modal-navigate:hover {
+    background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(34, 197, 94, 0.3);
 }
 
 .detail-modal-close {
-    background: none;
-    border: none;
-    color: #6B7280;
-    cursor: pointer;
-    padding: 0.5rem;
+    width: 40px;
+    height: 40px;
     border-radius: 8px;
-    transition: all 0.2s ease;
+    border: none;
+    background: rgba(148, 163, 184, 0.1);
+    color: #64748B;
+    font-size: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1059,41 +1224,135 @@ html {
 .detail-modal-close:hover {
     background: rgba(239, 68, 68, 0.1);
     color: #EF4444;
+    transform: scale(1.05);
 }
 
 .detail-modal-content {
-    padding: 2rem;
-    max-height: calc(90vh - 120px);
+    padding: 32px;
+    max-height: calc(85vh - 140px);
     overflow-y: auto;
+    position: relative;
+    z-index: 1;
 }
 
 .detail-content {
     display: grid;
-    gap: 1.5rem;
+    gap: 24px;
 }
 
 .detail-field {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 1rem;
-    align-items: start;
-    padding: 1rem;
-    background: rgba(248, 250, 252, 0.5);
-    border-radius: 12px;
-    border: 1px solid #E5E7EB;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.2s ease;
+}
+
+.detail-field:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(20, 184, 166, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .detail-field label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
     font-weight: 600;
-    color: #374151;
-    font-size: 0.875rem;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.detail-field label::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background-color: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 12H15M9 16H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L19.7071 9.70711C19.8946 9.89464 20 10.149 20 10.4142V19C20 20.1046 19.1046 21 18 21H17ZM17 21V10L13 6H7V19H17Z' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center;
+    mask-size: 16px 16px;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 12H15M9 16H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L19.7071 9.70711C19.8946 9.89464 20 10.149 20 10.4142V19C20 20.1046 19.1046 21 18 21H17ZM17 21V10L13 6H7V19H17Z' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center;
+    -webkit-mask-size: 16px 16px;
 }
 
 .detail-field span {
     color: #1F2937;
-    font-size: 0.875rem;
+    font-size: 16px;
+    font-weight: 500;
     line-height: 1.5;
     overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+/* Special styling for badges in modal */
+.detail-field .badge {
+    margin-left: 0;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+/* Responsive modal adjustments */
+@media (max-width: 768px) {
+    .detail-modal-overlay {
+        padding: 1rem;
+    }
+    
+    .detail-modal {
+        margin: 1rem;
+        max-height: calc(100vh - 2rem);
+        border-radius: 16px;
+    }
+    
+    .detail-modal-header {
+        padding: 24px 24px 16px 24px;
+    }
+    
+    .detail-modal-header h2 {
+        font-size: 20px;
+    }
+    
+    .detail-modal-content {
+        padding: 24px;
+        max-height: calc(100vh - 140px);
+    }
+    
+    .detail-field {
+        padding: 20px;
+    }
+    
+    .detail-modal-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    
+    .detail-modal-navigate {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Smooth scrollbar for modal content */
+.detail-modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.detail-modal-content::-webkit-scrollbar-track {
+    background: rgba(226, 232, 240, 0.3);
+    border-radius: 3px;
+}
+
+.detail-modal-content::-webkit-scrollbar-thumb {
+    background: rgba(20, 184, 166, 0.4);
+    border-radius: 3px;
+}
+
+.detail-modal-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(20, 184, 166, 0.6);
 }
 
 /* No Results */

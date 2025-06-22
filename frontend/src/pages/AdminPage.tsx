@@ -8,7 +8,6 @@ import type {
     JournalEntryRead,
 } from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
-import { formatDate, getStatusTranslation } from '../utils/dateUtils';
 import './AdminPage.css';
 
 // Interfaces will now directly use the more detailed types from apiService
@@ -50,7 +49,7 @@ const GlobalSearchInput = React.memo(({
                 <input
                     type="text"
                     className="global-search-input"
-                    placeholder={t('globalSearchPlaceholder') || 'Search users, journals, journal entries...'}
+                    placeholder={t('globalSearchPlaceholder') || 'Search users, journals, papers...'}
                     value={globalSearchTerm}
                     onChange={(e) => setGlobalSearchTerm(e.target.value)}
                 />
@@ -75,21 +74,12 @@ const GlobalSearchInput = React.memo(({
             {globalSearchTerm && (
                 <div className="search-results-summary">
                     <div className="search-results-info">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path 
-                                d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
-                                stroke="currentColor" 
-                                strokeWidth="2" 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round"
-                            />
-                        </svg>
                         <span>{t('searchResults') || 'Search Results'}:</span>
                         <span>{filteredUsers.length} {t('users') || 'users'}</span>
                         <span>•</span>
                         <span>{filteredJournals.length} {t('journals') || 'journals'}</span>
                         <span>•</span>
-                        <span>{filteredJournalEntries.length} {t('entries') || 'entries'}</span>
+                        <span>{filteredJournalEntries.length} {t('papers') || 'papers'}</span>
                     </div>
                 </div>
             )}
@@ -101,23 +91,6 @@ const AdminPage: React.FC = () => {
     const [users, setUsers] = useState<UserRead[]>([]);
     const [journals, setJournals] = useState<Journal[]>([]);
     const [journalEntries, setJournalEntries] = useState<JournalEntryRead[]>([]);
-
-    // Detail view state
-    const [selectedItem, setSelectedItem] = useState<any>(null);
-    const [selectedItemType, setSelectedItemType] = useState<'user' | 'journal' | 'journalEntry' | null>(null);
-    const [showDetailModal, setShowDetailModal] = useState(false);
-
-    const openDetailModal = (item: any, type: 'user' | 'journal' | 'journalEntry') => {
-        setSelectedItem(item);
-        setSelectedItemType(type);
-        setShowDetailModal(true);
-    };
-
-    const closeDetailModal = () => {
-        setSelectedItem(null);
-        setSelectedItemType(null);
-        setShowDetailModal(false);
-    };
 
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -241,8 +214,46 @@ const AdminPage: React.FC = () => {
 
     // Translation function for journal entry status
     const translateStatus = (status: string | undefined): string => {
-        if (!status) return getStatusTranslation('pending', language);
-        return getStatusTranslation(status, language);
+        if (!status) return t('pending') || 'Pending';
+        
+        const statusMap: { [key: string]: string } = {
+            'accepted': t('accepted') || 'Accepted',
+            'rejected': t('rejected') || 'Rejected',
+            'pending': t('pending') || 'Pending',
+            'not_accepted': t('notAccepted') || 'Not Accepted',
+            'waiting_for_payment': t('waitingForPayment') || 'Waiting for Payment',
+            'waiting_for_authors': t('waitingForAuthors') || 'Waiting for Authors',
+            'waiting_for_referees': t('waitingForReferees') || 'Waiting for Referees',
+            'waiting_for_editors': t('waitingForEditors') || 'Waiting for Editors'
+        };
+        
+        return statusMap[status] || status;
+    };
+
+    const translateRole = (role: string): string => {
+        const roleMap: { [key: string]: string } = {
+            'admin': t('admin') || 'Admin',
+            'owner': t('owner') || 'Owner',
+            'editor': t('editor') || 'Editor',
+            'referee': t('roleReferee') || 'Referee', 
+            'author': t('author') || 'Author'
+        };
+        
+        return roleMap[role] || role;
+    };
+
+    const translateJournalStatus = (isPublished: boolean): string => {
+        return isPublished ? (t('published') || 'Published') : (t('draft') || 'Draft');
+    };
+
+    const translateCardType = (type: 'user' | 'journal' | 'paper'): string => {
+        const typeMap: { [key: string]: string } = {
+            'user': t('user') || 'User',
+            'journal': t('journal') || 'Journal',
+            'paper': t('paper') || 'Paper'
+        };
+        
+        return typeMap[type] || type;
     };
 
     // Global Search Input Component moved outside to prevent re-creation
@@ -255,7 +266,7 @@ const AdminPage: React.FC = () => {
     // Removed handleSettingsUpdate as it's not used in card-based interface
 
     if (loading) {
-        return <div className="loading-container">{t('loading')}</div>;
+        return <div className="loading-container">Loading...</div>;
     }
 
     if (error) {
@@ -264,10 +275,10 @@ const AdminPage: React.FC = () => {
 
     // Card Components
     const UserCard = ({ user }: { user: UserRead }) => (
-        <div className="search-card user-card" onClick={() => openDetailModal(user, 'user')}>
+        <div className="search-card user-card" onClick={() => navigate(`/admin/users/profile/${user.id}`)}>
             <div className="card-header">
-                <div className="card-type">User</div>
-                <span className={`badge badge-${user.role}`}>{user.role}</span>
+                <div className="card-type">{translateCardType('user')}</div>
+                <span className={`badge badge-${user.role}`}>{translateRole(user.role)}</span>
             </div>
             <div className="card-content">
                 <h3 className="card-title">{user.name}</h3>
@@ -284,11 +295,11 @@ const AdminPage: React.FC = () => {
     );
 
     const JournalCard = ({ journal }: { journal: Journal }) => (
-        <div className="search-card journal-card" onClick={() => openDetailModal(journal, 'journal')}>
+        <div className="search-card journal-card" onClick={() => navigate(`/journals/${journal.id}`)}>
             <div className="card-header">
-                <div className="card-type">Journal</div>
+                <div className="card-type">{translateCardType('journal')}</div>
                 <span className={`badge ${journal.is_published ? 'badge-published' : 'badge-pending'}`}>
-                    {journal.is_published ? 'Published' : 'Draft'}
+                    {translateJournalStatus(journal.is_published)}
                 </span>
                     </div>
             <div className="card-content">
@@ -306,9 +317,9 @@ const AdminPage: React.FC = () => {
     );
 
     const JournalEntryCard = ({ entry }: { entry: JournalEntryRead }) => (
-        <div className="search-card entry-card" onClick={() => openDetailModal(entry, 'journalEntry')}>
+        <div className="search-card entry-card" onClick={() => navigate(`/entries/${entry.id}`)}>
             <div className="card-header">
-                <div className="card-type">Journal Entry</div>
+                <div className="card-type">{translateCardType('paper')}</div>
                 <span className={`badge badge-${entry.status?.toLowerCase() || 'pending'}`}>
                     {translateStatus(entry.status)}
                 </span>
@@ -333,301 +344,6 @@ const AdminPage: React.FC = () => {
             </div>
             </div>
         );
-
-    // Function to handle navigation to detail pages
-    const navigateToDetailPage = () => {
-        if (!selectedItem || !selectedItemType) return;
-        
-        switch (selectedItemType) {
-            case 'user':
-                navigate(`/admin/users/profile/${selectedItem.id}`);
-                break;
-            case 'journal':
-                navigate(`/journals/${selectedItem.id}`);
-                break;
-            case 'journalEntry':
-                navigate(`/entries/${selectedItem.id}`);
-                break;
-        }
-        closeDetailModal();
-    };
-
-    // Detail Modal Component
-    const DetailModal = () => {
-        if (!showDetailModal || !selectedItem) return null;
-
-        const renderUserDetails = (user: UserRead) => (
-            <div className="detail-content">
-                <div className="detail-field">
-                    <label>ID:</label>
-                    <span>{user.id}</span>
-                    </div>
-                <div className="detail-field">
-                    <label>Email:</label>
-                    <span>{user.email}</span>
-                    </div>
-                <div className="detail-field">
-                    <label>Name:</label>
-                    <span>{user.name}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Title:</label>
-                    <span>{user.title || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Bio:</label>
-                    <span>{user.bio || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Telephone:</label>
-                    <span>{user.telephone || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Science Branch:</label>
-                    <span>{user.science_branch || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Location:</label>
-                    <span>{user.location || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>YOKSIS ID:</label>
-                    <span>{user.yoksis_id || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>ORCID ID:</label>
-                    <span>{user.orcid_id || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Role:</label>
-                    <span className={`badge badge-${user.role}`}>{user.role}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Authenticated:</label>
-                    <span>{user.is_auth ? 'Yes' : 'No'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Marked for Deletion:</label>
-                    <span>{user.marked_for_deletion ? 'Yes' : 'No'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Tutorial Done:</label>
-                    <span>{user.tutorial_done ? 'Yes' : 'No'}</span>
-                </div>
-            </div>
-        );
-
-        const renderJournalDetails = (journal: Journal) => (
-            <div className="detail-content">
-                <div className="detail-field">
-                    <label>ID:</label>
-                    <span>{journal.id}</span>
-                    </div>
-                <div className="detail-field">
-                    <label>Title (TR):</label>
-                    <span>{journal.title}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Title (EN):</label>
-                    <span>{journal.title_en || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Issue:</label>
-                    <span>{journal.issue}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Created Date:</label>
-                    <span>{journal.created_date ? formatDate(journal.created_date, language) : '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Publication Date:</label>
-                    <span>{journal.publication_date ? new Date(journal.publication_date).toLocaleDateString() : '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Publication Place:</label>
-                    <span>{journal.publication_place || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Published:</label>
-                    <span>{journal.is_published ? 'Yes' : 'No'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Cover Photo:</label>
-                    <span>
-                        {journal.cover_photo ? (
-                            <a href={journal.cover_photo} target="_blank" rel="noopener noreferrer" className="file-link">
-                                View File
-                                                            </a>
-                                                        ) : '-'}
-                    </span>
-                </div>
-                <div className="detail-field">
-                    <label>Meta Files:</label>
-                    <span>
-                        {journal.meta_files ? (
-                            <a href={journal.meta_files} target="_blank" rel="noopener noreferrer" className="file-link">
-                                View File
-                                                            </a>
-                                                        ) : '-'}
-                    </span>
-                </div>
-                <div className="detail-field">
-                    <label>Editor Notes:</label>
-                    <span>
-                        {journal.editor_notes ? (
-                            <a href={journal.editor_notes} target="_blank" rel="noopener noreferrer" className="file-link">
-                                View File
-                                                            </a>
-                                                        ) : '-'}
-                    </span>
-                </div>
-                <div className="detail-field">
-                    <label>Full PDF:</label>
-                    <span>
-                        {journal.full_pdf ? (
-                            <a href={journal.full_pdf} target="_blank" rel="noopener noreferrer" className="file-link">
-                                View File
-                                                            </a>
-                                                        ) : '-'}
-                    </span>
-                </div>
-            </div>
-        );
-
-        const renderJournalEntryDetails = (entry: JournalEntryRead) => (
-            <div className="detail-content">
-                <div className="detail-field">
-                    <label>ID:</label>
-                    <span>{entry.id}</span>
-                    </div>
-                <div className="detail-field">
-                    <label>Title (TR):</label>
-                    <span>{entry.title}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Title (EN):</label>
-                    <span>{entry.title_en || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Abstract (TR):</label>
-                    <span>{entry.abstract_tr || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Abstract (EN):</label>
-                    <span>{entry.abstract_en || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Keywords:</label>
-                    <span>{entry.keywords || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>DOI:</label>
-                    <span>{entry.doi || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Article Type:</label>
-                    <span>{entry.article_type || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Language:</label>
-                    <span>{entry.language || '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Status:</label>
-                    <span className={`badge badge-${entry.status?.toLowerCase() || 'pending'}`}>
-                        {translateStatus(entry.status)}
-                    </span>
-                </div>
-                <div className="detail-field">
-                    <label>Journal ID:</label>
-                    <span>{entry.journal_id}</span>
-                </div>
-                <div className="detail-field">
-                    <label>Authors:</label>
-                    <span>
-                        {entry.authors && entry.authors.length > 0 
-                            ? entry.authors.map(author => author.name).join(', ')
-                            : '-'
-                        }
-                    </span>
-                </div>
-                <div className="detail-field">
-                    <label>Created Date:</label>
-                    <span>{entry.created_date ? new Date(entry.created_date).toLocaleDateString() : '-'}</span>
-                </div>
-                <div className="detail-field">
-                    <label>File Path:</label>
-                    <span>
-                        {entry.file_path ? (
-                            <a href={entry.file_path} target="_blank" rel="noopener noreferrer" className="file-link">
-                                View File
-                            </a>
-                        ) : '-'}
-                    </span>
-                </div>
-            </div>
-        );
-
-                                                return (
-            <div className="detail-modal-overlay" onClick={closeDetailModal}>
-                <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
-                    <div className="detail-modal-header">
-                        <h2>
-                            {selectedItemType === 'user' && 'User Details'}
-                            {selectedItemType === 'journal' && 'Journal Details'}
-                            {selectedItemType === 'journalEntry' && 'Journal Entry Details'}
-                        </h2>
-                        <div className="detail-modal-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <button 
-                                className="detail-modal-navigate" 
-                                onClick={navigateToDetailPage}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    padding: '8px 12px',
-                                    backgroundColor: '#3b82f6',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    fontSize: '14px',
-                                    fontWeight: '500',
-                                    cursor: 'pointer',
-                                    transition: 'background-color 0.2s ease'
-                                }}
-                                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
-                                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
-                                title={
-                                    selectedItemType === 'user' ? 'Go to User Profile' :
-                                    selectedItemType === 'journal' ? 'Go to Journal Details' :
-                                    'Go to Entry Details'
-                                }
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                    <path d="M18 13V19C18 19.5304 17.7893 20.0391 17.4142 20.4142C17.0391 20.7893 16.5304 21 16 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V8C3 7.46957 3.21071 6.96086 3.58579 6.58579C3.96086 6.21071 4.46957 6 5 6H11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M15 3H21V9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M10 14L21 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                                {selectedItemType === 'user' ? t('viewProfile') || 'View Profile' :
-                                 selectedItemType === 'journal' ? t('viewDetails') || 'View Details' :
-                                 t('viewDetails') || 'View Details'}
-                            </button>
-                            <button className="detail-modal-close" onClick={closeDetailModal}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="detail-modal-content">
-                        {selectedItemType === 'user' && renderUserDetails(selectedItem)}
-                        {selectedItemType === 'journal' && renderJournalDetails(selectedItem)}
-                        {selectedItemType === 'journalEntry' && renderJournalEntryDetails(selectedItem)}
-                    </div>
-                </div>
-            </div>
-        );
-    };
 
     return (
         <>
@@ -696,7 +412,7 @@ const AdminPage: React.FC = () => {
                                 alignItems: 'center',
                                 gap: '8px',
                                 padding: '12px 20px',
-                                backgroundColor: '#10b981',
+                                backgroundColor: '#a855f7',
                                 color: 'white',
                                 textDecoration: 'none',
                                 borderRadius: '8px',
@@ -706,8 +422,8 @@ const AdminPage: React.FC = () => {
                                 border: 'none',
                                 cursor: 'pointer'
                             }}
-                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#a855f7'}
                         >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                 <path d="M4 19.5C4 18.119 5.119 17 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -722,9 +438,9 @@ const AdminPage: React.FC = () => {
                         <div className="search-results-container">
                             {/* Users Results */}
                             {filteredUsers.length > 0 && (
-                                <div className="search-section">
+                                <div className="search-section users-section">
                                     <h3 className="section-title">
-                                        Users ({filteredUsers.length})
+                                        {t('users') || 'Users'} ({filteredUsers.length})
                                     </h3>
                                     <div className="cards-grid">
                                         {filteredUsers.map(user => (
@@ -736,9 +452,9 @@ const AdminPage: React.FC = () => {
 
                             {/* Journals Results */}
                             {filteredJournals.length > 0 && (
-                                <div className="search-section">
+                                <div className="search-section journals-section">
                                     <h3 className="section-title">
-                                        Journals ({filteredJournals.length})
+                                        {t('journals') || 'Journals'} ({filteredJournals.length})
                                     </h3>
                                     <div className="cards-grid">
                                         {filteredJournals.map(journal => (
@@ -748,11 +464,11 @@ const AdminPage: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Journal Entries Results */}
+                            {/* Papers Results */}
                             {filteredJournalEntries.length > 0 && (
-                                <div className="search-section">
+                                <div className="search-section papers-section">
                                     <h3 className="section-title">
-                                        Journal Entries ({filteredJournalEntries.length})
+                                        {t('papers') || 'Papers'} ({filteredJournalEntries.length})
                                     </h3>
                                     <div className="cards-grid">
                                         {filteredJournalEntries.map(entry => (
@@ -789,9 +505,6 @@ const AdminPage: React.FC = () => {
                             </div>
                         </div>
                 )}
-
-                    {/* Detail Modal */}
-                    <DetailModal />
         </div>
             </div>
         </>

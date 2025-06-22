@@ -7,6 +7,7 @@ import { FaCreditCard, FaExclamationTriangle, FaChevronDown, FaChevronUp } from 
 import { HiMail, HiUser, HiDocumentText, HiAcademicCap, HiFingerPrint, HiIdentification, HiCalendar, HiCheckCircle, HiEye, HiDownload, HiGlobeAlt, HiLink } from 'react-icons/hi';
 import { PiSubtitlesFill } from "react-icons/pi";
 import Footer from '../components/Footer';
+import './JournalEntryDetailsPage.css';
 
 const JournalEntryDetailsPage: React.FC = () => {
   const { entryId } = useParams<{ entryId: string }>();
@@ -696,7 +697,7 @@ const JournalEntryDetailsPage: React.FC = () => {
           <div className="page-title-actions">
             {/* Reference Token - Always visible to all users */}
             {entry.random_token && (
-              <div style={{
+              <div className="reference-token-container" style={{
                 padding: '12px 16px',
                 background: 'rgba(255, 255, 255, 0.8)',
                 backdropFilter: 'blur(10px)',
@@ -848,7 +849,7 @@ const JournalEntryDetailsPage: React.FC = () => {
           {/* Authors and Published In Section - Side by Side */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            gridTemplateColumns: '1fr 0.8fr',
             gap: '24px',
             marginBottom: '32px'
           }}>
@@ -946,7 +947,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                 }}></div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '1fr' : entry.authors && entry.authors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '1fr' : 'repeat(2, 1fr)',
                   gap: '16px'
                 }}>
                   {entry.authors && entry.authors.length > 0 ? (
@@ -2196,7 +2197,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                 }}></div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: entry.referees && entry.referees.length === 1 ? '1fr' : 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gridTemplateColumns: entry.referees && entry.referees.length === 1 ? '1fr' : 'repeat(2, 1fr)',
                   gap: '16px'
                 }}>
                   {entry.referees && entry.referees.length > 0 ? (
@@ -2210,34 +2211,76 @@ const JournalEntryDetailsPage: React.FC = () => {
                           borderRadius: '16px',
                           border: '1px solid rgba(226, 232, 240, 0.6)',
                           transition: 'all 0.3s ease',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = 'rgba(139, 92, 246, 0.08)';
                           e.currentTarget.style.borderColor = '#8B5CF6';
                           e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 8px 24px rgba(139, 92, 246, 0.15)';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
                           e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
                           e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
-                        <h4 style={{
-                          fontSize: '16px',
-                          fontWeight: '700',
-                          color: '#1E293B',
-                          margin: '0 0 8px 0',
-                          letterSpacing: '-0.025em'
-                        }}>{referee.name}</h4>
-                        {referee.title && (
-                          <p style={{
-                            fontSize: '13px',
-                            color: '#64748B',
-                            margin: 0,
-                            fontWeight: '500'
-                          }}>{referee.title}</p>
-                        )}
+                        {/* Subtle background pattern */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '-50%',
+                          right: '-30%',
+                          width: '120px',
+                          height: '120px',
+                          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%)',
+                          borderRadius: '50%',
+                          zIndex: 0
+                        }}></div>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, zIndex: 1 }}>
+                          {/* User Avatar/Icon */}
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            background: 'rgba(100, 116, 139, 0.1)',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            border: '1px solid rgba(100, 116, 139, 0.2)'
+                          }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                              <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M9 12L11 14L15 10" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </div>
+                          
+                          {/* User Info */}
+                          <div style={{ flex: 1 }}>
+                            <div style={{ 
+                              fontSize: '16px', 
+                              fontWeight: '600', 
+                              color: '#1E293B'
+                            }}>{referee.name}</div>
+                            {referee.title && (
+                              <p style={{
+                                fontSize: '13px',
+                                color: '#64748B',
+                                margin: '4px 0 0 0',
+                                fontWeight: '500'
+                              }}>
+                                {referee.title}
+                              </p>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     ))
                   ) : (
@@ -3350,8 +3393,8 @@ const JournalEntryDetailsPage: React.FC = () => {
                       height: '40px',
                       borderRadius: '6px',
                       border: 'none',
-                      background: 'rgba(239, 68, 68, 0.1)',
-                      color: '#DC2626',
+                      background: 'rgba(148, 163, 184, 0.1)',
+                      color: '#64748B',
                       fontSize: '20px',
                       fontWeight: '500',
                       cursor: 'pointer',
@@ -3365,8 +3408,8 @@ const JournalEntryDetailsPage: React.FC = () => {
                       e.currentTarget.style.color = '#EF4444';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                      e.currentTarget.style.color = '#DC2626';
+                      e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
+                      e.currentTarget.style.color = '#64748B';
                     }}
                   >
                     ×

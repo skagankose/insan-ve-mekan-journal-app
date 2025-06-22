@@ -116,15 +116,18 @@
   line-height: 1.6;
   color: #4B5563;
   background-color: #ffffff;
+  margin-bottom: 0;
+  border-bottom: none;
 }
 
 .modal-footer {
-  padding: 1rem 1.5rem 1.5rem 1.5rem;
-  background-color: #F9FAFB;
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  background-color: #ffffff;
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-  border-top: 1px solid #E5E7EB;
+  margin-top: 0;
+  border-top: none;
 }
 
 .modal-button {

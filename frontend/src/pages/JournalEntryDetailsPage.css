@@ -52,12 +52,16 @@
 }
 
 .badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.85rem;
   font-weight: 500;
   margin-left: 5px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .badge-published {
@@ -315,5 +319,11 @@
   
   .action-buttons button {
     width: 100%;
+  }
+}
+
+@media (max-width: 1370px) {
+  .reference-token-container {
+    display: none !important;
   }
 } 

@@ -5,6 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import * as apiService from '../services/apiService';
 import { formatDate, getRoleTranslation } from '../utils/dateUtils';
 import { toast } from 'react-toastify';
+import ConfirmationModal from '../components/ConfirmationModal';
 import './JournalEntryUpdateDetailsPage.css';
 
 // Define a combined type for chat display
@@ -48,6 +49,11 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   const [authorNamesMap, setAuthorNamesMap] = useState<Map<number, string>>(new Map());
   const [refereeNamesMap, setRefereeNamesMap] = useState<Map<number, string>>(new Map());
   const [showParticipantsTooltip, setShowParticipantsTooltip] = useState<boolean>(false);
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>('');
+  const [toastType, setToastType] = useState<'success' | 'warning'>('success');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [updateToDelete, setUpdateToDelete] = useState<CombinedUpdate | null>(null);
   
   useEffect(() => {
     const fetchData = async () => {
@@ -264,21 +270,36 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   };
   
   const handleDeleteUpdate = async (update: CombinedUpdate) => {
-    if (!window.confirm(t('confirmDeleteUpdate') || 'Are you sure you want to delete this update?')) {
-      return;
-    }
+    setUpdateToDelete(update);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDeleteUpdate = async () => {
+    if (!updateToDelete) return;
+    
+    setIsDeleteModalOpen(false);
     
     try {
-      if (update.type === 'author') {
-        await apiService.deleteAuthorUpdate(update.id);
-        setAuthorUpdates(prev => prev.filter(item => item.id !== update.id));
+      if (updateToDelete.type === 'author') {
+        await apiService.deleteAuthorUpdate(updateToDelete.id);
+        setAuthorUpdates(prev => prev.filter(item => item.id !== updateToDelete.id));
       } else {
-        await apiService.deleteRefereeUpdate(update.id);
-        setRefereeUpdates(prev => prev.filter(item => item.id !== update.id));
+        await apiService.deleteRefereeUpdate(updateToDelete.id);
+        setRefereeUpdates(prev => prev.filter(item => item.id !== updateToDelete.id));
       }
+      
+      setToastMessage(t('updateDeleted') || 'Update deleted successfully!');
+      setToastType('success');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 4000);
     } catch (err) {
       console.error('Error deleting update:', err);
-      alert(t('deleteUpdateError') || 'Failed to delete the update');
+      setToastMessage(t('deleteUpdateError') || 'Failed to delete the update');
+      setToastType('warning');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 4000);
+    } finally {
+      setUpdateToDelete(null);
     }
   };
 
@@ -319,13 +340,182 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
       copyText += `${update.type === 'author' ? t('updatedFile') : t('reviewFile')}: Attached\n`;
     }
     
-    try {
-      await navigator.clipboard.writeText(copyText.trim());
-      toast.success(t('updateCopied') || 'Update content copied to clipboard!');
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
-      toast.error(t('copyFailed') || 'Failed to copy to clipboard');
+    const textToCopy = copyText.trim();
+    
+    // Try modern clipboard API first (works on HTTPS and some HTTP localhost)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        setToastMessage(t('updateCopied') || 'Update content copied to clipboard!');
+        setToastType('success');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 4000);
+        return;
+      } catch (err) {
+        console.warn('Modern clipboard API failed, trying fallback:', err);
+      }
     }
+    
+    // Fallback 1: Create a temporary textarea element
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = textToCopy;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      textArea.style.opacity = '0';
+      textArea.style.pointerEvents = 'none';
+      textArea.setAttribute('readonly', '');
+      textArea.setAttribute('contenteditable', 'true');
+      
+      document.body.appendChild(textArea);
+      
+      // For iOS devices, we need to handle selection differently
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        // iOS specific handling
+        textArea.contentEditable = 'true';
+        textArea.readOnly = true;
+        const range = document.createRange();
+        range.selectNodeContents(textArea);
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+        textArea.setSelectionRange(0, 999999);
+      } else {
+        // Standard handling for other devices
+        textArea.focus();
+        textArea.select();
+        textArea.setSelectionRange(0, 999999);
+      }
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        setToastMessage(t('updateCopied') || 'Update content copied to clipboard!');
+        setToastType('success');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 4000);
+        return;
+      } else {
+        throw new Error('execCommand copy failed');
+      }
+    } catch (err) {
+      console.warn('Textarea fallback failed, trying final fallback:', err);
+    }
+    
+    // Fallback 2: Use deprecated execCommand with direct selection (for very old browsers)
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = textToCopy;
+      document.body.appendChild(textArea);
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        setToastMessage(t('updateCopied') || 'Update content copied to clipboard!');
+        setToastType('success');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 4000);
+        return;
+      }
+    } catch (err) {
+      console.warn('Final execCommand fallback failed:', err);
+    }
+    
+    // If all methods fail, show the text in a modal for manual copying
+    const copyModal = document.createElement('div');
+    copyModal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+    
+    copyModal.innerHTML = `
+      <div style="
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 90%;
+        max-height: 80%;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      ">
+        <h3 style="margin: 0 0 16px 0; color: #1e293b; font-size: 18px; font-weight: 600;">
+          ${t('copyManually') || 'Copy Text Manually'}
+        </h3>
+        <p style="margin: 0 0 16px 0; color: #64748b; font-size: 14px;">
+          ${t('copyManuallyInstructions') || 'Please select and copy the text below:'}
+        </p>
+        <textarea 
+          readonly
+          style="
+            width: 100%;
+            height: 300px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            resize: vertical;
+            background: #f8fafc;
+          "
+          onclick="this.select()"
+        >${textToCopy}</textarea>
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px;">
+          <button onclick="this.closest('[style*=&quot;position: fixed&quot;]').remove()" style="
+            padding: 8px 16px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+          ">
+            ${t('close') || 'Close'}
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(copyModal);
+    
+    // Remove modal when clicking outside
+    copyModal.addEventListener('click', (e) => {
+      if (e.target === copyModal) {
+        document.body.removeChild(copyModal);
+      }
+    });
+    
+    // Focus and select the textarea
+    setTimeout(() => {
+      const textarea = copyModal.querySelector('textarea');
+      if (textarea) {
+        textarea.focus();
+        textarea.select();
+      }
+    }, 100);
+    
+    setToastMessage(t('copyManuallyToast') || 'Please copy the text manually from the popup');
+    setToastType('warning');
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 4000);
   };
   
   // Check if the current user is an author or referee for this entry
@@ -816,7 +1006,7 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
           )}
           
           {(user?.role === 'admin' || user?.role === 'editor' || user?.role === 'owner' || isJournalEditor) && (
-            <Link to={`/entries/edit/${entryId}`} className="chat-action-button secondary">
+            <Link to={`/entries/edit/${entryId}`} className="chat-action-button secondary edit-entry-button">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -1107,7 +1297,52 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
         )}
       </div>
 
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="toast-notification">
+          <div className={`toast-content toast-${toastType}`}>
+            <div className="toast-icon">
+              {toastType === 'success' ? '✓' : '⚠'}
+            </div>
+            <span className="toast-message">{toastMessage}</span>
+            <button 
+              className="toast-close"
+              onClick={() => setShowToast(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
+      {/* Confirmation Modal for Deleting Updates */}
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setUpdateToDelete(null);
+        }}
+        onConfirm={confirmDeleteUpdate}
+        title={t('deleteUpdate') || 'Delete Update'}
+        message={
+          updateToDelete
+            ? `${t('confirmDeleteUpdateMessage') || 'Are you sure you want to delete this'} ${
+                updateToDelete.type === 'author' ? t('authorUpdate') || 'author update' : t('refereeUpdate') || 'referee update'
+              }? ${t('thisActionCannotBeUndone') || 'This action cannot be undone.'}`
+            : ''
+        }
+        confirmText={t('deleteUpdate') || 'Delete Update'}
+        cancelText={t('cancel') || 'Cancel'}
+        variant="danger"
+        icon={
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+          </svg>
+        }
+      />
     </div>
   );
 };

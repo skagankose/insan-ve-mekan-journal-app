@@ -1580,7 +1580,7 @@ const JournalDetailsPage: React.FC = () => {
                                                 height: '36px',
                                                 background: journal.is_published 
                                                     ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
-                                                    : 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                                                    : '#FDE68A',
                                                 borderRadius: '10px',
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -1593,7 +1593,7 @@ const JournalDetailsPage: React.FC = () => {
                                                     </svg>
                                                 ) : (
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                        <path d="M12 6V12L16 16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                        <path d="M12 6V12L16 16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="#92400E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                                     </svg>
                                                 )}
                                             </div>
@@ -1609,7 +1609,7 @@ const JournalDetailsPage: React.FC = () => {
                                                 <div style={{ 
                                                     fontSize: '16px', 
                                                     fontWeight: '700', 
-                                                    color: journal.is_published ? '#059669' : '#D97706',
+                                                    color: journal.is_published ? '#059669' : '#92400E',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     gap: '8px'
@@ -1618,7 +1618,7 @@ const JournalDetailsPage: React.FC = () => {
                                             width: '8px',
                                             height: '8px',
                                             borderRadius: '50%',
-                                            background: journal.is_published ? '#10B981' : '#F59E0B'
+                                            background: journal.is_published ? '#10B981' : '#FDE68A'
                                         }}></div>
                                         {journal.is_published ? (t('published') || 'Published') : (t('inProgress') || 'In Progress')}
                                     </div>

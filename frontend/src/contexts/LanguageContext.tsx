@@ -55,7 +55,7 @@ type TranslationKeys =
   | 'footer.facebookAria' | 'footer.twitterAria' | 'footer.instagramAria' | 'footer.linkedinAria' | 'footer.allRightsReserved'
   | 'validation.required' | 'validation.email' | 'validation.minLength' | 'validation.maxLength' | 'validation.tooShort' | 'validation.tooLong'
   | 'admin.welcomeTitle' | 'admin.welcomeDescription' | 'admin.searchTipsTitle' | 'admin.searchTip1' | 'admin.searchTip2' | 'admin.searchTip3'
-  | 'searchResults' | 'users' | 'journals' | 'entries' | 'globalSearchPlaceholder'
+  | 'searchResults' | 'users' | 'journals' | 'papers' | 'entries' | 'globalSearchPlaceholder'
   | 'setAsActive' | 'mergeAndCreateToc'
   | 'backToJournals' | 'backToArchive' | 'failedToLoadJournalData' | 'loadingJournalData' | 'journalNotFound'
   | 'createdDate' | 'publicationStatus' | 'notPublished' | 'publicationPlace' | 'editorInChief' | 'none' | 'editors'
@@ -83,7 +83,10 @@ type TranslationKeys =
   | 'paperNotFoundTitle' | 'paperNotFoundExplanation'
   | 'tryAgain' | 'addAuthorUpdate' | 'addRefereeUpdate' | 'participants' | 'noParticipants'
   | 'pleaseConfirmEmail' | 'incorrectCredentials'
-  | 'registrationSuccessful' | 'registrationFailed' | 'emailAlreadyRegistered' | 'accountCreated' | 'registrationToastMessage';
+  | 'registrationSuccessful' | 'registrationFailed' | 'emailAlreadyRegistered' | 'accountCreated' | 'registrationToastMessage'
+  | 'copyFailed' | 'copyManually' | 'copyManuallyInstructions' | 'copyManuallyToast' | 'close' | 'copyUpdate'
+  | 'deleteUpdate' | 'confirmDeleteUpdateMessage' | 'authorUpdate' | 'refereeUpdate' | 'thisActionCannotBeUndone' | 'updateDeleted' | 'deleteUpdateError'
+  | 'user' | 'journal' | 'paper' | 'draft' | 'founder' | 'author';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -373,6 +376,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'searchResults': 'Search Results',
     'users': 'users',
     'journals': 'journals',
+    'papers': 'papers',
     'entries': 'entries',
     'globalSearchPlaceholder': 'Search users, journals, journal entries...',
     
@@ -519,6 +523,31 @@ const translations: Record<Language, TranslationDictionary> = {
     'emailAlreadyRegistered': 'Email already registered. Please use a different email or login.',
     'accountCreated': 'Account created successfully!',
     'registrationToastMessage': 'Account created successfully! Please check your email and confirm your address to complete registration.',
+    
+    // Copy functionality
+    'copyFailed': 'Failed to copy to clipboard',
+    'copyManually': 'Copy Text Manually',
+    'copyManuallyInstructions': 'Please select and copy the text below:',
+    'copyManuallyToast': 'Please copy the text manually from the popup',
+    'close': 'Close',
+    'copyUpdate': 'Copy Update',
+    
+    // Delete functionality
+    'deleteUpdate': 'Delete Update',
+    'confirmDeleteUpdateMessage': 'Are you sure you want to delete this',
+    'authorUpdate': 'author update',
+    'refereeUpdate': 'referee update',
+    'thisActionCannotBeUndone': 'This action cannot be undone.',
+    'updateDeleted': 'Update deleted successfully!',
+    'deleteUpdateError': 'Failed to delete the update',
+    
+    // Badge labels for AdminPage
+    'user': 'User',
+    'journal': 'Journal', 
+    'paper': 'Paper',
+    'draft': 'Draft',
+    'founder': 'Founder',
+    'author': 'Author',
   },
   tr: {
     // Navigation
@@ -589,14 +618,14 @@ const translations: Record<Language, TranslationDictionary> = {
     'statusNotAccepted': 'Kabul Edilmedi',
     
     // Entry status translations
-    'notAccepted': 'Kabul Edilmedi',
-    'waitingForPayment': 'Ödeme Bekleniyor',
-    'waitingForAuthors': 'Yazarlar Bekleniyor',
-    'waitingForReferees': 'Hakemler Bekleniyor',
-    'waitingForEditors': 'Editörler Bekleniyor',
+    'notAccepted': 'KABUL EDİLMEDİ',
+    'waitingForPayment': 'Ödeme BEKLENİYOR',
+    'waitingForAuthors': 'Yazarlar BEKLENİYOR',
+    'waitingForReferees': 'Hakemler BEKLENİYOR',
+    'waitingForEditors': 'Editörler BEKLENİYOR',
     'rejected': 'Kabul Edilmedi',
     'pending': 'Beklemede',
-    'accepted': 'Kabul Edildi',
+    'accepted': 'Kabul EDİLDİ',
     'inProgress': 'Devam Ediyor',
     
     // Placeholders
@@ -624,15 +653,15 @@ const translations: Record<Language, TranslationDictionary> = {
 
     // Roles
     'writer': 'Yazar',
-    'editor': 'Editör',
-    'arbitrator': 'Hakem',
-    'admin': 'Yönetici',
+    'editor': 'EDİTÖR',
+    'arbitrator': 'HAKEM',
+    'admin': 'YÖNETİCİ',
     'owner': 'Kurucu',
     'roleAuthor': 'Yazar',
     'roleAdmin': 'Site Yöneticisi',
     'roleOwner': 'Site Sahibi',
     'roleEditor': 'Editör',
-    'roleReferee': 'Hakem',
+    'roleReferee': 'HAKEM',
     'isAuth': 'Yetkilendir',
     'isAuthDescription': 'Etkinleştirildiğinde, bu kullanıcı atanan rolü için sisteme erişime sahip olacaktır.',
 
@@ -802,8 +831,9 @@ const translations: Record<Language, TranslationDictionary> = {
     
     // Search Results
     'searchResults': 'Arama Sonuçları',
-    'users': 'kullanıcı',
-    'journals': 'dergi',
+    'users': 'Kullanıcılar',
+    'journals': 'Dergiler',
+    'papers': 'Makaleler',
     'entries': 'makale',
     'globalSearchPlaceholder': 'Kullanıcı, dergi, dergi yazısı ara...',
     
@@ -950,6 +980,31 @@ const translations: Record<Language, TranslationDictionary> = {
     'emailAlreadyRegistered': 'E-posta adresi zaten kayıtlı. Farklı bir e-posta kullanın veya giriş yapın.',
     'accountCreated': 'Hesap başarıyla oluşturuldu!',
     'registrationToastMessage': 'Hesap başarıyla oluşturuldu! Aktivasyon için e-postanızı onaylayınız.',
+    
+    // Copy functionality
+    'copyFailed': 'Panoya kopyalama başarısız',
+    'copyManually': 'Metni Manuel Olarak Kopyala',
+    'copyManuallyInstructions': 'Lütfen aşağıdaki metni seçin ve kopyalayın:',
+    'copyManuallyToast': 'Lütfen açılan pencereden metni manuel olarak kopyalayın',
+    'close': 'Kapat',
+    'copyUpdate': 'Güncellemeyi Kopyala',
+    
+    // Delete functionality
+    'deleteUpdate': 'Girdiyi Sil',
+    'confirmDeleteUpdateMessage': 'Bu',
+    'authorUpdate': 'Yazar güncellemesini silmek istediğinize emin misiniz',
+    'refereeUpdate': 'Hakem değerlendirmesini silmek istediğinize emin misiniz',
+    'thisActionCannotBeUndone': 'Bu işlem geri alınamaz.',
+    'updateDeleted': 'Güncelleme başarıyla silindi!',
+    'deleteUpdateError': 'Güncelleme silinirken hata oluştu',
+    
+    // Badge labels for AdminPage
+    'user': 'Kullanıcı',
+    'journal': 'DERGİ',
+    'paper': 'Makale', 
+    'draft': 'Taslak',
+    'founder': 'Kurucu',
+    'author': 'Yazar',
   }
 };
 

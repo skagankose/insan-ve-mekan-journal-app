@@ -7,6 +7,7 @@ import FormattedIdInput from '../components/FormattedIdInput';
 import LocationInput from '../components/LocationInput';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { validateYoksisId, validateOrcidId, validatePhoneNumber } from '../utils/validation';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import '../styles/FormattedIdInput.css';
 
 // Country code to flag mapping (copied from RegisterPage)
@@ -65,6 +66,11 @@ const ProfileEditPage: React.FC = () => {
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [isChangingPassword, setIsChangingPassword] = useState<boolean>(false);
+    
+    // Password visibility state
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
     
     // Collapsible sections state
     const [isPasswordSectionExpanded, setIsPasswordSectionExpanded] = useState<boolean>(false);
@@ -608,40 +614,60 @@ const ProfileEditPage: React.FC = () => {
                     </div>
                     
                     {isPasswordSectionExpanded && (
-                        <div style={{ padding: '1.5rem' }}>
+                        <div style={{ padding: '1.5rem', backgroundColor: 'white' }}>
                             <form className="register-form password-change-section" onSubmit={handlePasswordChange} style={{ padding: '0' }}>
 
                         <div className="form-group">
                             <label htmlFor="currentPassword">{t('currentPassword') || 'Current Password'}</label>
-                            <input
-                                type="password"
-                                id="currentPassword"
-                                value={currentPassword}
-                                onChange={(e) => {
-                                    setCurrentPassword(e.target.value);
-                                    setPasswordError(null);
-                                }}
-                                className="form-input"
-                                required
-                                disabled={isChangingPassword}
-                            />
+                            <div className="password-input-container">
+                                <input
+                                    type={showCurrentPassword ? "text" : "password"}
+                                    id="currentPassword"
+                                    value={currentPassword}
+                                    onChange={(e) => {
+                                        setCurrentPassword(e.target.value);
+                                        setPasswordError(null);
+                                    }}
+                                    className="form-input"
+                                    required
+                                    disabled={isChangingPassword}
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
+                                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                    disabled={isChangingPassword}
+                                >
+                                    {showCurrentPassword ? <FiEyeOff /> : <FiEye />}
+                                </button>
+                            </div>
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="newPassword">{t('newPassword') || 'New Password'}</label>
-                            <input
-                                type="password"
-                                id="newPassword"
-                                value={newPassword}
-                                onChange={(e) => {
-                                    setNewPassword(e.target.value);
-                                    setPasswordError(null);
-                                }}
-                                className="form-input"
-                                required
-                                disabled={isChangingPassword}
-                                minLength={8}
-                            />
+                            <div className="password-input-container">
+                                <input
+                                    type={showNewPassword ? "text" : "password"}
+                                    id="newPassword"
+                                    value={newPassword}
+                                    onChange={(e) => {
+                                        setNewPassword(e.target.value);
+                                        setPasswordError(null);
+                                    }}
+                                    className="form-input"
+                                    required
+                                    disabled={isChangingPassword}
+                                    minLength={8}
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
+                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                    disabled={isChangingPassword}
+                                >
+                                    {showNewPassword ? <FiEyeOff /> : <FiEye />}
+                                </button>
+                            </div>
                             <div className="password-requirements" style={{ background: 'rgba(254, 243, 199, 0.4)', border: '1px solid #F59E0B' }}>
                                 <div className="password-requirements-list" style={{ color: '#B45309', fontSize: '0.875rem', marginTop: '0.5rem' }}>
                                     <div>• {t('passwordMinLength') || 'At least 8 characters long'}</div>
@@ -653,19 +679,29 @@ const ProfileEditPage: React.FC = () => {
 
                         <div className="form-group">
                             <label htmlFor="confirmNewPassword">{t('confirmPassword') || 'Confirm New Password'}</label>
-                            <input
-                                type="password"
-                                id="confirmNewPassword"
-                                value={confirmNewPassword}
-                                onChange={(e) => {
-                                    setConfirmNewPassword(e.target.value);
-                                    setPasswordError(null);
-                                }}
-                                className="form-input"
-                                required
-                                disabled={isChangingPassword}
-                                minLength={8}
-                            />
+                            <div className="password-input-container">
+                                <input
+                                    type={showConfirmNewPassword ? "text" : "password"}
+                                    id="confirmNewPassword"
+                                    value={confirmNewPassword}
+                                    onChange={(e) => {
+                                        setConfirmNewPassword(e.target.value);
+                                        setPasswordError(null);
+                                    }}
+                                    className="form-input"
+                                    required
+                                    disabled={isChangingPassword}
+                                    minLength={8}
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
+                                    onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                                    disabled={isChangingPassword}
+                                >
+                                    {showConfirmNewPassword ? <FiEyeOff /> : <FiEye />}
+                                </button>
+                            </div>
                         </div>
 
                         {passwordError && (
@@ -767,7 +803,7 @@ const ProfileEditPage: React.FC = () => {
                     </div>
                     
                     {isDeletionSectionExpanded && (
-                        <div style={{ textAlign: 'center', padding: '1.5rem' }}>
+                        <div style={{ textAlign: 'center', padding: '1.5rem', backgroundColor: 'white' }}>
                         
                         <p style={{ 
                             color: '#6B7280', 

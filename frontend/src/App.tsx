@@ -6,8 +6,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { motion } from 'framer-motion';
-import { FaBuilding, FaSearch } from 'react-icons/fa';
-import { MdExplore } from 'react-icons/md';
+import { FaBuilding, FaSearch, FaUsers } from 'react-icons/fa';
+import { MdArticle, MdExplore } from 'react-icons/md';
 
 // Import page components
 import LoginPage from './pages/LoginPage';
@@ -178,6 +178,31 @@ const NotFoundPage = () => {
   );
 };
 
+const DesktopOnlyMessage: React.FC = () => {
+  const { language } = useLanguage();
+
+  return (
+    <div className="desktop-only-message">
+      <div className="desktop-only-message-box">
+        <div className="desktop-only-logo-container">
+          <div className="desktop-only-logo">
+            <MdArticle className="logo-icon-article" />
+            <FaUsers className="logo-icon-users" />
+          </div>
+        </div>
+        <h1>
+          {language === 'en' ? 'Human & Space' : 'İnsan & Mekan'}
+        </h1>
+        <p>
+          {language === 'en' 
+            ? 'This web application is designed for a rich, interactive experience on desktop computers. For full functionality, including dashboards and detailed views, please switch to a larger screen.' 
+            : 'Bu web uygulaması, masaüstü bilgisayarlarda zengin ve etkileşimli bir deneyim için tasarlanmıştır. Panolar ve ayrıntılı görünümler dahil olmak üzere tüm işlevler için lütfen daha büyük bir ekrana geçin.'}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const location = useLocation();
@@ -191,111 +216,114 @@ const App: React.FC = () => {
   }
 
   return (
-    <GoogleOAuthProvider clientId={googleClientId}>
-      <div className="app-container">
-        <Navbar /> 
-        <div className="content-area">
-          {!hideSidebar && <Sidebar />}
-          <main className={`main-content ${hideSidebar ? 'no-sidebar' : ''}`}>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/general-info" element={<GeneralInfoPage />} />
-              <Route path="/auto-login" element={<AutoLoginPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+    <>
+      <DesktopOnlyMessage />
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <div className="app-container">
+          <Navbar /> 
+          <div className="content-area">
+            {!hideSidebar && <Sidebar />}
+            <main className={`main-content ${hideSidebar ? 'no-sidebar' : ''}`}>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/general-info" element={<GeneralInfoPage />} />
+                <Route path="/auto-login" element={<AutoLoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
-              {/* Protected Routes */}
-              <Route path="/entries/new" element={
-                <UserRoute>
-                  <JournalCreatePage />
-                </UserRoute>
-              } />
-              <Route path="/entries/edit/:id" element={
-                <UserRoute>
-                  <JournalEditPage />
-                </UserRoute>
-              } />
-              <Route path="/entries/:entryId/updates" element={
-                <UserRoute>
-                  <JournalEntryUpdateDetailsPage />
-                </UserRoute>
-              } />
-              <Route path="/entries/:entryId" element={<JournalEntryDetailsPage />} />
-              <Route path="/entries/:entryId/author-update/new" element={
-                <UserRoute>
-                  <AuthorUpdateFormPage />
-                </UserRoute>
-              } />
-              <Route path="/entries/:entryId/referee-update/new" element={
-                <UserRoute>
-                  <RefereeUpdateFormPage />
-                </UserRoute>
-              } />
-              <Route path="/archive" element={<ArchivedJournalsPage />} />
-              <Route path="/profile" element={
-                <UserRoute>
-                  <UserProfilePage />
-                </UserRoute>
-              } />
-              <Route path="/profile/edit" element={
-                <UserRoute>
-                  <ProfileEditPage />
-                </UserRoute>
-              } />
-              
-              <Route path="/editor/journals" element={
-                <EditorRoute>
-                  <EditorJournalsPage />
-                </EditorRoute>
-              } />
-              
-              <Route path="/journals/:journalId" element={<JournalDetailsPage />} />
-              
-              {/* Admin Routes */}
-              <Route path="/" element={<ArchivedJournalsPage />} />
-              
-              <Route path="/journals/new" element={
-                <AdminRoute>
-                  <JournalCreateFormPage />
-                </AdminRoute>
-              } />
-              <Route path="/journals/edit/:id" element={
-                <AdminRoute>
-                  <JournalEditFormPage />
-                </AdminRoute>
-              } />
-              <Route path="/admin" element={
-                <AdminRoute>
-                  <AdminPage />
-                </AdminRoute>
-              } />
-              <Route path="/admin/users/edit/:id" element={
-                <AdminRoute>
-                  <EditUserPage />
-                </AdminRoute>
-              } />
-              <Route path="/admin/users/create" element={
-                <AdminRoute>
-                  <CreateUserPage />
-                </AdminRoute>
-              } />
-              <Route path="/admin/users/profile/:id" element={
-                <AdminRoute>
-                  <UserProfilePage />
-                </AdminRoute>
-              } />
-              
-              {/* Add a 404 Not Found route */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </main>
+                {/* Protected Routes */}
+                <Route path="/entries/new" element={
+                  <UserRoute>
+                    <JournalCreatePage />
+                  </UserRoute>
+                } />
+                <Route path="/entries/edit/:id" element={
+                  <UserRoute>
+                    <JournalEditPage />
+                  </UserRoute>
+                } />
+                <Route path="/entries/:entryId/updates" element={
+                  <UserRoute>
+                    <JournalEntryUpdateDetailsPage />
+                  </UserRoute>
+                } />
+                <Route path="/entries/:entryId" element={<JournalEntryDetailsPage />} />
+                <Route path="/entries/:entryId/author-update/new" element={
+                  <UserRoute>
+                    <AuthorUpdateFormPage />
+                  </UserRoute>
+                } />
+                <Route path="/entries/:entryId/referee-update/new" element={
+                  <UserRoute>
+                    <RefereeUpdateFormPage />
+                  </UserRoute>
+                } />
+                <Route path="/archive" element={<ArchivedJournalsPage />} />
+                <Route path="/profile" element={
+                  <UserRoute>
+                    <UserProfilePage />
+                  </UserRoute>
+                } />
+                <Route path="/profile/edit" element={
+                  <UserRoute>
+                    <ProfileEditPage />
+                  </UserRoute>
+                } />
+                
+                <Route path="/editor/journals" element={
+                  <EditorRoute>
+                    <EditorJournalsPage />
+                  </EditorRoute>
+                } />
+                
+                <Route path="/journals/:journalId" element={<JournalDetailsPage />} />
+                
+                {/* Admin Routes */}
+                <Route path="/" element={<ArchivedJournalsPage />} />
+                
+                <Route path="/journals/new" element={
+                  <AdminRoute>
+                    <JournalCreateFormPage />
+                  </AdminRoute>
+                } />
+                <Route path="/journals/edit/:id" element={
+                  <AdminRoute>
+                    <JournalEditFormPage />
+                  </AdminRoute>
+                } />
+                <Route path="/admin" element={
+                  <AdminRoute>
+                    <AdminPage />
+                  </AdminRoute>
+                } />
+                <Route path="/admin/users/edit/:id" element={
+                  <AdminRoute>
+                    <EditUserPage />
+                  </AdminRoute>
+                } />
+                <Route path="/admin/users/create" element={
+                  <AdminRoute>
+                    <CreateUserPage />
+                  </AdminRoute>
+                } />
+                <Route path="/admin/users/profile/:id" element={
+                  <AdminRoute>
+                    <UserProfilePage />
+                  </AdminRoute>
+                } />
+                
+                {/* Add a 404 Not Found route */}
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </main>
+          </div>
+          <ToastContainer position="top-right" autoClose={5000} />
         </div>
-        <ToastContainer position="top-right" autoClose={5000} />
-      </div>
-    </GoogleOAuthProvider>
+      </GoogleOAuthProvider>
+    </>
   )
 }
 

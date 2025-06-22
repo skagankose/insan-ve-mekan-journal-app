@@ -35,4 +35,83 @@
 
 .formatted-id-input .orcid-link:hover {
     text-decoration: underline;
+}
+
+/* Password input with toggle button styles */
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-input-container .form-input {
+    flex: 1;
+    padding-right: 60px; /* Increased padding to make room for Safari's autofill + our toggle */
+}
+
+/* Safari autofill icon handling */
+.password-input-container input::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+}
+
+/* Hide Safari's built-in password reveal button */
+.password-input-container input::-ms-reveal {
+    display: none;
+}
+
+.password-input-container input::-webkit-textfield-decoration-container {
+    visibility: hidden;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px;
+    line-height: 1;
+    color: #6B7280; /* Gray color */
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.2s ease;
+    pointer-events: none; /* Disable pointer events when hidden */
+    z-index: 10; /* Ensure it's above Safari's icons */
+}
+
+/* Show button when input is focused or hovered */
+.password-input-container:hover .password-toggle-btn,
+.password-input-container .form-input:focus + .password-toggle-btn,
+.password-input-container .form-input:focus-within + .password-toggle-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Alternative approach: show when container has focus-within */
+.password-input-container:focus-within .password-toggle-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.password-toggle-btn:hover {
+    color: #374151; /* Darker gray on hover */
+}
+
+.password-toggle-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    color: #9CA3AF; /* Lighter gray when disabled */
+}
+
+.password-toggle-btn:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 2px;
+    opacity: 1;
 } 

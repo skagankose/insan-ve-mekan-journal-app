@@ -289,17 +289,17 @@ const EditorJournalsPage: React.FC = () => {
                                     animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
                                     cursor: 'pointer',
                                     border: activeJournal?.id === journal.id 
-                                        ? '2px solid #14B8A6' 
-                                        : '1px solid rgba(20, 184, 166, 0.2)'
+                                        ? `2px solid ${journal.is_published ? '#14B8A6' : '#F59E0B'}` 
+                                        : `1px solid ${journal.is_published ? 'rgba(20, 184, 166, 0.2)' : 'rgba(245, 158, 11, 0.2)'}`
                                 }}
                                 onMouseEnter={e => {
                                     e.currentTarget.style.transform = 'translateY(-6px) scale(1.025)';
-                                    e.currentTarget.style.borderColor = '#14B8A6';
+                                    e.currentTarget.style.borderColor = journal.is_published ? '#14B8A6' : '#F59E0B';
                                 }}
                                 onMouseLeave={e => {
                                     e.currentTarget.style.transform = journal.isExpanded ? 'scale(1.02)' : 'scale(1)';
                                     const shouldKeepSpecialBorder = journal.isExpanded || activeJournal?.id === journal.id;
-                                    e.currentTarget.style.borderColor = shouldKeepSpecialBorder ? '#14B8A6' : 'rgba(20, 184, 166, 0.2)';
+                                    e.currentTarget.style.borderColor = shouldKeepSpecialBorder ? (journal.is_published ? '#14B8A6' : '#F59E0B') : (journal.is_published ? 'rgba(20, 184, 166, 0.2)' : 'rgba(245, 158, 11, 0.2)');
                                 }}
                             >
                                 <div 
@@ -307,7 +307,9 @@ const EditorJournalsPage: React.FC = () => {
                                     style={{
                                         padding: '32px',
                                         background: journal.isExpanded 
-                                            ? 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)'
+                                            ? (journal.is_published 
+                                                ? 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)'
+                                                : 'linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%)')
                                             : 'rgba(255,255,255,0.7)',
                                         cursor: 'pointer',
                                         position: 'relative',
@@ -320,7 +322,9 @@ const EditorJournalsPage: React.FC = () => {
                                         top: 0, right: 0, width: '300px', height: '300px',
                                         background: journal.isExpanded 
                                             ? 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)'
-                                            : 'radial-gradient(circle, rgba(20,184,166,0.03) 0%, transparent 70%)',
+                                            : (journal.is_published 
+                                                ? 'radial-gradient(circle, rgba(20,184,166,0.03) 0%, transparent 70%)'
+                                                : 'radial-gradient(circle, rgba(245,158,11,0.03) 0%, transparent 70%)'),
                                         transform: 'translate(50%, -50%)', pointerEvents: 'none'
                                     }}></div>
                                     
@@ -337,7 +341,7 @@ const EditorJournalsPage: React.FC = () => {
                                                     {journal.isExpanded ? (
                                                         <HiChevronDown 
                                                             size={20} 
-                                                            color={journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B'}
+                                                            color={journal.isExpanded ? (journal.is_published ? 'rgba(255, 255, 255, 0.9)' : '#451A03') : '#64748B'}
                                                             style={{
                                                                 transition: 'all 0.3s ease'
                                                             }}
@@ -345,21 +349,21 @@ const EditorJournalsPage: React.FC = () => {
                                                     ) : (
                                                         <HiChevronRight 
                                                             size={20} 
-                                                            color={journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B'}
+                                                            color={journal.isExpanded ? (journal.is_published ? 'rgba(255, 255, 255, 0.9)' : '#451A03') : '#64748B'}
                                                             style={{
                                                                 transition: 'all 0.3s ease'
                                                             }}
                                                         />
                                                     )}
                                                 </div>
-                                                <h3 style={{ margin: 0, fontSize: '28px', fontWeight: '700', color: journal.isExpanded ? 'white' : '#1E293B', letterSpacing: '-0.025em', transition: 'color 0.4s ease' }}>
+                                                <h3 style={{ margin: 0, fontSize: '28px', fontWeight: '700', color: journal.isExpanded ? (journal.is_published ? 'white' : '#451A03') : '#1E293B', letterSpacing: '-0.025em', transition: 'color 0.4s ease' }}>
                                                     {language === 'en' && journal.title_en ? journal.title_en : journal.title}
                                                     {activeJournal?.id === journal.id && (
                                                         <span style={{
                                                             marginLeft: '12px',
                                                             fontSize: '12px', 
-                                                            backgroundColor: journal.isExpanded ? 'rgba(255,255,255,0.2)' : '#14B8A6',
-                                                            color: journal.isExpanded ? 'white' : 'white',
+                                                            backgroundColor: journal.isExpanded ? 'rgba(255,255,255,0.2)' : (journal.is_published ? '#14B8A6' : '#F59E0B'),
+                                                            color: journal.isExpanded ? (journal.is_published ? 'white' : '#451A03') : 'white',
                                                             padding: '4px 10px',
                                                             borderRadius: '20px',
                                                             fontWeight: '600'
@@ -370,13 +374,13 @@ const EditorJournalsPage: React.FC = () => {
                                                 </h3>
                                             </div>
                                             <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B', transition: 'color 0.4s ease' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: journal.isExpanded ? (journal.is_published ? 'rgba(255, 255, 255, 0.9)' : '#451A03') : '#64748B', transition: 'color 0.4s ease' }}>
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                         <path d="M9 11H15M9 15H15M17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V5C19 3.89543 18.1046 3 17 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                                     </svg>
                                                     <span style={{ fontSize: '14px', fontWeight: '400' }}>{t('issue')}: #{journal.issue}</span>
                                                 </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: journal.isExpanded ? 'rgba(255, 255, 255, 0.9)' : '#64748B', transition: 'color 0.4s ease' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: journal.isExpanded ? (journal.is_published ? 'rgba(255, 255, 255, 0.9)' : '#451A03') : '#64748B', transition: 'color 0.4s ease' }}>
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                         <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                                     </svg>
@@ -390,8 +394,8 @@ const EditorJournalsPage: React.FC = () => {
                                                 onClick={(e) => e.stopPropagation()}
                                                 style={{
                                                     padding: '12px 24px',
-                                                    background: journal.isExpanded ? 'white' : 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-                                                    color: journal.isExpanded ? '#14B8A6' : 'white',
+                                                    background: journal.isExpanded ? 'white' : (journal.is_published ? 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' : 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)'),
+                                                    color: journal.isExpanded ? (journal.is_published ? '#14B8A6' : '#F59E0B') : 'white',
                                                     borderRadius: '12px', fontSize: '14px', fontWeight: '600', textDecoration: 'none',
                                                     display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'all 0.3s ease',
                                                     boxShadow: 'none',
@@ -419,12 +423,12 @@ const EditorJournalsPage: React.FC = () => {
                                 }}>
                                     <div style={{ padding: '40px', opacity: journal.isExpanded ? '1' : '0', transform: journal.isExpanded ? 'translateY(0)' : 'translateY(-20px)', transition: 'all 0.4s ease 0.2s' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-                                            <div style={{ width: '4px', height: '24px', background: 'linear-gradient(180deg, #14B8A6 0%, #0D9488 100%)', borderRadius: '2px' }}></div>
+                                            <div style={{ width: '4px', height: '24px', background: journal.is_published ? 'linear-gradient(180deg, #14B8A6 0%, #0D9488 100%)' : 'linear-gradient(180deg, #F59E0B 0%, #D97706 100%)', borderRadius: '2px' }}></div>
                                             <h4 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#1E293B', letterSpacing: '-0.025em' }}>
                                                 {t('entriesInJournal') || 'Entries in this Journal'}
                                             </h4>
                                             {journal.entries.length > 0 && (
-                                                <span style={{ padding: '4px 12px', background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)', color: 'white', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
+                                                <span style={{ padding: '4px 12px', background: journal.is_published ? 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' : 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', color: 'white', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
                                                     {journal.entries.length}
                                                 </span>
                                             )}

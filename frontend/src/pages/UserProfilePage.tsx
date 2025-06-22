@@ -845,8 +845,8 @@ const UserProfilePage: React.FC = () => {
                         ) : (
                             <span style={{
                                 padding: '4px 8px',
-                                background: '#F59E0B',
-                                color: 'white',
+                                background: '#FDE68A',
+                                color: '#92400E',
                                 borderRadius: '6px',
                                 fontSize: '12px',
                                 fontWeight: '600',

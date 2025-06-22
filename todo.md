@@ -8,9 +8,9 @@ Public/Authentication Pages
 [ - ] ForgotPasswordPage - Password Recovery
 [ - ] ResetPasswordPage - Password Reset (with token parameter)
 [ - ] Confirmations E-mail
-[ - ] Update E-mails (Referee Assigned, Author Updatem, Referee Update)
+[ - ] Update E-mails (Referee Assigned, Author Updated, Referee Update)
 
-Public Content Pages
+Public Pages
 [ + ] ArchivedJournalsPage - Journal List - Published
 [ + ] JournalDetailsPage - Journal Details
 [ + ] JournalEntriesPage - ?????
@@ -18,9 +18,10 @@ Public Content Pages
 [ + ] About Page
 [ + ] General Information Page
 
-Protected User Pages
-[ + ] UserProfilePage - User Profile
+Protected by User Role Pages
+[ + ] EditorJournalsPage - Journal List - All
 [ + ] JournalEntryUpdateDetailsPage - Entry Update Details
+[ + ] UserProfilePage - User Profile
 --------------------------------------------------------------- Create & Edit & Delete
 [ + ] ProfileEditPage - User Edit Profile
 [ - ] JournalCreatePage - Entry Create
@@ -31,24 +32,10 @@ Protected User Pages
 Admin-Only Pages
 [ - ] AdminPage - Dashboard
 --------------------------------------------------------------- Create & Edit & Delete
-[ - ] JournalCreateFormPage - Journal Create
+[ + ] JournalCreateFormPage - Journal Create
 [ - ] JournalEditFormPage - Journal Edit
-[ - ] EditUserPage - User Edit
 [ - ] CreateUserPage - User Create
-
-Editor-Only Pages
-[ + ] EditorJournalsPage - Journal List - All
+[ - ] EditUserPage - User Edit
 
 Error/Fallback Pages
 [ + ] 404 Not Found
-
-Page Access Levels:
-Public: 7 pages (authentication + password recovery)
-User Protected: 7 pages (requires login)
-Public Content: 4 pages (viewable by anyone)
-Editor Only: 1 page (requires editor+ role)
-Admin Only: 5 pages (requires admin+ role)
-
-Toast Messages in CREATE and EDIT and DELETE forms
-Check Pop Up Windows in All Pages
-Add Not Found Pages for Journal Entries and Users

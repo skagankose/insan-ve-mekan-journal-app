@@ -3,7 +3,9 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { GoogleLogin } from '@react-oauth/google';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import '../styles/LoginPage.css';
+import '../styles/FormattedIdInput.css';
 import '../pages/UserProfilePage.css'; // Import toast styles
 
 const LoginPage: React.FC = () => {
@@ -11,6 +13,7 @@ const LoginPage: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [showToast, setShowToast] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     const { login, loginWithGoogle, isLoading } = useAuth();
@@ -109,13 +112,22 @@ const LoginPage: React.FC = () => {
                     </div>
                     <div className="form-group">
                         <label htmlFor="password">{t('password')}</label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
+                        <div className="password-input-container">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                className="password-toggle-btn"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? <FiEyeOff /> : <FiEye />}
+                            </button>
+                        </div>
                         <div className="forgot-password-link">
                             <Link to="/forgot-password">{t('forgotPassword')}</Link>
                         </div>

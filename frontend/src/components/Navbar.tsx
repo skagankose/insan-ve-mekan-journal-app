@@ -92,23 +92,27 @@ const Navbar: React.FC = () => {
                 <div className="navbar-menu" style={{ marginLeft: 'auto', gap: '24px' }}>
                     <div className="navbar-end" style={{ gap: '16px', alignItems: 'center' }}>
                         {/* Add navigation links for public pages */}
-                        <Link to="/about" className="navbar-item" style={{
+                        <Link to="/about" className="navbar-nav-link" style={{
                             color: '#0D9488',
                             fontWeight: '600',
                             position: 'relative',
                             padding: '8px 16px',
                             borderRadius: '8px',
-                            transition: 'all 0.3s ease'
+                            transition: 'all 0.3s ease',
+                            textDecoration: 'none',
+                            overflow: 'hidden'
                         }}>
                             {t('about')}
                         </Link>
-                        <Link to="/general-info" className="navbar-item" style={{
+                        <Link to="/general-info" className="navbar-nav-link" style={{
                             color: '#0D9488',
                             fontWeight: '600',
                             position: 'relative',
                             padding: '8px 16px',
                             borderRadius: '8px',
-                            transition: 'all 0.3s ease'
+                            transition: 'all 0.3s ease',
+                            textDecoration: 'none',
+                            overflow: 'hidden'
                         }}>
                             {t('generalInformation')}
                         </Link>
@@ -295,9 +299,37 @@ const Navbar: React.FC = () => {
                         color: #0D9488;
                         border-color: #0D9488;
                     }
-                    .navbar-item a:hover {
+                    .navbar-nav-link {
+                        position: relative;
+                        display: inline-block;
+                    }
+                    .navbar-nav-link::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(20, 184, 166, 0.05) 100%);
+                        border-radius: 8px;
+                        opacity: 0;
+                        transform: scale(0.8);
+                        transition: all 0.3s ease;
+                        z-index: -1;
+                    }
+                    .navbar-nav-link:hover {
                         color: #0D9488;
-                        background: rgba(20, 184, 166, 0.1);
+                        text-decoration: none;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+                    }
+                    .navbar-nav-link:hover::before {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                    .navbar-nav-link:active {
+                        transform: translateY(0px);
+                        transition: all 0.1s ease;
                     }
                     .badge {
                         padding: 4px 10px;
@@ -330,6 +362,18 @@ const Navbar: React.FC = () => {
                         transform: translateY(-1px);
                         box-shadow: 0 2px 8px rgba(20, 184, 166, 0.2);
                         outline: none;
+                    }
+
+                    .navbar-end > * {
+                        flex-shrink: 0;
+                    }
+
+                    @media (max-width: 1350px) {
+                        .user-greeting,
+                        .badge.badge-admin,
+                        .badge.badge-owner {
+                            display: none !important;
+                        }
                     }
                 `}
             </style>

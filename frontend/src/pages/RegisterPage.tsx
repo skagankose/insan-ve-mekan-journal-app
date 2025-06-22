@@ -8,6 +8,7 @@ import FormattedIdInput from '../components/FormattedIdInput';
 import LocationInput from '../components/LocationInput';
 import CountrySelector from '../components/CountrySelector';
 import { validateYoksisId, validateOrcidId, validatePhoneNumber } from '../utils/validation';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import '../styles/FormattedIdInput.css';
 
 // Country code to flag mapping
@@ -239,6 +240,8 @@ const RegisterPage: React.FC = () => {
     const [captchaValue, setCaptchaValue] = useState<string | null>(null);
     const [currentFlag, setCurrentFlag] = useState('🇹🇷');
     const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
     const { register } = useAuth(); // Get register function
     const { t } = useLanguage();
@@ -465,8 +468,8 @@ const RegisterPage: React.FC = () => {
             return;
         }
         
-        // Validate phone number if provided
-        if (!validatePhoneNumber(countryCode, phoneNumber)) {
+        // Validate phone number only if phone number is provided
+        if (phoneNumber.trim() && !validatePhoneNumber(countryCode, phoneNumber)) {
             setError(t('phoneValidationError') || 'Phone number format is invalid');
             resetRecaptcha(); // Reset reCAPTCHA on error
             setIsSubmitting(false);
@@ -480,15 +483,15 @@ const RegisterPage: React.FC = () => {
         }
 
         try {
-            // Combine country code and phone number
-            const telephone = countryCode + phoneNumber.replace(/\s/g, '');
+            // Combine country code and phone number only if phone number is provided
+            const telephone = phoneNumber.trim() ? countryCode + phoneNumber.replace(/\s/g, '') : undefined;
             
             const userData = { 
                 email, 
                 name,
                 title: title || undefined,
                 bio: bio || undefined,
-                telephone: telephone || undefined,
+                telephone: telephone,
                 science_branch: scienceBranch || undefined,
                 location: country && location ? `${location}, ${country}` : location || country || undefined,
                 yoksis_id: yoksisId || undefined,
@@ -555,7 +558,7 @@ const RegisterPage: React.FC = () => {
                 <div className="register-form-container">
                     <form ref={formRef} className="register-form" onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="email">{t('email')}</label>
+                            <label htmlFor="email">{t('email')} *</label>
                             <input
                                 type="email"
                                 id="email"
@@ -569,7 +572,7 @@ const RegisterPage: React.FC = () => {
                         </div>
                         
                         <div className="form-group">
-                            <label htmlFor="name">{t('name')}</label>
+                            <label htmlFor="name">{t('name')} *</label>
                             <input
                                 type="text"
                                 id="name"
@@ -619,7 +622,6 @@ const RegisterPage: React.FC = () => {
                                     id="countryCode"
                                     value={countryCode}
                                     onChange={handleCountryCodeChange}
-                                    required
                                     disabled={isSubmitting}
                                     className="form-input country-code-input"
                                     maxLength={4}
@@ -630,7 +632,6 @@ const RegisterPage: React.FC = () => {
                                     id="phoneNumber"
                                     value={phoneNumber}
                                     onChange={handlePhoneNumberChange}
-                                    required
                                     disabled={isSubmitting}
                                     className="form-input phone-number-input"
                                     placeholder="555 55 55"
@@ -665,7 +666,6 @@ const RegisterPage: React.FC = () => {
                                 }}
                                 id="country"
                                 disabled={isSubmitting}
-                                required
                             />
                         </div>
                         
@@ -682,7 +682,6 @@ const RegisterPage: React.FC = () => {
                                 }}
                                 id="location"
                                 disabled={isSubmitting}
-                                required
                             />
                         </div>
                         
@@ -723,18 +722,28 @@ const RegisterPage: React.FC = () => {
                         </div>
                         
                         <div className="form-group">
-                            <label htmlFor="password">{t('password')}</label>
-                            <input
-                                type="password"
-                                id="password"
-                                value={password}
-                                onChange={handleInputChange('password')}
-                                required
-                                disabled={isSubmitting}
-                                minLength={8}
-                                maxLength={100}
-                                className="form-input"
-                            />
+                            <label htmlFor="password">{t('password')} *</label>
+                            <div className="password-input-container">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    id="password"
+                                    value={password}
+                                    onChange={handleInputChange('password')}
+                                    required
+                                    disabled={isSubmitting}
+                                    minLength={8}
+                                    maxLength={100}
+                                    className="form-input"
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    disabled={isSubmitting}
+                                >
+                                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                                </button>
+                            </div>
                             <div className="password-requirements">
                                 <div className="password-requirements-list" style={{ color: 'gray' }}>
                                     <div>• {t('passwordMinLength')}</div>
@@ -745,17 +754,27 @@ const RegisterPage: React.FC = () => {
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="confirmPassword">{t('confirmPassword')}</label>
-                            <input
-                                type="password"
-                                id="confirmPassword"
-                                value={confirmPassword}
-                                onChange={handleInputChange('confirmPassword')}
-                                required
-                                disabled={isSubmitting}
-                                minLength={8}
-                                className="form-input"
-                            />
+                            <label htmlFor="confirmPassword">{t('confirmPassword')} *</label>
+                            <div className="password-input-container">
+                                <input
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    id="confirmPassword"
+                                    value={confirmPassword}
+                                    onChange={handleInputChange('confirmPassword')}
+                                    required
+                                    disabled={isSubmitting}
+                                    minLength={8}
+                                    className="form-input"
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    disabled={isSubmitting}
+                                >
+                                    {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                                </button>
+                            </div>
                         </div>
 
                         <div className="form-group" style={{ display: 'flex', justifyContent: 'center', marginTop: '15px' }}>
