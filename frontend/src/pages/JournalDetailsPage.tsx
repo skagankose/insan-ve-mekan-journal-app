@@ -58,6 +58,7 @@ const JournalDetailsPage: React.FC = () => {
     const [selectedEditorInChiefId, setSelectedEditorInChiefId] = useState<number | null>(null);
     const [selectedEditorIds, setSelectedEditorIds] = useState<number[]>([]);
     const [isSubmittingEditors, setIsSubmittingEditors] = useState(false);
+    const [editorSearchQuery, setEditorSearchQuery] = useState<string>('');
     const [isMerging, setIsMerging] = useState<boolean>(false);
     const [mergeError, setMergeError] = useState<string | null>(null);
 
@@ -219,6 +220,18 @@ const JournalDetailsPage: React.FC = () => {
             document.removeEventListener('keydown', handleEscapeKey);
         };
     }, [showEditorInChiefModal, showEditorsModal, showUserDetailsModal, isSubmittingEditors]);
+
+    // Reset editor search when modal closes
+    useEffect(() => {
+        if (!showEditorsModal) {
+            setEditorSearchQuery('');
+        }
+    }, [showEditorsModal]);
+
+    // Filter editors based on search query
+    const filteredEditorUsers = editorUsers.filter(editor =>
+        editor.name.toLowerCase().includes(editorSearchQuery.toLowerCase())
+    );
 
     const handleSetActive = async () => {
         if (!journal) return;
@@ -2655,6 +2668,55 @@ const JournalDetailsPage: React.FC = () => {
                             maxHeight: '50vh', 
                             overflowY: 'auto'
                         }}>
+                            {/* Search Input */}
+                            <div style={{
+                                marginBottom: '24px',
+                                position: 'relative'
+                            }}>
+                                <div style={{
+                                    position: 'absolute',
+                                    left: '16px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: '#64748B',
+                                    zIndex: 1
+                                }}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                        <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder={language === 'tr' ? 'Editörlerin isimlerini ara...' : 'Search editors by name...'}
+                                    value={editorSearchQuery}
+                                    onChange={(e) => setEditorSearchQuery(e.target.value)}
+                                    disabled={isSubmittingEditors}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px 16px 12px 48px',
+                                        background: 'rgba(255, 255, 255, 0.8)',
+                                        border: '2px solid rgba(226, 232, 240, 0.5)',
+                                        borderRadius: '12px',
+                                        fontSize: '14px',
+                                        fontWeight: '500',
+                                        color: '#1E293B',
+                                        outline: 'none',
+                                        transition: 'all 0.3s ease',
+                                        opacity: isSubmittingEditors ? 0.7 : 1
+                                    }}
+                                    onFocus={(e) => {
+                                        e.currentTarget.style.borderColor = '#3B82F6';
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.5)';
+                                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
+                                />
+                            </div>
+                            
                             {editorUsers.length === 0 ? (
                                 <div style={{
                                     textAlign: 'center',
@@ -2671,14 +2733,68 @@ const JournalDetailsPage: React.FC = () => {
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         fontSize: '24px'
-                                    }}>✏️</div>
+                                    }}>
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                    </div>
                                     <p style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
-                                        {t('noEditorUsers') || 'No editor users found'}
+                                        {language === 'tr' ? 'Editör kullanıcısı bulunamadı' : 'No editor users found'}
                                     </p>
+                                </div>
+                            ) : filteredEditorUsers.length === 0 ? (
+                                <div style={{
+                                    textAlign: 'center',
+                                    padding: '40px 20px',
+                                    color: '#64748B'
+                                }}>
+                                    <div style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        margin: '0 auto 16px',
+                                        background: '#F1F5F9',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '24px'
+                                                                         }}>
+                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                             <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                         </svg>
+                                     </div>
+                                     <p style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
+                                         {language === 'tr' ? `"${editorSearchQuery}" ile eşleşen editör bulunamadı` : `No editors found matching "${editorSearchQuery}"`}
+                                    </p>
+                                    <button
+                                        onClick={() => setEditorSearchQuery('')}
+                                        style={{
+                                            marginTop: '12px',
+                                            padding: '8px 16px',
+                                            background: 'rgba(59, 130, 246, 0.1)',
+                                            color: '#3B82F6',
+                                            border: '1px solid rgba(59, 130, 246, 0.3)',
+                                            borderRadius: '8px',
+                                            fontSize: '14px',
+                                            fontWeight: '600',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
+                                            e.currentTarget.style.borderColor = '#3B82F6';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                                            e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                                        }}
+                                    >
+                                                                                 {language === 'tr' ? 'Aramayı Temizle' : 'Clear Search'}
+                                    </button>
                                 </div>
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                    {editorUsers.map(editor => (
+                                    {filteredEditorUsers.map(editor => (
                                         <label
                                             key={editor.id}
                                             htmlFor={`editor-${editor.id}`}

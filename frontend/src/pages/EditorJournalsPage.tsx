@@ -368,7 +368,7 @@ const EditorJournalsPage: React.FC = () => {
                                                             borderRadius: '20px',
                                                             fontWeight: '600'
                                                         }}>
-                                                            {t('active') || 'Active'}
+                                                            {t('Seçili') || 'Active'}
                                                         </span>
                                                     )}
                                                 </h3>

@@ -81,6 +81,7 @@ export interface JournalEntryCreate {
     journal_id?: number;
     authors_ids?: number[];
     referees_ids?: number[];
+    status?: string;
 }
 
 interface JournalEntryUpdate {
@@ -95,6 +96,8 @@ interface JournalEntryUpdate {
     authors_ids?: number[];
     referees_ids?: number[];
     journal_id?: number | null;
+    status?: string;
+    publication_date?: string;
 }
 
 // Add Journal interface
@@ -400,6 +403,10 @@ const updateEntry = async (entryId: number, entryData: JournalEntryUpdate): Prom
 const deleteEntry = async (entryId: number): Promise<void> => {
     // Expects a 204 No Content response, so no return data needed
     await apiClient.delete(`/entries/${entryId}`);
+};
+
+const incrementDownloadCount = async (entryId: number): Promise<void> => {
+    await apiClient.post(`/entries/${entryId}/increment-download`);
 };
 
 const createJournal = async (journalData: JournalCreate): Promise<Journal> => {
@@ -940,6 +947,7 @@ export {
     createEntry,
     updateEntry,
     deleteEntry,
+    incrementDownloadCount,
     createJournal,
     updateJournal,
     deleteJournal,

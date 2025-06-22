@@ -19,8 +19,7 @@ export interface JournalFormData {
     abstract_tr: string;
     abstract_en?: string;
     keywords?: string;
-    article_type?: string;
-    language?: string;
+    keywords_en?: string;
     journal_id?: number;
     authors_ids?: number[];
     referees_ids?: number[];
@@ -40,30 +39,31 @@ const JournalForm: React.FC<JournalFormProps> = ({
         abstract_tr: '',
         abstract_en: '',
         keywords: '',
-        article_type: '',
-        language: ''
+        keywords_en: ''
     },
     onSubmit,
     isSubmitting,
     submitError,
-    submitButtonText = 'Submit Entry',
+    submitButtonText,
 }) => {
     const [formData, setFormData] = useState<JournalFormData>(initialData);
     const { t } = useLanguage();
+
+    // Use translation for default submit button text
+    const defaultSubmitText = submitButtonText || t('submitEntry') || 'Submit Entry';
 
     useEffect(() => {
         const titleChanged = initialData.title !== formData.title;
         const abstractTrChanged = initialData.abstract_tr !== formData.abstract_tr;
         const abstractEnChanged = initialData.abstract_en !== formData.abstract_en;
         const keywordsChanged = initialData.keywords !== formData.keywords;
-        const articleTypeChanged = initialData.article_type !== formData.article_type;
-        const languageChanged = initialData.language !== formData.language;
+        const keywordsEnChanged = initialData.keywords_en !== formData.keywords_en;
         const journalIdChanged = initialData.journal_id !== formData.journal_id;
         const authorsIdsChanged = !arraysEqual(initialData.authors_ids, formData.authors_ids);
         const refereesIdsChanged = !arraysEqual(initialData.referees_ids, formData.referees_ids);
 
         if (titleChanged || abstractTrChanged || abstractEnChanged || 
-            keywordsChanged || articleTypeChanged || languageChanged || 
+            keywordsChanged || keywordsEnChanged || 
             journalIdChanged || authorsIdsChanged || refereesIdsChanged) {
             setFormData(initialData);
         }
@@ -84,11 +84,11 @@ const JournalForm: React.FC<JournalFormProps> = ({
     };
 
     return (
-        <form onSubmit={handleSubmit} className="card">
+        <form onSubmit={handleSubmit} className="register-form">
             {submitError && <div className="error-message">{submitError}</div>}
             
             <div className="form-group">
-                <label htmlFor="title" className="form-label">{t('title')}</label>
+                <label htmlFor="title" className="form-label">{t('entryTitle') || 'Title'}</label>
                 <input
                     type="text"
                     id="title"
@@ -96,7 +96,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     className="form-input"
                     value={formData.title}
                     onChange={handleChange}
-                    placeholder={t('enterTitle')}
+                    placeholder={t('enterEntryTitle') || 'Enter title'}
                     required
                     disabled={isSubmitting}
                     maxLength={300}
@@ -111,24 +111,9 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     className="form-textarea"
                     value={formData.abstract_tr}
                     onChange={handleChange}
-                    placeholder={t('enterAbstractTr') || 'Enter a brief summary in Turkish...'}
+                    placeholder={t('enterAbstractTurkish') || 'Enter a brief summary in Turkish...'}
                     rows={3}
                     required
-                    disabled={isSubmitting}
-                    maxLength={500}
-                />
-            </div>
-            
-            <div className="form-group">
-                <label htmlFor="abstract_en" className="form-label">{t('abstractEnglish') || 'Abstract (English)'}</label>
-                <textarea
-                    id="abstract_en"
-                    name="abstract_en"
-                    className="form-textarea"
-                    value={formData.abstract_en || ''}
-                    onChange={handleChange}
-                    placeholder={t('enterAbstractEn') || 'Enter a brief summary in English...'}
-                    rows={3}
                     disabled={isSubmitting}
                     maxLength={500}
                 />
@@ -143,53 +128,54 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     className="form-input"
                     value={formData.keywords || ''}
                     onChange={handleChange}
-                    placeholder={t('enterKeywords') || 'Enter keywords, separated by commas...'}
+                    placeholder={t('enterKeywordsComma') || 'Enter keywords, separated by commas...'}
                     disabled={isSubmitting}
                     maxLength={100}
+                    required
                 />
             </div>
             
             <div className="form-group">
-                <label htmlFor="article_type" className="form-label">{t('articleType') || 'Article Type'}</label>
-                <select
-                    id="article_type"
-                    name="article_type"
-                    className="form-select"
-                    value={formData.article_type || ''}
+                <label htmlFor="abstract_en" className="form-label">{t('abstractEnglish') || 'Abstract (English)'}</label>
+                <textarea
+                    id="abstract_en"
+                    name="abstract_en"
+                    className="form-textarea"
+                    value={formData.abstract_en || ''}
                     onChange={handleChange}
+                    placeholder={t('enterAbstractEnglish') || 'Enter a brief summary in English...'}
+                    rows={3}
                     disabled={isSubmitting}
-                >
-                    <option value="">{t('selectArticleType') || '-- Select Article Type --'}</option>
-                    <option value="theory">{t('articleTypeTheory') || 'Theory'}</option>
-                    <option value="research">{t('articleTypeResearch') || 'Research'}</option>
-                </select>
+                    maxLength={500}
+                    required
+                />
             </div>
             
             <div className="form-group">
-                <label htmlFor="language" className="form-label">{t('language') || 'Language'}</label>
-                <select
-                    id="language"
-                    name="language"
-                    className="form-select"
-                    value={formData.language || ''}
+                <label htmlFor="keywords_en" className="form-label">{t('keywordsEn') || 'Keywords (English)'}</label>
+                <input
+                    type="text"
+                    id="keywords_en"
+                    name="keywords_en"
+                    className="form-input"
+                    value={formData.keywords_en || ''}
                     onChange={handleChange}
+                    placeholder={t('keywordsSeparatedByCommasEn') || 'Separate English keywords with commas'}
                     disabled={isSubmitting}
-                >
-                    <option value="">{t('selectLanguage') || '-- Select Language --'}</option>
-                    <option value="tr">{t('turkish') || 'Turkish'}</option>
-                    <option value="en">{t('english') || 'English'}</option>
-                </select>
+                    maxLength={100}
+                    required
+                />
             </div>
             
-            <div className="form-group" style={{ marginTop: 'var(--spacing-6)', display: 'flex', justifyContent: 'flex-end' }}>
-                <button 
-                    type="submit" 
-                    className="btn btn-primary" 
-                    disabled={isSubmitting}
-                >
-                    {isSubmitting ? t('saving') : submitButtonText}
-                </button>
-            </div>
+
+            
+            <button 
+                type="submit" 
+                className="register-submit-button" 
+                disabled={isSubmitting}
+            >
+                {isSubmitting ? (t('saving') || 'Saving...') : defaultSubmitText}
+            </button>
         </form>
     );
 };

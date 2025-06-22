@@ -32,6 +32,32 @@ const getPatternForId = (id: number) => {
     return patterns[id % patterns.length];
 };
 
+// Helper function to fetch all items from a paginated API endpoint
+const fetchAllPaginated = async <T,>(
+    apiCall: (skip: number, limit: number) => Promise<T[]>,
+    limit: number = 500 // Increased limit to fetch more items per request
+): Promise<T[]> => {
+    let allItems: T[] = [];
+    let skip = 0;
+    let keepFetching = true;
+
+    while (keepFetching) {
+        try {
+            const items = await apiCall(skip, limit);
+            if (items && items.length > 0) {
+                allItems = allItems.concat(items);
+                skip += limit;
+            } else {
+                keepFetching = false;
+            }
+        } catch (error) {
+            console.error("Error fetching paginated data:", error);
+            keepFetching = false; // Stop fetching on error
+        }
+    }
+    return allItems;
+};
+
 const UserProfilePage: React.FC = () => {
     const { user } = useAuth();
     const { t, language } = useLanguage();
@@ -129,10 +155,10 @@ const UserProfilePage: React.FC = () => {
                     try {
                         const [users, entries, journalEntryAuthorLinks, journalEntryRefereeLinks] = 
                             await Promise.all([
-                                apiService.getAllUsers(),
-                                apiService.getAllJournalEntries(),
-                                apiService.getAllJournalEntryAuthorLinks(),
-                                apiService.getAllJournalEntryRefereeLinks()
+                                fetchAllPaginated(apiService.getAllUsers),
+                                fetchAllPaginated(apiService.getAllJournalEntries),
+                                fetchAllPaginated(apiService.getAllJournalEntryAuthorLinks),
+                                fetchAllPaginated(apiService.getAllJournalEntryRefereeLinks)
                             ]);
                         
                         // Find the user we want to display
@@ -161,42 +187,43 @@ const UserProfilePage: React.FC = () => {
                                 });
                             };
                             
-                            // Filter entries for this user
-                            // 1. Find author links for this user
+                            // Filter entries for this user as AUTHOR
+                            // Find author links for this user
                             const authorLinks = journalEntryAuthorLinks.filter(
                                 link => link.user_id === Number(userId)
                             );
                             
-                            // 2. Use those links to find their entries
+                            // Use those links to find their entries - make sure we get ALL entries
                             const userAuthorEntries = entries.filter(entry => 
                                 authorLinks.some(link => link.journal_entry_id === entry.id)
                             );
                             
-                            // 3. Populate authors for user entries
+                            // Populate authors for user entries
                             const userAuthorEntriesWithAuthors = populateAuthorsForEntries(userAuthorEntries);
                             setUserEntries(userAuthorEntriesWithAuthors);
                             
-                            // 4. Find referee links for this user
+                            // Filter entries for this user as REFEREE
+                            // Find referee links for this user
                             const refereeLinks = journalEntryRefereeLinks.filter(
                                 link => link.user_id === Number(userId)
                             );
                             
-                            // 5. Use those links to find their referee entries
+                            // Use those links to find their referee entries
                             const userRefereeEntries = entries.filter(entry => 
                                 refereeLinks.some(link => link.journal_entry_id === entry.id)
                             );
                             
-                            // 6. Populate authors for referee entries
+                            // Populate authors for referee entries
                             const userRefereeEntriesWithAuthors = populateAuthorsForEntries(userRefereeEntries);
                             setRefereeEntries(userRefereeEntriesWithAuthors);
                             
-                            // 7. Fetch editor journals if the target user is an editor or admin (owner users won't have journals but section should still be shown)
+                            // Fetch editor journals if the target user is an editor or admin (owner users won't have journals but section should still be shown)
                             if (targetUser.role === 'editor' || targetUser.role === 'admin') {
                                 try {
                                     // Get all journals and editor links to filter user's edited journals
                                     const [allJournals, editorLinks] = await Promise.all([
-                                        apiService.getAllJournals(),
-                                        apiService.getAllJournalEditorLinks()
+                                        fetchAllPaginated(apiService.getAllJournals),
+                                        fetchAllPaginated(apiService.getAllJournalEditorLinks)
                                     ]);
                                     
                                     // Find journals where this user is an editor or editor-in-chief

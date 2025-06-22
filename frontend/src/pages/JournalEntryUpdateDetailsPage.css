@@ -322,10 +322,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex: 1;
   text-align: center;
-  padding: 60px 40px;
+  padding: 32px 40px;
   color: #64748B;
+  max-width: 500px;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .empty-icon {
@@ -1313,7 +1319,7 @@
 /* Toast Notification Styles */
 .toast-notification {
   position: fixed;
-  top: 120px;
+  top: 190px;
   right: 24px;
   z-index: 1000;
   animation: slideInRight 0.3s ease-out;
@@ -1397,7 +1403,7 @@
 /* Responsive adjustments for toast */
 @media (max-width: 768px) {
   .toast-notification {
-    top: 100px;
+    top: 150px;
     right: 16px;
     left: 16px;
   }

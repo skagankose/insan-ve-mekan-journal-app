@@ -186,8 +186,11 @@ const DesktopOnlyMessage: React.FC = () => {
       <div className="desktop-only-message-box">
         <div className="desktop-only-logo-container">
           <div className="desktop-only-logo">
-            <MdArticle className="logo-icon-article" />
-            <FaUsers className="logo-icon-users" />
+            <img 
+              src="/logo.png" 
+              alt="Human & Space Logo" 
+              className="desktop-only-logo-image"
+            />
           </div>
         </div>
         <h1>
@@ -196,7 +199,7 @@ const DesktopOnlyMessage: React.FC = () => {
         <p>
           {language === 'en' 
             ? 'This web application is designed for a rich, interactive experience on desktop computers. For full functionality, including dashboards and detailed views, please switch to a larger screen.' 
-            : 'Bu web uygulaması, masaüstü bilgisayarlarda zengin ve etkileşimli bir deneyim için tasarlanmıştır. Panolar ve ayrıntılı görünümler dahil olmak üzere tüm işlevler için lütfen daha büyük bir ekrana geçin.'}
+            : 'Bu uygulama, masaüstü bilgisayarlarda zengin ve etkileşimli bir deneyim için tasarlanmıştır. İşlevsel olarak uygulamayı kullanabilmek için lütfen daha büyük bir ekrana geçin.'}
         </p>
       </div>
     </div>

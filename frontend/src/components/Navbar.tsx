@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'; // Use Link for client-sid
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageToggle from './LanguageToggle';
-import { FaUsers } from 'react-icons/fa';
-import { MdArticle } from 'react-icons/md';
+
 
 const Navbar: React.FC = () => {
     const { isAuthenticated, user, logout, isLoading } = useAuth(); // Get auth state and functions
@@ -38,34 +37,24 @@ const Navbar: React.FC = () => {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            padding: '8px',
-                            borderRadius: '12px',
+                            padding: '2px',
+                            borderRadius: '6px',
                             background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
                             boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
-                            position: 'relative'
+                            position: 'relative',
+                            width: '60px',
+                            height: '44px'
                         }}>
-                            <div style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                position: 'relative'
-                            }}>
-                                <MdArticle style={{
-                                    fontSize: '24px',
-                                    color: 'white',
-                                    position: 'relative',
-                                    zIndex: 2
-                                }} />
-                                <FaUsers style={{
-                                    fontSize: '16px',
-                                    color: 'rgba(255, 255, 255, 0.8)',
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '50%',
-                                    transform: 'translate(-40%, -40%)',
-                                    zIndex: 1
-                                }} />
-                            </div>
+                            <img 
+                                src="/logo.png" 
+                                alt="Human & Space Logo" 
+                                style={{
+                                    width: '80px',
+                                    height: '75px',
+                                    objectFit: 'contain',
+                                    transform: 'translate(0px, -10px)'
+                                }}
+                            />
                         </div>
                         <div className="navbar-title-container">
                             <span className="navbar-title-text" style={{

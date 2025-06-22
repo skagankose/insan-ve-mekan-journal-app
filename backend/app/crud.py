@@ -96,6 +96,9 @@ def update_entry(db: Session, entry_id: int, entry_update: schemas.JournalEntryU
     if not db_entry:
         return None
 
+    # Store the old status for comparison
+    old_status = db_entry.status
+
     # Get the update data, excluding unset fields to avoid overwriting with None
     update_data = entry_update.model_dump(exclude_unset=True)
 
@@ -111,6 +114,13 @@ def update_entry(db: Session, entry_id: int, entry_update: schemas.JournalEntryU
     # Update other fields
     for key, value in update_data.items():
         setattr(db_entry, key, value)
+    
+    # Check if status has changed
+    status_changed = False
+    new_status = None
+    if 'status' in update_data and update_data['status'] != old_status:
+        status_changed = True
+        new_status = update_data['status']
 
     # Update authors if authors_ids was provided
     if authors_ids is not None:
@@ -132,13 +142,19 @@ def update_entry(db: Session, entry_id: int, entry_update: schemas.JournalEntryU
 
     # Update referees if referees_ids was provided
     if referees_ids is not None:
-        # Clear existing referee links
+        # Get existing referee IDs for comparison
         statement = select(models.JournalEntryRefereeLink).where(
             models.JournalEntryRefereeLink.journal_entry_id == db_entry.id
         )
         existing_links = db.exec(statement).all()
+        existing_referee_ids = {link.user_id for link in existing_links}
+        
+        # Clear existing referee links
         for link in existing_links:
             db.delete(link)
+        
+        # Determine which referees are newly assigned
+        new_referee_ids = set(referees_ids) - existing_referee_ids
         
         # Add new referee links
         for referee_id in referees_ids:
@@ -147,6 +163,106 @@ def update_entry(db: Session, entry_id: int, entry_update: schemas.JournalEntryU
                 user_id=referee_id
             )
             db.add(referee_link)
+        
+        # Send email notifications for newly assigned referees
+        if new_referee_ids:
+            try:
+                from .email_utils import send_referee_assignment_notification
+                import os
+                
+                # Get the Brevo API key
+                api_key = os.getenv("BREVO_API_KEY")
+                if api_key:
+                    # Get all authors for this entry
+                    authors_statement = select(models.JournalEntryAuthorLink).where(
+                        models.JournalEntryAuthorLink.journal_entry_id == db_entry.id
+                    )
+                    author_links = db.exec(authors_statement).all()
+                    
+                    # For each newly assigned referee, send notifications to all authors
+                    for referee_id in new_referee_ids:
+                        referee = db.get(models.User, referee_id)
+                        if referee:
+                            for author_link in author_links:
+                                author = db.get(models.User, author_link.user_id)
+                                if author and author.email:
+                                    try:
+                                        send_referee_assignment_notification(
+                                            api_key=api_key,
+                                            user_email=author.email,
+                                            user_name=author.name,
+                                            referee_name=referee.name,
+                                            entry_title=db_entry.title,
+                                            entry_id=db_entry.id
+                                        )
+                                    except Exception as email_error:
+                                        print(f"Failed to send referee assignment notification to {author.email}: {email_error}")
+                                        # Continue processing even if email fails
+                                        
+            except Exception as e:
+                print(f"Error sending referee assignment notifications: {e}")
+                # Don't fail the whole operation if email fails
+
+    # Send status update notifications if status changed
+    if status_changed and old_status and new_status:
+        try:
+            from .email_utils import send_status_update_notification
+            import os
+            
+            # Get the Brevo API key
+            api_key = os.getenv("BREVO_API_KEY")
+            if api_key:
+                # Get all authors for this entry
+                authors_statement = select(models.JournalEntryAuthorLink).where(
+                    models.JournalEntryAuthorLink.journal_entry_id == db_entry.id
+                )
+                author_links = db.exec(authors_statement).all()
+                
+                # Get all referees for this entry
+                referees_statement = select(models.JournalEntryRefereeLink).where(
+                    models.JournalEntryRefereeLink.journal_entry_id == db_entry.id
+                )
+                referee_links = db.exec(referees_statement).all()
+                
+                # Send notifications to all authors
+                for author_link in author_links:
+                    author = db.get(models.User, author_link.user_id)
+                    if author and author.email:
+                        try:
+                            send_status_update_notification(
+                                api_key=api_key,
+                                user_email=author.email,
+                                user_name=author.name,
+                                entry_title=db_entry.title,
+                                entry_id=db_entry.id,
+                                old_status=old_status,
+                                new_status=new_status
+                            )
+                        except Exception as email_error:
+                            print(f"Failed to send status update notification to author {author.email}: {email_error}")
+                            # Continue processing even if email fails
+                
+                # Send notifications to all referees
+                for referee_link in referee_links:
+                    referee = db.get(models.User, referee_link.user_id)
+                    if referee and referee.email:
+                        try:
+                            send_status_update_notification(
+                                api_key=api_key,
+                                user_email=referee.email,
+                                user_name=referee.name,
+                                entry_title=db_entry.title,
+                                entry_id=db_entry.id,
+                                old_status=old_status,
+                                new_status=new_status
+                            )
+                        except Exception as email_error:
+                            print(f"Failed to send status update notification to referee {referee.email}: {email_error}")
+                            # Continue processing even if email fails
+                            
+        except Exception as e:
+            print(f"Error sending status update notifications: {e}")
+            # Don't fail the whole operation if email fails
 
     db.add(db_entry)
     db.commit()

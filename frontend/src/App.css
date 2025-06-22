@@ -310,6 +310,7 @@ body::before {
 
 .page-title-actions {
   display: flex;
+  align-items: center;
   gap: 12px;
   margin-right: 60px;
   margin-left: auto;
@@ -1453,29 +1454,20 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
+  padding: 4px;
   border-radius: 12px;
   background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
-  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+  box-shadow: 0 6px 20px rgba(20, 184, 166, 0.4);
   position: relative;
+  width: 90px;
+  height: 66px;
 }
 
-.logo-icon-article {
-  font-size: 24px;
-  color: white;
-  position: relative;
-  z-index: 2;
-}
-
-.logo-icon-users {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.8);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-40%, -40%);
-  z-index: 1;
+.desktop-only-logo-image {
+  width: 120px;
+  height: 110px;
+  object-fit: contain;
+  transform: translate(0px, -15px);
 }
 
 .desktop-only-message h1 {

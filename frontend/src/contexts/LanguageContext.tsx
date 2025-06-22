@@ -86,7 +86,16 @@ type TranslationKeys =
   | 'registrationSuccessful' | 'registrationFailed' | 'emailAlreadyRegistered' | 'accountCreated' | 'registrationToastMessage'
   | 'copyFailed' | 'copyManually' | 'copyManuallyInstructions' | 'copyManuallyToast' | 'close' | 'copyUpdate'
   | 'deleteUpdate' | 'confirmDeleteUpdateMessage' | 'authorUpdate' | 'refereeUpdate' | 'thisActionCannotBeUndone' | 'updateDeleted' | 'deleteUpdateError'
-  | 'user' | 'journal' | 'paper' | 'draft' | 'founder' | 'author';
+  | 'user' | 'journal' | 'paper' | 'draft' | 'founder' | 'author'
+  | 'noUpdates' | 'startConversation'
+  // Journal Entry Form specific translations
+  | 'createNewJournalEntry' | 'entryTitle' | 'enterEntryTitle' | 'abstractTurkish' | 'abstractEnglish'
+  | 'enterAbstractTurkish' | 'enterAbstractEnglish' | 'enterKeywordsComma' | 'entryLanguage'
+  | 'submitEntry' | 'mustBeLoggedIn' | 'failedToCreateEntry' | 'noActiveJournalSelected'
+  | 'noActiveJournalMessage' | 'selectAJournal' | 'toAssociateWithEntry' | 'entrySavedSecurelyMessage'
+  | 'selectArticleType' | 'articleTypeTheory' | 'articleTypeResearch' | 'selectLanguage'
+  | 'entryCreatedSuccessfully' | 'entryUpdatedSuccessfully' | 'entryDeletedSuccessfully' | 'authorRemovedSuccessfully' | 'failedToRemoveAuthor'
+  | 'citeArticle' | 'citeThisArticle' | 'copy' | 'noResultsFound';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -548,6 +557,44 @@ const translations: Record<Language, TranslationDictionary> = {
     'draft': 'Draft',
     'founder': 'Founder',
     'author': 'Author',
+    
+    // Journal Entry Form specific translations
+    'createNewJournalEntry': 'Create New Journal Entry',
+    'entryTitle': 'Title',
+    'enterEntryTitle': 'Enter title',
+    'abstractTurkish': 'Abstract (Turkish)',
+    'abstractEnglish': 'Abstract (English)',
+    'enterAbstractTurkish': 'Enter a brief summary in Turkish...',
+    'enterAbstractEnglish': 'Enter a brief summary in English...',
+    'enterKeywordsComma': 'Enter keywords, separated by commas...',
+    'entryLanguage': 'Language',
+    'submitEntry': 'Submit Entry',
+    'mustBeLoggedIn': 'You must be logged in to create an entry.',
+    'failedToCreateEntry': 'Failed to create entry.',
+    'noActiveJournalSelected': 'No Active Journal Selected',
+    'noActiveJournalMessage': 'No active journal selected.',
+    'selectAJournal': 'Select a journal',
+    'toAssociateWithEntry': 'to associate with this entry.',
+    'entrySavedSecurelyMessage': 'Your entry will be saved securely and reviewed by our editorial team',
+    'selectArticleType': '-- Select Article Type --',
+    'articleTypeTheory': 'Theory',
+    'articleTypeResearch': 'Research',
+    'selectLanguage': '-- Select Language --',
+    'entryCreatedSuccessfully': 'Entry created successfully!',
+    'entryUpdatedSuccessfully': 'Entry updated successfully!',
+    'entryDeletedSuccessfully': 'Entry deleted successfully!',
+    'noResultsFound': 'No results found',
+    'authorRemovedSuccessfully': 'Author removed successfully',
+    'failedToRemoveAuthor': 'Failed to remove author',
+
+    // Citation translations
+    'citeArticle': 'Cite Article',
+    'citeThisArticle': 'Cite This Article',
+    'copy': 'Copy',
+    
+    // Update conversation translations
+    'noUpdates': 'No updates yet',
+    'startConversation': 'Start the conversation by adding an update',
   },
   tr: {
     // Navigation
@@ -567,7 +614,7 @@ const translations: Record<Language, TranslationDictionary> = {
     
     // Page titles
     'createNewEntry': 'Yeni Makale Oluştur',
-    'editEntry': 'Makaleyi Düzenle',
+    'editEntry': 'Düzenle',
     'createAccount': 'Hesap Oluştur',
     'welcomeBack': 'Tekrar Hoş Geldiniz',
     'publishedJournals': 'Yayınlanmış Dergiler',
@@ -590,7 +637,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'role': 'Rol',
     
     // Buttons
-    'createEntry': 'Kayıt Oluştur',
+    'createEntry': 'Makale Oluştur',
     'updateEntry': 'Kaydı Güncelle',
     'delete': 'Sil',
     'edit': 'Düzenle',
@@ -618,14 +665,14 @@ const translations: Record<Language, TranslationDictionary> = {
     'statusNotAccepted': 'Kabul Edilmedi',
     
     // Entry status translations
-    'notAccepted': 'KABUL EDİLMEDİ',
-    'waitingForPayment': 'Ödeme BEKLENİYOR',
-    'waitingForAuthors': 'Yazarlar BEKLENİYOR',
-    'waitingForReferees': 'Hakemler BEKLENİYOR',
-    'waitingForEditors': 'Editörler BEKLENİYOR',
+    'notAccepted': 'Kabul Edilmedi',
+    'waitingForPayment': 'Ödeme Bekleniyor',
+    'waitingForAuthors': 'Yazarlar Bekleniyor',
+    'waitingForReferees': 'Hakemler Bekleniyor',
+    'waitingForEditors': 'Editörler Bekleniyor',
     'rejected': 'Kabul Edilmedi',
     'pending': 'Beklemede',
-    'accepted': 'Kabul EDİLDİ',
+    'accepted': 'Kabul Edildi',
     'inProgress': 'Devam Ediyor',
     
     // Placeholders
@@ -838,7 +885,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'globalSearchPlaceholder': 'Kullanıcı, dergi, dergi yazısı ara...',
     
     // Journal actions
-    'setAsActive': 'Aktif Olarak Ayarla',
+    'setAsActive': 'Seçili Olarak Ayarla',
     'mergeAndCreateToc': 'Dergi Dosyalarını Birleştir',
     
     // Journal Details Page
@@ -900,7 +947,7 @@ const translations: Record<Language, TranslationDictionary> = {
     
     // Journal Entry Details Page translations
     'downloadPdf': 'PDF İndir',
-    'viewUpdates': 'Güncellemeleri Görüntüle',
+    'viewUpdates': 'Yayın Sürecini Görüntüle',
     'authors': 'Yazarlar',
     'publishedIn': 'Yayınlandığı Dergi',
     'entryDetails': 'Makale Detayları',
@@ -912,9 +959,9 @@ const translations: Record<Language, TranslationDictionary> = {
     'bankName': 'Banka Adı',
     'accountHolder': 'Hesap Sahibi',
     'processingTime': 'İşlem Süresi',
-    'keywords': 'Anahtar Kelimeler',
+    'keywords': 'Anahtar Kelimeler (Türkçe)',
     'keywordsEn': 'Anahtar Kelimeler (İngilizce)',
-    'keywordsSeparatedByCommasEn': 'İngilizce anahtar kelimeleri virgülle ayırın',
+    'keywordsSeparatedByCommasEn': 'İngilizce anahtar kelimeleri virgül ile ayırarak giriniz...',
     'updatedKeywordsEn': 'Güncellenmiş Anahtar Kelimeler (İngilizce)',
     'referees': 'Hakemler',
     'files': 'Dosyalar',
@@ -931,7 +978,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'reviewFile': 'Değerlendirme Dosyası',
     'updatedTitle': 'Güncellenmiş Başlık',
     'updatedAbstract': 'Güncellenmiş Özet',
-    'updatedAbstractEn': 'Güncellenmiş Özet (İngilizce)',
+    'updatedAbstractEn': 'Güncellenmiş Genişletilmiş Özet (İngilizce)',
     'updatedKeywords': 'Güncellenmiş Anahtar Kelimeler',
     'updatedFile': 'Güncellenmiş Dosya',
     'updateCopied': 'Güncelleme içeriği panoya kopyalandı!',
@@ -1005,6 +1052,44 @@ const translations: Record<Language, TranslationDictionary> = {
     'draft': 'Taslak',
     'founder': 'Kurucu',
     'author': 'Yazar',
+    
+    // Journal Entry Form specific translations
+    'createNewJournalEntry': 'Yeni Makale Oluştur',
+    'entryTitle': 'Başlık',
+    'enterEntryTitle': 'Başlık giriniz',
+    'abstractTurkish': 'Özet (Türkçe)',
+    'abstractEnglish': 'Genişletilmiş Özet (İngilizce)',
+    'enterAbstractTurkish': 'Türkçe özeti giriniz...',
+    'enterAbstractEnglish': 'İngilizce genişletilmiş özeti giriniz...',
+    'enterKeywordsComma': 'Anahtar kelimeleri virgül ile ayırarak giriniz...',
+    'entryLanguage': 'Dil',
+    'submitEntry': 'Makale Gönder',
+    'mustBeLoggedIn': 'Makale oluşturmak için giriş yapmalısınız.',
+    'failedToCreateEntry': 'Makale oluşturulamadı.',
+    'noActiveJournalSelected': 'Aktif Dergi Seçilmedi',
+    'noActiveJournalMessage': 'Aktif dergi seçilmedi.',
+    'selectAJournal': 'Bir dergi seçin',
+    'toAssociateWithEntry': 'bu makale ile ilişkilendirmek için.',
+    'entrySavedSecurelyMessage': 'İşlem ücreti ödemenizin ardından, makalenizin tamamını yükleyerek yayın sürecini başlatabilirsiniz.',
+    'selectArticleType': '-- Makale Türü Seçin --',
+    'articleTypeTheory': 'Teorik',
+    'articleTypeResearch': 'Araştırma',
+    'selectLanguage': '-- Dil Seçin --',
+    'entryCreatedSuccessfully': 'Makale başarıyla oluşturuldu!',
+    'entryUpdatedSuccessfully': 'Makale başarıyla güncellendi!',
+    'entryDeletedSuccessfully': 'Makale başarıyla silindi!',
+    'noResultsFound': 'Sonuç bulunamadı',
+    'authorRemovedSuccessfully': 'Yazar başarıyla kaldırıldı',
+    'failedToRemoveAuthor': 'Yazar kaldırma işlemi başarısız',
+
+    // Citation translations
+    'citeArticle': 'Alıntıla',
+    'citeThisArticle': 'Bu Makaleyi Alıntıla',
+    'copy': 'Kopyala',
+    
+    // Update conversation translations
+    'noUpdates': 'Henüz Süreç Başlatılmadı',
+    'startConversation': 'Makalenizin güncel bilgilerini girerek süreci başlatın',
   }
 };
 

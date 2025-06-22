@@ -32,6 +32,37 @@ const SearchBox: React.FC = () => {
     };
   }, []);
   
+  // Blur sidebar content when search results are showing
+  useEffect(() => {
+    const sidebarNav = document.querySelector('.sidebar-nav');
+    
+    if (showResults && results) {
+      // Apply blur effect only to navigation
+      if (sidebarNav) {
+        (sidebarNav as HTMLElement).style.filter = 'blur(3px)';
+        (sidebarNav as HTMLElement).style.opacity = '0.6';
+        (sidebarNav as HTMLElement).style.transition = 'all 0.3s ease';
+        (sidebarNav as HTMLElement).style.pointerEvents = 'none';
+      }
+    } else {
+      // Remove blur effect
+      if (sidebarNav) {
+        (sidebarNav as HTMLElement).style.filter = '';
+        (sidebarNav as HTMLElement).style.opacity = '';
+        (sidebarNav as HTMLElement).style.pointerEvents = '';
+      }
+    }
+    
+    // Cleanup function
+    return () => {
+      if (sidebarNav) {
+        (sidebarNav as HTMLElement).style.filter = '';
+        (sidebarNav as HTMLElement).style.opacity = '';
+        (sidebarNav as HTMLElement).style.pointerEvents = '';
+      }
+    };
+  }, [showResults, results]);
+  
   // Add keyboard shortcut (/) to focus the search box
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -132,73 +163,83 @@ const SearchBox: React.FC = () => {
       
       {showResults && results && (
         <div className="search-results">
-          {/* Users section - only show for admin and owner */}
-          {canViewUsers && results.users.length > 0 && (
-            <div className="search-section">
-              <h3 className="search-section-title">Users</h3>
-              <ul className="search-result-list">
-                {results.users.map((user) => (
-                  <li 
-                    key={`user-${user.id}`} 
-                    className="search-result-item"
-                    onClick={() => handleResultClick('user', user.id)}
-                  >
-                    <FaUser className="result-icon" />
-                    <span className="result-text">{user.name}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          {/* Journals section */}
-          {results.journals.length > 0 && (
-            <div className="search-section">
-              <h3 className="search-section-title">Journals</h3>
-              <ul className="search-result-list">
-                {results.journals.map((journal) => (
-                  <li 
-                    key={`journal-${journal.id}`} 
-                    className="search-result-item"
-                    onClick={() => handleResultClick('journal', journal.id)}
-                  >
-                    <FaBook className="result-icon" />
-                    <span className="result-text">
-                      {language === 'en' && journal.title_en ? journal.title_en : journal.title}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          {/* Journal entries section */}
-          {results.entries.length > 0 && (
-            <div className="search-section">
-              <h3 className="search-section-title">Papers</h3>
-              <ul className="search-result-list">
-                {results.entries.map((entry) => (
-                  <li 
-                    key={`entry-${entry.id}`} 
-                    className="search-result-item"
-                    onClick={() => handleResultClick('entry', entry.id)}
-                  >
-                    <FaFileAlt className="result-icon" />
-                    <span className="result-text">
-                      {language === 'en' && entry.title_en ? entry.title_en : entry.title}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          {/* No results message */}
-          {(!canViewUsers || results.users.length === 0) && 
-           results.journals.length === 0 && 
-           results.entries.length === 0 && (
-            <div className="no-results">No results found</div>
-          )}
+          {(() => {
+            const sections = [];
+            
+            // Users section - only show for admin and owner
+            if (canViewUsers && results.users.length > 0) {
+              sections.push(
+                <div key="users" className="search-section">
+                  <h3 className="search-section-title">{t('users') || 'Users'}</h3>
+                  <ul className="search-result-list">
+                    {results.users.map((user) => (
+                      <li 
+                        key={`user-${user.id}`} 
+                        className="search-result-item"
+                        onClick={() => handleResultClick('user', user.id)}
+                      >
+                        <FaUser className="result-icon" />
+                        <span className="result-text">{user.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+            
+            // Journals section
+            if (results.journals.length > 0) {
+              sections.push(
+                <div key="journals" className="search-section">
+                  <h3 className="search-section-title">{t('journals') || 'Journals'}</h3>
+                  <ul className="search-result-list">
+                    {results.journals.map((journal) => (
+                      <li 
+                        key={`journal-${journal.id}`} 
+                        className="search-result-item"
+                        onClick={() => handleResultClick('journal', journal.id)}
+                      >
+                        <FaBook className="result-icon" />
+                        <span className="result-text">
+                          {language === 'en' && journal.title_en ? journal.title_en : journal.title}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+            
+            // Journal entries section
+            if (results.entries.length > 0) {
+              sections.push(
+                <div key="entries" className="search-section">
+                  <h3 className="search-section-title">{t('papers') || 'Papers'}</h3>
+                  <ul className="search-result-list">
+                    {results.entries.map((entry) => (
+                      <li 
+                        key={`entry-${entry.id}`} 
+                        className="search-result-item"
+                        onClick={() => handleResultClick('entry', entry.id)}
+                      >
+                        <FaFileAlt className="result-icon" />
+                        <span className="result-text">
+                          {language === 'en' && entry.title_en ? entry.title_en : entry.title}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+            
+            // No results message
+            if (sections.length === 0) {
+              return <div className="no-results">{t('noResultsFound') || 'No results found'}</div>;
+            }
+            
+            return sections;
+          })()}
         </div>
       )}
     </div>

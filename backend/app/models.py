@@ -283,6 +283,7 @@ class JournalEntryUpdate(SQLModel):
     title: Optional[str] = None
     title_en: Optional[str] = None
     created_date: Optional[datetime] = None
+    publication_date: Optional[datetime] = None
     abstract_tr: Optional[str] = None
     abstract_en: Optional[str] = None
     keywords: Optional[str] = None

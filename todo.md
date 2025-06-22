@@ -1,7 +1,6 @@
-All Pages in the Project
-
 Public/Authentication Pages
 [ + ] LoginPage - User Login
+--------------------------------------------------------------- Create & Edit & Delete
 [ + ] RegisterPage - User Register
 --------------------------------------------------------------- Secondary Pages & Mails
 [ - ] AutoLoginPage - Automatic Login
@@ -24,13 +23,13 @@ Protected by User Role Pages
 [ + ] UserProfilePage - User Profile
 --------------------------------------------------------------- Create & Edit & Delete
 [ + ] ProfileEditPage - User Edit Profile
-[ - ] JournalCreatePage - Entry Create
-[ - ] JournalEditPage - Entry Edit
+[ + ] JournalCreatePage - Entry Create
+[ + ] JournalEditPage - Entry Edit
 [ - ] AuthorUpdateFormPage - Author Update Create
 [ - ] RefereeUpdateFormPage - Referee Update Create
 
 Admin-Only Pages
-[ - ] AdminPage - Dashboard
+[ + ] AdminPage - Dashboard
 --------------------------------------------------------------- Create & Edit & Delete
 [ + ] JournalCreateFormPage - Journal Create
 [ - ] JournalEditFormPage - Journal Edit

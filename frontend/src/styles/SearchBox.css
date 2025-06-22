@@ -57,10 +57,13 @@
   overflow-y: auto;
   z-index: 1000;
   margin-top: 5px;
+  padding: 0;
+  overflow: hidden;
 }
 
 .search-section {
-  padding: 10px 0;
+  margin: 0;
+  padding: 0;
   border-bottom: 1px solid #eee;
 }
 
@@ -70,32 +73,43 @@
 
 .search-section-title {
   margin: 0;
-  padding: 0 15px 5px;
-  font-size: 14px;
+  padding: 10px 15px 6px 15px;
+  font-size: 13px;
   color: #666;
   font-weight: 600;
+  line-height: 1;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
 }
 
 .search-result-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: block;
 }
 
 .search-result-item {
-  padding: 8px 15px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
   cursor: pointer;
   transition: background-color 0.2s;
+  margin: 0;
+  border: none;
+  line-height: 1.2;
 }
 
 .search-result-item:hover {
-  background-color: #f5f5f5;
+  background-color: #f5f7fa;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
 }
 
 .result-icon {
-  margin-right: 12px;
+  margin-right: 10px;
   font-size: 14px;
   color: #64748B;
   flex-shrink: 0;
@@ -111,22 +125,26 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 14px;
+  line-height: 1.2;
 }
 
 .result-token {
-  margin-left: 10px;
-  font-size: 12px;
+  margin-left: 8px;
+  font-size: 11px;
   color: #888;
   background-color: #f0f0f0;
-  padding: 2px 6px;
+  padding: 2px 5px;
   border-radius: 3px;
 }
 
 .no-results {
-  padding: 15px;
+  padding: 20px 15px;
   text-align: center;
   color: #888;
   font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .search-shortcut-hint {

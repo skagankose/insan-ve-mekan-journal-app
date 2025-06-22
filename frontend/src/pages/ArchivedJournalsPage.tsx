@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import * as apiService from '../services/apiService';
 import { Journal, JournalEntryRead } from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -27,6 +27,12 @@ const ArchivedJournalsPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const { t, language } = useLanguage();
+    const [searchParams, setSearchParams] = useSearchParams();
+    
+    // Toast state
+    const [showToast, setShowToast] = useState<boolean>(false);
+    const [toastMessage, setToastMessage] = useState<string>('');
+    const [toastType, setToastType] = useState<'success' | 'warning'>('success');
 
     useEffect(() => {
         const fetchPublishedJournals = async () => {
@@ -64,6 +70,26 @@ const ArchivedJournalsPage: React.FC = () => {
 
         fetchPublishedJournals();
     }, [t]);
+
+    // Check for deleted parameter and show toast
+    useEffect(() => {
+        const deleted = searchParams.get('deleted');
+        
+        if (deleted === 'true') {
+            setToastMessage(t('entryDeletedSuccessfully') || 'Entry deleted successfully!');
+            setToastType('warning');
+            setShowToast(true);
+            
+            // Remove the parameter from URL
+            searchParams.delete('deleted');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+        }
+    }, [searchParams, setSearchParams, t]);
 
     const toggleJournalExpansion = async (journalId: number) => {
         setJournalsWithEntries(prevJournals => {
@@ -676,6 +702,25 @@ const ArchivedJournalsPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Toast Notification */}
+            {showToast && (
+                <div className="toast-notification">
+                    <div className={`toast-content toast-${toastType}`}>
+                        <div className="toast-icon">
+                            {toastType === 'success' ? '✓' : '⚠'}
+                        </div>
+                        <span className="toast-message">{toastMessage}</span>
+                        <button 
+                            className="toast-close"
+                            onClick={() => setShowToast(false)}
+                            aria-label="Close"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
             
             {/* CSS Animations (can be moved to a global CSS file if preferred) */}
             <style>{`
@@ -699,6 +744,104 @@ const ArchivedJournalsPage: React.FC = () => {
                 .transparent-footer .footer-content {
                     background: transparent !important;
                     border-top: none !important;
+                }
+
+                /* Toast Notification Styles */
+                .toast-notification {
+                    position: fixed;
+                    top: 190px;
+                    right: 24px;
+                    z-index: 1000;
+                    animation: slideInRight 0.3s ease-out;
+                }
+
+                .toast-content {
+                    color: white;
+                    padding: 16px 20px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    min-width: 320px;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                }
+
+                .toast-content.toast-success {
+                    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+                    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+                }
+
+                .toast-content.toast-warning {
+                    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+                    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.3);
+                }
+
+                .toast-icon {
+                    width: 24px;
+                    height: 24px;
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 700;
+                    font-size: 14px;
+                    flex-shrink: 0;
+                }
+
+                .toast-message {
+                    flex: 1;
+                    font-size: 14px;
+                    font-weight: 600;
+                    letter-spacing: 0.025em;
+                }
+
+                .toast-close {
+                    background: none;
+                    border: none;
+                    color: white;
+                    font-size: 20px;
+                    font-weight: 300;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    transition: background-color 0.2s ease;
+                    flex-shrink: 0;
+                }
+
+                .toast-close:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                }
+
+                @keyframes slideInRight {
+                    from {
+                        opacity: 0;
+                        transform: translateX(100%);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+
+                /* Responsive adjustments for toast */
+                @media (max-width: 768px) {
+                    .toast-notification {
+                        top: 150px;
+                        right: 16px;
+                        left: 16px;
+                    }
+                    
+                    .toast-content {
+                        min-width: auto;
+                        width: 100%;
+                    }
                 }
             `}</style>
         </>

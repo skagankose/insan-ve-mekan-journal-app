@@ -170,6 +170,28 @@ def delete_journal_entry(
     return
 
 
+@router.post("/{entry_id}/increment-download", status_code=status.HTTP_200_OK)
+def increment_download_count(
+    entry_id: int,
+    db: Session = Depends(get_session)
+):
+    """
+    Increment the download count for a journal entry.
+    This endpoint is public and doesn't require authentication.
+    """
+    db_entry = crud.get_entry(db, entry_id=entry_id)
+    if db_entry is None:
+        raise HTTPException(status_code=404, detail="Journal entry not found")
+    
+    # Increment the download count
+    db_entry.download_count += 1
+    db.add(db_entry)
+    db.commit()
+    db.refresh(db_entry)
+    
+    return {"message": "Download count incremented successfully"}
+
+
 @router.get("/by-journal/{journal_id}", response_model=List[schemas.JournalEntryRead])
 def read_journal_entries_by_journal(
     journal_id: int,

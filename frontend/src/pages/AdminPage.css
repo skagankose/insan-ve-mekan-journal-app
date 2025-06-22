@@ -244,7 +244,7 @@
     border-radius: 20px;
     font-size: 0.7rem;
     font-weight: 600;
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.025em;
     line-height: 1;
     white-space: nowrap;
@@ -286,9 +286,9 @@
 }
 
 .badge-accepted {
-    background: #10B981;
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
     color: white !important;
-    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.5);
+    box-shadow: 0 2px 4px rgba(20, 184, 166, 0.4);
 }
 
 .badge-rejected {
@@ -892,11 +892,11 @@ html {
 }
 
 .search-section.papers-section .section-title {
-    border-bottom-color: #22C55E;
+    border-bottom-color: #14B8A6;
 }
 
 .search-section.papers-section .section-title::after {
-    background: linear-gradient(90deg, #22C55E, #16A34A);
+    background: linear-gradient(90deg, #14B8A6, #0D9488);
 }
 
 /* Cards Grid */
@@ -1028,17 +1028,17 @@ html {
 }
 
 .entry-card .card-type {
-    background: rgba(34, 197, 94, 0.1);
-    color: #16A34A;
+    background: rgba(20, 184, 166, 0.1);
+    color: #0D9488;
 }
 
 .entry-card:hover {
-    border-color: rgba(34, 197, 94, 0.3);
-    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.15);
+    border-color: rgba(20, 184, 166, 0.3);
+    box-shadow: 0 8px 25px rgba(20, 184, 166, 0.15);
 }
 
 .entry-card::before {
-    background: linear-gradient(90deg, #22C55E, #16A34A);
+    background: linear-gradient(90deg, #14B8A6, #0D9488);
 }
 
 /* Detail Modal */
@@ -1094,7 +1094,7 @@ html {
 
 /* Paper modal background pattern */
 .detail-modal.paper-modal::before {
-    background: radial-gradient(circle, rgba(34, 197, 94, 0.05) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.05) 0%, transparent 70%);
 }
 
 .detail-modal-header {
@@ -1144,8 +1144,8 @@ html {
 
 /* Paper modal header icon */
 .detail-modal.paper-modal .detail-modal-header-icon {
-    background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
-    box-shadow: 0 8px 16px rgba(34, 197, 94, 0.3);
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+    box-shadow: 0 8px 16px rgba(20, 184, 166, 0.3);
     color: white;
 }
 
@@ -1195,14 +1195,14 @@ html {
 
 /* Paper modal navigate button */
 .detail-modal.paper-modal .detail-modal-navigate {
-    background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
-    box-shadow: 0 4px 8px rgba(34, 197, 94, 0.2);
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+    box-shadow: 0 4px 8px rgba(20, 184, 166, 0.2);
 }
 
 .detail-modal.paper-modal .detail-modal-navigate:hover {
-    background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+    background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
     transform: translateY(-1px);
-    box-shadow: 0 6px 12px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 6px 12px rgba(20, 184, 166, 0.3);
 }
 
 .detail-modal-close {
@@ -1293,6 +1293,12 @@ html {
     font-size: 12px;
     padding: 6px 12px;
     border-radius: 8px;
+}
+
+/* Ensure status badges don't inherit uppercase from any parent */
+.search-card .badge,
+.card-header .badge {
+    text-transform: none !important;
 }
 
 /* Responsive modal adjustments */

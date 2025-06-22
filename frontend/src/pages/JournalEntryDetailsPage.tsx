@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,6 +14,7 @@ const JournalEntryDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const { user, isAuthenticated } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const [entry, setEntry] = useState<apiService.JournalEntryRead | null>(null);
   const [journal, setJournal] = useState<apiService.Journal | null>(null);
@@ -84,6 +85,8 @@ const JournalEntryDetailsPage: React.FC = () => {
   const [selectedAuthorIds, setSelectedAuthorIds] = useState<number[]>([]);
   const [selectedRefereeIds, setSelectedRefereeIds] = useState<number[]>([]);
   const [isSubmittingUsers, setIsSubmittingUsers] = useState(false);
+  const [authorSearchQuery, setAuthorSearchQuery] = useState<string>('');
+  const [refereeSearchQuery, setRefereeSearchQuery] = useState<string>('');
 
   // Payment accordion state
   const [isPaymentAccordionOpen, setIsPaymentAccordionOpen] = useState(false);
@@ -91,12 +94,213 @@ const JournalEntryDetailsPage: React.FC = () => {
   // Author details modal state
   const [showAuthorDetailsModal, setShowAuthorDetailsModal] = useState(false);
   const [selectedAuthor, setSelectedAuthor] = useState<apiService.UserRead | null>(null);
+  const [isRemovingAuthor, setIsRemovingAuthor] = useState(false);
 
   // Journal selection modal state
   const [showJournalModal, setShowJournalModal] = useState(false);
   const [journals, setJournals] = useState<apiService.Journal[]>([]);
   const [selectedJournalId, setSelectedJournalId] = useState<number | null>(null);
   const [isSubmittingJournal, setIsSubmittingJournal] = useState(false);
+
+  // Toast notification state
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>('');
+  const [toastType, setToastType] = useState<'success' | 'warning'>('success');
+
+  // Citation modal state
+  const [showCitationModal, setShowCitationModal] = useState(false);
+
+  // Helper function to parse Turkish volume/issue format to English academic format
+  const parseVolumeIssue = (issueText: string) => {
+    if (!issueText) return { volume: null, issue: null };
+    
+    // Extract volume and issue numbers from Turkish format like "Cilt 1, Sayı 1"
+    const volumeMatch = issueText.match(/Cilt\s+(\d+)/i);
+    const issueMatch = issueText.match(/Sayı\s+(\d+)/i);
+    
+    return {
+      volume: volumeMatch ? volumeMatch[1] : null,
+      issue: issueMatch ? issueMatch[1] : null
+    };
+  };
+
+  // Citation generation functions
+  const generateAPACitation = () => {
+    if (!entry) return '';
+    
+    const authors = entry.authors?.map(author => {
+      const nameParts = author.name.split(' ');
+      const lastName = nameParts[nameParts.length - 1];
+      const firstInitial = nameParts[0]?.charAt(0);
+      // Capitalize first letter of last name and first initial
+      const formattedLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
+      const formattedInitial = firstInitial?.toUpperCase();
+      return `${formattedLastName}, ${formattedInitial}.`;
+    }).join(', ') || 'Unknown Author';
+    
+    const year = entry.created_date ? new Date(entry.created_date).getFullYear() : 'n.d.';
+    const title = language === 'en' && entry.title_en ? entry.title_en : entry.title;
+    // Convert title to sentence case (only first word and proper nouns capitalized)
+    const sentenceCaseTitle = title.charAt(0).toUpperCase() + title.slice(1).toLowerCase();
+    const journalName = journal?.title || 'Unknown Journal';
+    
+    // Parse volume and issue information
+    const { volume, issue } = parseVolumeIssue(journal?.issue || '');
+    
+    // APA format: Author, A. (Year). Title. Journal Name, Volume(Issue), pages.
+    let citation = `${authors} (${year}). ${sentenceCaseTitle}. *${journalName}*`;
+    if (volume || entry.page_number) {
+      citation += ', ';
+      if (volume) {
+        citation += `*${volume}*`;
+        if (issue) {
+          citation += `(${issue})`;
+        }
+      }
+      if (entry.page_number) {
+        citation += volume ? `, ${entry.page_number}` : entry.page_number;
+      }
+    }
+    citation += '.';
+    
+    return citation;
+  };
+
+  const generateMLACitation = () => {
+    if (!entry) return '';
+    
+    const authors = entry.authors?.map(author => {
+      const nameParts = author.name.split(' ');
+      const lastName = nameParts[nameParts.length - 1];
+      const firstName = nameParts.slice(0, -1).join(' ');
+      // Capitalize names properly
+      const formattedLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
+      const formattedFirstName = firstName.split(' ').map(name => 
+        name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+      ).join(' ');
+      return `${formattedLastName}, ${formattedFirstName}`;
+    }).join(', ') || 'Unknown Author';
+    
+    const title = language === 'en' && entry.title_en ? entry.title_en : entry.title;
+    const journalName = journal?.title || 'Unknown Journal';
+    const year = entry.created_date ? new Date(entry.created_date).getFullYear() : 'n.d.';
+    
+    // Parse volume and issue information
+    const { volume, issue } = parseVolumeIssue(journal?.issue || '');
+    
+    // MLA format: Author, Full Name. "Title." Journal Name, vol. 1, no. 1, Year, pp. pages.
+    let citation = `${authors}. "${title}." *${journalName}*`;
+    if (volume) {
+      citation += `, vol. ${volume}`;
+      if (issue) {
+        citation += `, no. ${issue}`;
+      }
+    }
+    citation += `, ${year}`;
+    if (entry.page_number) {
+      citation += `, pp. ${entry.page_number}`;
+    }
+    citation += '.';
+    
+    return citation;
+  };
+
+  const generateChicagoCitation = () => {
+    if (!entry) return '';
+    
+    const authors = entry.authors?.map(author => {
+      const nameParts = author.name.split(' ');
+      const lastName = nameParts[nameParts.length - 1];
+      const firstName = nameParts.slice(0, -1).join(' ');
+      // Capitalize names properly
+      const formattedLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
+      const formattedFirstName = firstName.split(' ').map(name => 
+        name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+      ).join(' ');
+      return `${formattedLastName}, ${formattedFirstName}`;
+    }).join(', ') || 'Unknown Author';
+    
+    const title = language === 'en' && entry.title_en ? entry.title_en : entry.title;
+    const journalName = journal?.title || 'Unknown Journal';
+    const year = entry.created_date ? new Date(entry.created_date).getFullYear() : 'n.d.';
+    
+    // Parse volume and issue information
+    const { volume, issue } = parseVolumeIssue(journal?.issue || '');
+    
+    // Chicago format: Author, Full Name. Year. "Title." Journal Name volume, no. issue: pages.
+    let citation = `${authors}. ${year}. "${title}." *${journalName}*`;
+    if (volume) {
+      citation += ` ${volume}`;
+      if (issue) {
+        citation += `, no. ${issue}`;
+      }
+    }
+    if (entry.page_number) {
+      citation += volume ? `: ${entry.page_number}` : ` (${entry.page_number})`;
+    }
+    citation += '.';
+    
+    return citation;
+  };
+
+  const generateIEEECitation = () => {
+    if (!entry) return '';
+    
+    const authors = entry.authors?.map(author => {
+      const nameParts = author.name.split(' ');
+      const lastName = nameParts[nameParts.length - 1];
+      const firstInitial = nameParts[0]?.charAt(0);
+      // Capitalize properly for IEEE format
+      const formattedLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
+      const formattedInitial = firstInitial?.toUpperCase();
+      return `${formattedInitial}. ${formattedLastName}`;
+    }).join(', ') || 'Unknown Author';
+    
+    const title = language === 'en' && entry.title_en ? entry.title_en : entry.title;
+    const journalName = journal?.title || 'Unknown Journal';
+    const year = entry.created_date ? new Date(entry.created_date).getFullYear() : 'n.d.';
+    
+    // Parse volume and issue information
+    const { volume, issue } = parseVolumeIssue(journal?.issue || '');
+    
+    // IEEE format: A. Author, "Title," Journal Name, vol. 1, no. 1, pp. pages, Year.
+    let citation = `${authors}, "${title}," *${journalName}*`;
+    if (volume) {
+      citation += `, vol. ${volume}`;
+      if (issue) {
+        citation += `, no. ${issue}`;
+      }
+    }
+    if (entry.page_number) {
+      citation += `, pp. ${entry.page_number}`;
+    }
+    citation += `, ${year}.`;
+    
+    return citation;
+  };
+
+  const copyToClipboard = async (text: string, style: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setToastMessage(t(`${style.toLowerCase()}CitationCopied`) || `${style} citation copied to clipboard!`);
+      setToastType('success');
+      setShowToast(true);
+      
+      // Hide toast after 3 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to copy citation:', err);
+      setToastMessage(t('failedToCopyCitation') || 'Failed to copy citation to clipboard');
+      setToastType('warning');
+      setShowToast(true);
+      
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+    }
+  };
 
   useEffect(() => {
     const fetchEntryDetails = async () => {
@@ -139,6 +343,40 @@ const JournalEntryDetailsPage: React.FC = () => {
 
     fetchEntryDetails();
   }, [entryId, t, isAuthenticated, user]);
+
+  // Check for success parameter and show toast
+  useEffect(() => {
+    const created = searchParams.get('created');
+    const updated = searchParams.get('updated');
+    
+    if (created === 'true') {
+      setToastMessage(t('entryCreatedSuccessfully') || 'Entry created successfully!');
+      setToastType('success');
+      setShowToast(true);
+      
+      // Remove the parameter from URL
+      searchParams.delete('created');
+      setSearchParams(searchParams, { replace: true });
+      
+      // Hide toast after 4 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 4000);
+    } else if (updated === 'true') {
+      setToastMessage(t('entryUpdatedSuccessfully') || 'Entry updated successfully!');
+      setToastType('success');
+      setShowToast(true);
+      
+      // Remove the parameter from URL
+      searchParams.delete('updated');
+      setSearchParams(searchParams, { replace: true });
+      
+      // Hide toast after 4 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 4000);
+    }
+  }, [searchParams, setSearchParams, t]);
 
   // Fetch author and referee users when modals open
   useEffect(() => {
@@ -306,7 +544,7 @@ const JournalEntryDetailsPage: React.FC = () => {
 
   // Prevent background scrolling when modals are open
   useEffect(() => {
-    const isModalOpen = showAuthorsModal || showRefereesModal || showJournalModal || showAuthorDetailsModal;
+    const isModalOpen = showAuthorsModal || showRefereesModal || showJournalModal || showAuthorDetailsModal || showCitationModal;
     
     if (isModalOpen) {
       document.body.style.overflow = 'hidden';
@@ -317,7 +555,7 @@ const JournalEntryDetailsPage: React.FC = () => {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [showAuthorsModal, showRefereesModal, showJournalModal, showAuthorDetailsModal]);
+  }, [showAuthorsModal, showRefereesModal, showJournalModal, showAuthorDetailsModal, showCitationModal]);
 
   // Handle ESC key to close modals
   useEffect(() => {
@@ -331,12 +569,14 @@ const JournalEntryDetailsPage: React.FC = () => {
           setShowRefereesModal(false);
         } else if (showJournalModal) {
           setShowJournalModal(false);
+        } else if (showCitationModal) {
+          setShowCitationModal(false);
         }
       }
     };
 
     // Add event listener when any modal is open
-    const isModalOpen = showAuthorsModal || showRefereesModal || showJournalModal || showAuthorDetailsModal;
+    const isModalOpen = showAuthorsModal || showRefereesModal || showJournalModal || showAuthorDetailsModal || showCitationModal;
     if (isModalOpen) {
       document.addEventListener('keydown', handleEscapeKey);
     }
@@ -345,10 +585,32 @@ const JournalEntryDetailsPage: React.FC = () => {
     return () => {
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [showAuthorsModal, showRefereesModal, showJournalModal, showAuthorDetailsModal]);
+  }, [showAuthorsModal, showRefereesModal, showJournalModal, showAuthorDetailsModal, showCitationModal]);
+
+  // Reset search queries when modals close
+  useEffect(() => {
+    if (!showAuthorsModal) {
+      setAuthorSearchQuery('');
+    }
+  }, [showAuthorsModal]);
+
+  useEffect(() => {
+    if (!showRefereesModal) {
+      setRefereeSearchQuery('');
+    }
+  }, [showRefereesModal]);
+
+  // Filter authors and referees based on search queries
+  const filteredAuthorUsers = authorUsers.filter(author =>
+    author.name.toLowerCase().includes(authorSearchQuery.toLowerCase())
+  );
+
+  const filteredRefereeUsers = refereeUsers.filter(referee =>
+    referee.name.toLowerCase().includes(refereeSearchQuery.toLowerCase())
+  );
 
   const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return t('notAvailable') || 'N/A';
+    if (!dateString) return language === 'tr' ? 'Henüz Yayınlanmamıştır' : 'Not Published';
     return new Date(dateString).toLocaleDateString();
   };
 
@@ -366,6 +628,87 @@ const JournalEntryDetailsPage: React.FC = () => {
   // Handle author profile navigation
   const handleAuthorProfileClick = (author: apiService.UserRead) => {
     navigate(`/admin/users/profile/${author.id}`);
+  };
+
+  // Handle removing author from entry
+  const handleRemoveAuthor = async (authorId: number) => {
+    if (!entryId || !selectedAuthor) return;
+    
+    try {
+      setIsRemovingAuthor(true);
+      
+      // Remove the author from the entry
+      await apiService.removeEntryAuthor(parseInt(entryId), authorId);
+      
+      // Refresh entry data to get updated authors
+      const updatedEntry = await apiService.getEntryById(parseInt(entryId));
+      setEntry(updatedEntry);
+      
+      // Close the modal
+      setShowAuthorDetailsModal(false);
+      setSelectedAuthor(null);
+      
+      // Show success toast
+      setToastMessage(t('authorRemovedSuccessfully') || 'Author removed successfully');
+      setToastType('success');
+      setShowToast(true);
+      
+      // Hide toast after 4 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 4000);
+      
+    } catch (err) {
+      console.error('Failed to remove author:', err);
+      
+      // Show error toast
+      setToastMessage(t('failedToRemoveAuthor') || 'Failed to remove author');
+      setToastType('warning');
+      setShowToast(true);
+      
+      // Hide toast after 4 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 4000);
+    } finally {
+      setIsRemovingAuthor(false);
+    }
+  };
+
+  // Handle PDF download with download count increment
+  const handlePdfDownload = async (downloadUrl: string) => {
+    if (!entryId) return;
+    
+    try {
+      // Increment download count
+      await apiService.incrementDownloadCount(parseInt(entryId));
+      
+      // Update local state to reflect the new download count
+      if (entry) {
+        setEntry({
+          ...entry,
+          download_count: entry.download_count + 1
+        });
+      }
+      
+      // Start the download
+      const link = document.createElement('a');
+      link.href = `/api${downloadUrl}`;
+      link.download = '';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+    } catch (err) {
+      console.error('Failed to increment download count:', err);
+      // Still allow the download even if count increment fails
+      const link = document.createElement('a');
+      link.href = `/api${downloadUrl}`;
+      link.download = '';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   if (loading) {
@@ -720,9 +1063,8 @@ const JournalEntryDetailsPage: React.FC = () => {
             
             {/* Download PDF Button - Always visible to all users */}
             {(entry.full_pdf || entry.file_path) && (
-              <a 
-                href={`/api${entry.full_pdf || entry.file_path}`} 
-                download
+              <button 
+                onClick={() => handlePdfDownload(entry.full_pdf || entry.file_path || '')}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -730,12 +1072,13 @@ const JournalEntryDetailsPage: React.FC = () => {
                   padding: '12px 20px',
                   background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
                   color: 'white',
-                  textDecoration: 'none',
+                  border: 'none',
                   fontSize: '14px',
                   fontWeight: '600',
                   borderRadius: '12px',
                   transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)'
+                  boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
+                  cursor: 'pointer'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
@@ -750,8 +1093,42 @@ const JournalEntryDetailsPage: React.FC = () => {
                   <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15L17 10M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 {t('downloadPdf') || 'Download PDF'}
-              </a>
+              </button>
             )}
+            
+            {/* Citation Button - Always available for published entries */}
+            <button
+              onClick={() => setShowCitationModal(true)}
+              style={{
+                padding: '12px 20px',
+                background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(20, 184, 166, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.3)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M6 6.5C6 5.11929 7.11929 4 8.5 4H15.5C16.8807 4 18 5.11929 18 6.5V20L12 16L6 20V6.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9 8H15M9 11H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {t('citeArticle') || 'Cite Article'}
+            </button>
             
             {/* Authenticated user buttons */}
             {user && (
@@ -769,7 +1146,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                       onClick={() => navigate(`/entries/edit/${entry.id}`)}
                       style={{
                         padding: '12px 20px',
-                        background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                        background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '12px',
@@ -777,18 +1154,17 @@ const JournalEntryDetailsPage: React.FC = () => {
                         fontWeight: '600',
                         cursor: 'pointer',
                         transition: 'all 0.3s ease',
-                        boxShadow: '0 4px 12px rgba(20, 184, 166, 0.3)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'translateY(-2px)';
-                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(20, 184, 166, 0.4)';
+                        e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(20, 184, 166, 0.3)';
+                        e.currentTarget.style.boxShadow = 'none';
                       }}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -798,8 +1174,8 @@ const JournalEntryDetailsPage: React.FC = () => {
                     </button>
                   )}
                   
-                  {/* View Updates Button: Show to authors, referees, journal editors, admins, and owners */}
-                  {canViewTokenAndUpdates && (
+                  {/* View Updates Button: Show to authors, referees, journal editors, admins, and owners, but hide when status is waiting_for_payment */}
+                  {canViewTokenAndUpdates && entry.status !== 'waiting_for_payment' && (
                     <button
                       onClick={() => navigate(`/entries/${entry.id}/updates`)}
                       style={{
@@ -1053,13 +1429,15 @@ const JournalEntryDetailsPage: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '18px'
-                      }}>👤</div>
+                      }}>
+                        <HiUser size={20} color="#64748B" />
+                      </div>
                       <p style={{
                         margin: 0,
                         fontSize: '14px',
                         fontWeight: '500',
                         color: '#64748B'
-                      }}>{language === 'tr' ? 'Yazar atanmamış' : 'No authors assigned'}</p>
+                      }}>{language === 'tr' ? 'Yazar Bulunmamaktadır' : 'No authors assigned'}</p>
                     </div>
                   )}
                 </div>
@@ -1165,26 +1543,26 @@ const JournalEntryDetailsPage: React.FC = () => {
                  
               {journal ? (
                 <div 
-                  onClick={() => navigate(`/journals/${journal.id}`)}
-                  onMouseEnter={() => setIsJournalHovered(true)}
-                  onMouseLeave={() => setIsJournalHovered(false)}
+                  onClick={journal.id === 1 ? undefined : () => navigate(`/journals/${journal.id}`)}
+                  onMouseEnter={journal.id === 1 ? undefined : () => setIsJournalHovered(true)}
+                  onMouseLeave={journal.id === 1 ? undefined : () => setIsJournalHovered(false)}
                   style={{ 
-                    cursor: 'pointer',
+                    cursor: journal.id === 1 ? 'default' : 'pointer',
                     padding: '20px',
                     borderRadius: '16px',
                     transition: 'all 0.3s ease',
-                    background: isJournalHovered ? 'rgba(59, 130, 246, 0.08)' : 'rgba(255, 255, 255, 0.7)',
-                    border: `1px solid ${isJournalHovered ? '#3B82F6' : 'rgba(226, 232, 240, 0.6)'}`,
-                    transform: isJournalHovered ? 'translateY(-2px)' : 'translateY(0)',
-                    boxShadow: isJournalHovered ? '0 8px 24px rgba(59, 130, 246, 0.15)' : 'none',
+                    background: (journal.id !== 1 && isJournalHovered) ? 'rgba(59, 130, 246, 0.08)' : 'rgba(255, 255, 255, 0.7)',
+                    border: `1px solid ${(journal.id !== 1 && isJournalHovered) ? '#3B82F6' : 'rgba(226, 232, 240, 0.6)'}`,
+                    transform: (journal.id !== 1 && isJournalHovered) ? 'translateY(-2px)' : 'translateY(0)',
+                    boxShadow: (journal.id !== 1 && isJournalHovered) ? '0 8px 24px rgba(59, 130, 246, 0.15)' : 'none',
                     position: 'relative',
                     zIndex: 1,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between'
                   }}
-                  role="link"
-                  aria-label={`View details for journal: ${journal.title}`}
+                  role={journal.id === 1 ? undefined : "link"}
+                  aria-label={journal.id === 1 ? undefined : `View details for journal: ${journal.title}`}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
                     {/* Journal Icon */}
@@ -1625,10 +2003,10 @@ const JournalEntryDetailsPage: React.FC = () => {
                       <div style={{
                         width: '36px',
                         height: '36px',
-                        background: entry.status === 'accepted' ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 
+                        background: entry.status === 'accepted' ? 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)' : 
                                    entry.status === 'not_accepted' ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' :
                                    entry.status === 'rejected' ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' :
-                                   entry.status === 'waiting_for_payment' ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' :
+                                   entry.status === 'waiting_for_payment' ? '#FDE68A' :
                                    entry.status === 'waiting_for_authors' ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' :
                                    entry.status === 'waiting_for_referees' ? 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)' :
                                    entry.status === 'waiting_for_editors' ? 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)' :
@@ -1651,7 +2029,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                           </svg>
                         ) : entry.status === 'waiting_for_payment' ? (
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 1V23M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6312 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6312 13.6815 18 14.5717 18 15.5C18 16.4283 17.6312 17.3185 16.9749 17.9749C16.3185 18.6312 15.4283 19 14.5 19H6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M12 6V12L16 16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="#92400E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         ) : entry.status === 'waiting_for_authors' ? (
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -1692,9 +2070,9 @@ const JournalEntryDetailsPage: React.FC = () => {
                             width: '8px',
                             height: '8px',
                             borderRadius: '50%',
-                            background: entry.status === 'accepted' ? '#10B981' : 
+                            background: entry.status === 'accepted' ? '#14B8A6' : 
                                        entry.status === 'not_accepted' || entry.status === 'rejected' ? '#EF4444' :
-                                       entry.status === 'waiting_for_payment' ? '#F59E0B' :
+                                       entry.status === 'waiting_for_payment' ? '#FDE68A' :
                                        entry.status === 'waiting_for_authors' ? '#F59E0B' :
                                        entry.status === 'waiting_for_referees' ? '#8B5CF6' :
                                        entry.status === 'waiting_for_editors' ? '#3B82F6' :
@@ -2285,6 +2663,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                     ))
                   ) : (
                     <div style={{
+                      gridColumn: '1 / -1',
                       padding: '12px 20px',
                       textAlign: 'center',
                       background: 'rgba(255, 255, 255, 0.6)',
@@ -2301,13 +2680,18 @@ const JournalEntryDetailsPage: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '18px'
-                      }}>🔍</div>
+                      }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M9 12L11 14L15 10" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </div>
                       <p style={{
                         margin: 0,
                         fontSize: '14px',
                         fontWeight: '500',
                         color: '#64748B'
-                      }}>{language === 'tr' ? 'Hakem atanmamış' : 'No referees assigned'}</p>
+                      }}>{language === 'tr' ? 'Hakem Bulunmamaktadır' : 'No referees assigned'}</p>
                     </div>
                   )}
                 </div>
@@ -2488,7 +2872,8 @@ const JournalEntryDetailsPage: React.FC = () => {
 
                   {(!entry.file_path && !entry.full_pdf) && (
                     <div style={{
-                      padding: '32px 20px',
+                      gridColumn: '1 / -1',
+                      padding: '12px 20px',
                       textAlign: 'center',
                       background: 'rgba(255, 255, 255, 0.6)',
                       borderRadius: '16px',
@@ -2497,20 +2882,22 @@ const JournalEntryDetailsPage: React.FC = () => {
                       <div style={{
                         width: '40px',
                         height: '40px',
-                        margin: '0 auto 12px',
+                        margin: '0 auto 8px',
                         background: '#F1F5F9',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: '18px'
-                      }}>📄</div>
+                      }}>
+                        <HiDocumentText size={20} color="#64748B" />
+                      </div>
                       <p style={{
                         margin: 0,
                         fontSize: '14px',
                         fontWeight: '500',
                         color: '#64748B'
-                      }}>{t('noFiles') || 'No files available'}</p>
+                      }}>{language === 'tr' ? 'Dosya Bulunmamaktadır' : 'No files available'}</p>
                     </div>
                   )}
                 </div>
@@ -2609,6 +2996,55 @@ const JournalEntryDetailsPage: React.FC = () => {
               maxHeight: '50vh', 
               overflowY: 'auto'
             }}>
+              {/* Search Input */}
+              <div style={{
+                marginBottom: '24px',
+                position: 'relative'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  left: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#64748B',
+                  zIndex: 1
+                }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder={language === 'tr' ? 'Yazarların isimlerini ara...' : 'Search authors by name...'}
+                  value={authorSearchQuery}
+                  onChange={(e) => setAuthorSearchQuery(e.target.value)}
+                  disabled={isSubmittingUsers}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px 12px 48px',
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    border: '2px solid rgba(226, 232, 240, 0.5)',
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#1E293B',
+                    outline: 'none',
+                    transition: 'all 0.3s ease',
+                    opacity: isSubmittingUsers ? 0.7 : 1
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = '#F59E0B';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.5)';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+              
               {authorUsers.length === 0 ? (
                 <div style={{
                   textAlign: 'center',
@@ -2625,14 +3061,68 @@ const JournalEntryDetailsPage: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '24px'
-                  }}>👤</div>
+                  }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
                   <p style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
-                    {t('noAuthorUsers') || 'No author users found'}
+                    {language === 'tr' ? 'Yazar kullanıcısı bulunamadı' : 'No author users found'}
                   </p>
+                </div>
+              ) : filteredAuthorUsers.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  color: '#64748B'
+                }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    margin: '0 auto 16px',
+                    background: '#F1F5F9',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px'
+                                     }}>
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                       <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                     </svg>
+                   </div>
+                   <p style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
+                     {language === 'tr' ? `"${authorSearchQuery}" ile eşleşen yazar bulunamadı` : `No authors found matching "${authorSearchQuery}"`}
+                  </p>
+                  <button
+                    onClick={() => setAuthorSearchQuery('')}
+                    style={{
+                      marginTop: '12px',
+                      padding: '8px 16px',
+                      background: 'rgba(245, 158, 11, 0.1)',
+                      color: '#F59E0B',
+                      border: '1px solid rgba(245, 158, 11, 0.3)',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(245, 158, 11, 0.2)';
+                      e.currentTarget.style.borderColor = '#F59E0B';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(245, 158, 11, 0.1)';
+                      e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+                    }}
+                  >
+                    {language === 'tr' ? 'Aramayı Temizle' : 'Clear Search'}
+                  </button>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {authorUsers.map(author => (
+                  {filteredAuthorUsers.map(author => (
                     <label
                       key={author.id}
                       htmlFor={`author-${author.id}`}
@@ -2858,6 +3348,55 @@ const JournalEntryDetailsPage: React.FC = () => {
               maxHeight: '50vh', 
               overflowY: 'auto'
             }}>
+              {/* Search Input */}
+              <div style={{
+                marginBottom: '24px',
+                position: 'relative'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  left: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#64748B',
+                  zIndex: 1
+                }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder={language === 'tr' ? 'Hakemlerin isimlerini ara...' : 'Search referees by name...'}
+                  value={refereeSearchQuery}
+                  onChange={(e) => setRefereeSearchQuery(e.target.value)}
+                  disabled={isSubmittingUsers}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px 12px 48px',
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    border: '2px solid rgba(226, 232, 240, 0.5)',
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#1E293B',
+                    outline: 'none',
+                    transition: 'all 0.3s ease',
+                    opacity: isSubmittingUsers ? 0.7 : 1
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = '#8B5CF6';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.95)';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.5)';
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+              
               {refereeUsers.length === 0 ? (
                 <div style={{
                   textAlign: 'center',
@@ -2874,14 +3413,68 @@ const JournalEntryDetailsPage: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '24px'
-                  }}>🔍</div>
+                  }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
                   <p style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
-                    {t('noRefereeUsers') || 'No referee users found'}
+                    {language === 'tr' ? 'Hakem kullanıcısı bulunamadı' : 'No referee users found'}
                   </p>
+                </div>
+              ) : filteredRefereeUsers.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  color: '#64748B'
+                }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    margin: '0 auto 16px',
+                    background: '#F1F5F9',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px'
+                  }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
+                    {language === 'tr' ? `"${refereeSearchQuery}" ile eşleşen hakem bulunamadı` : `No referees found matching "${refereeSearchQuery}"`}
+                  </p>
+                  <button
+                    onClick={() => setRefereeSearchQuery('')}
+                    style={{
+                      marginTop: '12px',
+                      padding: '8px 16px',
+                      background: 'rgba(139, 92, 246, 0.1)',
+                      color: '#8B5CF6',
+                      border: '1px solid rgba(139, 92, 246, 0.3)',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
+                      e.currentTarget.style.borderColor = '#8B5CF6';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
+                      e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
+                    }}
+                  >
+                    {language === 'tr' ? 'Aramayı Temizle' : 'Clear Search'}
+                  </button>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {refereeUsers.map(referee => (
+                  {filteredRefereeUsers.map(referee => (
                     <label
                       key={referee.id}
                       htmlFor={`referee-${referee.id}`}
@@ -3352,29 +3945,77 @@ const JournalEntryDetailsPage: React.FC = () => {
                   }}>{language === 'tr' ? 'Yazar Detayları' : 'Author Details'}</h3>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  {/* Go to Profile Button - Only for Admin and Owner users */}
+                  {/* Remove Author Button - Only for Admin and Owner users */}
                   {(isAdmin || isOwner) && (
                     <button
-                      onClick={() => handleAuthorProfileClick(selectedAuthor)}
+                      onClick={() => handleRemoveAuthor(selectedAuthor.id)}
+                      disabled={isRemovingAuthor}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '6px',
                         padding: '10px 12px',
-                        backgroundColor: '#F59E0B',
+                        backgroundColor: isRemovingAuthor ? '#94A3B8' : '#EF4444',
                         color: 'white',
                         border: 'none',
                         borderRadius: '6px',
-                        fontSize: '16px',
+                        fontSize: '14px',
                         fontWeight: '500',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.2s ease'
+                        cursor: isRemovingAuthor ? 'not-allowed' : 'pointer',
+                        transition: 'background-color 0.2s ease',
+                        opacity: isRemovingAuthor ? 0.7 : 1
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#D97706';
+                        if (!isRemovingAuthor) {
+                          e.currentTarget.style.backgroundColor = '#DC2626';
+                        }
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#F59E0B';
+                        if (!isRemovingAuthor) {
+                          e.currentTarget.style.backgroundColor = '#EF4444';
+                        }
+                      }}
+                      title={language === 'tr' ? 'Yazarı Kaldır' : 'Remove Author'}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M12.5 7C12.5 9.20914 10.7091 11 8.5 11C6.29086 11 4.5 9.20914 4.5 7C4.5 4.79086 6.29086 3 8.5 3C10.7091 3 12.5 4.79086 12.5 7ZM20 8L23 11L20 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {isRemovingAuthor 
+                        ? (language === 'tr' ? 'Kaldırılıyor...' : 'Removing...') 
+                        : (language === 'tr' ? 'Yazarı Kaldır' : 'Remove Author')
+                      }
+                    </button>
+                  )}
+                  
+                  {/* Go to Profile Button - Only for Admin and Owner users */}
+                  {(isAdmin || isOwner) && (
+                    <button
+                      onClick={() => handleAuthorProfileClick(selectedAuthor)}
+                      disabled={isRemovingAuthor}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '10px 12px',
+                        backgroundColor: isRemovingAuthor ? '#94A3B8' : '#F59E0B',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: isRemovingAuthor ? 'not-allowed' : 'pointer',
+                        transition: 'background-color 0.2s ease',
+                        opacity: isRemovingAuthor ? 0.7 : 1
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isRemovingAuthor) {
+                          e.currentTarget.style.backgroundColor = '#D97706';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isRemovingAuthor) {
+                          e.currentTarget.style.backgroundColor = '#F59E0B';
+                        }
                       }}
                       title={language === 'tr' ? 'Kullanıcı Profiline Git' : 'Go to User Profile'}
                     >
@@ -3663,6 +4304,453 @@ const JournalEntryDetailsPage: React.FC = () => {
                 
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Citation Modal */}
+      {showCitationModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '24px',
+            padding: '0',
+            maxWidth: '800px',
+            width: '100%',
+            maxHeight: '80vh',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              padding: '32px 32px 0 32px',
+              borderBottom: '1px solid rgba(226, 232, 240, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M6 6.5C6 5.11929 7.11929 4 8.5 4H15.5C16.8807 4 18 5.11929 18 6.5V20L12 16L6 20V6.5Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 8H15M9 11H15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <h3 style={{
+                  margin: 0,
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  color: '#1E293B',
+                  letterSpacing: '-0.025em'
+                }}>{t('citeThisArticle') || 'Cite This Article'}</h3>
+              </div>
+              <button 
+                onClick={() => setShowCitationModal(false)}
+                style={{
+                  background: 'rgba(148, 163, 184, 0.1)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: '20px',
+                  color: '#64748B',
+                  transition: 'all 0.3s ease',
+                  marginBottom: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                  e.currentTarget.style.color = '#EF4444';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(148, 163, 184, 0.1)';
+                  e.currentTarget.style.color = '#64748B';
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ 
+              padding: '32px',
+              maxHeight: '60vh', 
+              overflowY: 'auto'
+            }}>
+              {/* Citation Styles */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                
+                {/* APA Style */}
+                <div style={{
+                  padding: '24px',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderRadius: '16px',
+                  border: '2px solid rgba(226, 232, 240, 0.5)',
+                  transition: 'all 0.3s ease'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: '12px'
+                  }}>
+                    <h4 style={{
+                      margin: 0,
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      color: '#1E293B',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <span style={{
+                        padding: '4px 8px',
+                        background: 'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)',
+                        color: 'white',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>APA</span>
+                      American Psychological Association
+                    </h4>
+                    <button
+                      onClick={() => copyToClipboard(generateAPACitation(), 'APA')}
+                      style={{
+                        padding: '8px 12px',
+                        background: 'transparent',
+                        color: '#6B7280',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#9CA3AF';
+                        e.currentTarget.style.color = '#374151';
+                        e.currentTarget.style.background = '#F9FAFB';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#D1D5DB';
+                        e.currentTarget.style.color = '#6B7280';
+                        e.currentTarget.style.background = 'transparent';
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                      </svg>
+                      {t('copy') || 'Copy'}
+                    </button>
+                  </div>
+                  <div style={{
+                    fontSize: '15px',
+                    lineHeight: '1.6',
+                    color: '#374151',
+                    fontFamily: 'Georgia, serif',
+                    fontStyle: 'italic',
+                    padding: '16px',
+                    background: 'rgba(249, 250, 251, 0.8)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(226, 232, 240, 0.3)'
+                  }}>
+                    {generateAPACitation()}
+                  </div>
+                </div>
+
+                {/* MLA Style */}
+                <div style={{
+                  padding: '24px',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderRadius: '16px',
+                  border: '2px solid rgba(226, 232, 240, 0.5)',
+                  transition: 'all 0.3s ease'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: '12px'
+                  }}>
+                    <h4 style={{
+                      margin: 0,
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      color: '#1E293B',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <span style={{
+                        padding: '4px 8px',
+                        background: 'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)',
+                        color: 'white',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>MLA</span>
+                                            Modern Language Association
+                    </h4>
+                     <button
+                       onClick={() => copyToClipboard(generateMLACitation(), 'MLA')}
+                       style={{
+                         padding: '8px 12px',
+                         background: 'transparent',
+                         color: '#6B7280',
+                         border: '1px solid #D1D5DB',
+                         borderRadius: '8px',
+                         fontSize: '14px',
+                         fontWeight: '500',
+                         cursor: 'pointer',
+                         transition: 'all 0.3s ease',
+                         display: 'flex',
+                         alignItems: 'center',
+                         gap: '6px'
+                       }}
+                       onMouseEnter={(e) => {
+                         e.currentTarget.style.borderColor = '#9CA3AF';
+                         e.currentTarget.style.color = '#374151';
+                         e.currentTarget.style.background = '#F9FAFB';
+                       }}
+                       onMouseLeave={(e) => {
+                         e.currentTarget.style.borderColor = '#D1D5DB';
+                         e.currentTarget.style.color = '#6B7280';
+                         e.currentTarget.style.background = 'transparent';
+                       }}
+                     >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                      </svg>
+                      {t('copy') || 'Copy'}
+                    </button>
+                  </div>
+                  <div style={{
+                    fontSize: '15px',
+                    lineHeight: '1.6',
+                    color: '#374151',
+                    fontFamily: 'Georgia, serif',
+                    fontStyle: 'italic',
+                    padding: '16px',
+                    background: 'rgba(249, 250, 251, 0.8)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(226, 232, 240, 0.3)'
+                  }}>
+                    {generateMLACitation()}
+                  </div>
+                </div>
+
+                {/* Chicago Style */}
+                <div style={{
+                  padding: '24px',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderRadius: '16px',
+                  border: '2px solid rgba(226, 232, 240, 0.5)',
+                  transition: 'all 0.3s ease'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: '12px'
+                  }}>
+                    <h4 style={{
+                      margin: 0,
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      color: '#1E293B',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <span style={{
+                        padding: '4px 8px',
+                        background: 'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)',
+                        color: 'white',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>Chicago</span>
+                      Chicago Manual of Style
+                    </h4>
+                                         <button
+                       onClick={() => copyToClipboard(generateChicagoCitation(), 'Chicago')}
+                       style={{
+                         padding: '8px 12px',
+                         background: 'transparent',
+                         color: '#6B7280',
+                         border: '1px solid #D1D5DB',
+                         borderRadius: '8px',
+                         fontSize: '14px',
+                         fontWeight: '500',
+                         cursor: 'pointer',
+                         transition: 'all 0.3s ease',
+                         display: 'flex',
+                         alignItems: 'center',
+                         gap: '6px'
+                       }}
+                       onMouseEnter={(e) => {
+                         e.currentTarget.style.borderColor = '#9CA3AF';
+                         e.currentTarget.style.color = '#374151';
+                         e.currentTarget.style.background = '#F9FAFB';
+                       }}
+                       onMouseLeave={(e) => {
+                         e.currentTarget.style.borderColor = '#D1D5DB';
+                         e.currentTarget.style.color = '#6B7280';
+                         e.currentTarget.style.background = 'transparent';
+                       }}
+                     >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                      </svg>
+                      {t('copy') || 'Copy'}
+                    </button>
+                  </div>
+                  <div style={{
+                    fontSize: '15px',
+                    lineHeight: '1.6',
+                    color: '#374151',
+                    fontFamily: 'Georgia, serif',
+                    fontStyle: 'italic',
+                    padding: '16px',
+                    background: 'rgba(249, 250, 251, 0.8)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(226, 232, 240, 0.3)'
+                  }}>
+                    {generateChicagoCitation()}
+                  </div>
+                </div>
+
+                {/* IEEE Style */}
+                <div style={{
+                  padding: '24px',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderRadius: '16px',
+                  border: '2px solid rgba(226, 232, 240, 0.5)',
+                  transition: 'all 0.3s ease'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: '12px'
+                  }}>
+                    <h4 style={{
+                      margin: 0,
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      color: '#1E293B',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <span style={{
+                        padding: '4px 8px',
+                        background: 'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)',
+                        color: 'white',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>IEEE</span>
+                      Institute of Electrical and Electronics Engineers
+                    </h4>
+                                         <button
+                       onClick={() => copyToClipboard(generateIEEECitation(), 'IEEE')}
+                       style={{
+                         padding: '8px 12px',
+                         background: 'transparent',
+                         color: '#6B7280',
+                         border: '1px solid #D1D5DB',
+                         borderRadius: '8px',
+                         fontSize: '14px',
+                         fontWeight: '500',
+                         cursor: 'pointer',
+                         transition: 'all 0.3s ease',
+                         display: 'flex',
+                         alignItems: 'center',
+                         gap: '6px'
+                       }}
+                       onMouseEnter={(e) => {
+                         e.currentTarget.style.borderColor = '#9CA3AF';
+                         e.currentTarget.style.color = '#374151';
+                         e.currentTarget.style.background = '#F9FAFB';
+                       }}
+                       onMouseLeave={(e) => {
+                         e.currentTarget.style.borderColor = '#D1D5DB';
+                         e.currentTarget.style.color = '#6B7280';
+                         e.currentTarget.style.background = 'transparent';
+                       }}
+                     >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>
+                      </svg>
+                      {t('copy') || 'Copy'}
+                    </button>
+                  </div>
+                  <div style={{
+                    fontSize: '15px',
+                    lineHeight: '1.6',
+                    color: '#374151',
+                    fontFamily: 'Georgia, serif',
+                    fontStyle: 'italic',
+                    padding: '16px',
+                    background: 'rgba(249, 250, 251, 0.8)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(226, 232, 240, 0.3)'
+                  }}>
+                    {generateIEEECitation()}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="toast-notification">
+          <div className={`toast-content toast-${toastType}`}>
+            <div className="toast-icon">
+              {toastType === 'success' ? '✓' : '⚠'}
+            </div>
+            <span className="toast-message">{toastMessage}</span>
+            <button 
+              className="toast-close" 
+              onClick={() => setShowToast(false)}
+            >
+              ×
+            </button>
           </div>
         </div>
       )}

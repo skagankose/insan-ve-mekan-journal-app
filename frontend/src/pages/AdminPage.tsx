@@ -275,7 +275,7 @@ const AdminPage: React.FC = () => {
 
     // Card Components
     const UserCard = ({ user }: { user: UserRead }) => (
-        <div className="search-card user-card" onClick={() => navigate(`/admin/users/profile/${user.id}`)}>
+        <div className="search-card user-card" onClick={() => window.open(`/admin/users/profile/${user.id}`, '_blank', 'noopener,noreferrer')}>
             <div className="card-header">
                 <div className="card-type">{translateCardType('user')}</div>
                 <span className={`badge badge-${user.role}`}>{translateRole(user.role)}</span>
@@ -295,7 +295,7 @@ const AdminPage: React.FC = () => {
     );
 
     const JournalCard = ({ journal }: { journal: Journal }) => (
-        <div className="search-card journal-card" onClick={() => navigate(`/journals/${journal.id}`)}>
+        <div className="search-card journal-card" onClick={() => window.open(`/journals/${journal.id}`, '_blank', 'noopener,noreferrer')}>
             <div className="card-header">
                 <div className="card-type">{translateCardType('journal')}</div>
                 <span className={`badge ${journal.is_published ? 'badge-published' : 'badge-pending'}`}>
@@ -317,7 +317,7 @@ const AdminPage: React.FC = () => {
     );
 
     const JournalEntryCard = ({ entry }: { entry: JournalEntryRead }) => (
-        <div className="search-card entry-card" onClick={() => navigate(`/entries/${entry.id}`)}>
+        <div className="search-card entry-card" onClick={() => window.open(`/entries/${entry.id}`, '_blank', 'noopener,noreferrer')}>
             <div className="card-header">
                 <div className="card-type">{translateCardType('paper')}</div>
                 <span className={`badge badge-${entry.status?.toLowerCase() || 'pending'}`}>

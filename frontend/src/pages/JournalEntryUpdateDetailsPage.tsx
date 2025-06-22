@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as apiService from '../services/apiService';
 import { formatDate, getRoleTranslation } from '../utils/dateUtils';
-import { toast } from 'react-toastify';
 import ConfirmationModal from '../components/ConfirmationModal';
 import './JournalEntryUpdateDetailsPage.css';
 
@@ -1021,9 +1020,15 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
       <div className="chat-messages">
         {combinedUpdates.length === 0 ? (
           <div className="chat-empty-state">
-            <div className="empty-icon">💬</div>
-            <h3>{t('noUpdates') || 'No updates yet'}</h3>
-            <p>{t('startConversation') || 'Start the conversation by adding an update'}</p>
+            <div className="empty-icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <path d="M8 9h8"/>
+                <path d="M8 13h6"/>
+              </svg>
+            </div>
+            <h3>{t('noUpdates')}</h3>
+            <p>{t('startConversation')}</p>
           </div>
         ) : (
           <div className="chat-messages-list">

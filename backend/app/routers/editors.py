@@ -598,6 +598,40 @@ def add_entry_referee_as_editor(
     db.add(link)
     db.commit()
     
+    # Send email notifications to all authors
+    try:
+        from ..email_utils import send_referee_assignment_notification
+        import os
+        
+        # Get the Brevo API key
+        api_key = os.getenv("BREVO_API_KEY")
+        if api_key:
+            # Get all authors for this entry
+            authors_statement = select(models.JournalEntryAuthorLink).where(
+                models.JournalEntryAuthorLink.journal_entry_id == entry_id
+            )
+            author_links = db.exec(authors_statement).all()
+            
+            for author_link in author_links:
+                author = db.get(models.User, author_link.user_id)
+                if author and author.email:
+                    try:
+                        send_referee_assignment_notification(
+                            api_key=api_key,
+                            user_email=author.email,
+                            user_name=author.name,
+                            referee_name=referee.name,
+                            entry_title=entry.title,
+                            entry_id=entry_id
+                        )
+                    except Exception as email_error:
+                        print(f"Failed to send referee assignment notification to {author.email}: {email_error}")
+                        # Continue processing even if email fails
+                        
+    except Exception as e:
+        print(f"Error sending referee assignment notifications: {e}")
+        # Don't fail the whole operation if email fails
+    
     return link
 
 @router.delete("/entries/{entry_id}/referees/{referee_id}", status_code=status.HTTP_204_NO_CONTENT)
