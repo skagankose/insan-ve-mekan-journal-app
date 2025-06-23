@@ -6,8 +6,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { motion } from 'framer-motion';
-import { FaBuilding, FaSearch, FaUsers } from 'react-icons/fa';
-import { MdArticle, MdExplore } from 'react-icons/md';
+import { FaBuilding, FaSearch } from 'react-icons/fa';
+import { MdExplore } from 'react-icons/md';
 
 // Import page components
 import LoginPage from './pages/LoginPage';
@@ -198,8 +198,8 @@ const DesktopOnlyMessage: React.FC = () => {
         </h1>
         <p>
           {language === 'en' 
-            ? 'This web application is designed for a rich, interactive experience on desktop computers. For full functionality, including dashboards and detailed views, please switch to a larger screen.' 
-            : 'Bu uygulama, masaüstü bilgisayarlarda zengin ve etkileşimli bir deneyim için tasarlanmıştır. İşlevsel olarak uygulamayı kullanabilmek için lütfen daha büyük bir ekrana geçin.'}
+            ? 'This web application is designed for a rich, interactive experience on desktop computers and tablets. For full functionality, including dashboards and detailed views, please switch to a larger screen.' 
+            : 'Bu platform, masaüstü bilgisayar ve tabletlerde zengin ve etkileşimli bir deneyim için tasarlanmıştır. İşlevsel olarak uygulamayı kullanabilmek için lütfen daha büyük bir ekrana geçin.'}
         </p>
       </div>
     </div>

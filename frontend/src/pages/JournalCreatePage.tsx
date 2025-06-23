@@ -16,6 +16,7 @@ const JournalCreatePage: React.FC = () => {
 
     const initialFormData = useMemo(() => ({
         title: '', 
+        title_en: '',
         abstract_tr: '',
         abstract_en: '',
         keywords: '',
@@ -34,6 +35,7 @@ const JournalCreatePage: React.FC = () => {
         try {
             const submitData: apiService.JournalEntryCreate = {
                 title: formData.title,
+                title_en: formData.title_en,
                 abstract_tr: formData.abstract_tr,
                 abstract_en: formData.abstract_en,
                 keywords: formData.keywords,

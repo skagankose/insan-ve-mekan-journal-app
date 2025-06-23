@@ -16,6 +16,7 @@ const arraysEqual = (a?: number[], b?: number[]): boolean => {
 
 export interface JournalFormData {
     title: string;
+    title_en: string;
     abstract_tr: string;
     abstract_en?: string;
     keywords?: string;
@@ -36,6 +37,7 @@ interface JournalFormProps {
 const JournalForm: React.FC<JournalFormProps> = ({
     initialData = { 
         title: '', 
+        title_en: '',
         abstract_tr: '',
         abstract_en: '',
         keywords: '',
@@ -54,6 +56,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
 
     useEffect(() => {
         const titleChanged = initialData.title !== formData.title;
+        const titleEnChanged = initialData.title_en !== formData.title_en;
         const abstractTrChanged = initialData.abstract_tr !== formData.abstract_tr;
         const abstractEnChanged = initialData.abstract_en !== formData.abstract_en;
         const keywordsChanged = initialData.keywords !== formData.keywords;
@@ -62,7 +65,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
         const authorsIdsChanged = !arraysEqual(initialData.authors_ids, formData.authors_ids);
         const refereesIdsChanged = !arraysEqual(initialData.referees_ids, formData.referees_ids);
 
-        if (titleChanged || abstractTrChanged || abstractEnChanged || 
+        if (titleChanged || titleEnChanged || abstractTrChanged || abstractEnChanged || 
             keywordsChanged || keywordsEnChanged || 
             journalIdChanged || authorsIdsChanged || refereesIdsChanged) {
             setFormData(initialData);
@@ -104,6 +107,22 @@ const JournalForm: React.FC<JournalFormProps> = ({
             </div>
             
             <div className="form-group">
+                <label htmlFor="title_en" className="form-label">{t('entryTitleEn') || 'Title (English)'}</label>
+                <input
+                    type="text"
+                    id="title_en"
+                    name="title_en"
+                    className="form-input"
+                    value={formData.title_en || ''}
+                    onChange={handleChange}
+                    placeholder={t('enterEntryTitleEn') || 'Enter title in English'}
+                    disabled={isSubmitting}
+                    maxLength={300}
+                    required
+                />
+            </div>
+            
+            <div className="form-group">
                 <label htmlFor="abstract_tr" className="form-label">{t('abstractTurkish') || 'Abstract (Turkish)'}</label>
                 <textarea
                     id="abstract_tr"
@@ -120,22 +139,6 @@ const JournalForm: React.FC<JournalFormProps> = ({
             </div>
             
             <div className="form-group">
-                <label htmlFor="keywords" className="form-label">{t('keywords') || 'Keywords'}</label>
-                <input
-                    type="text"
-                    id="keywords"
-                    name="keywords"
-                    className="form-input"
-                    value={formData.keywords || ''}
-                    onChange={handleChange}
-                    placeholder={t('enterKeywordsComma') || 'Enter keywords, separated by commas...'}
-                    disabled={isSubmitting}
-                    maxLength={100}
-                    required
-                />
-            </div>
-            
-            <div className="form-group">
                 <label htmlFor="abstract_en" className="form-label">{t('abstractEnglish') || 'Abstract (English)'}</label>
                 <textarea
                     id="abstract_en"
@@ -147,6 +150,22 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     rows={3}
                     disabled={isSubmitting}
                     maxLength={500}
+                    required
+                />
+            </div>
+
+            <div className="form-group">
+                <label htmlFor="keywords" className="form-label">{t('keywords') || 'Keywords'}</label>
+                <input
+                    type="text"
+                    id="keywords"
+                    name="keywords"
+                    className="form-input"
+                    value={formData.keywords || ''}
+                    onChange={handleChange}
+                    placeholder={t('enterKeywordsComma') || 'Enter keywords, separated by commas...'}
+                    disabled={isSubmitting}
+                    maxLength={100}
                     required
                 />
             </div>
@@ -167,12 +186,11 @@ const JournalForm: React.FC<JournalFormProps> = ({
                 />
             </div>
             
-
-            
             <button 
                 type="submit" 
                 className="register-submit-button" 
                 disabled={isSubmitting}
+                style={{ marginTop: '20px' }}
             >
                 {isSubmitting ? (t('saving') || 'Saving...') : defaultSubmitText}
             </button>

@@ -118,6 +118,15 @@ const JournalEntryDetailsPage: React.FC = () => {
     const volumeMatch = issueText.match(/Cilt\s+(\d+)/i);
     const issueMatch = issueText.match(/Sayı\s+(\d+)/i);
     
+    // If no numeric patterns found, treat the entire text as issue identifier
+    // This handles cases like "Yaz Baskısı", "Kış Baskısı", etc.
+    if (!volumeMatch && !issueMatch && issueText.trim()) {
+      return {
+        volume: null,
+        issue: issueText.trim()
+      };
+    }
+    
     return {
       volume: volumeMatch ? volumeMatch[1] : null,
       issue: issueMatch ? issueMatch[1] : null
@@ -128,39 +137,46 @@ const JournalEntryDetailsPage: React.FC = () => {
   const generateAPACitation = () => {
     if (!entry) return '';
     
-    const authors = entry.authors?.map(author => {
+    const authorList = entry.authors?.map(author => {
       const nameParts = author.name.split(' ');
-      const lastName = nameParts[nameParts.length - 1];
-      const firstInitial = nameParts[0]?.charAt(0);
-      // Capitalize first letter of last name and first initial
+      const lastName = nameParts.pop() || '';
+      const firstInitial = nameParts[0]?.charAt(0).toUpperCase();
       const formattedLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
-      const formattedInitial = firstInitial?.toUpperCase();
-      return `${formattedLastName}, ${formattedInitial}.`;
-    }).join(', ') || 'Unknown Author';
+      return `${formattedLastName}, ${firstInitial}.`;
+    }) || [];
+
+    let authors = 'Unknown Author';
+    if (authorList.length === 1) {
+      authors = authorList[0];
+    } else if (authorList.length > 1) {
+      authors = `${authorList.slice(0, -1).join(', ')}, & ${authorList[authorList.length - 1]}`;
+    }
     
     const year = entry.created_date ? new Date(entry.created_date).getFullYear() : 'n.d.';
     const title = language === 'en' && entry.title_en ? entry.title_en : entry.title;
-    // Convert title to sentence case (only first word and proper nouns capitalized)
     const sentenceCaseTitle = title.charAt(0).toUpperCase() + title.slice(1).toLowerCase();
     const journalName = journal?.title || 'Unknown Journal';
     
-    // Parse volume and issue information
     const { volume, issue } = parseVolumeIssue(journal?.issue || '');
-    
-    // APA format: Author, A. (Year). Title. Journal Name, Volume(Issue), pages.
-    let citation = `${authors} (${year}). ${sentenceCaseTitle}. *${journalName}*`;
-    if (volume || entry.page_number) {
-      citation += ', ';
-      if (volume) {
-        citation += `*${volume}*`;
-        if (issue) {
-          citation += `(${issue})`;
-        }
+    const pageNumber = entry.page_number?.replace(/-/g, '–');
+
+    let citation = `${authors} (${year}). ${sentenceCaseTitle}. `;
+
+    if (volume) {
+      citation += `*${journalName}*, *${volume}*`;
+      if (issue) {
+        citation += `(${issue})`;
       }
-      if (entry.page_number) {
-        citation += volume ? `, ${entry.page_number}` : entry.page_number;
-      }
+    } else if (issue) {
+      citation += `*${journalName} ${issue}*`;
+    } else {
+      citation += `*${journalName}*`;
     }
+
+    if (pageNumber) {
+      citation += `, ${pageNumber}`;
+    }
+    
     citation += '.';
     
     return citation;
@@ -169,36 +185,44 @@ const JournalEntryDetailsPage: React.FC = () => {
   const generateMLACitation = () => {
     if (!entry) return '';
     
-    const authors = entry.authors?.map(author => {
-      const nameParts = author.name.split(' ');
-      const lastName = nameParts[nameParts.length - 1];
-      const firstName = nameParts.slice(0, -1).join(' ');
-      // Capitalize names properly
-      const formattedLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
-      const formattedFirstName = firstName.split(' ').map(name => 
-        name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
-      ).join(' ');
-      return `${formattedLastName}, ${formattedFirstName}`;
-    }).join(', ') || 'Unknown Author';
+    const authorList = entry.authors || [];
+    let authors = 'Unknown Author';
+    if (authorList.length > 0) {
+      const firstAuthor = authorList[0];
+      const firstAuthorNameParts = firstAuthor.name.split(' ');
+      const firstAuthorLastName = firstAuthorNameParts.pop() || '';
+      const firstAuthorFirstName = firstAuthorNameParts.join(' ');
+      let authorStr = `${firstAuthorLastName.charAt(0).toUpperCase() + firstAuthorLastName.slice(1).toLowerCase()}, ${firstAuthorFirstName}`;
+
+      if (authorList.length === 2) {
+        authorStr += ` and ${authorList[1].name}`;
+      } else if (authorList.length > 2) {
+        const otherAuthors = authorList.slice(1, -1).map(a => a.name).join(', ');
+        const lastAuthor = authorList[authorList.length - 1];
+        authorStr += `, ${otherAuthors}, and ${lastAuthor.name}`;
+      }
+      authors = authorStr;
+    }
     
     const title = language === 'en' && entry.title_en ? entry.title_en : entry.title;
     const journalName = journal?.title || 'Unknown Journal';
     const year = entry.created_date ? new Date(entry.created_date).getFullYear() : 'n.d.';
     
-    // Parse volume and issue information
     const { volume, issue } = parseVolumeIssue(journal?.issue || '');
-    
-    // MLA format: Author, Full Name. "Title." Journal Name, vol. 1, no. 1, Year, pp. pages.
+    const pageNumber = entry.page_number?.replace(/-/g, '–');
+
     let citation = `${authors}. "${title}." *${journalName}*`;
     if (volume) {
       citation += `, vol. ${volume}`;
       if (issue) {
         citation += `, no. ${issue}`;
       }
+    } else if (issue) {
+      citation += `, ${issue}`;
     }
     citation += `, ${year}`;
-    if (entry.page_number) {
-      citation += `, pp. ${entry.page_number}`;
+    if (pageNumber) {
+      citation += `, pp. ${pageNumber}`;
     }
     citation += '.';
     
@@ -208,35 +232,46 @@ const JournalEntryDetailsPage: React.FC = () => {
   const generateChicagoCitation = () => {
     if (!entry) return '';
     
-    const authors = entry.authors?.map(author => {
-      const nameParts = author.name.split(' ');
-      const lastName = nameParts[nameParts.length - 1];
-      const firstName = nameParts.slice(0, -1).join(' ');
-      // Capitalize names properly
-      const formattedLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
-      const formattedFirstName = firstName.split(' ').map(name => 
-        name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
-      ).join(' ');
-      return `${formattedLastName}, ${formattedFirstName}`;
-    }).join(', ') || 'Unknown Author';
+    const authorList = entry.authors || [];
+    let authors = 'Unknown Author';
+    if (authorList.length > 0) {
+      const firstAuthor = authorList[0];
+      const firstAuthorNameParts = firstAuthor.name.split(' ');
+      const firstAuthorLastName = firstAuthorNameParts.pop() || '';
+      const firstAuthorFirstName = firstAuthorNameParts.join(' ');
+      let authorStr = `${firstAuthorLastName.charAt(0).toUpperCase() + firstAuthorLastName.slice(1).toLowerCase()}, ${firstAuthorFirstName}`;
+
+      if (authorList.length === 2) {
+        authorStr += ` and ${authorList[1].name}`;
+      } else if (authorList.length > 2) {
+        const otherAuthors = authorList.slice(1, -1).map(a => a.name).join(', ');
+        const lastAuthor = authorList[authorList.length - 1];
+        authorStr += `, ${otherAuthors}, and ${lastAuthor.name}`;
+      }
+      authors = authorStr;
+    }
     
     const title = language === 'en' && entry.title_en ? entry.title_en : entry.title;
     const journalName = journal?.title || 'Unknown Journal';
     const year = entry.created_date ? new Date(entry.created_date).getFullYear() : 'n.d.';
     
-    // Parse volume and issue information
     const { volume, issue } = parseVolumeIssue(journal?.issue || '');
-    
-    // Chicago format: Author, Full Name. Year. "Title." Journal Name volume, no. issue: pages.
-    let citation = `${authors}. ${year}. "${title}." *${journalName}*`;
+    const pageNumber = entry.page_number?.replace(/-/g, '–');
+
+    let citation = `${authors}. "${title}." *${journalName}*`;
     if (volume) {
       citation += ` ${volume}`;
       if (issue) {
         citation += `, no. ${issue}`;
       }
+    } else if (issue) {
+      citation += ` ${issue}`;
     }
-    if (entry.page_number) {
-      citation += volume ? `: ${entry.page_number}` : ` (${entry.page_number})`;
+
+    citation += ` (${year})`;
+    
+    if (pageNumber) {
+      citation += `: ${pageNumber}`;
     }
     citation += '.';
     
@@ -246,37 +281,57 @@ const JournalEntryDetailsPage: React.FC = () => {
   const generateIEEECitation = () => {
     if (!entry) return '';
     
-    const authors = entry.authors?.map(author => {
+    const authorList = entry.authors?.map(author => {
       const nameParts = author.name.split(' ');
-      const lastName = nameParts[nameParts.length - 1];
-      const firstInitial = nameParts[0]?.charAt(0);
-      // Capitalize properly for IEEE format
+      const lastName = nameParts.pop() || '';
+      const firstInitial = nameParts[0]?.charAt(0).toUpperCase();
       const formattedLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
-      const formattedInitial = firstInitial?.toUpperCase();
-      return `${formattedInitial}. ${formattedLastName}`;
-    }).join(', ') || 'Unknown Author';
+      return `${firstInitial}. ${formattedLastName}`;
+    }) || [];
+
+    let authors = 'Unknown Author';
+    if (authorList.length === 1) {
+      authors = authorList[0];
+    } else if (authorList.length > 1) {
+      authors = `${authorList.slice(0, -1).join(', ')} and ${authorList[authorList.length - 1]}`;
+    }
     
     const title = language === 'en' && entry.title_en ? entry.title_en : entry.title;
     const journalName = journal?.title || 'Unknown Journal';
     const year = entry.created_date ? new Date(entry.created_date).getFullYear() : 'n.d.';
     
-    // Parse volume and issue information
     const { volume, issue } = parseVolumeIssue(journal?.issue || '');
-    
-    // IEEE format: A. Author, "Title," Journal Name, vol. 1, no. 1, pp. pages, Year.
+    const pageNumber = entry.page_number?.replace(/-/g, '–');
+
     let citation = `${authors}, "${title}," *${journalName}*`;
     if (volume) {
       citation += `, vol. ${volume}`;
       if (issue) {
         citation += `, no. ${issue}`;
       }
+    } else if (issue) {
+      citation += `, ${issue}`;
     }
-    if (entry.page_number) {
-      citation += `, pp. ${entry.page_number}`;
+    if (pageNumber) {
+      citation += `, pp. ${pageNumber}`;
     }
     citation += `, ${year}.`;
     
     return citation;
+  };
+
+  // Helper function to render citation with proper italic formatting
+  const renderCitationWithFormatting = (citation: string) => {
+    // Split the citation by asterisks and render alternating parts as italic
+    const parts = citation.split('*');
+    
+    return parts.map((part, index) => {
+      // Even indices are regular text, odd indices should be italic
+      if (index % 2 === 1) {
+        return <em key={index}>{part}</em>;
+      }
+      return <span key={index}>{part}</span>;
+    });
   };
 
   const copyToClipboard = async (text: string, style: string) => {
@@ -4478,13 +4533,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                     lineHeight: '1.6',
                     color: '#374151',
                     fontFamily: 'Georgia, serif',
-                    fontStyle: 'italic',
                     padding: '16px',
                     background: 'rgba(249, 250, 251, 0.8)',
                     borderRadius: '12px',
                     border: '1px solid rgba(226, 232, 240, 0.3)'
                   }}>
-                    {generateAPACitation()}
+                    {renderCitationWithFormatting(generateAPACitation())}
                   </div>
                 </div>
 
@@ -4559,13 +4613,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                     lineHeight: '1.6',
                     color: '#374151',
                     fontFamily: 'Georgia, serif',
-                    fontStyle: 'italic',
                     padding: '16px',
                     background: 'rgba(249, 250, 251, 0.8)',
                     borderRadius: '12px',
                     border: '1px solid rgba(226, 232, 240, 0.3)'
                   }}>
-                    {generateMLACitation()}
+                    {renderCitationWithFormatting(generateMLACitation())}
                   </div>
                 </div>
 
@@ -4640,13 +4693,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                     lineHeight: '1.6',
                     color: '#374151',
                     fontFamily: 'Georgia, serif',
-                    fontStyle: 'italic',
                     padding: '16px',
                     background: 'rgba(249, 250, 251, 0.8)',
                     borderRadius: '12px',
                     border: '1px solid rgba(226, 232, 240, 0.3)'
                   }}>
-                    {generateChicagoCitation()}
+                    {renderCitationWithFormatting(generateChicagoCitation())}
                   </div>
                 </div>
 
@@ -4721,13 +4773,12 @@ const JournalEntryDetailsPage: React.FC = () => {
                     lineHeight: '1.6',
                     color: '#374151',
                     fontFamily: 'Georgia, serif',
-                    fontStyle: 'italic',
                     padding: '16px',
                     background: 'rgba(249, 250, 251, 0.8)',
                     borderRadius: '12px',
                     border: '1px solid rgba(226, 232, 240, 0.3)'
                   }}>
-                    {generateIEEECitation()}
+                    {renderCitationWithFormatting(generateIEEECitation())}
                   </div>
                 </div>
 

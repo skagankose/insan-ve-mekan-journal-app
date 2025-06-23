@@ -79,8 +79,8 @@ type TranslationKeys =
   | 'yoksisValidationError' | 'orcidValidationError' | 'phoneValidationError'
   | 'profileUpdated' | 'accountMarkedForDeletion' | 'accountUnmarkedForDeletion'
   | 'entryNotFoundTitle' | 'entryNotFoundExplanation' | 'userNotFoundTitle' | 'userNotFoundExplanation'
-  | 'errorLoadingEntryTitle' | 'errorLoadingEntryExplanation' | 'errorLoadingUserTitle' | 'errorLoadingUserExplanation'
-  | 'paperNotFoundTitle' | 'paperNotFoundExplanation'
+  | 'errorLoadingEntryTitle' | 'errorLoadingEntryExplanation'   | 'errorLoadingUserTitle' | 'errorLoadingUserExplanation'
+  | 'paperNotFoundTitle' | 'paperNotFoundExplanation' | 'paperNotFoundUpdateExplanation'
   | 'tryAgain' | 'addAuthorUpdate' | 'addRefereeUpdate' | 'participants' | 'noParticipants'
   | 'pleaseConfirmEmail' | 'incorrectCredentials'
   | 'registrationSuccessful' | 'registrationFailed' | 'emailAlreadyRegistered' | 'accountCreated' | 'registrationToastMessage'
@@ -89,7 +89,7 @@ type TranslationKeys =
   | 'user' | 'journal' | 'paper' | 'draft' | 'founder' | 'author'
   | 'noUpdates' | 'startConversation'
   // Journal Entry Form specific translations
-  | 'createNewJournalEntry' | 'entryTitle' | 'enterEntryTitle' | 'abstractTurkish' | 'abstractEnglish'
+  | 'createNewJournalEntry' | 'entryTitle' | 'enterEntryTitle' | 'entryTitleEn' | 'enterEntryTitleEn' | 'abstractTurkish' | 'abstractEnglish'
   | 'enterAbstractTurkish' | 'enterAbstractEnglish' | 'enterKeywordsComma' | 'entryLanguage'
   | 'submitEntry' | 'mustBeLoggedIn' | 'failedToCreateEntry' | 'noActiveJournalSelected'
   | 'noActiveJournalMessage' | 'selectAJournal' | 'toAssociateWithEntry' | 'entrySavedSecurelyMessage'
@@ -518,6 +518,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'errorLoadingUserExplanation': 'Unable to load the user profile. Please check your connection and try again.',
     'paperNotFoundTitle': 'Journal Paper Not Found',
     'paperNotFoundExplanation': 'We encountered an issue while loading this journal entry.',
+    'paperNotFoundUpdateExplanation': 'We encountered an issue while loading this journal entry\'s updates.',
     'tryAgain': 'Try Again',
     'addAuthorUpdate': 'Add Author Update',
     'addRefereeUpdate': 'Add Referee Update',
@@ -562,6 +563,8 @@ const translations: Record<Language, TranslationDictionary> = {
     'createNewJournalEntry': 'Create New Journal Entry',
     'entryTitle': 'Title',
     'enterEntryTitle': 'Enter title',
+    'entryTitleEn': 'Title (English)',
+    'enterEntryTitleEn': 'Enter title in English',
     'abstractTurkish': 'Abstract (Turkish)',
     'abstractEnglish': 'Abstract (English)',
     'enterAbstractTurkish': 'Enter a brief summary in Turkish...',
@@ -738,7 +741,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'createNewJournal': 'Yeni Dergi Oluştur',
     'journalTitle': 'Dergi İsmi',
     'enterJournalTitle': 'Dergi başlığını giriniz',
-    'enterIssueNumber': 'Sayı ismini giriniz',
+    'enterIssueNumber': 'Sayıyu giriniz',
     'journalCreatedSuccessfully': 'Dergi başarıyla oluşturuldu',
     'errorCreatingJournal': 'Dergi oluşturulurken hata oluştu',
 
@@ -961,7 +964,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'processingTime': 'İşlem Süresi',
     'keywords': 'Anahtar Kelimeler (Türkçe)',
     'keywordsEn': 'Anahtar Kelimeler (İngilizce)',
-    'keywordsSeparatedByCommasEn': 'İngilizce anahtar kelimeleri virgül ile ayırarak giriniz...',
+    'keywordsSeparatedByCommasEn': 'İngilizce anahtar kelimeleri virgül ile ayırarak giriniz',
     'updatedKeywordsEn': 'Güncellenmiş Anahtar Kelimeler (İngilizce)',
     'referees': 'Hakemler',
     'files': 'Dosyalar',
@@ -971,7 +974,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'changeJournal': 'Dergiyi Değiştir',
     'manageReferees': 'Hakemleri Yönet',
     'noPublishedEntries': 'Bu dergide yayınlanan makale bulunmamaktadır',
-    'loadingPublishedJournals': 'Yayınlanmış dergiler yükleniyor...',
+    'loadingPublishedJournals': 'Yayınlanmış dergiler yükleniyor',
     'failedToLoadPublishedJournals': 'Yayınlanmış dergiler yüklenemedi.',
     'noPublishedJournals': 'Yayınlanan Dergiler Bulunamadı',
     'checkBackLaterForPublications': 'Yayınlanan dergiler kısa bir zaman içinde burada görüntülenecektir. Bizi takipte kalmanızı tavsiye ederiz.',
@@ -1013,6 +1016,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'errorLoadingUserExplanation': 'Kullanıcı profili yüklenemedi. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
     'paperNotFoundTitle': 'Makale Bulunamadı!',
     'paperNotFoundExplanation': 'Makale verileri sunucudan yüklenemedi. Bu durum geçici bir ağ sorunu, sunucu bakımı veya derginin taşınmış ya da silinmiş olması nedeniyle ortaya çıkabilir. Lütfen internet bağlantınızı kontrol edin ve sayfayı yenilemeyi deneyin. Sorun devam ederse, teknik destek ekibimizle iletişime geçin.',
+    'paperNotFoundUpdateExplanation': 'Bu makalenin güncellemelerini yüklerken bir sorunla karşılaştık.',
           'tryAgain': 'Tekrar Dene',
       'addAuthorUpdate': 'Yazar Güncellemesi',
       'addRefereeUpdate': 'Hakem Değerlendirmesi',
@@ -1057,11 +1061,13 @@ const translations: Record<Language, TranslationDictionary> = {
     'createNewJournalEntry': 'Yeni Makale Oluştur',
     'entryTitle': 'Başlık',
     'enterEntryTitle': 'Başlık giriniz',
+    'entryTitleEn': 'Başlık (İngilizce)',
+    'enterEntryTitleEn': 'İngilizce başlık giriniz',
     'abstractTurkish': 'Özet (Türkçe)',
     'abstractEnglish': 'Genişletilmiş Özet (İngilizce)',
-    'enterAbstractTurkish': 'Türkçe özeti giriniz...',
-    'enterAbstractEnglish': 'İngilizce genişletilmiş özeti giriniz...',
-    'enterKeywordsComma': 'Anahtar kelimeleri virgül ile ayırarak giriniz...',
+    'enterAbstractTurkish': 'Türkçe özeti giriniz',
+    'enterAbstractEnglish': 'Enter a brief summary in English...',
+    'enterKeywordsComma': 'Anahtar kelimeleri virgül ile ayırarak giriniz',
     'entryLanguage': 'Dil',
     'submitEntry': 'Makale Gönder',
     'mustBeLoggedIn': 'Makale oluşturmak için giriş yapmalısınız.',
