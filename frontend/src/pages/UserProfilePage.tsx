@@ -265,8 +265,22 @@ const UserProfilePage: React.FC = () => {
         const passwordUpdated = searchParams.get('passwordUpdated');
         const markedForDeletion = searchParams.get('markedForDeletion');
         const unmarkedForDeletion = searchParams.get('unmarkedForDeletion');
+        const created = searchParams.get('created');
         
-        if (updated === 'true') {
+        if (created === 'true') {
+            setToastMessage(t('userCreatedSuccessfully') || 'User created successfully!');
+            setToastType('success');
+            setShowToast(true);
+            
+            // Remove the parameter from URL
+            searchParams.delete('created');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+        } else if (updated === 'true') {
             setToastMessage(t('profileUpdated') || 'Profile updated successfully!');
             setToastType('success');
             setShowToast(true);
@@ -674,7 +688,7 @@ const UserProfilePage: React.FC = () => {
                                 fontWeight: '600', 
                                 color: '#475569',
                                 marginRight: '8px'
-                            }}>Keywords:</span>
+                            }}>{language === 'tr' ? 'Anahtar Kelimeler:' : 'Keywords:'}</span>
                             {language === 'en' && entry.keywords_en ? entry.keywords_en : entry.keywords}
                         </>
                     ) : entry.abstract_tr ? (

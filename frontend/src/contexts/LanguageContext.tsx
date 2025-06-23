@@ -29,7 +29,7 @@ type TranslationKeys =
   | 'publicationDate' | 'isPublished' | 'editJournal' | 'updateJournal' | 'accessDeniedAdminOnly'
   | 'theme' | 'lightMode' | 'darkMode' | 'switchToDark' | 'switchToLight'
   | 'previousIssues' | 'publishedJournals' | 'acceptedEntries'
-  | 'createUser' | 'userCreatedSuccessfully' | 'cancel' | 'editUser' | 'userUpdatedSuccessfully' | 'createJournal'
+  | 'createUser' | 'userCreatedSuccessfully' | 'userDeletedSuccessfully' | 'cancel' | 'editUser' | 'userUpdatedSuccessfully' | 'createJournal'
   | 'createNewJournal' | 'enterJournalTitle' | 'enterIssueNumber' | 'journalCreatedSuccessfully' | 'errorCreatingJournal' | 'journalTitle'
   | 'directLogin' | 'directLoginDescription' | 'generateLoginLink' | 'copyLink' | 'linkCopied' | 'generating' | 'saveChanges'
   | 'invalidLoginLink' | 'loginFailed' | 'autoLoginFailed' | 'autoLoginProcessing' | 'loginError' | 'goToLogin' | 'loginSuccessful' | 'redirecting'
@@ -119,7 +119,7 @@ const translations: Record<Language, TranslationDictionary> = {
     
     // Page titles
     'createNewEntry': 'Create New Journal Entry',
-    'editEntry': 'Edit Journal Entry',
+    'editEntry': 'Edit Journal Paper',
     'createAccount': 'Create an Account',
     'welcomeBack': 'Welcome Back',
     'publishedJournals': 'Published Journals',
@@ -234,6 +234,7 @@ const translations: Record<Language, TranslationDictionary> = {
     // Admin actions
     'createUser': 'Create User',
     'userCreatedSuccessfully': 'User created successfully!',
+    'userDeletedSuccessfully': 'User deleted successfully!',
     'editUser': 'Edit User',
     'userUpdatedSuccessfully': 'User updated successfully!',
     'cancel': 'Cancel',
@@ -617,7 +618,7 @@ const translations: Record<Language, TranslationDictionary> = {
     
     // Page titles
     'createNewEntry': 'Yeni Makale Oluştur',
-    'editEntry': 'Düzenle',
+    'editEntry': 'Makaleyi Düzenle',
     'createAccount': 'Hesap Oluştur',
     'welcomeBack': 'Tekrar Hoş Geldiniz',
     'publishedJournals': 'Yayınlanmış Dergiler',
@@ -704,14 +705,14 @@ const translations: Record<Language, TranslationDictionary> = {
     // Roles
     'writer': 'Yazar',
     'editor': 'EDİTÖR',
-    'arbitrator': 'HAKEM',
+    'arbitrator': 'Hakem',
     'admin': 'YÖNETİCİ',
     'owner': 'Kurucu',
     'roleAuthor': 'Yazar',
     'roleAdmin': 'Site Yöneticisi',
     'roleOwner': 'Site Sahibi',
     'roleEditor': 'Editör',
-    'roleReferee': 'HAKEM',
+    'roleReferee': 'Hakem',
     'isAuth': 'Yetkilendir',
     'isAuthDescription': 'Etkinleştirildiğinde, bu kullanıcı atanan rolü için sisteme erişime sahip olacaktır.',
 
@@ -732,6 +733,7 @@ const translations: Record<Language, TranslationDictionary> = {
     // Admin actions
     'createUser': 'Kullanıcı Oluştur',
     'userCreatedSuccessfully': 'Kullanıcı başarıyla oluşturuldu!',
+    'userDeletedSuccessfully': 'Kullanıcı başarıyla silindi!',
     'editUser': 'Kullanıcıyı Düzenle',
     'userUpdatedSuccessfully': 'Kullanıcı başarıyla güncellendi!',
     'cancel': 'İptal',

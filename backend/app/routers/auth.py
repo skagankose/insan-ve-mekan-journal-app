@@ -61,8 +61,8 @@ async def register_user(user: schemas.UserCreate, db: Session = Depends(get_sess
     """
     Register a new user and send a confirmation email.
     """
-    # Verify reCAPTCHA first
-    if not await verify_recaptcha(user.recaptcha_token):
+    # Skip reCAPTCHA verification for admin-created users (those with is_auth=True)
+    if not user.is_auth and not await verify_recaptcha(user.recaptcha_token):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="reCAPTCHA verification failed"

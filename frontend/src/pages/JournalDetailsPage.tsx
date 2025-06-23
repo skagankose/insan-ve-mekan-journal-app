@@ -70,6 +70,8 @@ const JournalDetailsPage: React.FC = () => {
     // Check for success parameter and show toast
     useEffect(() => {
         const created = searchParams.get('created');
+        const updated = searchParams.get('updated');
+        const deleted = searchParams.get('deleted');
         
         if (created === 'true') {
             setToastMessage(t('journalCreatedSuccessfully') || 'Journal created successfully!');
@@ -84,8 +86,38 @@ const JournalDetailsPage: React.FC = () => {
             setTimeout(() => {
                 setShowToast(false);
             }, 4000);
+        } else if (updated === 'true') {
+            setToastMessage(language === 'tr' 
+                ? 'Dergi başarıyla güncellendi' 
+                : 'Journal updated successfully');
+            setToastType('success');
+            setShowToast(true);
+            
+            // Remove the parameter from URL
+            searchParams.delete('updated');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+        } else if (deleted === 'true') {
+            setToastMessage(language === 'tr' 
+                ? 'Dergi başarıyla silindi. Tüm makaleler varsayılan dergiye taşındı.' 
+                : 'Journal deleted successfully. All entries have been reassigned to the default journal.');
+            setToastType('success');
+            setShowToast(true);
+            
+            // Remove the parameter from URL
+            searchParams.delete('deleted');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
         }
-    }, [searchParams, setSearchParams, t]);
+    }, [searchParams, setSearchParams, t, language]);
 
     useEffect(() => {
         const fetchJournalAndEntries = async () => {
@@ -239,9 +271,33 @@ const JournalDetailsPage: React.FC = () => {
         try {
             await apiService.updateSettings({ active_journal_id: journal.id });
             setActiveJournal(journal);
+            
+            // Show success toast
+            setToastMessage(language === 'tr' 
+                ? 'Dergi aktif dergi olarak ayarlandı' 
+                : 'Journal set as active successfully');
+            setToastType('success');
+            setShowToast(true);
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
         } catch (err: any) {
             console.error("Failed to set active journal:", err);
             setError(err.response?.data?.detail || 'Failed to set active journal.');
+            
+            // Show error toast
+            setToastMessage(err.response?.data?.detail || (language === 'tr' 
+                ? 'Dergi aktif olarak ayarlanamadı' 
+                : 'Failed to set journal as active'));
+            setToastType('warning');
+            setShowToast(true);
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
         }
     };
 
@@ -339,9 +395,33 @@ const JournalDetailsPage: React.FC = () => {
                 setJournal(updatedJournal);
             }
             
+            // Show success toast
+            setToastMessage(language === 'tr' 
+                ? 'Dergi dosyaları başarıyla birleştirildi' 
+                : 'Journal files merged successfully');
+            setToastType('success');
+            setShowToast(true);
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+            
         } catch (err: any) {
             console.error('Failed to merge journal files:', err);
             setMergeError(err.response?.data?.detail || t('failedToMergeFiles') || 'Failed to merge journal files.');
+            
+            // Show error toast
+            setToastMessage(err.response?.data?.detail || (language === 'tr' 
+                ? 'Dergi dosyaları birleştirilemedi' 
+                : 'Failed to merge journal files'));
+            setToastType('warning');
+            setShowToast(true);
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
         } finally {
             setIsMerging(false);
         }
@@ -1207,7 +1287,7 @@ const JournalDetailsPage: React.FC = () => {
                                 
                                 <div style={{
                                     display: 'grid',
-                                    gridTemplateColumns: editors.length === 1 ? '1fr' : editors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(220px, 1fr))',
+                                    gridTemplateColumns: 'repeat(2, 1fr)',
                                     gap: '16px'
                                 }}>
                                     {editors.length > 0 ? (
@@ -1226,7 +1306,7 @@ const JournalDetailsPage: React.FC = () => {
                                                     overflow: 'hidden',
                                                     display: 'flex',
                                                     alignItems: 'center',
-                                                    justifyContent: 'space-between'
+                                                    justifyContent: 'space-between',
                                                 }}
                                                 onMouseEnter={(e) => {
                                                     e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)';
@@ -2200,7 +2280,7 @@ const JournalDetailsPage: React.FC = () => {
                                                     fontWeight: '600', 
                                                     color: '#475569',
                                                     marginRight: '8px'
-                                                }}>Keywords:</span>
+                                                }}>{language === 'tr' ? 'Anahtar Kelimeler:' : 'Keywords:'}</span>
                                                 {language === 'en' && entry.keywords_en ? entry.keywords_en : entry.keywords}
                                             </>
                                         ) : 'No keywords available.'}

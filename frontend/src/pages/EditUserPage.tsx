@@ -235,7 +235,7 @@ const EditUserPage: React.FC = () => {
             setShowDeleteConfirm(false);
             
             // Navigate back to admin page after short delay
-            navigate('/admin');
+            navigate('/admin?deleted=true');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to delete user');
             setDeleting(false);

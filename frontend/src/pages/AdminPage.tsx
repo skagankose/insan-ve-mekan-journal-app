@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import type {
@@ -9,6 +9,7 @@ import type {
 } from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import './AdminPage.css';
+import './UserProfilePage.css'; // Import toast styles
 
 // Interfaces will now directly use the more detailed types from apiService
 
@@ -95,6 +96,11 @@ const AdminPage: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     
+    // Toast state
+    const [showToast, setShowToast] = useState<boolean>(false);
+    const [toastMessage, setToastMessage] = useState<string>('');
+    const [toastType, setToastType] = useState<'success' | 'warning'>('success');
+    
     // Global search state
     const [globalSearchTerm, setGlobalSearchTerm] = useState<string>('');
 
@@ -106,6 +112,7 @@ const AdminPage: React.FC = () => {
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const { t, language } = useLanguage();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -145,7 +152,25 @@ const AdminPage: React.FC = () => {
         fetchData();
     }, [isAuthenticated, user, navigate]);
 
-
+    // Check for success parameter and show toast
+    useEffect(() => {
+        const deleted = searchParams.get('deleted');
+        
+        if (deleted === 'true') {
+            setToastMessage(t('userDeletedSuccessfully') || 'User deleted successfully!');
+            setToastType('success');
+            setShowToast(true);
+            
+            // Remove the parameter from URL
+            searchParams.delete('deleted');
+            setSearchParams(searchParams, { replace: true });
+            
+            // Hide toast after 4 seconds
+            setTimeout(() => {
+                setShowToast(false);
+            }, 4000);
+        }
+    }, [searchParams, setSearchParams, t]);
 
     // Update filtered data when original data or global search term changes
     useEffect(() => {
@@ -347,10 +372,29 @@ const AdminPage: React.FC = () => {
 
     return (
         <>
+            {/* Toast Notification */}
+            {showToast && (
+                <div className="toast-notification">
+                    <div className={`toast-content toast-${toastType}`}>
+                        <div className="toast-icon">
+                            {toastType === 'success' ? '✓' : '⚠'}
+                        </div>
+                        <span className="toast-message">{toastMessage}</span>
+                        <button 
+                            className="toast-close"
+                            onClick={() => setShowToast(false)}
+                            aria-label="Close"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
+            
             {/* Title Section */}
             <div className="page-title-section" style={{ marginLeft: '60px' }}>
                 <h1>{t('adminDashboard')}</h1>
-                    </div>
+            </div>
 
             {/* Content Section */}
             <div className="page-content-section" style={{

@@ -334,9 +334,54 @@ const JournalEntryDetailsPage: React.FC = () => {
     });
   };
 
-  const copyToClipboard = async (text: string, style: string) => {
+  const copyRichTextToClipboard = async (citation: string, style: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      // Create a hidden contentEditable div that's actually focusable
+      const tempDiv = document.createElement('div');
+      tempDiv.contentEditable = 'true';
+      tempDiv.style.position = 'fixed';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '0px';
+      tempDiv.style.width = '1px';
+      tempDiv.style.height = '1px';
+      tempDiv.style.opacity = '0';
+      tempDiv.style.overflow = 'hidden';
+      tempDiv.style.zIndex = '-1';
+      
+      // Convert markdown asterisks to proper HTML formatting
+      const htmlContent = citation.replace(/\*(.*?)\*/g, '<i>$1</i>');
+      tempDiv.innerHTML = htmlContent;
+      
+      document.body.appendChild(tempDiv);
+      
+      // Focus the element first
+      tempDiv.focus();
+      
+      // Select all content in the div
+      const range = document.createRange();
+      range.selectNodeContents(tempDiv);
+      
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        // Force focus and selection
+        tempDiv.focus();
+        
+        // Use execCommand which works reliably with Google Docs
+        const success = document.execCommand('copy');
+        
+        if (!success) {
+          throw new Error('execCommand copy failed');
+        }
+        
+        selection.removeAllRanges();
+      }
+      
+      // Clean up
+      document.body.removeChild(tempDiv);
+      
       setToastMessage(t(`${style.toLowerCase()}CitationCopied`) || `${style} citation copied to clipboard!`);
       setToastType('success');
       setShowToast(true);
@@ -346,14 +391,28 @@ const JournalEntryDetailsPage: React.FC = () => {
         setShowToast(false);
       }, 3000);
     } catch (err) {
-      console.error('Failed to copy citation:', err);
-      setToastMessage(t('failedToCopyCitation') || 'Failed to copy citation to clipboard');
-      setToastType('warning');
-      setShowToast(true);
-      
-      setTimeout(() => {
-        setShowToast(false);
-      }, 3000);
+      console.error('Failed to copy rich text citation:', err);
+      // Fallback to plain text copy
+      try {
+        const plainText = citation.replace(/\*/g, '');
+        await navigator.clipboard.writeText(plainText);
+        setToastMessage(t(`${style.toLowerCase()}CitationCopied`) || `${style} citation copied to clipboard (plain text)!`);
+        setToastType('success');
+        setShowToast(true);
+        
+        setTimeout(() => {
+          setShowToast(false);
+        }, 3000);
+      } catch (fallbackErr) {
+        console.error('Fallback copy also failed:', fallbackErr);
+        setToastMessage(t('failedToCopyCitation') || 'Failed to copy citation to clipboard');
+        setToastType('warning');
+        setShowToast(true);
+        
+        setTimeout(() => {
+          setShowToast(false);
+        }, 3000);
+      }
     }
   };
 
@@ -1378,7 +1437,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                 }}></div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '1fr' : 'repeat(2, 1fr)',
+                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))',
                   gap: '16px'
                 }}>
                   {entry.authors && entry.authors.length > 0 ? (
@@ -1397,7 +1456,8 @@ const JournalEntryDetailsPage: React.FC = () => {
                           overflow: 'hidden',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'space-between'
+                          justifyContent: 'space-between',
+                          maxWidth: entry.authors && entry.authors.length === 1 ? '400px' : undefined,
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = 'rgba(245, 158, 11, 0.08)';
@@ -2649,7 +2709,8 @@ const JournalEntryDetailsPage: React.FC = () => {
                           overflow: 'hidden',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'space-between'
+                          justifyContent: 'space-between',
+                          maxWidth: entry.referees && entry.referees.length === 1 ? '400px' : undefined,
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = 'rgba(139, 92, 246, 0.08)';
@@ -4495,9 +4556,9 @@ const JournalEntryDetailsPage: React.FC = () => {
                       }}>APA</span>
                       American Psychological Association
                     </h4>
-                    <button
-                      onClick={() => copyToClipboard(generateAPACitation(), 'APA')}
-                      style={{
+                                         <button
+                       onClick={() => copyRichTextToClipboard(generateAPACitation(), 'APA')}
+                       style={{
                         padding: '8px 12px',
                         background: 'transparent',
                         color: '#6B7280',
@@ -4576,7 +4637,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                                             Modern Language Association
                     </h4>
                      <button
-                       onClick={() => copyToClipboard(generateMLACitation(), 'MLA')}
+                       onClick={() => copyRichTextToClipboard(generateMLACitation(), 'MLA')}
                        style={{
                          padding: '8px 12px',
                          background: 'transparent',
@@ -4656,7 +4717,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                       Chicago Manual of Style
                     </h4>
                                          <button
-                       onClick={() => copyToClipboard(generateChicagoCitation(), 'Chicago')}
+                       onClick={() => copyRichTextToClipboard(generateChicagoCitation(), 'Chicago')}
                        style={{
                          padding: '8px 12px',
                          background: 'transparent',
@@ -4736,7 +4797,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                       Institute of Electrical and Electronics Engineers
                     </h4>
                                          <button
-                       onClick={() => copyToClipboard(generateIEEECitation(), 'IEEE')}
+                       onClick={() => copyRichTextToClipboard(generateIEEECitation(), 'IEEE')}
                        style={{
                          padding: '8px 12px',
                          background: 'transparent',

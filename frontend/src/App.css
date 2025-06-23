@@ -1493,3 +1493,14 @@ body::before {
     display: flex;
   }
 }
+
+/* Media query for screens with insufficient height */
+@media (max-height: 490px) {
+  .app-container {
+    display: none !important;
+  }
+
+  .desktop-only-message {
+    display: flex;
+  }
+}

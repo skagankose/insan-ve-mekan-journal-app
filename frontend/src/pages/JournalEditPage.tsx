@@ -8,6 +8,7 @@ import { FaFileWord, FaFilePdf } from 'react-icons/fa';
 
 interface JournalFormData {
     title: string;
+    title_en?: string;
     abstract_tr: string;
     abstract_en?: string;
     keywords?: string;
@@ -31,6 +32,7 @@ const JournalEditPage: React.FC = () => {
 
     const [formData, setFormData] = useState<JournalFormData>({
         title: '',
+        title_en: '',
         abstract_tr: '',
         abstract_en: '',
         keywords: '',
@@ -75,6 +77,7 @@ const JournalEditPage: React.FC = () => {
                 const entry = await apiService.getEntryById(entryId);
                 setFormData({ 
                     title: entry.title,
+                    title_en: entry.title_en,
                     abstract_tr: entry.abstract_tr,
                     abstract_en: entry.abstract_en,
                     keywords: entry.keywords,
@@ -258,6 +261,21 @@ const JournalEditPage: React.FC = () => {
                                 onChange={(e) => setFormData({...formData, title: e.target.value})}
                                 placeholder={t('enterEntryTitle') || 'Enter title'}
                                 required
+                                disabled={isSubmitting}
+                                maxLength={300}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="title_en" className="form-label">{t('entryTitleEn') || 'Title (English)'}</label>
+                            <input
+                                type="text"
+                                id="title_en"
+                                name="title_en"
+                                className="form-input"
+                                value={formData.title_en || ''}
+                                onChange={(e) => setFormData({...formData, title_en: e.target.value})}
+                                placeholder={t('enterEntryTitleEn') || 'Enter title in English'}
                                 disabled={isSubmitting}
                                 maxLength={300}
                             />
@@ -534,10 +552,9 @@ const JournalEditPage: React.FC = () => {
                         )}
                         
                         <div style={{ 
-                            display: 'flex', 
-                            gap: '1rem', 
-                            justifyContent: 'flex-end',
-                            marginTop: '2rem'
+                            display: 'flex',
+                            gap: 'var(--spacing-3)',
+                            marginTop: 'var(--spacing-6)'
                         }}>
                             <button 
                                 type="button" 
@@ -545,9 +562,15 @@ const JournalEditPage: React.FC = () => {
                                 onClick={() => navigate(`/entries/${id}`)}
                                 disabled={isSubmitting}
                                 style={{
-                                    padding: '12px 24px',
+                                    flex: '1',
+                                    padding: '12px 20px',
+                                    border: '2px solid #E2E8F0',
                                     borderRadius: '12px',
-                                    fontWeight: '600'
+                                    background: 'transparent',
+                                    color: 'var(--color-text-secondary)',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease'
                                 }}
                             >
                                 {t('cancel') || 'Cancel'}
@@ -556,7 +579,9 @@ const JournalEditPage: React.FC = () => {
                                 type="submit" 
                                 className="register-submit-button"
                                 disabled={isSubmitting}
-                                style={{ width: 'auto', margin: 0 }}
+                                style={{
+                                    flex: '2'
+                                }}
                             >
                                 {isSubmitting ? (t('saving') || 'Saving...') : (t('updateEntry') || 'Update Entry')}
                             </button>

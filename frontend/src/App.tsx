@@ -198,8 +198,8 @@ const DesktopOnlyMessage: React.FC = () => {
         </h1>
         <p>
           {language === 'en' 
-            ? 'This web application is designed for a rich, interactive experience on desktop computers and tablets. For full functionality, including dashboards and detailed views, please switch to a larger screen.' 
-            : 'Bu platform, masaüstü bilgisayar ve tabletlerde zengin ve etkileşimli bir deneyim için tasarlanmıştır. İşlevsel olarak uygulamayı kullanabilmek için lütfen daha büyük bir ekrana geçin.'}
+            ? 'This web application is designed for a rich, interactive experience on desktop computers and tablets. For full functionality, including dashboards and detailed views, please switch to a larger screen with adequate display dimensions.' 
+            : 'Bu platform, masaüstü bilgisayar ve tabletlerde zengin ve etkileşimli bir deneyim için tasarlanmıştır. İşlevsel olarak uygulamayı kullanabilmek için lütfen yeterli ekran boyutlarına sahip daha büyük bir ekrana geçin.'}
         </p>
       </div>
     </div>

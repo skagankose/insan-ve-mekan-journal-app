@@ -3,15 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
-import { toast } from 'react-toastify';
 import ConfirmationModal from '../components/ConfirmationModal';
-import 'react-toastify/dist/ReactToastify.css';
+import { FaImage, FaFileWord, FaFilePdf, FaFileAlt, FaList, FaFolder } from 'react-icons/fa';
+import './JournalEntryDetailsPage.css'; // Import toast styles
 
 interface JournalFormData {
     title: string;
+    title_en?: string;
     issue: string;
     is_published: boolean;
-    created_date: string | undefined;
     publication_date: string | undefined;
     publication_place: string | undefined;
     cover_photo: string | undefined;
@@ -28,9 +28,9 @@ const JournalEditFormPage: React.FC = () => {
     
     const [formData, setFormData] = useState<JournalFormData>({
         title: '',
+        title_en: '',
         issue: '',
         is_published: false,
-        created_date: undefined,
         publication_date: undefined,
         publication_place: undefined,
         cover_photo: undefined,
@@ -57,9 +57,17 @@ const JournalEditFormPage: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     
+    // Add deletion section state
+    const [isDeletionSectionExpanded, setIsDeletionSectionExpanded] = useState<boolean>(false);
+    
+    // Toast notification state
+    const [showToast, setShowToast] = useState<boolean>(false);
+    const [toastMessage, setToastMessage] = useState<string>('');
+    const [toastType, setToastType] = useState<'success' | 'warning'>('success');
+    
     const navigate = useNavigate();
     const { isAuthenticated, user } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
     const isAdminOrOwner = user?.role === 'admin' || user?.role === 'owner';
 
@@ -91,9 +99,9 @@ const JournalEditFormPage: React.FC = () => {
                 
                 setFormData({
                     title: journal.title,
+                    title_en: journal.title_en || '',
                     issue: journal.issue,
                     is_published: journal.is_published,
-                    created_date: journal.created_date ? journal.created_date.slice(0, 16) : undefined,
                     publication_date: journal.publication_date || undefined,
                     publication_place: journal.publication_place || undefined,
                     cover_photo: journal.cover_photo || undefined,
@@ -198,12 +206,14 @@ const JournalEditFormPage: React.FC = () => {
                 await apiService.uploadJournalFiles(journalId, formData);
             }
 
-            toast.success(t('journalUpdated') || 'Journal updated successfully');
-            navigate(`/journals/${journalId}`);
+            navigate(`/journals/${journalId}?updated=true`);
         } catch (err: any) {
             console.error('Error updating journal:', err);
-            setSubmitError(err.message || 'Failed to update journal');
-            toast.error(err.message || t('errorUpdatingJournal') || 'Error updating journal');
+            setSubmitError(err.message || (language === 'tr' ? 'Dergi güncellenemedi' : 'Failed to update journal'));
+            setToastMessage(err.message || (language === 'tr' ? 'Dergi güncellenirken hata oluştu' : 'Error updating journal'));
+            setToastType('warning');
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 4000);
         } finally {
             setIsSubmitting(false);
         }
@@ -216,7 +226,12 @@ const JournalEditFormPage: React.FC = () => {
         }
 
         if (journalId === 1) {
-            toast.error(t('cannotDeleteDefaultJournal') || 'Cannot delete the default journal (ID: 1)');
+            setToastMessage(language === 'tr' 
+                ? 'Varsayılan dergi silinemez (ID: 1)' 
+                : 'Cannot delete the default journal (ID: 1)');
+            setToastType('warning');
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 4000);
             return;
         }
 
@@ -228,14 +243,23 @@ const JournalEditFormPage: React.FC = () => {
         setIsDeleting(true);
         try {
             await apiService.deleteJournal(journalId);
-            toast.success(t('journalDeleted') || 'Journal deleted successfully. All entries have been reassigned to the default journal.');
-            navigate('/');
+            navigate('/?deleted=true');
         } catch (err: any) {
             console.error("Failed to delete journal:", err);
             if (err.response?.data?.detail?.includes("Cannot delete journal with ID 1")) {
-                toast.error(t('cannotDeleteDefaultJournal') || 'Cannot delete the default journal (ID: 1)');
+                setToastMessage(language === 'tr' 
+                    ? 'Varsayılan dergi silinemez (ID: 1)' 
+                    : 'Cannot delete the default journal (ID: 1)');
+                setToastType('warning');
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 4000);
             } else {
-                toast.error(err.response?.data?.detail || t('errorDeletingJournal') || 'Failed to delete journal');
+                setToastMessage(err.response?.data?.detail || (language === 'tr' 
+                    ? 'Dergi silinemedi' 
+                    : 'Failed to delete journal'));
+                setToastType('warning');
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 4000);
             }
             setIsDeleting(false);
         }
@@ -245,10 +269,10 @@ const JournalEditFormPage: React.FC = () => {
         return (
             <>
                 <div className="page-title-section">
-                    <h1 style={{textAlign: 'center'}}>{t('editJournal') || 'Edit Journal'}</h1>
+                    <h1 style={{textAlign: 'center'}}>{language === 'tr' ? 'Dergi Düzenle' : 'Edit Journal'}</h1>
                 </div>
                 <div className="page-content-section">
-                    <div className="loading">{t('loadingJournal') || 'Loading journal...'}</div>
+                    <div className="loading">{language === 'tr' ? 'Dergi yükleniyor...' : 'Loading journal...'}</div>
                 </div>
             </>
         );
@@ -258,7 +282,7 @@ const JournalEditFormPage: React.FC = () => {
         return (
             <>
                 <div className="page-title-section">
-                    <h1 style={{textAlign: 'center'}}>{t('editJournal') || 'Edit Journal'}</h1>
+                    <h1 style={{textAlign: 'center'}}>{language === 'tr' ? 'Dergi Düzenle' : 'Edit Journal'}</h1>
                 </div>
                 <div className="page-content-section">
                     <div className="error-message">{error}</div>
@@ -271,18 +295,18 @@ const JournalEditFormPage: React.FC = () => {
         <>
             {/* Title Section */}
             <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
-                <h1>{t('editJournal') || 'Edit Journal'}</h1>
+                <h1>{language === 'tr' ? 'Dergi Düzenle' : 'Edit Journal'}</h1>
             </div>
 
             {/* Content Section */}
             <div className="page-content-section">
-                <div className="register-form-container">
+                <div className="register-form-container" style={{ marginBottom: '2rem' }}>
                     
                     <form onSubmit={handleSubmit} className="register-form">
                         {submitError && <div className="error-message">{submitError}</div>}
                         
                         <div className="form-group">
-                            <label htmlFor="title" className="form-label">{t('title') || 'Title'}</label>
+                            <label htmlFor="title" className="form-label">{language === 'tr' ? 'Başlık' : 'Title'}</label>
                             <input
                                 type="text"
                                 id="title"
@@ -293,12 +317,27 @@ const JournalEditFormPage: React.FC = () => {
                                 required
                                 disabled={isSubmitting}
                                 maxLength={300}
-                                placeholder={t('enterJournalTitle') || 'Enter journal title'}
+                                placeholder={language === 'tr' ? 'Dergi başlığını girin' : 'Enter journal title'}
                             />
                         </div>
                         
                         <div className="form-group">
-                            <label htmlFor="issue" className="form-label">{t('issue') || 'Issue'}</label>
+                            <label htmlFor="title_en" className="form-label">{language === 'tr' ? 'Başlık (İngilizce)' : 'Title (English)'}</label>
+                            <input
+                                type="text"
+                                id="title_en"
+                                name="title_en"
+                                className="form-input"
+                                value={formData.title_en || ''}
+                                onChange={handleChange}
+                                disabled={isSubmitting}
+                                maxLength={300}
+                                placeholder={language === 'tr' ? 'İngilizce dergi başlığını girin' : 'Enter journal title in English'}
+                            />
+                        </div>
+                        
+                        <div className="form-group">
+                            <label htmlFor="issue" className="form-label">{language === 'tr' ? 'Sayı' : 'Issue'}</label>
                             <input
                                 type="text"
                                 id="issue"
@@ -309,57 +348,20 @@ const JournalEditFormPage: React.FC = () => {
                                 required
                                 disabled={isSubmitting}
                                 maxLength={100}
-                                placeholder={t('enterIssue') || 'Enter issue number'}
+                                placeholder={language === 'tr' ? 'Sayı numarasını girin' : 'Enter issue number'}
                             />
                         </div>
                         
-                        <div className="form-group">
-                            <label htmlFor="created_date" className="form-label">{t('createdDate') || 'Created Date'}</label>
-                            <input
-                                type="datetime-local"
-                                id="created_date"
-                                name="created_date"
-                                className="form-input"
-                                value={formData.created_date || ''}
-                                onChange={handleChange}
-                                disabled={isSubmitting}
-                            />
-                        </div>
+
                         
-                        <div className="form-group">
-                            <label className="form-label" style={{ 
-                                display: 'flex', 
-                                alignItems: 'center',
-                                gap: 'var(--spacing-2)',
-                                cursor: 'pointer'
-                            }}>
-                                <input
-                                    type="checkbox"
-                                    name="is_published"
-                                    checked={formData.is_published}
-                                    onChange={handleChange}
-                                    disabled={isSubmitting || !isAdminOrOwner}
-                                    style={{
-                                        width: '18px',
-                                        height: '18px',
-                                        cursor: isAdminOrOwner ? 'pointer' : 'not-allowed'
-                                    }}
-                                />
-                                <span>{t('isPublished') || 'Is Published'}</span>
-                                {!isAdminOrOwner && (
-                                    <small style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>
-                                        ({t('adminOnly') || 'Admin only'})
-                                    </small>
-                                )}
-                            </label>
-                        </div>
+
                         
                         <div className="form-group">
                             <label htmlFor="publication_date" className="form-label">
-                                {t('publicationDate') || 'Publication Date'}
+                                {language === 'tr' ? 'Yayın Tarihi' : 'Publication Date'}
                                 {!isAdminOrOwner && (
                                     <small style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic', marginLeft: 'var(--spacing-1)' }}>
-                                        ({t('adminOnly') || 'Admin only'})
+                                        ({language === 'tr' ? 'Sadece admin' : 'Admin only'})
                                     </small>
                                 )}
                             </label>
@@ -380,10 +382,10 @@ const JournalEditFormPage: React.FC = () => {
                         
                         <div className="form-group">
                             <label htmlFor="publication_place" className="form-label">
-                                {t('publicationPlace') || 'Publication Place'}
+                                {language === 'tr' ? 'Yayın Yeri' : 'Publication Place'}
                                 {!isAdminOrOwner && (
                                     <small style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic', marginLeft: 'var(--spacing-1)' }}>
-                                        ({t('adminOnly') || 'Admin only'})
+                                        ({language === 'tr' ? 'Sadece admin' : 'Admin only'})
                                     </small>
                                 )}
                             </label>
@@ -395,7 +397,7 @@ const JournalEditFormPage: React.FC = () => {
                                 maxLength={100}
                                 value={formData.publication_place || ''}
                                 onChange={handleChange}
-                                placeholder={t('enterPublicationPlace') || 'Enter publication place'}
+                                placeholder={language === 'tr' ? 'Yayın yerini girin' : 'Enter publication place'}
                                 disabled={isSubmitting || !isAdminOrOwner}
                                 style={{
                                     opacity: !isAdminOrOwner ? 0.6 : 1,
@@ -408,59 +410,59 @@ const JournalEditFormPage: React.FC = () => {
                         {[
                             {
                                 key: 'cover_photo',
-                                label: t('coverPhoto') || 'Cover Photo',
+                                label: language === 'tr' ? 'Kapak Fotoğrafı' : 'Cover Photo',
                                 accept: '.png,.jpg,.jpeg',
-                                description: t('coverPhotoDescription') || 'Upload a PNG or JPEG image file',
-                                icon: '🖼️',
+                                description: language === 'tr' ? 'PNG veya JPEG görsel dosyası yükleyin' : 'Upload a PNG or JPEG image file',
+                                icon: FaImage,
                                 color: '#8B5CF6'
                             },
                             {
                                 key: 'meta_files',
-                                label: t('metaFiles') || 'Meta Files',
+                                label: language === 'tr' ? 'Meta Dosyalar' : 'Meta Files',
                                 accept: '.docx',
-                                description: t('metaFilesDescription') || 'Upload a DOCX file',
-                                icon: '📋',
+                                description: language === 'tr' ? 'DOCX dosyası yükleyin' : 'Upload a DOCX file',
+                                icon: FaFileWord,
                                 color: '#06B6D4'
                             },
                             {
                                 key: 'editor_notes',
-                                label: t('editorNotes') || 'Editor Notes',
+                                label: language === 'tr' ? 'Editör Notları' : 'Editor Notes',
                                 accept: '.docx',
-                                description: t('editorNotesDescription') || 'Upload a DOCX file',
-                                icon: '📝',
+                                description: language === 'tr' ? 'DOCX dosyası yükleyin' : 'Upload a DOCX file',
+                                icon: FaFileAlt,
                                 color: '#F59E0B'
                             },
                             {
                                 key: 'full_pdf',
-                                label: t('fullPdf') || 'Full PDF',
+                                label: language === 'tr' ? 'Tam PDF' : 'Full PDF',
                                 accept: '.pdf',
-                                description: t('fullPdfDescription') || 'Upload a PDF file',
-                                icon: '📄',
+                                description: language === 'tr' ? 'PDF dosyası yükleyin' : 'Upload a PDF file',
+                                icon: FaFilePdf,
                                 color: '#EF4444'
                             },
                             {
                                 key: 'index_section',
-                                label: t('indexSection') || 'Index Section',
+                                label: language === 'tr' ? 'İçindekiler Bölümü' : 'Index Section',
                                 accept: '.docx',
-                                description: t('indexSectionDescription') || 'Upload a DOCX file',
-                                icon: '📊',
+                                description: language === 'tr' ? 'DOCX dosyası yükleyin' : 'Upload a DOCX file',
+                                icon: FaList,
                                 color: '#10B981'
                             },
                             {
                                 key: 'file_path',
-                                label: t('filePath') || 'File Path',
+                                label: language === 'tr' ? 'Dosya Yolu' : 'File Path',
                                 accept: '.docx',
-                                description: t('filePathDescription') || 'Upload a DOCX file',
-                                icon: '📁',
+                                description: language === 'tr' ? 'DOCX dosyası yükleyin' : 'Upload a DOCX file',
+                                icon: FaFolder,
                                 color: '#6366F1'
                             }
-                        ].map(({ key, label, accept, description, icon, color }) => (
+                        ].map(({ key, label, accept, description, icon: IconComponent, color }) => (
                             <div className="form-group" key={key}>
                                 <label htmlFor={key} className="form-label">
                                     {label}
                                     {!isAdminOrOwner && (
                                         <small style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic', marginLeft: 'var(--spacing-1)' }}>
-                                            ({t('adminOnly') || 'Admin only'})
+                                            ({language === 'tr' ? 'Sadece admin' : 'Admin only'})
                                         </small>
                                     )}
                                 </label>
@@ -470,7 +472,8 @@ const JournalEditFormPage: React.FC = () => {
                                         padding: 'var(--spacing-2)', 
                                         background: `${color}15`, 
                                         borderRadius: '8px',
-                                        border: `1px solid ${color}30`
+                                        border: `1px solid ${color}30`,
+                                        textAlign: 'center'
                                     }}>
                                         <a 
                                             href={`/api${(formData as any)[key]}`} 
@@ -481,16 +484,17 @@ const JournalEditFormPage: React.FC = () => {
                                                 textDecoration: 'none',
                                                 fontWeight: '500',
                                                 fontSize: '0.9rem',
-                                                display: 'flex',
+                                                display: 'inline-flex',
                                                 alignItems: 'center',
                                                 gap: 'var(--spacing-1)'
                                             }}
                                         >
-                                            <span>{icon}</span>
-                                            {t(`current${key.charAt(0).toUpperCase() + key.slice(1).replace('_', '')}`) || `Current ${label}`}
+                                            <IconComponent size={16} />
+                                            {language === 'tr' ? `Mevcut ${label}` : `Current ${label}`}
                                         </a>
                                     </div>
                                 )}
+                                <div style={{ position: 'relative' }}>
                                 <input
                                     type="file"
                                     id={key}
@@ -506,9 +510,29 @@ const JournalEditFormPage: React.FC = () => {
                                         background: 'rgba(249, 250, 251, 0.8)',
                                         cursor: isAdminOrOwner ? 'pointer' : 'not-allowed',
                                         transition: 'all 0.3s ease',
+                                            opacity: 0,
+                                            position: 'absolute',
+                                            width: '100%',
+                                            height: '100%'
+                                        }}
+                                    />
+                                    <div style={{
+                                        padding: '12px 16px',
+                                        border: '2px dashed #E2E8F0',
+                                        borderRadius: '12px',
+                                        background: 'rgba(249, 250, 251, 0.8)',
+                                        cursor: isAdminOrOwner ? 'pointer' : 'not-allowed',
+                                        transition: 'all 0.3s ease',
+                                        color: '#6B7280',
+                                        textAlign: 'center' as const,
                                         opacity: !isAdminOrOwner ? 0.6 : 1
-                                    }}
-                                />
+                                    }}>
+                                        {selectedFiles[key as keyof typeof selectedFiles] 
+                                            ? selectedFiles[key as keyof typeof selectedFiles]?.name 
+                                            : (language === 'tr' ? 'Dosya Seç' : 'Choose File')
+                                        }
+                                    </div>
+                                </div>
                                 <small style={{ 
                                     color: 'var(--color-text-tertiary)', 
                                     fontSize: '0.8rem',
@@ -520,6 +544,89 @@ const JournalEditFormPage: React.FC = () => {
                                 </small>
                             </div>
                         ))}
+                        
+                        {/* Publication Status Section */}
+                        <div className="form-group">
+                            <label className="form-label">
+                                {language === 'tr' ? 'Yayın Durumu' : 'Publication Status'}
+                                {!isAdminOrOwner && (
+                                    <small style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic', marginLeft: 'var(--spacing-1)' }}>
+                                        ({language === 'tr' ? 'Sadece admin' : 'Admin only'})
+                                    </small>
+                                )}
+                            </label>
+                            <div style={{ 
+                                display: 'flex', 
+                                gap: 'var(--spacing-2)', 
+                                marginTop: 'var(--spacing-2)' 
+                            }}>
+                                {/* Publish Option */}
+                                <div 
+                                    onClick={() => isAdminOrOwner && !isSubmitting && setFormData({...formData, is_published: true})}
+                                    style={{
+                                        flex: '1',
+                                        padding: '8px 16px',
+                                        borderRadius: '12px',
+                                        border: formData.is_published ? '3px solid #14B8A6' : '2px solid #E2E8F0',
+                                        background: formData.is_published 
+                                            ? 'linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(20, 184, 166, 0.05) 100%)'
+                                            : 'rgba(249, 250, 251, 0.8)',
+                                        cursor: isAdminOrOwner && !isSubmitting ? 'pointer' : 'not-allowed',
+                                        transition: 'all 0.3s ease',
+                                        textAlign: 'center',
+                                        opacity: !isAdminOrOwner ? 0.6 : 1
+                                    }}
+                                >
+                                    <div style={{ 
+                                        fontSize: '1.5rem', 
+                                        marginBottom: '4px',
+                                        color: formData.is_published ? '#14B8A6' : '#9CA3AF'
+                                    }}>
+                                        ✓
+                                    </div>
+                                    <div style={{ 
+                                        fontWeight: '600', 
+                                        fontSize: '0.9rem',
+                                        color: formData.is_published ? '#14B8A6' : '#6B7280'
+                                    }}>
+                                        {language === 'tr' ? 'Yayınlandı' : 'Published'}
+                                    </div>
+                                </div>
+
+                                {/* Unpublish Option */}
+                                <div 
+                                    onClick={() => isAdminOrOwner && !isSubmitting && setFormData({...formData, is_published: false})}
+                                    style={{
+                                        flex: '1',
+                                        padding: '8px 16px',
+                                        borderRadius: '12px',
+                                        border: !formData.is_published ? '3px solid #F59E0B' : '2px solid #E2E8F0',
+                                        background: !formData.is_published 
+                                            ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%)'
+                                            : 'rgba(249, 250, 251, 0.8)',
+                                        cursor: isAdminOrOwner && !isSubmitting ? 'pointer' : 'not-allowed',
+                                        transition: 'all 0.3s ease',
+                                        textAlign: 'center',
+                                        opacity: !isAdminOrOwner ? 0.6 : 1
+                                    }}
+                                >
+                                    <div style={{ 
+                                        fontSize: '1.5rem', 
+                                        marginBottom: '4px',
+                                        color: !formData.is_published ? '#F59E0B' : '#9CA3AF'
+                                    }}>
+                                        ⏸
+                                    </div>
+                                    <div style={{ 
+                                        fontWeight: '600', 
+                                        fontSize: '0.9rem',
+                                        color: !formData.is_published ? '#F59E0B' : '#6B7280'
+                                    }}>
+                                        {language === 'tr' ? 'Taslak Durumunda' : 'Unpublished'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div style={{ 
                             display: 'flex',
@@ -543,7 +650,7 @@ const JournalEditFormPage: React.FC = () => {
                                     transition: 'all 0.3s ease'
                                 }}
                             >
-                                {t('cancel') || 'Cancel'}
+                                {language === 'tr' ? 'İptal' : 'Cancel'}
                             </button>
                             <button 
                                 type="submit" 
@@ -556,58 +663,152 @@ const JournalEditFormPage: React.FC = () => {
                                 }}
                             >
                                 {isSubmitting 
-                                    ? (t('saving') || 'Saving...') 
-                                    : (t('saveChanges') || 'Save Changes')}
+                                    ? (language === 'tr' ? 'Kaydediliyor...' : 'Saving...') 
+                                    : (language === 'tr' ? 'Değişiklikleri Kaydet' : 'Save Changes')}
                             </button>
                         </div>
+                    </form>
+                        </div>
 
-                        {/* Delete Journal Button */}
+                {/* Journal Deletion Section */}
                         {isAdminOrOwner && (
-                            <div style={{ 
+                    <div className="register-form-container" style={{ 
+                        border: '2px solid #FEE2E2', 
+                        backgroundColor: 'rgba(254, 226, 226, 0.3)',
+                        padding: '0',
+                        overflow: 'hidden'
+                    }}>
+                        <div 
+                            onClick={() => setIsDeletionSectionExpanded(!isDeletionSectionExpanded)}
+                            style={{ 
+                                cursor: 'pointer',
                                 display: 'flex', 
+                                alignItems: 'center',
                                 justifyContent: 'center', 
-                                marginTop: 'var(--spacing-6)',
-                                paddingTop: 'var(--spacing-4)',
-                                borderTop: '1px solid rgba(226, 232, 240, 0.6)'
+                                position: 'relative',
+                                padding: '1.5rem',
+                                backgroundColor: 'rgba(254, 226, 226, 0.5)',
+                                borderBottom: isDeletionSectionExpanded ? '2px solid #FCA5A5' : 'none',
+                                margin: '0',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.backgroundColor = 'rgba(254, 226, 226, 0.7)';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.backgroundColor = 'rgba(254, 226, 226, 0.5)';
+                            }}
+                        >
+                            <h2 style={{ 
+                                margin: '0', 
+                                fontSize: '1.5rem', 
+                                fontWeight: '600', 
+                                color: '#DC2626'
                             }}>
+                                {language === 'tr' ? 'Dergiyi Sil' : 'Delete Journal'}
+                            </h2>
+                            <span style={{ 
+                                position: 'absolute',
+                                right: '1.5rem',
+                                fontSize: '2.5rem',
+                                fontWeight: '300',
+                                lineHeight: '1',
+                                color: '#DC2626',
+                                transition: 'transform 0.3s ease',
+                                transform: isDeletionSectionExpanded ? 'rotate(45deg)' : 'rotate(0deg)'
+                            }}>
+                                +
+                            </span>
+                        </div>
+                        
+                        {isDeletionSectionExpanded && (
+                            <div style={{ textAlign: 'center', padding: '1.5rem', backgroundColor: 'white' }}>
+                            
+                            <p style={{ 
+                                color: '#6B7280', 
+                                marginBottom: '2rem',
+                                lineHeight: '1.6',
+                                fontSize: '1rem'
+                            }}>
+                                {language === 'tr' 
+                                    ? 'Bu işlem dergiyi kalıcı olarak silecektir ve geri alınamaz. Dergi ile ilgili tüm makaleler varsayılan dergiye (ID: 1) taşınacaktır.'
+                                    : 'This action will permanently delete this journal and cannot be undone. All entries will be reassigned to the default journal (ID: 1).'}
+                            </p>
+                            
                                 <button 
                                     type="button"
+                                className="btn"
                                     onClick={handleDeleteJournal}
                                     disabled={isDeleting}
-                                    className="btn btn-danger btn-sm"
                                     style={{
-                                        background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+                                    backgroundColor: '#DC2626',
+                                    color: 'white',
                                         border: 'none',
-                                        borderRadius: '8px',
                                         padding: '12px 24px',
-                                        fontSize: '0.875rem',
+                                    borderRadius: '12px',
+                                    cursor: isDeleting ? 'not-allowed' : 'pointer',
                                         fontWeight: '600',
-                                        color: 'white',
-                                        cursor: isDeleting ? 'not-allowed' : 'pointer',
+                                    fontSize: '1rem',
                                         opacity: isDeleting ? 0.6 : 1,
                                         transition: 'all 0.3s ease',
-                                        boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                                    boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)'
+                                }}
+                                onMouseOver={(e) => {
+                                    const target = e.target as HTMLButtonElement;
+                                    if (!target.disabled) {
+                                        target.style.backgroundColor = '#B91C1C';
+                                        target.style.boxShadow = '0 4px 16px rgba(220, 38, 38, 0.4)';
+                                    }
+                                }}
+                                onMouseOut={(e) => {
+                                    const target = e.target as HTMLButtonElement;
+                                    if (!target.disabled) {
+                                        target.style.backgroundColor = '#DC2626';
+                                        target.style.boxShadow = '0 2px 8px rgba(220, 38, 38, 0.3)';
+                                    }
                                     }}
                                 >
                                     {isDeleting 
-                                        ? (t('deletingJournal') || 'Deleting Journal...') 
-                                        : (t('deleteJournal') || 'Delete Journal')}
+                                    ? (language === 'tr' ? 'Siliniyor...' : 'Deleting...') 
+                                    : (language === 'tr' ? 'Dergiyi Sil' : 'Delete Journal')}
                                 </button>
                             </div>
                         )}
-                    </form>
                 </div>
+                )}
             </div>
 
             <ConfirmationModal
                 isOpen={isConfirmModalOpen}
                 onClose={() => setIsConfirmModalOpen(false)}
                 onConfirm={confirmDeleteJournal}
-                title={t('deleteJournal') || 'Delete Journal'}
-                message={t('confirmDeleteJournal') || 'Are you sure you want to delete this journal? All related entries will be reassigned to the default journal (ID: 1). This action cannot be undone.'}
-                confirmText={t('deleteJournal') || 'Delete Journal'}
-                cancelText={t('cancel') || 'Cancel'}
+                title={language === 'tr' ? 'Dergiyi Sil' : 'Delete Journal'}
+                message={language === 'tr' 
+                    ? 'Bu dergiyi silmek istediğinizden emin misiniz? İlgili tüm makaleler varsayılan dergiye (ID: 1) taşınacaktır. Bu işlem geri alınamaz.'
+                    : 'Are you sure you want to delete this journal? All related entries will be reassigned to the default journal (ID: 1). This action cannot be undone.'}
+                confirmText={language === 'tr' ? 'Dergiyi Sil' : 'Delete Journal'}
+                cancelText={language === 'tr' ? 'İptal' : 'Cancel'}
+                variant="danger"
+                icon="⚠"
             />
+
+            {/* Toast Notification */}
+            {showToast && (
+                <div className="toast-notification">
+                    <div className={`toast-content toast-${toastType}`}>
+                        <div className="toast-icon">
+                            {toastType === 'success' ? '✓' : '⚠'}
+                        </div>
+                        <span className="toast-message">{toastMessage}</span>
+                        <button 
+                            className="toast-close" 
+                            onClick={() => setShowToast(false)}
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

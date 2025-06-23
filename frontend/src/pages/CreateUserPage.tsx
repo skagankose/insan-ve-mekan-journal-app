@@ -4,10 +4,12 @@ import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import './EditUserPage.css'; // Reuse the same styling
-import ReCAPTCHA from 'react-google-recaptcha';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
+
 import FormattedIdInput from '../components/FormattedIdInput';
 import LocationInput from '../components/LocationInput';
 import CountrySelector from '../components/CountrySelector';
+import { validateYoksisId, validateOrcidId, validatePhoneNumber } from '../utils/validation';
 import '../styles/FormattedIdInput.css';
 
 // Country code to flag mapping (same as RegisterPage)
@@ -240,15 +242,17 @@ interface UserForm {
 const CreateUserPage: React.FC = () => {
     const navigate = useNavigate();
     const { user: currentUser, isAuthenticated } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const formRef = useRef<HTMLFormElement>(null);
     
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<boolean>(false);
-    const [captchaValue, setCaptchaValue] = useState<string | null>(null);
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [currentFlag, setCurrentFlag] = useState('🇹🇷');
+    const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formData, setFormData] = useState<UserForm>({
         email: '',
         name: '',
@@ -314,19 +318,19 @@ const CreateUserPage: React.FC = () => {
         const hasNumbers = /\d/.test(password);
 
         if (password.length < minLength) {
-            setPasswordError(t('passwordMinLength') || 'Password must be at least 8 characters long');
+            setPasswordError(language === 'tr' ? 'Şifre en az 8 karakter uzunluğunda olmalıdır' : 'Password must be at least 8 characters long');
             return false;
         }
         if (!hasUpperCase || !hasLowerCase) {
-            setPasswordError(t('passwordCase') || 'Password must contain both uppercase and lowercase letters');
+            setPasswordError(language === 'tr' ? 'Şifre büyük ve küçük harfler içermelidir' : 'Password must contain both uppercase and lowercase letters');
             return false;
         }
         if (!hasNumbers) {
-            setPasswordError(t('passwordNumber') || 'Password must contain at least one number');
+            setPasswordError(language === 'tr' ? 'Şifre en az bir rakam içermelidir' : 'Password must contain at least one number');
             return false;
         }
         if (password !== formData.confirmPassword) {
-            setPasswordError(t('passwordMatch') || 'Passwords do not match');
+            setPasswordError(language === 'tr' ? 'Şifreler eşleşmiyor' : 'Passwords do not match');
             return false;
         }
 
@@ -368,53 +372,68 @@ const CreateUserPage: React.FC = () => {
                 [name]: value
             });
         }
-    };
 
-    const handleCaptchaChange = (value: string | null) => {
-        setCaptchaValue(value);
-        if (!value) {
-            setError(t('captchaExpired') || 'CAPTCHA verification expired. Please verify again.');
-        } else {
+        // Clear errors when user starts typing after attempting submit
+        if (hasAttemptedSubmit) {
             setError(null);
+            setPasswordError(null);
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        if (!captchaValue) {
-            setError(t('pleaseVerifyCaptcha') || 'Please verify that you are human');
+        setError(null);
+        setPasswordError(null);
+        setHasAttemptedSubmit(true);
+
+        if (!validatePassword(formData.password)) {
+            setLoading(false);
             return;
         }
 
-        if (!validatePassword(formData.password)) {
+        // Validate YÖKSİS ID if provided
+        if (formData.yoksis_id && !validateYoksisId(formData.yoksis_id)) {
+            setError(language === 'tr' ? 'YÖKSİS ID 5-8 rakam olmalıdır' : 'YÖKSİS ID must be 5-8 digits');
+            setLoading(false);
+            return;
+        }
+        
+        // Validate ORCID ID if provided
+        if (formData.orcid_id && !validateOrcidId(formData.orcid_id)) {
+            setError(language === 'tr' ? 'ORCID ID formatı 0000-0000-0000-0000 olmalıdır' : 'ORCID ID must be in format 0000-0000-0000-0000');
+            setLoading(false);
+            return;
+        }
+        
+        // Validate phone number only if phone number is provided
+        if (formData.phoneNumber.trim() && !validatePhoneNumber(formData.countryCode, formData.phoneNumber)) {
+            setError(language === 'tr' ? 'Telefon numarası formatı geçersiz' : 'Phone number format is invalid');
+            setLoading(false);
             return;
         }
 
         try {
             setLoading(true);
-            setError(null);
             setSuccess(false);
-            setPasswordError(null);
             
-            // Combine country code and phone number
-            const telephone = formData.countryCode + formData.phoneNumber.replace(/\s/g, '');
+            // Combine country code and phone number only if phone number is provided
+            const telephone = formData.phoneNumber.trim() ? formData.countryCode + formData.phoneNumber.replace(/\s/g, '') : undefined;
             
             // Use the register function from apiService
-            await apiService.register({
+            const createdUser = await apiService.register({
                 email: formData.email,
                 name: formData.name,
                 title: formData.title || undefined,
                 bio: formData.bio || undefined,
-                telephone: telephone || undefined,
+                telephone: telephone,
                 science_branch: formData.science_branch || undefined,
                 location: formData.country && formData.location ? `${formData.location}, ${formData.country}` : formData.location || formData.country || undefined,
                 yoksis_id: formData.yoksis_id || undefined,
                 orcid_id: formData.orcid_id || undefined,
                 role: formData.role,
                 password: formData.password,
-                is_auth: formData.is_auth,
-                recaptcha_token: captchaValue
+                is_auth: true, // Always set to true for admin-created users
+                recaptcha_token: '' // Skip reCAPTCHA for admin creation
             });
             
             setSuccess(true);
@@ -436,13 +455,28 @@ const CreateUserPage: React.FC = () => {
                 confirmPassword: '',
                 is_auth: true
             });
-            setCaptchaValue(null);
+            setHasAttemptedSubmit(false);
             
-            // Navigate back to admin page after a short delay
-            navigate('/admin');
+            // Navigate to the newly created user's profile page
+            navigate(`/admin/users/profile/${createdUser.id}?created=true`);
             
         } catch (err: any) {
-            setError(err.response?.data?.detail || 'Failed to create user');
+            console.error("User creation failed:", err);
+            // Handle specific error messages
+            if (err.response?.data?.detail) {
+                const errorDetail = err.response.data.detail.toLowerCase();
+                console.log("Backend error detail:", err.response.data.detail);
+                
+                // Check for email already registered error
+                if (errorDetail === 'email already registered' || 
+                    (errorDetail.includes('email') && errorDetail.includes('already'))) {
+                    setError(language === 'tr' ? 'E-posta adresi zaten kayıtlı' : 'Email already registered');
+                } else {
+                    setError(err.response.data.detail);
+                }
+            } else {
+                setError(language === 'tr' ? 'Kullanıcı oluşturulamadı' : 'Failed to create user');
+            }
         } finally {
             setLoading(false);
         }
@@ -451,28 +485,15 @@ const CreateUserPage: React.FC = () => {
     return (
         <>
             {/* Title Section */}
-            <div className="page-title-section">
-                <h1 style={{ margin: 0, textAlign: 'center' }}>{t('createUser') || 'Create User'}</h1>
+            <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
+                <h1>{language === 'tr' ? 'Kullanıcı Oluştur' : 'Create User'}</h1>
             </div>
 
             {/* Content Section */}
             <div className="page-content-section" style={{ paddingBottom: '0px' }}>
                 <div style={{ margin: '0 auto', maxWidth: '600px', width: '100%', padding: '0 20px' }}>
                     <div className="register-form-container">
-                        {error && (
-                            <div style={{
-                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                border: '1px solid rgba(239, 68, 68, 0.3)',
-                                borderRadius: '12px',
-                                padding: '16px',
-                                marginBottom: '24px',
-                                color: '#DC2626',
-                                fontSize: '14px',
-                                fontWeight: '500'
-                            }}>
-                                {error}
-                            </div>
-                        )}
+
                         
                         {success && (
                             <div style={{
@@ -485,13 +506,13 @@ const CreateUserPage: React.FC = () => {
                                 fontSize: '14px',
                                 fontWeight: '500'
                             }}>
-                                {t('userCreatedSuccessfully') || 'User created successfully'}
+    {language === 'tr' ? 'Kullanıcı başarıyla oluşturuldu' : 'User created successfully'}
                             </div>
                         )}
                         
                         <form ref={formRef} onSubmit={handleSubmit} className="register-form">
                             <div className="form-group">
-                                <label htmlFor="email" className="form-label">{t('email') || 'Email'}</label>
+                                <label htmlFor="email" className="form-label">{language === 'tr' ? 'E-posta' : 'Email'} *</label>
                                 <input
                                     type="email"
                                     id="email"
@@ -501,13 +522,13 @@ const CreateUserPage: React.FC = () => {
                                     required
                                     maxLength={200}
                                     className="form-input"
-                                    placeholder={t('enterEmail') || 'Enter email address'}
+                                    placeholder={language === 'tr' ? 'E-posta adresini girin' : 'Enter email address'}
                                     disabled={loading}
                                 />
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="name" className="form-label">{t('name') || 'Name'}</label>
+                                <label htmlFor="name" className="form-label">{language === 'tr' ? 'Ad Soyad' : 'Name'} *</label>
                                 <input
                                     type="text"
                                     id="name"
@@ -517,13 +538,13 @@ const CreateUserPage: React.FC = () => {
                                     required
                                     maxLength={200}
                                     className="form-input"
-                                    placeholder={t('enterFullName') || 'Enter full name'}
+                                    placeholder={language === 'tr' ? 'Tam adınızı girin' : 'Enter full name'}
                                     disabled={loading}
                                 />
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="title" className="form-label">{t('title') || 'Title'}</label>
+                                <label htmlFor="title" className="form-label">{language === 'tr' ? 'Ünvan' : 'Title'}</label>
                                 <input
                                     type="text"
                                     id="title"
@@ -532,13 +553,13 @@ const CreateUserPage: React.FC = () => {
                                     onChange={handleInputChange}
                                     maxLength={200}
                                     className="form-input"
-                                    placeholder={t('enterTitle') || 'Enter academic title'}
+                                    placeholder={language === 'tr' ? 'Akademik unvanınızı girin' : 'Enter academic title'}
                                     disabled={loading}
                                 />
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="bio" className="form-label">{t('bio') || 'Bio'}</label>
+                                <label htmlFor="bio" className="form-label">{language === 'tr' ? 'Biyografi' : 'Bio'}</label>
                                 <textarea
                                     id="bio"
                                     name="bio"
@@ -547,13 +568,13 @@ const CreateUserPage: React.FC = () => {
                                     rows={3}
                                     maxLength={400}
                                     className="form-textarea"
-                                    placeholder={t('enterBio') || 'Enter biographical information'}
+                                    placeholder={language === 'tr' ? 'Biyografik bilgilerinizi girin' : 'Enter biographical information'}
                                     disabled={loading}
                                 />
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="telephone" className="form-label">{t('telephone') || 'Phone Number'}</label>
+                                <label htmlFor="telephone" className="form-label">{language === 'tr' ? 'Telefon Numarası' : 'Phone Number'}</label>
                                 <div className="phone-input-group">
                                     <div className="country-flag-display">
                                         <span className="flag-emoji">{currentFlag}</span>
@@ -564,7 +585,6 @@ const CreateUserPage: React.FC = () => {
                                         name="countryCode"
                                         value={formData.countryCode}
                                         onChange={handleInputChange}
-                                        required
                                         disabled={loading}
                                         className="form-input country-code-input"
                                         maxLength={4}
@@ -576,7 +596,6 @@ const CreateUserPage: React.FC = () => {
                                         name="phoneNumber"
                                         value={formData.phoneNumber}
                                         onChange={handleInputChange}
-                                        required
                                         disabled={loading}
                                         className="form-input phone-number-input"
                                         placeholder="555 55 55"
@@ -586,7 +605,7 @@ const CreateUserPage: React.FC = () => {
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="science_branch" className="form-label">{t('scienceBranch') || 'Science Branch'}</label>
+                                <label htmlFor="science_branch" className="form-label">{language === 'tr' ? 'Bilim Dalı' : 'Science Branch'}</label>
                                 <input
                                     type="text"
                                     id="science_branch"
@@ -595,43 +614,59 @@ const CreateUserPage: React.FC = () => {
                                     onChange={handleInputChange}
                                     maxLength={300}
                                     className="form-input"
-                                    placeholder={t('enterScienceBranch') || 'Enter field of study'}
+                                    placeholder={language === 'tr' ? 'Çalışma alanınızı girin' : 'Enter field of study'}
                                     disabled={loading}
                                 />
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="country" className="form-label">{t('country') || 'Country'}</label>
+                                <label htmlFor="country" className="form-label">{language === 'tr' ? 'Ülke' : 'Country'}</label>
                                 <CountrySelector
                                     value={formData.country}
-                                    onChange={(value) => setFormData({ ...formData, country: value })}
+                                    onChange={(value) => {
+                                        setFormData({ ...formData, country: value });
+                                        if (hasAttemptedSubmit) {
+                                            setError(null);
+                                            setPasswordError(null);
+                                        }
+                                    }}
                                     id="country"
                                     disabled={loading}
-                                    required
                                 />
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="location" className="form-label">{t('location') || 'City/Location'}</label>
+                                <label htmlFor="location" className="form-label">{language === 'tr' ? 'Şehir/Konum' : 'City/Location'}</label>
                                 <div className="location-input-container">
                                     <LocationInput
                                         value={formData.location}
-                                        onChange={(value) => setFormData({ ...formData, location: value })}
+                                        onChange={(value) => {
+                                            setFormData({ ...formData, location: value });
+                                            if (hasAttemptedSubmit) {
+                                                setError(null);
+                                                setPasswordError(null);
+                                            }
+                                        }}
                                         id="location"
                                         name="location"
                                         disabled={loading}
-                                        required
                                     />
                                 </div>
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="yoksis_id" className="form-label">{t('yoksisId') || 'YÖKSİS ID'}</label>
+                                <label htmlFor="yoksis_id" className="form-label">{language === 'tr' ? 'YÖKSİS ID' : 'YÖKSİS ID'}</label>
                                 <div className="formatted-id-container">
                                     <FormattedIdInput
                                         type="yoksis"
                                         value={formData.yoksis_id}
-                                        onChange={(value) => setFormData({ ...formData, yoksis_id: value })}
+                                        onChange={(value) => {
+                                            setFormData({ ...formData, yoksis_id: value });
+                                            if (hasAttemptedSubmit) {
+                                                setError(null);
+                                                setPasswordError(null);
+                                            }
+                                        }}
                                         id="yoksis_id"
                                         name="yoksis_id"
                                         disabled={loading}
@@ -640,12 +675,18 @@ const CreateUserPage: React.FC = () => {
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="orcid_id" className="form-label">{t('orcidId') || 'ORCID ID'}</label>
+                                <label htmlFor="orcid_id" className="form-label">{language === 'tr' ? 'ORCID ID' : 'ORCID ID'}</label>
                                 <div className="formatted-id-container">
                                     <FormattedIdInput
                                         type="orcid"
                                         value={formData.orcid_id}
-                                        onChange={(value) => setFormData({ ...formData, orcid_id: value })}
+                                        onChange={(value) => {
+                                            setFormData({ ...formData, orcid_id: value });
+                                            if (hasAttemptedSubmit) {
+                                                setError(null);
+                                                setPasswordError(null);
+                                            }
+                                        }}
                                         id="orcid_id"
                                         name="orcid_id"
                                         disabled={loading}
@@ -654,57 +695,67 @@ const CreateUserPage: React.FC = () => {
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="password" className="form-label">{t('password') || 'Password'}</label>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={(e) => {
-                                        handleInputChange(e);
-                                        if (formData.confirmPassword) {
-                                            validatePassword(e.target.value);
-                                        }
-                                    }}
-                                    required
-                                    minLength={8}
-                                    maxLength={100}
-                                    className="form-input"
-                                    placeholder={t('enterPassword') || 'Enter password'}
-                                    disabled={loading}
-                                />
+                                <label htmlFor="password" className="form-label">{language === 'tr' ? 'Şifre' : 'Password'} *</label>
+                                <div className="password-input-container">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        id="password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        required
+                                        minLength={8}
+                                        maxLength={100}
+                                        className="form-input"
+                                        placeholder={language === 'tr' ? 'Şifrenizi girin' : 'Enter password'}
+                                        disabled={loading}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="password-toggle-btn"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        disabled={loading}
+                                    >
+                                        {showPassword ? <FiEyeOff /> : <FiEye />}
+                                    </button>
+                                </div>
                                 <div className="password-requirements">
                                     <div className="password-requirements-list" style={{ color: 'gray' }}>
-                                        <div>• {t('passwordMinLength') || 'At least 8 characters long'}</div>
-                                        <div>• {t('passwordCase') || 'Contains both uppercase and lowercase letters'}</div>
-                                        <div>• {t('passwordNumber') || 'Contains at least one number'}</div>
+                                        <div>• {language === 'tr' ? 'En az 8 karakter uzunluğunda' : 'At least 8 characters long'}</div>
+                                        <div>• {language === 'tr' ? 'Büyük ve küçük harfler içerir' : 'Contains both uppercase and lowercase letters'}</div>
+                                        <div>• {language === 'tr' ? 'En az bir rakam içerir' : 'Contains at least one number'}</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="form-group">
-                                <label htmlFor="confirmPassword" className="form-label">{t('confirmPassword') || 'Confirm Password'}</label>
-                                <input
-                                    type="password"
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    value={formData.confirmPassword}
-                                    onChange={(e) => {
-                                        handleInputChange(e);
-                                        if (formData.password) {
-                                            validatePassword(formData.password);
-                                        }
-                                    }}
-                                    required
-                                    minLength={8}
-                                    className="form-input"
-                                    placeholder={t('confirmPassword') || 'Confirm password'}
-                                    disabled={loading}
-                                />
+                                <label htmlFor="confirmPassword" className="form-label">{language === 'tr' ? 'Şifre Onayı' : 'Confirm Password'} *</label>
+                                <div className="password-input-container">
+                                    <input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        value={formData.confirmPassword}
+                                        onChange={handleInputChange}
+                                        required
+                                        minLength={8}
+                                        className="form-input"
+                                        placeholder={language === 'tr' ? 'Şifrenizi tekrar girin' : 'Confirm password'}
+                                        disabled={loading}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="password-toggle-btn"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        disabled={loading}
+                                    >
+                                        {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                                    </button>
+                                </div>
                             </div>
                             
                             <div className="form-group">
-                                <label htmlFor="role" className="form-label">{t('role') || 'Role'}</label>
+                                <label htmlFor="role" className="form-label">{language === 'tr' ? 'Rol' : 'Role'} *</label>
                                 <select
                                     id="role"
                                     name="role"
@@ -713,195 +764,58 @@ const CreateUserPage: React.FC = () => {
                                     required
                                     className="form-input"
                                     disabled={loading}
-                                    style={{
-                                        appearance: 'none',
-                                        backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6,9 12,15 18,9\'%3e%3c/polyline%3e%3c/svg%3e")',
-                                        backgroundRepeat: 'no-repeat',
-                                        backgroundPosition: 'right 12px center',
-                                        backgroundSize: '20px',
-                                        paddingRight: '40px'
-                                    }}
                                 >
-                                    <option value="author">{t('roleAuthor') || 'Author'}</option>
-                                    <option value="admin">{t('roleAdmin') || 'Admin'}</option>
-                                    <option value="owner">{t('roleOwner') || 'Owner'}</option>
-                                    <option value="editor">{t('roleEditor') || 'Editor'}</option>
-                                    <option value="referee">{t('roleReferee') || 'Referee'}</option>
+                                    <option value="author">{language === 'tr' ? 'Yazar' : 'Author'}</option>
+                                    <option value="admin">{language === 'tr' ? 'Yönetici' : 'Admin'}</option>
+                                    <option value="owner">{language === 'tr' ? 'Sahip' : 'Owner'}</option>
+                                    <option value="editor">{language === 'tr' ? 'Editör' : 'Editor'}</option>
+                                    <option value="referee">{language === 'tr' ? 'Hakem' : 'Referee'}</option>
                                 </select>
                             </div>
                             
-                            <div className="form-group">
-                                <div style={{
-                                    background: 'rgba(248, 250, 252, 0.8)',
-                                    backdropFilter: 'blur(10px)',
-                                    border: '2px solid rgba(226, 232, 240, 0.8)',
-                                    borderRadius: '16px',
-                                    padding: '20px',
-                                    marginTop: '8px',
-                                    transition: 'all 0.3s ease',
-                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                                }}>
-                                    <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '16px'
-                                    }}>
-                                        <div style={{ position: 'relative' }}>
-                                            <input
-                                                type="checkbox"
-                                                id="is_auth"
-                                                name="is_auth"
-                                                checked={formData.is_auth}
-                                                onChange={handleInputChange}
-                                                disabled={loading}
-                                                style={{
-                                                    appearance: 'none',
-                                                    width: '24px',
-                                                    height: '24px',
-                                                    border: '2px solid #E2E8F0',
-                                                    borderRadius: '6px',
-                                                    background: formData.is_auth ? 'linear-gradient(135deg, #10B981, #059669)' : 'rgba(255, 255, 255, 0.9)',
-                                                    cursor: loading ? 'not-allowed' : 'pointer',
-                                                    transition: 'all 0.3s ease',
-                                                    position: 'relative',
-                                                    opacity: loading ? 0.6 : 1
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    if (!loading) {
-                                                        e.currentTarget.style.borderColor = '#10B981';
-                                                        e.currentTarget.style.transform = 'scale(1.05)';
-                                                    }
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    if (!loading) {
-                                                        e.currentTarget.style.borderColor = '#E2E8F0';
-                                                        e.currentTarget.style.transform = 'scale(1)';
-                                                    }
-                                                }}
-                                            />
-                                            {formData.is_auth && (
-                                                <div style={{
-                                                    position: 'absolute',
-                                                    top: '50%',
-                                                    left: '50%',
-                                                    transform: 'translate(-50%, -50%)',
-                                                    width: '14px',
-                                                    height: '14px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    pointerEvents: 'none'
-                                                }}>
-                                                    <svg 
-                                                        width="12" 
-                                                        height="12" 
-                                                        viewBox="0 0 24 24" 
-                                                        fill="none" 
-                                                        stroke="white" 
-                                                        strokeWidth="3" 
-                                                        strokeLinecap="round" 
-                                                        strokeLinejoin="round"
-                                                    >
-                                                        <polyline points="20,6 9,17 4,12"></polyline>
-                                                    </svg>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <label 
-                                            htmlFor="is_auth" 
-                                            style={{
-                                                fontSize: '16px',
-                                                fontWeight: '600',
-                                                color: '#1E293B',
-                                                cursor: loading ? 'not-allowed' : 'pointer',
-                                                userSelect: 'none',
-                                                margin: 0,
-                                                opacity: loading ? 0.6 : 1,
-                                                transition: 'all 0.2s ease'
-                                            }}
-                                        >
-                                            {t('isAuth') || 'Is Authorized'}
-                                        </label>
-                                    </div>
-                                    <div style={{
-                                        marginTop: '12px',
-                                        fontSize: '14px',
-                                        color: '#64748B',
-                                        lineHeight: '1.5'
-                                    }}>
-                                        {t('isAuthDescription') || 'When enabled, this user will have authorized access to the system with full permissions for their assigned role.'}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="form-group" style={{ 
-                                display: 'flex', 
-                                justifyContent: 'center', 
-                                marginTop: '24px', 
-                                marginBottom: '24px' 
-                            }}>
-                                <ReCAPTCHA
-                                    sitekey="6Lc0kEYrAAAAACSgj_HzCdsBIdsl60GEN8uv7m43"
-                                    onChange={handleCaptchaChange}
-                                />
-                            </div>
-                            
-                            {passwordError && (
+                            {hasAttemptedSubmit && passwordError && (
                                 <div style={{
                                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
                                     border: '1px solid rgba(239, 68, 68, 0.3)',
                                     borderRadius: '12px',
                                     padding: '16px',
-                                    marginBottom: '24px',
+                                    marginTop: '16px',
+                                    marginBottom: '16px',
                                     color: '#DC2626',
                                     fontSize: '14px',
-                                    fontWeight: '500'
+                                    fontWeight: '500',
+                                    textAlign: 'center'
                                 }}>
                                     {passwordError}
                                 </div>
                             )}
                             
+                            {hasAttemptedSubmit && error && (
+                                <div style={{
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                    borderRadius: '12px',
+                                    padding: '16px',
+                                    marginTop: '16px',
+                                    marginBottom: '16px',
+                                    color: '#DC2626',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    textAlign: 'center'
+                                }}>
+                                    {error}
+                                </div>
+                            )}
+                            
                             <div style={{ 
-                                display: 'flex', 
-                                gap: '16px', 
-                                marginTop: '32px',
-                                flexDirection: 'column'
+                                marginTop: hasAttemptedSubmit && (passwordError || error) ? '0px' : '24px'
                             }}>
                                 <button 
                                     type="submit" 
                                     className="register-submit-button"
-                                    disabled={loading || !captchaValue}
-                                >
-                                    {loading ? (t('saving') || 'Saving...') : (t('createUser') || 'Create User')}
-                                </button>
-                                
-                                <button 
-                                    type="button" 
-                                    onClick={() => navigate('/admin')}
                                     disabled={loading}
-                                    style={{
-                                        width: '100%',
-                                        padding: '16px 20px',
-                                        background: 'transparent',
-                                        color: '#64748B',
-                                        border: '2px solid #E2E8F0',
-                                        borderRadius: '12px',
-                                        fontSize: '16px',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease',
-                                        letterSpacing: '0.025em'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.borderColor = '#94A3B8';
-                                        e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.borderColor = '#E2E8F0';
-                                        e.currentTarget.style.background = 'transparent';
-                                    }}
                                 >
-                                    {t('cancel') || 'Cancel'}
+                                    {loading ? (language === 'tr' ? 'Kaydediliyor...' : 'Saving...') : (language === 'tr' ? 'Kullanıcı Oluştur' : 'Create User')}
                                 </button>
                             </div>
                         </form>

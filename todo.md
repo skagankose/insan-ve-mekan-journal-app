@@ -32,7 +32,7 @@ Admin-Only Pages
 [ + ] AdminPage - Dashboard
 --------------------------------------------------------------- Create & Edit & Delete
 [ + ] JournalCreateFormPage - Journal Create
-[ - ] JournalEditFormPage - Journal Edit
+[ + ] JournalEditFormPage - Journal Edit
 [ - ] CreateUserPage - User Create
 [ - ] EditUserPage - User Edit
 

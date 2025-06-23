@@ -131,8 +131,8 @@
 }
 
 .authors-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
@@ -140,8 +140,6 @@
   background-color: #f9f9f9;
   border-radius: 6px;
   padding: 15px;
-  min-width: 200px;
-  flex: 1;
 }
 
 .author-card h4 {
@@ -181,8 +179,8 @@
 }
 
 .referees-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
@@ -190,8 +188,6 @@
   background-color: #f9f9f9;
   border-radius: 6px;
   padding: 15px;
-  min-width: 200px;
-  flex: 1;
 }
 
 .referee-card h4 {
@@ -308,8 +304,8 @@
     flex-basis: 100%;
   }
   
-  .author-card, .referee-card {
-    min-width: 100%;
+  .authors-list, .referees-list {
+    grid-template-columns: 1fr;
   }
   
   .action-buttons {

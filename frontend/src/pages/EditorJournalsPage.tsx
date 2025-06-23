@@ -528,14 +528,14 @@ const EditorJournalsPage: React.FC = () => {
                                                             position: 'relative',
                                                             zIndex: 1
                                                         }}>
-                                                            {entry.keywords ? (
+                                                            {(language === 'en' && entry.keywords_en ? entry.keywords_en : entry.keywords) ? (
                                                                 <>
                                                                     <span style={{ 
                                                                         fontWeight: '600', 
                                                                         color: '#475569',
                                                                         marginRight: '8px'
-                                                                    }}>Keywords:</span>
-                                                                    {entry.keywords}
+                                                                    }}>{language === 'tr' ? 'Anahtar Kelimeler:' : 'Keywords:'}</span>
+                                                                    {language === 'en' && entry.keywords_en ? entry.keywords_en : entry.keywords}
                                                                 </>
                                                             ) : 'No keywords available.'}
                                                         </p>

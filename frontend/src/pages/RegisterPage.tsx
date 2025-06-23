@@ -244,7 +244,7 @@ const RegisterPage: React.FC = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
     const { register } = useAuth(); // Get register function
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const formRef = useRef<HTMLFormElement>(null);
     const recaptchaRef = useRef<ReCAPTCHA>(null);
 
@@ -516,21 +516,21 @@ const RegisterPage: React.FC = () => {
             resetRecaptcha();
             // Handle specific error messages
             if (err.response?.data?.detail) {
+                const errorDetail = err.response.data.detail.toLowerCase();
+                
                 // Check for email already registered error
-                if (err.response.data.detail.includes('email') && 
-                    (err.response.data.detail.includes('already') || 
-                     err.response.data.detail.includes('exists') ||
-                     err.response.data.detail.includes('registered'))) {
-                    setError(t('emailAlreadyRegistered'));
+                if (errorDetail === 'email already registered' || 
+                    (errorDetail.includes('email') && errorDetail.includes('already'))) {
+                    setError(language === 'tr' ? 'E-posta adresi zaten kayıtlı' : 'Email already registered');
                 } 
                 // Check for reCAPTCHA verification failed error
                 else if (err.response.data.detail.includes('reCAPTCHA verification failed')) {
-                    setError(t('captchaVerificationFailed'));
+                    setError(language === 'tr' ? 'reCAPTCHA doğrulaması başarısız' : 'reCAPTCHA verification failed');
                 } else {
                     setError(err.response.data.detail);
                 }
             } else {
-                setError(t('registrationFailed'));
+                setError(language === 'tr' ? 'Kayıt başarısız oldu' : 'Registration failed');
             }
         } finally {
             setIsSubmitting(false);
@@ -540,7 +540,7 @@ const RegisterPage: React.FC = () => {
     const handleCaptchaChange = (value: string | null) => {
         setCaptchaValue(value);
         if (!value) {
-            setError(t('captchaExpired') || 'CAPTCHA verification expired. Please verify again.');
+            setError(language === 'tr' ? 'CAPTCHA doğrulaması süresi doldu. Lütfen tekrar doğrulayın.' : 'CAPTCHA verification expired. Please verify again.');
         } else if (hasAttemptedSubmit) {
             setError(null);
         }
