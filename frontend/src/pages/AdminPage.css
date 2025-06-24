@@ -1459,22 +1459,22 @@ html {
     }
 }
 
-/* Marked user cards with gray top line animation */
+/* Marked user cards with red top line animation */
 .marked-user-card::before {
-    background: linear-gradient(90deg, #9CA3AF, #6B7280) !important;
+    background: linear-gradient(90deg, #EF4444, #DC2626) !important;
 }
 
 .marked-user-card:hover {
-    border-color: #9CA3AF !important;
-    box-shadow: 0 8px 25px rgba(156, 163, 175, 0.2) !important;
+    border-color: #EF4444 !important;
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2) !important;
     transform: translateY(-4px);
 }
 
-/* Gray badges for marked users */
+/* Red badges for marked users */
 .marked-user-card .badge {
-    background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%) !important;
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
     color: white !important;
-    box-shadow: 0 2px 4px rgba(156, 163, 175, 0.3) !important;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3) !important;
 }
 
 /* Notification Badge Styles */

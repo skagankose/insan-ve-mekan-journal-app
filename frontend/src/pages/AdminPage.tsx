@@ -531,7 +531,7 @@ const AdminPage: React.FC = () => {
                                 <div key={`marked-user-${user.id}`} className="search-card user-card marked-user-card" 
                                      onClick={() => window.location.href = `/admin/users/profile/${user.id}`}
                                      style={{
-                                         border: '2px solid #D1D5DB',
+                                         border: '2px solid #FCA5A5',
                                          backgroundColor: 'rgba(249, 250, 251, 0.5)'
                                      }}>
                                     <div className="card-header">
