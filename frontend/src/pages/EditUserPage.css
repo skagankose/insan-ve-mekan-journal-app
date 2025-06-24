@@ -159,7 +159,7 @@
     margin-top: 15px;
     padding: 15px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 8px;
     background-color: #f9f9f9;
 }
 
@@ -170,6 +170,8 @@
     background-color: #fff;
     border-radius: 4px;
     border: 1px solid #ddd;
+    font-family: monospace;
+    font-size: 14px;
 }
 
 .link-actions {
@@ -177,12 +179,14 @@
     gap: 10px;
     margin-bottom: 10px;
     position: relative;
+    flex-wrap: wrap;
 }
 
 .email-actions {
     display: flex;
     flex: 1;
     gap: 10px;
+    min-width: 200px;
 }
 
 .custom-email-input {
@@ -191,6 +195,7 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+    min-width: 150px;
 }
 
 .copy-button, .email-button {
@@ -200,6 +205,8 @@
     cursor: pointer;
     font-weight: 500;
     transition: background-color 0.2s;
+    font-size: 14px;
+    white-space: nowrap;
 }
 
 .copy-button {
@@ -229,7 +236,7 @@
     font-size: 12px;
     color: #4caf50;
     position: absolute;
-    bottom: -5px;
+    bottom: -20px;
     right: 0;
     opacity: 0;
     transition: opacity 0.3s;
@@ -245,13 +252,13 @@
 .generate-link-button {
     background-color: #007bff;
     color: white;
-    padding: 8px 16px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
     transition: background-color 0.2s;
-    max-width: 200px;
+    font-size: 14px;
 }
 
 .generate-link-button:hover {
@@ -261,6 +268,27 @@
 .generate-link-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+    .link-actions {
+        flex-direction: column;
+    }
+    
+    .email-actions {
+        flex-direction: column;
+        min-width: auto;
+    }
+    
+    .custom-email-input {
+        min-width: auto;
+    }
+    
+    .link-copied-message {
+        position: static;
+        margin-top: 10px;
+    }
 }
 
 /* Delete User Section Styles */
