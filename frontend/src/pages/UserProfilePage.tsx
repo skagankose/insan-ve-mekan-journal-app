@@ -1357,7 +1357,7 @@ const UserProfilePage: React.FC = () => {
                         )}
                     </div>
                     <div className="user-info-header">
-                        <div className="user-avatar">
+                        <div className={`user-avatar ${profileUser.marked_for_deletion ? 'marked-for-deletion' : ''}`}>
                             {profileUser.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="user-details">

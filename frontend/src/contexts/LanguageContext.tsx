@@ -72,8 +72,9 @@ type TranslationKeys =
   | 'referenceToken' | 'manageAuthors' | 'changeJournal' | 'manageReferees' | 'noPublishedEntries'
   | 'loadingPublishedJournals' | 'failedToLoadPublishedJournals' | 'noPublishedJournals' | 'checkBackLaterForPublications'
   | 'reviewFile' | 'updatedTitle' | 'updatedAbstract' | 'updatedAbstractEn' | 'updatedKeywords' | 'updatedFile'
-  | 'updateCopied' | 'privateNotes'
+  | 'updateCopied'   | 'privateNotes'
   | 'unmarkForDeletion' | 'unmarkForDeletionWarning' | 'markForDeletion' | 'markForDeletionWarning'
+  | 'markedForDeletion' | 'hideMarkedUsers'
   | 'editProfile' | 'academicTitle'
   | 'incorrectCurrentPassword' | 'passwordUpdateFailed'
   | 'yoksisValidationError' | 'orcidValidationError' | 'phoneValidationError'
@@ -505,6 +506,8 @@ const translations: Record<Language, TranslationDictionary> = {
     'profileUpdated': 'Profile updated successfully!',
     'accountMarkedForDeletion': 'Account marked for deletion successfully!',
     'accountUnmarkedForDeletion': 'Account unmarked for deletion successfully!',
+    'markedForDeletion': 'Marked for Deletion',
+    'hideMarkedUsers': 'Hide Marked Users',
     
     // Not Found Messages
     'entryNotFoundTitle': 'Journal Entry Not Found',
@@ -704,9 +707,9 @@ const translations: Record<Language, TranslationDictionary> = {
 
     // Roles
     'writer': 'Yazar',
-    'editor': 'EDİTÖR',
+    'editor': 'Editör',
     'arbitrator': 'Hakem',
-    'admin': 'YÖNETİCİ',
+    'admin': 'Yönetici',
     'owner': 'Kurucu',
     'roleAuthor': 'Yazar',
     'roleAdmin': 'Site Yöneticisi',
@@ -979,7 +982,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'loadingPublishedJournals': 'Yayınlanmış dergiler yükleniyor',
     'failedToLoadPublishedJournals': 'Yayınlanmış dergiler yüklenemedi.',
     'noPublishedJournals': 'Yayınlanan Dergiler Bulunamadı',
-    'checkBackLaterForPublications': 'Yayınlanan dergiler kısa bir zaman içinde burada görüntülenecektir. Bizi takipte kalmanızı tavsiye ederiz.',
+    'checkBackLaterForPublications': 'Yayınlanan dergiler kısa bir zaman içinde burada görüntülenecektir. Bizi takipte kalınız.',
     'reviewFile': 'Değerlendirme Dosyası',
     'updatedTitle': 'Güncellenmiş Başlık',
     'updatedAbstract': 'Güncellenmiş Özet',
@@ -1004,6 +1007,8 @@ const translations: Record<Language, TranslationDictionary> = {
     'profileUpdated': 'Profil başarıyla güncellendi!',
     'accountMarkedForDeletion': 'Hesap silme için işaretlendi!',
     'accountUnmarkedForDeletion': 'Hesap silme işlemi iptal edildi!',
+    'markedForDeletion': 'Silinmek Üzere İşaretlenenler',
+    'hideMarkedUsers': 'İşaretlenenleri Gizle',
     
     // Not Found Messages
     'entryNotFoundTitle': 'Journal Entry Bulunamadı',

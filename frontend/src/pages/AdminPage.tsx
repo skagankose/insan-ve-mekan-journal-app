@@ -109,6 +109,10 @@ const AdminPage: React.FC = () => {
     const [filteredJournals, setFilteredJournals] = useState<Journal[]>([]);
     const [filteredJournalEntries, setFilteredJournalEntries] = useState<JournalEntryRead[]>([]);
     
+    // Users marked for deletion state
+    const [usersMarkedForDeletion, setUsersMarkedForDeletion] = useState<UserRead[]>([]);
+    const [showMarkedUsers, setShowMarkedUsers] = useState<boolean>(false);
+    
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const { t, language } = useLanguage();
@@ -184,6 +188,12 @@ const AdminPage: React.FC = () => {
     useEffect(() => {
         setFilteredJournalEntries(globalSearchJournalEntries(journalEntries, globalSearchTerm));
     }, [journalEntries, globalSearchTerm]);
+
+    // Update users marked for deletion when users data changes
+    useEffect(() => {
+        const markedUsers = users.filter(user => user.marked_for_deletion);
+        setUsersMarkedForDeletion(markedUsers);
+    }, [users]);
 
     // Removed renderCell function as it's not used in card-based interface
 
@@ -302,12 +312,11 @@ const AdminPage: React.FC = () => {
     const UserCard = ({ user }: { user: UserRead }) => (
         <div className="search-card user-card" onClick={() => window.open(`/admin/users/profile/${user.id}`, '_blank', 'noopener,noreferrer')}>
             <div className="card-header">
-                <div className="card-type">{translateCardType('user')}</div>
+                <h3 className="card-title" style={{ margin: '0', fontSize: '1.125rem', fontWeight: '700' }}>{user.name}</h3>
                 <span className={`badge badge-${user.role}`}>{translateRole(user.role)}</span>
             </div>
             <div className="card-content">
-                <h3 className="card-title">{user.name}</h3>
-                <p className="card-subtitle">
+                <p className="card-subtitle" style={{ margin: '0' }}>
                     {user.title}
                     {user.title && user.email && <span style={{ marginLeft: '8px', fontWeight: '500', color: '#6B7280' }}>• {user.email}</span>}
                     {!user.title && user.email && <span>{user.email}</span>}
@@ -475,7 +484,71 @@ const AdminPage: React.FC = () => {
                             </svg>
                             {t('createJournal') || 'Create Journal'}
                         </Link>
+
+                        {/* Users Marked for Deletion Button - Only show if there are users marked for deletion */}
+                        {usersMarkedForDeletion.length > 0 && (
+                            <button 
+                                className="admin-action-button marked-users-btn"
+                                onClick={() => setShowMarkedUsers(!showMarkedUsers)}
+                                style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '12px 20px',
+                                    backgroundColor: '#dc2626',
+                                    color: 'white',
+                                    textDecoration: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    transition: 'all 0.2s ease',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    position: 'relative'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
+                                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M16 4H8C6.34315 4 5 5.34315 5 7V17C5 18.6569 6.34315 20 8 20H16C17.6569 20 19 18.6569 19 17V7C19 5.34315 17.6569 4 16 4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M9 9L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M15 9L9 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                {showMarkedUsers ? (t('hideMarkedUsers') || 'Hide Marked Users') : (t('markedForDeletion') || 'Marked for Deletion')}
+                                
+                                {/* Notification Badge */}
+                                <span className="notification-badge">
+                                    {usersMarkedForDeletion.length}
+                                </span>
+                            </button>
+                        )}
                         </div>
+
+                    {/* Users Marked for Deletion Section */}
+                    {showMarkedUsers && usersMarkedForDeletion.length > 0 && (
+                        <div className="cards-grid" style={{ marginBottom: '2rem', marginTop: '2rem' }}>
+                            {usersMarkedForDeletion.map(user => (
+                                <div key={`marked-user-${user.id}`} className="search-card user-card marked-user-card" 
+                                     onClick={() => window.location.href = `/admin/users/profile/${user.id}`}
+                                     style={{
+                                         border: '2px solid #D1D5DB',
+                                         backgroundColor: 'rgba(249, 250, 251, 0.5)'
+                                     }}>
+                                    <div className="card-header">
+                                        <h3 className="card-title" style={{ margin: '0', fontSize: '1.125rem', fontWeight: '700' }}>{user.name}</h3>
+                                        <span className={`badge badge-${user.role}`}>{translateRole(user.role)}</span>
+                                    </div>
+                                    <div className="card-content">
+                                        <p className="card-subtitle" style={{ margin: '0' }}>
+                                            {user.title}
+                                            {user.title && user.email && <span style={{ marginLeft: '8px', fontWeight: '500', color: '#6B7280' }}>• {user.email}</span>}
+                                            {!user.title && user.email && <span>{user.email}</span>}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Search Results Cards */}
                     {globalSearchTerm && (

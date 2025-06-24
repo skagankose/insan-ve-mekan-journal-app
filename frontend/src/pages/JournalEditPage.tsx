@@ -342,7 +342,7 @@ const JournalEditPage: React.FC = () => {
                                 className="form-textarea"
                                 value={formData.abstract_en || ''}
                                 onChange={(e) => setFormData({...formData, abstract_en: e.target.value})}
-                                placeholder={t('enterAbstractEnglish') || 'Enter a brief summary in English...'}
+                                placeholder={language === 'tr' ? 'İngilizce genişletilmiş özeti giriniz' : 'Enter an extended summary in English'}
                                 disabled={isSubmitting}
                                 rows={3}
                                 maxLength={500}
@@ -375,7 +375,7 @@ const JournalEditPage: React.FC = () => {
                                 className="form-input"
                                 value={formData.page_number || ''}
                                 onChange={(e) => setFormData({...formData, page_number: e.target.value})}
-                                placeholder={t('enterPageNumber') || 'Enter page number (e.g., 1-15)'}
+                                placeholder={language === 'tr' ? 'Sayfa numarası giriniz (örn: 1-15)' : 'Enter page number (e.g., 1-15)'}
                                 disabled={isSubmitting}
                                 maxLength={20}
                             />
@@ -392,7 +392,7 @@ const JournalEditPage: React.FC = () => {
                                 className="form-input"
                                 value={formData.doi || ''}
                                 onChange={(e) => setFormData({...formData, doi: e.target.value})}
-                                placeholder={t('enterDoi') || 'Enter DOI (e.g., 10.1000/xyz123)'}
+                                placeholder={language === 'tr' ? 'DOI giriniz' : 'Enter DOI'}
                                 disabled={isSubmitting}
                                 maxLength={100}
                             />
@@ -548,18 +548,6 @@ const JournalEditPage: React.FC = () => {
                                     value={formData.status || ''}
                                     onChange={(e) => setFormData({...formData, status: e.target.value})}
                                     disabled={isSubmitting}
-                                    style={{
-                                        padding: '12px 16px',
-                                        border: '2px solid #E2E8F0',
-                                        borderRadius: '12px',
-                                        background: 'rgba(249, 250, 251, 0.8)',
-                                        cursor: 'pointer',
-                                        appearance: 'none',
-                                        backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
-                                        backgroundRepeat: 'no-repeat',
-                                        backgroundPosition: 'right 12px center',
-                                        backgroundSize: '16px'
-                                    }}
                                 >
                                     <option value="waiting_for_payment">{t('statusWaitingForPayment') || 'Waiting for Payment'}</option>
                                     <option value="waiting_for_authors">{t('statusWaitingForAuthors') || 'Waiting for Authors'}</option>

@@ -1438,6 +1438,95 @@ html {
     left: 0;
 }
 
+/* Marked Users Button and Section Styles */
+.admin-action-button.marked-users-btn {
+    position: relative;
+    overflow: visible;
+}
+
+.marked-users-section {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Marked user cards with gray top line animation */
+.marked-user-card::before {
+    background: linear-gradient(90deg, #9CA3AF, #6B7280) !important;
+}
+
+.marked-user-card:hover {
+    border-color: #9CA3AF !important;
+    box-shadow: 0 8px 25px rgba(156, 163, 175, 0.2) !important;
+    transform: translateY(-4px);
+}
+
+/* Gray badges for marked users */
+.marked-user-card .badge {
+    background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%) !important;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(156, 163, 175, 0.3) !important;
+}
+
+/* Notification Badge Styles */
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #FDE047 0%, #FACC15 100%);
+    color: #92400E;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 0 rgba(251, 191, 36, 0.7);
+    }
+    70% {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 6px rgba(251, 191, 36, 0);
+    }
+    100% {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 0 rgba(251, 191, 36, 0);
+    }
+}
+
+/* Marked for deletion badge style */
+.badge-marked-for-deletion {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    animation: warningPulse 3s infinite ease-in-out;
+}
+
+@keyframes warningPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .cards-grid {
@@ -1473,5 +1562,22 @@ html {
     
     .search-tips {
         padding: 1.5rem;
+    }
+
+    .marked-users-section {
+        margin: 1rem -1rem;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .admin-actions-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-action-button {
+        width: 100%;
+        justify-content: center;
     }
 } 
