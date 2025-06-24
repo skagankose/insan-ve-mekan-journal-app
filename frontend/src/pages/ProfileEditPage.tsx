@@ -56,7 +56,7 @@ const ProfileEditPage: React.FC = () => {
     const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false);
     
     // Phone input state (separate country code and phone number)
-    const [countryCode, setCountryCode] = useState('');
+    const [countryCode, setCountryCode] = useState('+90');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [currentFlag, setCurrentFlag] = useState('🇹🇷');
     
@@ -110,11 +110,7 @@ const ProfileEditPage: React.FC = () => {
 
     // Update flag when country code changes
     useEffect(() => {
-        if (countryCode) {
-            setCurrentFlag(getFlagForCountryCode(countryCode));
-        } else {
-            setCurrentFlag('🇹🇷'); // Default to Turkey flag when empty
-        }
+        setCurrentFlag(getFlagForCountryCode(countryCode));
     }, [countryCode]);
 
     // Handle country code change
@@ -161,7 +157,7 @@ const ProfileEditPage: React.FC = () => {
 
     // Parse existing phone number to separate country code and number
     const parsePhoneNumber = (fullPhone: string) => {
-        if (!fullPhone) return { code: '', number: '' }; // Return empty strings if no phone
+        if (!fullPhone) return { code: '+90', number: '' }; // Return default Turkey code if no phone
         
         // Find the longest matching country code
         let bestMatch = '+90';

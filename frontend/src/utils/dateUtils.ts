@@ -132,6 +132,20 @@ export const getRoleTranslationForBadge = (role: string, language: Language): st
 };
 
 /**
+ * Formats a date string (like YYYY-MM-DD) to DD/MM/YYYY format.
+ */
+export const formatDateToDDMMYYYY = (dateString: string | undefined): string => {
+  if (!dateString) return '';
+  // Handles both 'YYYY-MM-DD' and 'YYYY-MM-DDTHH:mm:ss.sssZ'
+  const dateParts = dateString.split('T')[0].split('-');
+  if (dateParts.length === 3) {
+    const [year, month, day] = dateParts;
+    return `${day}/${month}/${year}`;
+  }
+  return dateString; // fallback if format is unexpected
+};
+
+/**
  * Get status translation
  */
 export const getStatusTranslation = (status: string, language: Language): string => {

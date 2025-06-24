@@ -5,6 +5,7 @@ import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { FaFileWord, FaFilePdf } from 'react-icons/fa';
+import { formatDateToDDMMYYYY } from '../utils/dateUtils';
 
 interface JournalFormData {
     title: string;
@@ -29,6 +30,7 @@ const JournalEditPage: React.FC = () => {
     const { t, language } = useLanguage();
     const { isAuthenticated, user } = useAuth();
     const isEditorOrAdmin = isAuthenticated && user && (user.role === 'editor' || user.role === 'admin' || user.role === 'owner');
+    const [isDateInput, setIsDateInput] = useState(false);
 
     const [formData, setFormData] = useState<JournalFormData>({
         title: '',
@@ -89,7 +91,7 @@ const JournalEditPage: React.FC = () => {
                     status: entry.status,
                     authors_ids: entry.authors?.map((author: apiService.UserRead) => author.id),
                     referees_ids: entry.referees?.map((referee: apiService.UserRead) => referee.id),
-                    publication_date: entry.publication_date ? new Date(entry.publication_date).toISOString().slice(0, 16) : ''
+                    publication_date: entry.publication_date ? new Date(entry.publication_date).toISOString().slice(0, 10) : ''
                 });
             } catch (err: any) {
                 console.error("Failed to fetch entry for editing:", err);
@@ -284,13 +286,19 @@ const JournalEditPage: React.FC = () => {
                         <div className="form-group">
                             <label htmlFor="publication_date" className="form-label">{t('publicationDate') || 'Publication Date'}</label>
                             <input
-                                type="datetime-local"
+                                type={isDateInput ? 'date' : 'text'}
                                 id="publication_date"
                                 name="publication_date"
                                 className="form-input"
-                                value={formData.publication_date || ''}
-                                onChange={(e) => setFormData({...formData, publication_date: e.target.value})}
-                                placeholder={t('enterPublicationDate') || 'Enter publication date'}
+                                value={
+                                    isDateInput
+                                        ? (formData.publication_date || '')
+                                        : (formData.publication_date ? formatDateToDDMMYYYY(formData.publication_date) : '')
+                                }
+                                onChange={(e) => setFormData({ ...formData, publication_date: e.target.value })}
+                                onFocus={() => setIsDateInput(true)}
+                                onBlur={() => setIsDateInput(false)}
+                                placeholder="DD/MM/YYYY"
                                 disabled={isSubmitting}
                             />
                         </div>
@@ -540,6 +548,18 @@ const JournalEditPage: React.FC = () => {
                                     value={formData.status || ''}
                                     onChange={(e) => setFormData({...formData, status: e.target.value})}
                                     disabled={isSubmitting}
+                                    style={{
+                                        padding: '12px 16px',
+                                        border: '2px solid #E2E8F0',
+                                        borderRadius: '12px',
+                                        background: 'rgba(249, 250, 251, 0.8)',
+                                        cursor: 'pointer',
+                                        appearance: 'none',
+                                        backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundPosition: 'right 12px center',
+                                        backgroundSize: '16px'
+                                    }}
                                 >
                                     <option value="waiting_for_payment">{t('statusWaitingForPayment') || 'Waiting for Payment'}</option>
                                     <option value="waiting_for_authors">{t('statusWaitingForAuthors') || 'Waiting for Authors'}</option>

@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { FaImage, FaFileWord, FaFilePdf, FaFileAlt, FaList, FaFolder } from 'react-icons/fa';
 import './JournalEntryDetailsPage.css'; // Import toast styles
+import { formatDateToDDMMYYYY } from '../utils/dateUtils';
 
 interface JournalFormData {
     title: string;
@@ -59,6 +60,7 @@ const JournalEditFormPage: React.FC = () => {
     
     // Add deletion section state
     const [isDeletionSectionExpanded, setIsDeletionSectionExpanded] = useState<boolean>(false);
+    const [isDateInput, setIsDateInput] = useState(false);
     
     // Toast notification state
     const [showToast, setShowToast] = useState<boolean>(false);
@@ -67,7 +69,7 @@ const JournalEditFormPage: React.FC = () => {
     
     const navigate = useNavigate();
     const { isAuthenticated, user } = useAuth();
-    const { t, language } = useLanguage();
+    const { language } = useLanguage();
 
     const isAdminOrOwner = user?.role === 'admin' || user?.role === 'owner';
 
@@ -102,7 +104,7 @@ const JournalEditFormPage: React.FC = () => {
                     title_en: journal.title_en || '',
                     issue: journal.issue,
                     is_published: journal.is_published,
-                    publication_date: journal.publication_date || undefined,
+                    publication_date: journal.publication_date ? journal.publication_date.split('T')[0] : undefined,
                     publication_place: journal.publication_place || undefined,
                     cover_photo: journal.cover_photo || undefined,
                     meta_files: journal.meta_files || undefined,
@@ -366,12 +368,19 @@ const JournalEditFormPage: React.FC = () => {
                                 )}
                             </label>
                             <input
-                                type="datetime-local"
+                                type={isDateInput ? 'date' : 'text'}
                                 id="publication_date"
                                 name="publication_date"
                                 className="form-input"
-                                value={formData.publication_date || ''}
-                                onChange={handleChange}
+                                value={
+                                    isDateInput
+                                        ? (formData.publication_date || '')
+                                        : (formData.publication_date ? formatDateToDDMMYYYY(formData.publication_date) : '')
+                                }
+                                onChange={(e) => setFormData(prev => ({...prev, publication_date: e.target.value}))}
+                                onFocus={() => setIsDateInput(true)}
+                                onBlur={() => setIsDateInput(false)}
+                                placeholder="DD/MM/YYYY"
                                 disabled={isSubmitting || !isAdminOrOwner}
                                 style={{
                                     opacity: !isAdminOrOwner ? 0.6 : 1,

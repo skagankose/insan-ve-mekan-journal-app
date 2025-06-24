@@ -242,7 +242,7 @@ interface UserForm {
 const CreateUserPage: React.FC = () => {
     const navigate = useNavigate();
     const { user: currentUser, isAuthenticated } = useAuth();
-    const { t, language } = useLanguage();
+    const { language } = useLanguage();
     const formRef = useRef<HTMLFormElement>(null);
     
     const [loading, setLoading] = useState<boolean>(false);
