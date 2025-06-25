@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveJournal } from '../contexts/ActiveJournalContext';
 import Footer from '../components/Footer';
-import { HiMail, HiUser, HiCalendar, HiLocationMarker, HiClock, HiCheckCircle, HiUserGroup, HiDocumentText, HiAcademicCap } from 'react-icons/hi';
+import { HiMail, HiUser, HiCalendar, HiLocationMarker, HiCheckCircle, HiUserGroup, HiDocumentText, HiAcademicCap } from 'react-icons/hi';
 import { PiSubtitlesFill } from "react-icons/pi";
 import './JournalEntryUpdateDetailsPage.css'; // Import toast styles
 

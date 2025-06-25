@@ -5,6 +5,7 @@ import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import FormattedIdInput from '../components/FormattedIdInput';
 import LocationInput from '../components/LocationInput';
+import CountrySelector from '../components/CountrySelector';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { validateYoksisId, validateOrcidId, validatePhoneNumber } from '../utils/validation';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
@@ -41,6 +42,7 @@ interface UserForm {
     title: string;
     bio: string;
     science_branch: string;
+    country: string;
     location: string;
     yoksis_id: string;
     orcid_id: string;
@@ -84,6 +86,7 @@ const ProfileEditPage: React.FC = () => {
         title: '',
         bio: '',
         science_branch: '',
+        country: '',
         location: '',
         yoksis_id: '',
         orcid_id: '',
@@ -185,13 +188,30 @@ const ProfileEditPage: React.FC = () => {
         setCountryCode(code);
         setPhoneNumber(number);
 
+        // Parse location into country and city (same as EditUserPage)
+        const parseLocation = (location: string): { country: string; city: string } => {
+            if (!location) {
+                return { country: '', city: '' };
+            }
+            const parts = location.split(',').map(part => part.trim());
+            if (parts.length > 1) {
+                const country = parts[parts.length - 1];
+                const city = parts.slice(0, -1).join(', ');
+                return { country, city };
+            }
+            return { country: '', city: location };
+        };
+
+        const locationData = parseLocation(user.location || '');
+
         // Initialize form with current user data
         setFormData({
             name: user.name || '',
             title: user.title || '',
             bio: user.bio || '',
             science_branch: user.science_branch || '',
-            location: user.location || '',
+            country: locationData.country,
+            location: locationData.city,
             yoksis_id: user.yoksis_id || '',
             orcid_id: user.orcid_id || '',
         });
@@ -282,7 +302,7 @@ const ProfileEditPage: React.FC = () => {
                 bio: formData.bio,
                 telephone: telephone || undefined,
                 science_branch: formData.science_branch,
-                location: formData.location,
+                location: formData.country && formData.location ? `${formData.location}, ${formData.country}` : formData.location || formData.country || undefined,
                 yoksis_id: formData.yoksis_id,
                 orcid_id: formData.orcid_id,
             };
@@ -458,13 +478,29 @@ const ProfileEditPage: React.FC = () => {
                             </div>
 
                             <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                                <label htmlFor="location">{t('location') || 'Location'}</label>
+                                <label htmlFor="country">{t('country') || 'Country'}</label>
+                                <CountrySelector
+                                    value={formData.country}
+                                    onChange={(value) => {
+                                        setFormData({ ...formData, country: value });
+                                        if (hasAttemptedSubmit) {
+                                            setError(null);
+                                        }
+                                    }}
+                                    id="country"
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                                <label htmlFor="location">{t('location') || 'City/Location'}</label>
                                 <LocationInput
                                     value={formData.location}
                                     onChange={(value) => {
-                                        handleInputChange({
-                                            target: { name: 'location', value }
-                                        } as React.ChangeEvent<HTMLInputElement>);
+                                        setFormData({ ...formData, location: value });
+                                        if (hasAttemptedSubmit) {
+                                            setError(null);
+                                        }
                                     }}
                                     id="location"
                                     name="location"
@@ -530,7 +566,6 @@ const ProfileEditPage: React.FC = () => {
                         <div style={{ 
                             display: 'flex', 
                             gap: '1rem', 
-                            justifyContent: 'flex-end',
                             marginTop: '2rem'
                         }}>
                             <button 
@@ -539,6 +574,7 @@ const ProfileEditPage: React.FC = () => {
                                 onClick={() => navigate('/profile')}
                                 disabled={loading}
                                 style={{
+                                    flex: '1',
                                     padding: '12px 24px',
                                     borderRadius: '12px',
                                     fontWeight: '600'
@@ -550,7 +586,7 @@ const ProfileEditPage: React.FC = () => {
                                 type="submit" 
                                 className="register-submit-button"
                                 disabled={loading}
-                                style={{ width: 'auto', margin: 0 }}
+                                style={{ flex: '1', margin: 0 }}
                             >
                                 {loading ? (t('saving') || 'Saving...') : (t('saveChanges') || 'Save Changes')}
                             </button>

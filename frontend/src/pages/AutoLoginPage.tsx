@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
+import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import './AutoLoginPage.css';
 
 const AutoLoginPage: React.FC = () => {
@@ -37,7 +38,6 @@ const AutoLoginPage: React.FC = () => {
             }
             
             try {
-                // Call API to validate and get a session with this token
                 const response = await apiService.loginWithToken(token, parseInt(userId));
                 
                 // Store the token and update auth state
@@ -51,9 +51,6 @@ const AutoLoginPage: React.FC = () => {
                         // Update auth context directly
                         setAuthState(true, currentUser);
                         loginSuccessRef.current = true;
-                        
-                        // Don't navigate here - we'll use another useEffect for that
-                        // after auth state is fully updated
                     } catch (authErr) {
                         console.error('Error retrieving user after auto-login:', authErr);
                         setError(t('loginSuccessButUserInfoFailed'));
@@ -76,10 +73,8 @@ const AutoLoginPage: React.FC = () => {
     // Effect to navigate after user is set
     useEffect(() => {
         if (loginSuccessRef.current && user) {
-            // console.log("AutoLoginPage: User is now set, navigating to home", user);
             // Short delay to ensure everything is properly loaded
             setTimeout(() => {
-                // console.log("AutoLoginPage: Navigating now");
                 window.location.href = '/'; // Force a full page reload
             }, 300);
         }
@@ -89,8 +84,8 @@ const AutoLoginPage: React.FC = () => {
         return (
             <div className="auto-login-page">
                 <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>{t('autoLoginProcessing')}</p>
+                    <img src="/book.gif" alt="Loading" className="loading-spinner" />
+                    <p>{t('pleaseWait')}</p>
                 </div>
             </div>
         );
@@ -100,7 +95,9 @@ const AutoLoginPage: React.FC = () => {
         return (
             <div className="auto-login-page">
                 <div className="error-container">
-                    <div className="error-icon">❌</div>
+                    <div className="error-icon">
+                        <FaTimesCircle />
+                    </div>
                     <h2>{t('loginError')}</h2>
                     <p className="error-message">{error}</p>
                     <button 
@@ -117,8 +114,9 @@ const AutoLoginPage: React.FC = () => {
     return (
         <div className="auto-login-page">
             <div className="success-container">
-                <div className="success-icon">✓</div>
-                <h2>{t('loginSuccessful')}</h2>
+                <div className="success-icon">
+                    <FaCheckCircle />
+                </div>
                 <p>{t('redirecting')}</p>
             </div>
         </div>

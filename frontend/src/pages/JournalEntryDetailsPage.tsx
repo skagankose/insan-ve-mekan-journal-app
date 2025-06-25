@@ -8,6 +8,7 @@ import { HiMail, HiUser, HiDocumentText, HiAcademicCap, HiFingerPrint, HiIdentif
 import { PiSubtitlesFill } from "react-icons/pi";
 import Footer from '../components/Footer';
 import './JournalEntryDetailsPage.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 const JournalEntryDetailsPage: React.FC = () => {
   const { entryId } = useParams<{ entryId: string }>();
@@ -382,7 +383,7 @@ const JournalEntryDetailsPage: React.FC = () => {
       // Clean up
       document.body.removeChild(tempDiv);
       
-      setToastMessage(t(`${style.toLowerCase()}CitationCopied`) || `${style} citation copied to clipboard!`);
+      setToastMessage(`${style.toUpperCase()} ${t('citationCopiedSuccess')}`);
       setToastType('success');
       setShowToast(true);
       
@@ -396,7 +397,7 @@ const JournalEntryDetailsPage: React.FC = () => {
       try {
         const plainText = citation.replace(/\*/g, '');
         await navigator.clipboard.writeText(plainText);
-        setToastMessage(t(`${style.toLowerCase()}CitationCopied`) || `${style} citation copied to clipboard (plain text)!`);
+        setToastMessage(`${style.toUpperCase()} ${t('citationCopiedPlainText')}`);
         setToastType('success');
         setShowToast(true);
         
@@ -405,7 +406,7 @@ const JournalEntryDetailsPage: React.FC = () => {
         }, 3000);
       } catch (fallbackErr) {
         console.error('Fallback copy also failed:', fallbackErr);
-        setToastMessage(t('failedToCopyCitation') || 'Failed to copy citation to clipboard');
+        setToastMessage(t('citationCopyFailed'));
         setToastType('warning');
         setShowToast(true);
         

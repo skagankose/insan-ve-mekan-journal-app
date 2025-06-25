@@ -389,4 +389,113 @@
 .confirm-delete-button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+/* Custom button style for the login link section */
+.login-link-button {
+    background: linear-gradient(135deg, #0EA5E9 0%, #0C87B7 100%) !important;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3) !important;
+}
+
+.login-link-button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0C87B7 0%, #086A91 100%) !important;
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4) !important;
+}
+
+/* Toast Notification */
+.toast-notification {
+    position: fixed;
+    top: 190px;
+    right: 24px;
+    z-index: 1000;
+    animation: slideInRight 0.3s ease-out;
+}
+
+.toast-content {
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 320px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.toast-content.toast-success {
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+}
+
+.toast-content.toast-warning {
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.3);
+}
+
+.toast-icon {
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    font-weight: 300;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .toast-notification {
+        top: 130px;
+        right: 16px;
+        left: 16px;
+    }
+    
+    .toast-content {
+        min-width: auto;
+        width: 100%;
+    }
 } 

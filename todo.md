@@ -33,8 +33,8 @@ Admin-Only Pages
 --------------------------------------------------------------- Create & Edit & Delete
 [ + ] JournalCreateFormPage - Journal Create
 [ + ] JournalEditFormPage - Journal Edit
-[ - ] CreateUserPage - User Create
-[ - ] EditUserPage - User Edit
+[ + ] CreateUserPage - User Create
+[ + ] EditUserPage - User Edit
 
 Error/Fallback Pages
 [ + ] 404 Not Found

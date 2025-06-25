@@ -4,12 +4,31 @@
 }
 
 .formatted-id-input input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-family: monospace;
-    letter-spacing: 1px;
+    width: 100% !important;
+    padding: 12px 16px !important;
+    border: 2px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    background: rgba(249, 250, 251, 0.8) !important;
+    font-family: monospace !important;
+    letter-spacing: 1px !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    transition: all 0.3s ease !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    min-height: 48px !important;
+}
+
+.formatted-id-input input:focus {
+    border-color: #6A9DA1 !important;
+    box-shadow: 0 0 0 3px rgba(106, 157, 161, 0.1) !important;
+}
+
+.formatted-id-input input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: rgba(241, 245, 249, 0.5);
 }
 
 .formatted-id-input input.invalid {
@@ -28,14 +47,7 @@
     color: var(--text-secondary);
 }
 
-.formatted-id-input .orcid-link {
-    color: var(--primary-color);
-    text-decoration: none;
-}
 
-.formatted-id-input .orcid-link:hover {
-    text-decoration: underline;
-}
 
 /* Password input with toggle button styles */
 .password-input-container {

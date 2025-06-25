@@ -655,7 +655,7 @@ const JournalEditFormPage: React.FC = () => {
                         }}>
                             <button 
                                 type="button" 
-                                onClick={() => navigate('/')} 
+                                onClick={() => navigate(`/journals/${journalId}`)} 
                                 className="btn btn-outline"
                                 disabled={isSubmitting}
                                 style={{

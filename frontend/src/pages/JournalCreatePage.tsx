@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import JournalForm, { JournalFormData } from '../components/JournalForm';
 import * as apiService from '../services/apiService';
 import { useAuth } from '../contexts/AuthContext';

@@ -81,18 +81,7 @@ const FormattedIdInput: React.FC<FormattedIdInputProps> = ({
                 className={`${className} ${!isValid && !isFocused ? 'invalid' : ''}`}
             />
 
-            {type === 'orcid' && value && (
-                <div className="help-text">
-                    <a 
-                        href={`https://orcid.org/${value}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="orcid-link"
-                    >
-                        View ORCID Profile
-                    </a>
-                </div>
-            )}
+
         </div>
     );
 };

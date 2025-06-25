@@ -96,7 +96,10 @@ type TranslationKeys =
   | 'noActiveJournalMessage' | 'selectAJournal' | 'toAssociateWithEntry' | 'entrySavedSecurelyMessage'
   | 'selectArticleType' | 'articleTypeTheory' | 'articleTypeResearch' | 'selectLanguage'
   | 'entryCreatedSuccessfully' | 'entryUpdatedSuccessfully' | 'entryDeletedSuccessfully' | 'authorRemovedSuccessfully' | 'failedToRemoveAuthor'
-  | 'citeArticle' | 'citeThisArticle' | 'copy' | 'noResultsFound' | 'adjustSearchTerms';
+  | 'citeArticle' | 'citeThisArticle' | 'copy' | 'noResultsFound' | 'adjustSearchTerms'
+  | 'citationCopiedSuccess' | 'citationCopiedPlainText' | 'citationCopyFailed'
+  | 'deleteUser' | 'deleteUserWarning' | 'deleting' | 'deleteUserConfirm' | 'confirmDelete' | 'customEmailAddress' | 'linkEmailSent'
+  | 'linkCopied' | 'copyFailed' | 'pleaseWait';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -603,6 +606,19 @@ const translations: Record<Language, TranslationDictionary> = {
     // Update conversation translations
     'noUpdates': 'No updates yet',
     'startConversation': 'Start the conversation by adding an update',
+
+    // New citation translations
+    'citationCopiedSuccess': 'citation copied to clipboard!',
+    'citationCopiedPlainText': 'citation copied to clipboard (plain text)!',
+    'citationCopyFailed': 'Failed to copy citation to clipboard',
+    'deleteUser': 'Delete User',
+    'deleteUserWarning': 'Warning: This action will permanently delete the user and transfer all related objects to your account. This cannot be undone.',
+    'deleting': 'Deleting...',
+    'deleteUserConfirm': 'Are you sure you want to delete this user? This action cannot be undone.',
+    'confirmDelete': 'Yes, Delete',
+    'customEmailAddress': 'Custom email address',
+    'linkEmailSent': 'Login link sent via email!',
+    'pleaseWait': 'Please wait while we log you in...',
   },
   tr: {
     // Navigation
@@ -616,9 +632,9 @@ const translations: Record<Language, TranslationDictionary> = {
     'myJournals': 'Dergilerim',
     'navigation': 'Navigasyon',
     'previousIssues': 'Önceki Sayılar',
-    'editorJournals': 'Aktif Dergiler',
+    'editorJournals': 'Tüm Dergiler',
     'submitPaper': 'Makale Gönder',
-    'publishedIssues': 'Arşivler',
+    'publishedIssues': 'Yayınlananlar',
     
     // Page titles
     'createNewEntry': 'Yeni Makale Oluştur',
@@ -633,7 +649,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'content': 'İçerik',
     'username': 'Kullanıcı Adı',
     'password': 'Şifre',
-    'email': 'E-posta Adresi',
+    'email': 'E-post Adresi',
     'fullName': 'Tam İsim (İsteğe Bağlı)',
     'abstract': 'Özet',
     'type': 'Tür',
@@ -779,7 +795,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'loadingUserData': 'Kullanıcı verileri yükleniyor...',
     'failedToLoadUserEntries': 'Kullanıcı yazıları yüklenemedi.',
     'biography': 'Biyografi',
-    'scienceBranch': 'Bilim Dalı',
+    'scienceBranch': 'BİLİM DALI',
     'location': 'Konum',
     'telephone': 'Telefon',
     'profileInformation': 'Profil Bilgileri',
@@ -1105,6 +1121,19 @@ const translations: Record<Language, TranslationDictionary> = {
     // Update conversation translations
     'noUpdates': 'Henüz Süreç Başlatılmadı',
     'startConversation': 'Makalenizin güncel bilgilerini girerek süreci başlatın',
+
+    // New citation translations
+    'citationCopiedSuccess': 'alıntı panoya kopyalandı!',
+    'citationCopiedPlainText': 'alıntı panoya kopyalandı (düz metin)!',
+    'citationCopyFailed': 'Alıntı panoya kopyalanamadı',
+    'deleteUser': 'Kullanıcıyı Sil',
+    'deleteUserWarning': 'Uyarı: Bu işlem kullanıcıyı kalıcı olarak silecek ve ilgili tüm nesneleri hesabınıza aktaracaktır. Bu işlem geri alınamaz.',
+    'deleting': 'Siliniyor...',
+    'deleteUserConfirm': 'Bu kullanıcıyı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+    'confirmDelete': 'Evet, Sil',
+    'customEmailAddress': 'Bağlantının gönderileceği e-posta adresi',
+    'linkEmailSent': 'Giriş bağlantısı e-posta ile gönderildi!',
+    'pleaseWait': 'Giriş Yapılıyor...',
   }
 };
 

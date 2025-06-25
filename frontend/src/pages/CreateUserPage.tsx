@@ -756,21 +756,78 @@ const CreateUserPage: React.FC = () => {
                             
                             <div className="form-group">
                                 <label htmlFor="role" className="form-label">{language === 'tr' ? 'Rol' : 'Role'} *</label>
-                                <select
-                                    id="role"
-                                    name="role"
-                                    value={formData.role}
-                                    onChange={handleInputChange}
-                                    required
-                                    className="form-input"
-                                    disabled={loading}
-                                >
-                                    <option value="author">{language === 'tr' ? 'Yazar' : 'Author'}</option>
-                                    <option value="admin">{language === 'tr' ? 'Yönetici' : 'Admin'}</option>
-                                    <option value="owner">{language === 'tr' ? 'Sahip' : 'Owner'}</option>
-                                    <option value="editor">{language === 'tr' ? 'Editör' : 'Editor'}</option>
-                                    <option value="referee">{language === 'tr' ? 'Hakem' : 'Referee'}</option>
-                                </select>
+                                <div style={{ position: 'relative' }}>
+                                    <select
+                                        id="role"
+                                        name="role"
+                                        value={formData.role}
+                                        onChange={handleInputChange}
+                                        required
+                                        disabled={loading}
+                                        style={{
+                                            padding: '12px 16px',
+                                            border: '2px solid #E2E8F0',
+                                            borderRadius: '12px',
+                                            background: 'rgba(249, 250, 251, 0.8)',
+                                            backgroundColor: 'rgba(249, 250, 251, 0.8)',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.3s ease',
+                                            color: '#374151',
+                                            fontSize: '1rem',
+                                            fontWeight: '500',
+                                            width: '100%',
+                                            appearance: 'none' as const,
+                                            WebkitAppearance: 'none' as const,
+                                            MozAppearance: 'none' as const,
+                                            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                                            backgroundPosition: 'right 12px center',
+                                            backgroundRepeat: 'no-repeat',
+                                            backgroundSize: '16px',
+                                            fontFamily: 'var(--font-family-sans)',
+                                            outline: 'none',
+                                            boxSizing: 'border-box' as const,
+                                            minHeight: '48px',
+                                            display: 'block'
+                                        } as React.CSSProperties}
+                                        onFocus={(e) => {
+                                            e.target.style.setProperty('border-color', '#6A9DA1', 'important');
+                                            e.target.style.setProperty('box-shadow', '0 0 0 3px rgba(106, 157, 161, 0.1)', 'important');
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.setProperty('border-color', '#E2E8F0', 'important');
+                                            e.target.style.setProperty('box-shadow', 'none', 'important');
+                                        }}
+                                        ref={(element) => {
+                                            if (element) {
+                                                // Force override any CSS with !important
+                                                element.style.setProperty('padding', '12px 16px', 'important');
+                                                element.style.setProperty('border', '2px solid #E2E8F0', 'important');
+                                                element.style.setProperty('border-radius', '12px', 'important');
+                                                element.style.setProperty('background', 'rgba(249, 250, 251, 0.8)', 'important');
+                                                element.style.setProperty('cursor', 'pointer', 'important');
+                                                element.style.setProperty('color', '#374151', 'important');
+                                                element.style.setProperty('font-size', '1rem', 'important');
+                                                element.style.setProperty('font-weight', '500', 'important');
+                                                element.style.setProperty('width', '100%', 'important');
+                                                element.style.setProperty('appearance', 'none', 'important');
+                                                element.style.setProperty('-webkit-appearance', 'none', 'important');
+                                                element.style.setProperty('-moz-appearance', 'none', 'important');
+                                                element.style.setProperty('background-image', `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, 'important');
+                                                element.style.setProperty('background-position', 'right 12px center', 'important');
+                                                element.style.setProperty('background-repeat', 'no-repeat', 'important');
+                                                element.style.setProperty('background-size', '16px', 'important');
+                                                element.style.setProperty('outline', 'none', 'important');
+                                                element.style.setProperty('min-height', '48px', 'important');
+                                            }
+                                        }}
+                                    >
+                                        <option value="author">{language === 'tr' ? 'Yazar' : 'Author'}</option>
+                                        <option value="admin">{language === 'tr' ? 'Yönetici' : 'Admin'}</option>
+                                        <option value="owner">{language === 'tr' ? 'Sahip' : 'Owner'}</option>
+                                        <option value="editor">{language === 'tr' ? 'Editör' : 'Editor'}</option>
+                                        <option value="referee">{language === 'tr' ? 'Hakem' : 'Referee'}</option>
+                                    </select>
+                                </div>
                             </div>
                             
                             {hasAttemptedSubmit && passwordError && (

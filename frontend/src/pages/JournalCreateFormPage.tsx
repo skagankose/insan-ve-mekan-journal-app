@@ -127,30 +127,11 @@ const JournalCreateFormPage: React.FC = () => {
                             marginTop: 'var(--spacing-6)'
                         }}>
                             <button 
-                                type="button" 
-                                onClick={() => navigate('/')} 
-                                className="btn btn-outline"
-                                disabled={isSubmitting}
-                                style={{
-                                    flex: '1',
-                                    padding: '12px 20px',
-                                    border: '2px solid #E2E8F0',
-                                    borderRadius: '12px',
-                                    background: 'transparent',
-                                    color: 'var(--color-text-secondary)',
-                                    fontWeight: '600',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s ease'
-                                }}
-                            >
-                                {t('cancel') || 'Cancel'}
-                            </button>
-                            <button 
                                 type="submit" 
                                 className="register-submit-button"
                                 disabled={isSubmitting}
                                 style={{
-                                    flex: '2'
+                                    width: '100%'
                                 }}
                             >
                                 {isSubmitting ? (t('saving') || 'Saving...') : (t('createJournal') || 'Create Journal')}

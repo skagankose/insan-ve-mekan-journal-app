@@ -1433,7 +1433,14 @@ const UserProfilePage: React.FC = () => {
                                 {profileUser.orcid_id && (
                                     <div className="academic-id-item">
                                         <span className="academic-id-label">ORCID ID:</span>
-                                        <span className="academic-id-value">{profileUser.orcid_id}</span>
+                                        <a 
+                                            href={`https://orcid.org/${profileUser.orcid_id}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="academic-id-link"
+                                        >
+                                            {profileUser.orcid_id}
+                                        </a>
                                     </div>
                                 )}
                         </div>
