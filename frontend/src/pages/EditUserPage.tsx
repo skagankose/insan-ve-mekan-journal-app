@@ -25,7 +25,7 @@ const EditUserPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { user: currentUser, isAuthenticated } = useAuth();
-    const { t, language } = useLanguage();
+    const { t } = useLanguage();
     
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);

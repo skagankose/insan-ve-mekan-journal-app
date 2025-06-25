@@ -151,7 +151,11 @@ const JournalEditPage: React.FC = () => {
                 page_number: formData.page_number?.trim() || undefined,
                 doi: formData.doi?.trim() || undefined,
                 publication_date: formData.publication_date ? 
-                    new Date(formData.publication_date).toISOString() : undefined,
+                    (() => {
+                        const date = new Date(formData.publication_date);
+                        date.setHours(8, 0, 0, 0); // Set time to 08:00:00 as required
+                        return date.toISOString();
+                    })() : undefined,
                 authors_ids: formData.authors_ids?.filter(id => id != null) || [],
                 referees_ids: formData.referees_ids?.filter(id => id != null) || []
             };

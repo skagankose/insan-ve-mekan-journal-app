@@ -154,8 +154,19 @@ const JournalEditFormPage: React.FC = () => {
         setSubmitError(null);
 
         try {
+            // Clean up form data before submission, ensuring publication_date is set to 08:00
+            const cleanedFormData = {
+                ...formData,
+                publication_date: formData.publication_date ? 
+                    (() => {
+                        const date = new Date(formData.publication_date);
+                        date.setHours(8, 0, 0, 0); // Set time to 08:00:00 as required
+                        return date.toISOString();
+                    })() : undefined,
+            };
+            
             // First update the journal data
-            await apiService.updateJournal(journalId, formData);
+            await apiService.updateJournal(journalId, cleanedFormData);
 
             // Then handle file uploads if any files were selected
             if (Object.keys(selectedFiles).length > 0) {

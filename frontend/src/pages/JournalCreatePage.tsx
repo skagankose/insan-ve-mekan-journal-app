@@ -72,63 +72,6 @@ const JournalCreatePage: React.FC = () => {
 
             {/* Content Section */}
             <div className="page-content-section">
-                {!activeJournal && (
-                    <div style={{
-                        backgroundColor: 'rgba(255, 243, 205, 0.9)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 193, 7, 0.3)',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        marginBottom: '30px',
-                        boxShadow: '0 4px 12px rgba(255, 193, 7, 0.1)',
-                        maxWidth: '800px',
-                        margin: '0 auto 30px auto'
-                    }}>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            marginBottom: '8px'
-                        }}>
-                            <span style={{ fontSize: '20px' }}>⚠️</span>
-                            <h4 style={{ 
-                                margin: 0, 
-                                color: '#856404',
-                                fontSize: '16px',
-                                fontWeight: '600'
-                            }}>
-                                {t('noActiveJournalSelected') || 'No Active Journal Selected'}
-                            </h4>
-                        </div>
-                        <p style={{ 
-                            margin: 0, 
-                            color: '#856404',
-                            lineHeight: '1.5'
-                        }}>
-                            {t('noActiveJournalMessage') || 'No active journal selected. '}
-                            <Link 
-                                to="/journals" 
-                                style={{ 
-                                    color: '#0D9488',
-                                    textDecoration: 'none',
-                                    fontWeight: '600',
-                                    borderBottom: '1px solid #0D9488'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.color = '#14B8A6';
-                                    e.currentTarget.style.borderBottomColor = '#14B8A6';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.color = '#0D9488';
-                                    e.currentTarget.style.borderBottomColor = '#0D9488';
-                                }}
-                            >
-                                {t('selectAJournal') || 'Select a journal'}
-                            </Link>
-                            {' '}{t('toAssociateWithEntry') || 'to associate with this entry.'}
-                        </p>
-                    </div>
-                )}
                 
                 <div className="register-form-container">
                     <JournalForm

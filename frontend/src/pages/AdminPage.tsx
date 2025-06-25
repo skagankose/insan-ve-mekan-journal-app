@@ -598,8 +598,8 @@ const AdminPage: React.FC = () => {
                             {/* No Results */}
                             {filteredUsers.length === 0 && filteredJournals.length === 0 && filteredJournalEntries.length === 0 && (
                                 <div className="no-results">
-                                    <h3>No results found</h3>
-                                    <p>Try adjusting your search terms.</p>
+                                    <h3>{t('noResultsFound') || 'No results found'}</h3>
+                                    <p>{t('adjustSearchTerms') || 'Try adjusting your search terms.'}</p>
                                 </div>
                             )}
                         </div>

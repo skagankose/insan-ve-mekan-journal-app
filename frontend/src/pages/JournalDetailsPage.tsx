@@ -1617,7 +1617,7 @@ const JournalDetailsPage: React.FC = () => {
                                 {/* Status and Admin Info */}
                             {isEditorOrAdmin && (
                                     <>
-                                        {/* Creation Date */}
+                                        {/* Publication Date */}
                                 <div style={{
                                             display: 'flex',
                                             alignItems: 'center',
@@ -1638,7 +1638,7 @@ const JournalDetailsPage: React.FC = () => {
                                                 justifyContent: 'center',
                                                 flexShrink: 0
                                             }}>
-                                                <HiClock size={20} color="#64748B" />
+                                                <HiCalendar size={20} color="#64748B" />
                                             </div>
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ 
@@ -1648,12 +1648,12 @@ const JournalDetailsPage: React.FC = () => {
                                                     textTransform: 'uppercase',
                                                     letterSpacing: '0.5px',
                                                     marginBottom: '4px'
-                                                }}>{t('createdDate') || 'Created Date'}</div>
+                                                }}>{t('publicationDate') || 'Publication Date'}</div>
                                                 <div style={{ 
                                                     fontSize: '16px', 
                                                     fontWeight: '600', 
                                                     color: '#1E293B'
-                                                }}>{new Date(journal.created_date).toLocaleDateString()}</div>
+                                                }}>{journal.publication_date ? new Date(journal.publication_date).toLocaleDateString() : 'Not set'}</div>
                                             </div>
                                         </div>
                                         

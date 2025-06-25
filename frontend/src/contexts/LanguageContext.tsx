@@ -96,7 +96,7 @@ type TranslationKeys =
   | 'noActiveJournalMessage' | 'selectAJournal' | 'toAssociateWithEntry' | 'entrySavedSecurelyMessage'
   | 'selectArticleType' | 'articleTypeTheory' | 'articleTypeResearch' | 'selectLanguage'
   | 'entryCreatedSuccessfully' | 'entryUpdatedSuccessfully' | 'entryDeletedSuccessfully' | 'authorRemovedSuccessfully' | 'failedToRemoveAuthor'
-  | 'citeArticle' | 'citeThisArticle' | 'copy' | 'noResultsFound';
+  | 'citeArticle' | 'citeThisArticle' | 'copy' | 'noResultsFound' | 'adjustSearchTerms';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -591,6 +591,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'entryUpdatedSuccessfully': 'Entry updated successfully!',
     'entryDeletedSuccessfully': 'Entry deleted successfully!',
     'noResultsFound': 'No results found',
+    'adjustSearchTerms': 'Try adjusting your search terms.',
     'authorRemovedSuccessfully': 'Author removed successfully',
     'failedToRemoveAuthor': 'Failed to remove author',
 
@@ -1092,6 +1093,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'entryUpdatedSuccessfully': 'Makale başarıyla güncellendi!',
     'entryDeletedSuccessfully': 'Makale başarıyla silindi!',
     'noResultsFound': 'Sonuç bulunamadı',
+    'adjustSearchTerms': 'Arama terimlerinizi değiştirmeyi deneyin.',
     'authorRemovedSuccessfully': 'Yazar başarıyla kaldırıldı',
     'failedToRemoveAuthor': 'Yazar kaldırma işlemi başarısız',
 
