@@ -6,7 +6,11 @@ Public/Authentication Pages
 [ - ] AutoLoginPage - Automatic Login
 [ - ] ForgotPasswordPage - Password Recovery
 [ - ] ResetPasswordPage - Password Reset (with token parameter)
+[ - ] EmailConfirmationPage - Confirmin  E-mail
+--------------------------------------------------------------- Mails
 [ - ] Confirmations E-mail
+[ - ] Reset Password E-mail
+[ - ] Auto-Logim E-mail
 [ - ] Update E-mails (Referee Assigned, Author Updated, Referee Update)
 
 Public Pages

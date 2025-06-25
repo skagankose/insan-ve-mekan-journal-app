@@ -98,19 +98,18 @@ async def register_user(user: schemas.UserCreate, db: Session = Depends(get_sess
     return created_user
 
 
-@router.get("/confirm-email/{token}", status_code=status.HTTP_200_OK, tags=["auth"])
+@router.get("/confirm-email/{token}", response_class=RedirectResponse, tags=["auth"])
 def confirm_email(token: str, db: Session = Depends(get_session)):
     """
-    Confirm user's email address using the provided token.
+    Confirm user's email address using the provided token and redirect to a frontend page.
     """
-    # Use the new CRUD function to get user by token
     user = crud.get_user_by_token(db, token=token)
     
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired confirmation token."
-        )
+        # Redirect to a failure page on the frontend
+        return RedirectResponse(url=f"{frontend_url}/email-confirmation?status=failed")
     
     # Now update the user directly
     user.is_auth = True
@@ -120,30 +119,8 @@ def confirm_email(token: str, db: Session = Depends(get_session)):
     db.add(user)
     db.commit()
     
-    # Return an HTML response that's more user-friendly
-    html_content = """
-    <!DOCTYPE html>
-    <html>
-        <head>
-            <title>Email Confirmed</title>
-            <meta http-equiv="refresh" content="5;url=http://localhost:5173/login">
-            <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-                .success { color: green; }
-                .container { max-width: 600px; margin: 0 auto; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1 class="success">Email Confirmed Successfully!</h1>
-                <p>Your email has been confirmed. You can now log in to your account.</p>
-                <p>Redirecting to login page in 5 seconds...</p>
-                <p>If you are not redirected, <a href="http://localhost:5173/login">click here</a>.</p>
-            </div>
-        </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content)
+    # Redirect to a success page on the frontend
+    return RedirectResponse(url=f"{frontend_url}/email-confirmation?status=success")
 
 
 @router.post("/token", response_model=auth.Token, tags=["auth"])
@@ -309,28 +286,41 @@ def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_se
     """
     Request a password reset link via email.
     """
-    # Create reset token for the user
-    user = crud.create_password_reset_token(db, email=request.email)
+    # Check if user exists first
+    user = crud.get_user_by_email(db, email=request.email)
     
-    # Even if user doesn't exist, we return success for security reasons
     if not user:
-        return {"message": "If the email is registered, a password reset link has been sent."}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No user found with this email address."
+        )
+    
+    # Create reset token for the user
+    user_with_token = crud.create_password_reset_token(db, email=request.email)
+    
+    if not user_with_token:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create password reset token."
+        )
     
     try:
         # Send reset password email
         base_url_for_email = "http://localhost:5173"  # Frontend URL
         send_password_reset_email(
             api_key=BREVO_API_KEY,
-            user_email=user.email,
-            user_name=user.name,
-            reset_token=user.reset_password_token,
+            user_email=user_with_token.email,
+            user_name=user_with_token.name,
+            reset_token=user_with_token.reset_password_token,
             base_url=base_url_for_email
         )
         return {"message": "Password reset link has been sent to your email."}
     except Exception as e:
-        print(f"Failed to send password reset email to {user.email}: {e}")
-        # For security, still return success even if email fails
-        return {"message": "If the email is registered, a password reset link has been sent."}
+        print(f"Failed to send password reset email to {user_with_token.email}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send password reset email. Please try again later."
+        )
 
 @router.post("/reset-password/{token}", status_code=status.HTTP_200_OK, tags=["auth"])
 def reset_password(token: str, request: ResetPasswordRequest, db: Session = Depends(get_session)):
@@ -343,7 +333,7 @@ def reset_password(token: str, request: ResetPasswordRequest, db: Session = Depe
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired reset token."
+            detail="Bu sıfırlama linki kullanılmış veya süresi dolmuştur."
         )
     
     # Check if token is expired (15 minutes)

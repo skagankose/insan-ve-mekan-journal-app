@@ -33,6 +33,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import JournalEntryUpdateDetailsPage from './pages/JournalEntryUpdateDetailsPage';
 import AuthorUpdateFormPage from './pages/AuthorUpdateFormPage';
 import RefereeUpdateFormPage from './pages/RefereeUpdateFormPage';
+import EmailConfirmationPage from './pages/EmailConfirmationPage';
 // Import other components as needed (e.g., JournalDetailPage, JournalCreatePage)
 
 // Import shared components
@@ -211,7 +212,13 @@ const App: React.FC = () => {
   const location = useLocation();
   
   // Check if current route should hide sidebar
-  const hideSidebar = ['/login', '/register'].includes(location.pathname);
+  const hideSidebar = [
+    '/login', 
+    '/register', 
+    '/forgot-password', 
+    '/auto-login', 
+    '/email-confirmation'
+  ].includes(location.pathname) || location.pathname.startsWith('/reset-password/');
 
   if (!googleClientId) {
     console.error('Google Client ID is not set in environment variables');
@@ -236,6 +243,7 @@ const App: React.FC = () => {
                 <Route path="/auto-login" element={<AutoLoginPage />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+                <Route path="/email-confirmation" element={<EmailConfirmationPage />} />
 
                 {/* Protected Routes */}
                 <Route path="/entries/new" element={

@@ -46,7 +46,7 @@ type TranslationKeys =
   | 'pageNotFoundTitle' | 'pageNotFoundDescription' | 'exploreJournalsText' | 'searchContentText'
   | 'forgotPassword' | 'forgotPasswordInstructions' | 'passwordResetLinkSent' | 'backToLogin' | 'enterEmail' | 'sendResetLink' | 'rememberPassword'
   | 'resetPassword' | 'passwordResetSuccess' | 'redirectingToLogin' | 'enterNewPassword' | 'confirmNewPassword' | 'resetting'
-  | 'createAccountHere'
+  | 'createAccountHere' | 'invalidResetToken' | 'invalidResetLink' | 'passwordResetFailed' | 'emailNotFound' | 'sending'
   | 'country' | 'selectCountry' | 'searchCountries' | 'noCountriesFound' | 'enterLocation'
   | 'pleaseVerifyCaptcha' | 'captchaExpired' | 'captchaVerificationFailed'
   | 'editorJournals' | 'submitPaper' | 'publishedIssues' | 'searchPlaceholder' | 'viewJournal' | 'readMore'
@@ -99,7 +99,10 @@ type TranslationKeys =
   | 'citeArticle' | 'citeThisArticle' | 'copy' | 'noResultsFound' | 'adjustSearchTerms'
   | 'citationCopiedSuccess' | 'citationCopiedPlainText' | 'citationCopyFailed'
   | 'deleteUser' | 'deleteUserWarning' | 'deleting' | 'deleteUserConfirm' | 'confirmDelete' | 'customEmailAddress' | 'linkEmailSent'
-  | 'linkCopied' | 'copyFailed' | 'pleaseWait';
+  | 'linkCopied' | 'copyFailed' | 'pleaseWait'
+  // Email Confirmation
+  | 'emailConfirmationSuccessTitle' | 'emailConfirmationSuccessMessage' | 'emailConfirmationRedirectMessage'
+  | 'emailConfirmationFailureTitle' | 'emailConfirmationFailureMessage' | 'emailConfirmationSupportMessage' | 'backToRegister';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -338,6 +341,11 @@ const translations: Record<Language, TranslationDictionary> = {
     'confirmNewPassword': 'Confirm your new password',
     'resetting': 'Resetting...',
     'createAccountHere': 'Create Account Here',
+    'invalidResetToken': 'Invalid or expired reset token.',
+    'invalidResetLink': 'Invalid reset link. Please request a new password reset.',
+    'passwordResetFailed': 'Failed to reset password. The link may have expired.',
+    'emailNotFound': 'No user found with this email address.',
+    'sending': 'Sending...',
 
     // Country and Location
     'country': 'Country',
@@ -619,6 +627,15 @@ const translations: Record<Language, TranslationDictionary> = {
     'customEmailAddress': 'Custom email address',
     'linkEmailSent': 'Login link sent via email!',
     'pleaseWait': 'Please wait while we log you in...',
+
+    // Email Confirmation
+    'emailConfirmationSuccessTitle': 'Email Confirmed!',
+    'emailConfirmationSuccessMessage': 'Your email has been successfully verified. You can now log in.',
+    'emailConfirmationRedirectMessage': 'Redirecting to login in {countdown} seconds...',
+    'emailConfirmationFailureTitle': 'Confirmation Failed',
+    'emailConfirmationFailureMessage': 'The confirmation link is invalid or has expired.',
+    'emailConfirmationSupportMessage': 'If you need help, please contact',
+    'backToRegister': 'Back to Register',
   },
   tr: {
     // Navigation
@@ -780,7 +797,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'invalidLoginLink': 'Geçersiz giriş bağlantısı. Bağlantı süresi dolmuş veya kullanılmış olabilir.',
     'loginFailed': 'Giriş başarısız. Lütfen tekrar deneyin veya destek ile iletişime geçin.',
     'autoLoginFailed': 'Otomatik giriş başarısız. Lütfen manuel olarak giriş yapmayı deneyin.',
-    'autoLoginProcessing': 'Giriş işleniyor...',
+    'autoLoginProcessing': 'Giriş Sağlandı!',
     'loginError': 'Giriş Hatası',
     'goToLogin': 'Giriş Sayfasına Git',
     'loginSuccessful': 'Giriş Başarılı',
@@ -848,11 +865,16 @@ const translations: Record<Language, TranslationDictionary> = {
     'rememberPassword': 'Şifrenizi hatırlıyor musunuz?',
     'resetPassword': 'Şifre Sıfırlama',
     'passwordResetSuccess': 'Şifreniz başarıyla sıfırlandı!',
-    'redirectingToLogin': 'Giriş sayfasına yönlendiriliyorsunuz.',
+    'redirectingToLogin': 'Giriş sayfasına yönlendiriliyorsunuz...',
     'enterNewPassword': 'Yeni şifrenizi girin',
     'confirmNewPassword': 'Yeni şifrenizi onaylayın',
     'resetting': 'Sıfırlama...',
     'createAccountHere': 'Hesap Oluştur',
+    'invalidResetToken': 'Geçersiz veya süresi dolmuş sıfırlama kodu.',
+    'invalidResetLink': 'Geçersiz sıfırlama bağlantısı. Lütfen yeni bir şifre sıfırlama talebinde bulunun.',
+    'passwordResetFailed': 'Şifre sıfırlama başarısız. Bağlantının süresi dolmuş olabilir.',
+    'emailNotFound': 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.',
+    'sending': 'Gönderiliyor...',
 
     // Country and Location
     'country': 'Ülke',
@@ -1133,7 +1155,16 @@ const translations: Record<Language, TranslationDictionary> = {
     'confirmDelete': 'Evet, Sil',
     'customEmailAddress': 'Bağlantının gönderileceği e-posta adresi',
     'linkEmailSent': 'Giriş bağlantısı e-posta ile gönderildi!',
-    'pleaseWait': 'Giriş Yapılıyor...',
+    'pleaseWait': 'Ana sayfaya yönlendiriliyorsunuz...',
+
+    // Email Confirmation
+    'emailConfirmationSuccessTitle': 'E-posta Onaylandı!',
+    'emailConfirmationSuccessMessage': 'E-postanız başarıyla doğrulandı. Artık giriş yapabilirsiniz.',
+    'emailConfirmationRedirectMessage': '{countdown} saniye içinde giriş sayfasına yönlendiriliyorsunuz...',
+    'emailConfirmationFailureTitle': 'Onaylama Başarısız',
+    'emailConfirmationFailureMessage': 'Onaylama bağlantısı geçersiz veya süresi dolmuş.',
+    'emailConfirmationSupportMessage': 'Yardıma ihtiyacınız olursa, lütfen iletişime geçin',
+    'backToRegister': 'Kayıt Sayfasına Dön'
   }
 };
 

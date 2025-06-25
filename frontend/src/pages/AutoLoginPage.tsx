@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import './AutoLoginPage.css';
 
 const AutoLoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -82,10 +81,17 @@ const AutoLoginPage: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="auto-login-page">
-                <div className="loading-container">
-                    <img src="/book.gif" alt="Loading" className="loading-spinner" />
-                    <p>{t('pleaseWait')}</p>
+            <div className="page-content-section">
+                <div className="register-form-container">
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>
+                        <FaCheckCircle size={56} color="#14B8A6" style={{ marginBottom: '1.5rem' }} />
+                        <h2 style={{ fontSize: '1.75rem', fontWeight: '600', color: '#1F2937', marginBottom: '0.75rem' }}>
+                            {t('autoLoginProcessing')}
+                        </h2>
+                        <p style={{ fontSize: '1rem', color: '#4B5563' }}>
+                            {t('pleaseWait')}
+                        </p>
+                    </div>
                 </div>
             </div>
         );
@@ -93,31 +99,41 @@ const AutoLoginPage: React.FC = () => {
 
     if (error) {
         return (
-            <div className="auto-login-page">
-                <div className="error-container">
-                    <div className="error-icon">
-                        <FaTimesCircle />
+            <div className="page-content-section">
+                <div className="register-form-container">
+                    <div style={{ textAlign: 'center', padding: '2rem' }}>
+                        <FaTimesCircle size={56} color="#DC2626" style={{ marginBottom: '1.5rem' }} />
+                        <h2 style={{ fontSize: '1.75rem', fontWeight: '600', color: '#1F2937', marginBottom: '0.75rem' }}>
+                            {t('loginError')}
+                        </h2>
+                        <p style={{ fontSize: '1rem', color: '#4B5563', marginBottom: '1.5rem' }}>
+                            {error}
+                        </p>
+                        <button 
+                            className="btn btn-primary register-submit-button" 
+                            onClick={() => navigate('/login')}
+                            style={{ textDecoration: 'none' }}
+                        >
+                            {t('goToLogin')}
+                        </button>
                     </div>
-                    <h2>{t('loginError')}</h2>
-                    <p className="error-message">{error}</p>
-                    <button 
-                        className="login-button" 
-                        onClick={() => navigate('/login')}
-                    >
-                        {t('goToLogin')}
-                    </button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="auto-login-page">
-            <div className="success-container">
-                <div className="success-icon">
-                    <FaCheckCircle />
+        <div className="page-content-section">
+            <div className="register-form-container">
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
+                    <FaCheckCircle size={56} color="#14B8A6" style={{ marginBottom: '1.5rem' }} />
+                    <h2 style={{ fontSize: '1.75rem', fontWeight: '600', color: '#1F2937', marginBottom: '0.75rem' }}>
+                        {t('loginSuccessful')}
+                    </h2>
+                    <p style={{ fontSize: '1rem', color: '#4B5563' }}>
+                        {t('redirecting')}
+                    </p>
                 </div>
-                <p>{t('redirecting')}</p>
             </div>
         </div>
     );
