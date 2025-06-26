@@ -3,8 +3,8 @@ Public/Authentication Pages
 --------------------------------------------------------------- Create & Edit & Delete
 [ + ] RegisterPage - User Register
 --------------------------------------------------------------- Secondary Pages & Mails
-[ - ] AutoLoginPage - Automatic Login
-[ - ] ForgotPasswordPage - Password Recovery
+[ + ] AutoLoginPage - Automatic Login
+[ + ] ForgotPasswordPage - Password Recovery
 [ - ] ResetPasswordPage - Password Reset (with token parameter)
 [ - ] EmailConfirmationPage - Confirmin  E-mail
 --------------------------------------------------------------- Mails

@@ -333,7 +333,7 @@ def reset_password(token: str, request: ResetPasswordRequest, db: Session = Depe
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Bu sıfırlama linki kullanılmış veya süresi dolmuştur."
+            detail="Bu sıfırlama linki kullanılmış veya süresi dolmuştur"
         )
     
     # Check if token is expired (15 minutes)

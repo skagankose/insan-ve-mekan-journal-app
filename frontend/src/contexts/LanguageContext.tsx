@@ -44,7 +44,7 @@ type TranslationKeys =
   | 'notAccepted' | 'waitingForPayment' | 'waitingForAuthors' | 'waitingForReferees' | 'waitingForEditors' | 'rejected' | 'pending' | 'accepted'
   | 'published' | 'inProgress' | 'or' | 'locale' | 'googleSignIn' | 'googleSignInFailed'
   | 'pageNotFoundTitle' | 'pageNotFoundDescription' | 'exploreJournalsText' | 'searchContentText'
-  | 'forgotPassword' | 'forgotPasswordInstructions' | 'passwordResetLinkSent' | 'backToLogin' | 'enterEmail' | 'sendResetLink' | 'rememberPassword'
+  | 'forgotPassword' | 'forgotPasswordInstructions' | 'passwordResetLinkSent' | 'backToLogin' | 'enterEmail' | 'sendResetLink' | 'rememberPassword' | 'passwordResetCheckEmail'
   | 'resetPassword' | 'passwordResetSuccess' | 'redirectingToLogin' | 'enterNewPassword' | 'confirmNewPassword' | 'resetting'
   | 'createAccountHere' | 'invalidResetToken' | 'invalidResetLink' | 'passwordResetFailed' | 'emailNotFound' | 'sending'
   | 'country' | 'selectCountry' | 'searchCountries' | 'noCountriesFound' | 'enterLocation'
@@ -102,7 +102,7 @@ type TranslationKeys =
   | 'linkCopied' | 'copyFailed' | 'pleaseWait'
   // Email Confirmation
   | 'emailConfirmationSuccessTitle' | 'emailConfirmationSuccessMessage' | 'emailConfirmationRedirectMessage'
-  | 'emailConfirmationFailureTitle' | 'emailConfirmationFailureMessage' | 'emailConfirmationSupportMessage' | 'backToRegister';
+  | 'emailConfirmationFailureTitle' | 'emailConfirmationFailureMessage' | 'emailConfirmationSupportMessage' | 'backToRegister' | 'emailConfirmationFailureSubTitle';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -330,6 +330,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'forgotPassword': 'Forgot Password',
     'forgotPasswordInstructions': 'Enter your email address and we\'ll send you a link to reset your password.',
     'passwordResetLinkSent': 'Password reset link has been sent to your email address.',
+    'passwordResetCheckEmail': 'We have sent a password reset link to your email address. Please check your inbox and spam folder.',
     'backToLogin': 'Back to Login',
     'enterEmail': 'Enter your email address',
     'sendResetLink': 'Send Reset Link',
@@ -633,6 +634,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'emailConfirmationSuccessMessage': 'Your email has been successfully verified. You can now log in.',
     'emailConfirmationRedirectMessage': 'Redirecting to login in {countdown} seconds...',
     'emailConfirmationFailureTitle': 'Confirmation Failed',
+    'emailConfirmationFailureSubTitle': 'Confirmation Failed',
     'emailConfirmationFailureMessage': 'The confirmation link is invalid or has expired.',
     'emailConfirmationSupportMessage': 'If you need help, please contact',
     'backToRegister': 'Back to Register',
@@ -800,8 +802,8 @@ const translations: Record<Language, TranslationDictionary> = {
     'autoLoginProcessing': 'Giriş Sağlandı!',
     'loginError': 'Giriş Hatası',
     'goToLogin': 'Giriş Sayfasına Git',
-    'loginSuccessful': 'Giriş Başarılı',
-    'redirecting': 'Ana sayfaya yönlendiriliyorsunuz...',
+    'loginSuccessful': 'Giriş Başarılı!',
+    'redirecting': 'Ana sayfaya yönlendiriliyorsunuz',
     'loginSuccessButUserInfoFailed': 'Giriş başarılı ancak kullanıcı bilgileri alınırken hata oluştu. Lütfen sayfayı yenileyin.',
     
     // User Profile Page
@@ -858,14 +860,15 @@ const translations: Record<Language, TranslationDictionary> = {
     // Forgot Password and Reset Password
     'forgotPassword': 'Şifremi Unuttum',
     'forgotPasswordInstructions': 'E-posta adresinizi girin ve şifrenizi sıfırlamak için bir bağlantı göndereceğiz.',
-    'passwordResetLinkSent': 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.',
+    'passwordResetLinkSent': 'E-posta  gönderildi!',
+    'passwordResetCheckEmail': 'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen gelen kutunuzu ve spam klasörünüzü kontrol ediniz. Göderilen linki takip ederek şifrenizi sıfırlayabilirsiniz.',
     'backToLogin': 'Giriş Sayfasına Dön',
     'enterEmail': 'E-posta adresinizi girin',
     'sendResetLink': 'Şifre Sıfırlama Bağlantısı Gönder',
     'rememberPassword': 'Şifrenizi hatırlıyor musunuz?',
     'resetPassword': 'Şifre Sıfırlama',
     'passwordResetSuccess': 'Şifreniz başarıyla sıfırlandı!',
-    'redirectingToLogin': 'Giriş sayfasına yönlendiriliyorsunuz...',
+    'redirectingToLogin': 'Giriş sayfasına yönlendiriliyorsunuz',
     'enterNewPassword': 'Yeni şifrenizi girin',
     'confirmNewPassword': 'Yeni şifrenizi onaylayın',
     'resetting': 'Sıfırlama...',
@@ -1161,8 +1164,9 @@ const translations: Record<Language, TranslationDictionary> = {
     'emailConfirmationSuccessTitle': 'E-posta Onaylandı!',
     'emailConfirmationSuccessMessage': 'E-postanız başarıyla doğrulandı. Artık giriş yapabilirsiniz.',
     'emailConfirmationRedirectMessage': '{countdown} saniye içinde giriş sayfasına yönlendiriliyorsunuz...',
-    'emailConfirmationFailureTitle': 'Onaylama Başarısız',
-    'emailConfirmationFailureMessage': 'Onaylama bağlantısı geçersiz veya süresi dolmuş.',
+    'emailConfirmationFailureTitle': 'E-Posta Onayı',
+    'emailConfirmationFailureSubTitle': 'Onaylama Başarısız!',
+    'emailConfirmationFailureMessage': 'Onaylama bağlantısı geçersiz veya süresi dolmuş. Lütfen tekrar onaylama bağlantısını alınız.',
     'emailConfirmationSupportMessage': 'Yardıma ihtiyacınız olursa, lütfen iletişime geçin',
     'backToRegister': 'Kayıt Sayfasına Dön'
   }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import * as apiService from '../services/apiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { FaCheckCircle } from 'react-icons/fa';
@@ -10,6 +10,7 @@ const ForgotPasswordPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const { t } = useLanguage();
+    const navigate = useNavigate();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -53,11 +54,13 @@ const ForgotPasswordPage: React.FC = () => {
                             <p style={{ fontSize: '1rem', color: '#4B5563', maxWidth: '420px', margin: '0 auto 1.5rem' }}>
                                 {t('passwordResetCheckEmail') || 'We have sent a password reset link to your email address. Please check your inbox and spam folder.'}
                             </p>
-                            <div style={{ marginTop: '1.5rem' }}>
-                                <Link to="/login" className="btn btn-primary register-submit-button" style={{textDecoration: 'none'}}>
-                                    {t('backToLogin')}
-                                </Link>
-                            </div>
+                            <button 
+                                type="button"
+                                className="btn btn-primary register-submit-button"
+                                onClick={() => navigate('/login')}
+                            >
+                                {t('backToLogin') || 'Back to Login'}
+                            </button>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="register-form">

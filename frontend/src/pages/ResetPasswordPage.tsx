@@ -13,6 +13,7 @@ const ResetPasswordPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const [countdown, setCountdown] = useState<number>(3);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { t } = useLanguage();
@@ -65,9 +66,17 @@ const ResetPasswordPage: React.FC = () => {
             await apiService.resetPassword(token, password);
             setSuccess(true);
             
-            setTimeout(() => {
-                navigate('/login?reset=success');
-            }, 3000);
+            // Start countdown timer
+            const timer = setInterval(() => {
+                setCountdown((prevCount) => {
+                    if (prevCount <= 1) {
+                        clearInterval(timer);
+                        navigate('/login?reset=success');
+                        return 0;
+                    }
+                    return prevCount - 1;
+                });
+            }, 1000);
 
         } catch (err: any) {
             console.error("Password reset failed:", err);
@@ -92,7 +101,7 @@ const ResetPasswordPage: React.FC = () => {
                                 {t('passwordResetSuccess')}
                             </h2>
                             <p style={{ fontSize: '1rem', color: '#4B5563' }}>
-                                {t('redirectingToLogin')}
+                                {t('redirectingToLogin')} <span style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#14B8A6' }}>({countdown})</span>...
                             </p>
                         </div>
                     ) : (

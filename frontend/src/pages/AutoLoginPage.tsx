@@ -13,6 +13,7 @@ const AutoLoginPage: React.FC = () => {
     
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [countdown, setCountdown] = useState<number>(3);
     const loginAttemptedRef = useRef(false);
     const loginSuccessRef = useRef(false);
 
@@ -50,6 +51,7 @@ const AutoLoginPage: React.FC = () => {
                         // Update auth context directly
                         setAuthState(true, currentUser);
                         loginSuccessRef.current = true;
+                        setLoading(false); // Set loading to false after successful login
                     } catch (authErr) {
                         console.error('Error retrieving user after auto-login:', authErr);
                         setError(t('loginSuccessButUserInfoFailed'));
@@ -69,13 +71,21 @@ const AutoLoginPage: React.FC = () => {
         autoLoginWithToken();
     }, [searchParams, t, setAuthState]);
 
-    // Effect to navigate after user is set
+    // Effect to handle countdown and redirect
     useEffect(() => {
         if (loginSuccessRef.current && user) {
-            // Short delay to ensure everything is properly loaded
-            setTimeout(() => {
-                window.location.href = '/'; // Force a full page reload
-            }, 300);
+            const timer = setInterval(() => {
+                setCountdown((prevCount) => {
+                    if (prevCount <= 1) {
+                        clearInterval(timer);
+                        window.location.href = '/'; // Force a full page reload
+                        return 0;
+                    }
+                    return prevCount - 1;
+                });
+            }, 1000);
+
+            return () => clearInterval(timer);
         }
     }, [user, navigate]);
 
@@ -131,7 +141,7 @@ const AutoLoginPage: React.FC = () => {
                         {t('loginSuccessful')}
                     </h2>
                     <p style={{ fontSize: '1rem', color: '#4B5563' }}>
-                        {t('redirecting')}
+                        {t('redirecting')} <span style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#14B8A6' }}>({countdown})</span>...
                     </p>
                 </div>
             </div>

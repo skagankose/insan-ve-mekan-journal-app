@@ -37,41 +37,54 @@ const EmailConfirmationPage: React.FC = () => {
     }, [isSuccess, navigate]);
 
     return (
-        <div className="email-confirmation-container">
-            <motion.div 
-                className="confirmation-box"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-            >
-                {isSuccess ? (
-                    <>
-                        <div className="confirmation-icon-wrapper">
-                            <FaCheckCircle className="confirmation-icon success" />
+        <>
+            <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
+                <h1>{isSuccess ? (t('emailConfirmationSuccessTitle') || 'Email Confirmed!') : (t('emailConfirmationFailureTitle') || 'Confirmation Failed')}</h1>
+            </div>
+
+            <div className="page-content-section">
+                <div className="register-form-container">
+                    {isSuccess ? (
+                        <div style={{ textAlign: 'center', padding: '2rem' }}>
+                            <FaCheckCircle size={56} color="#14B8A6" style={{ marginBottom: '1.5rem' }} />
+                            <h2 style={{ fontSize: '1.75rem', fontWeight: '600', color: '#1F2937', marginBottom: '0.75rem' }}>
+                                {t('emailConfirmationSuccessTitle') || 'Email Confirmed!'}
+                            </h2>
+                            <p style={{ fontSize: '1rem', color: '#4B5563', maxWidth: '420px', margin: '0 auto 1.5rem' }}>
+                                {t('emailConfirmationSuccessMessage') || 'Your email has been successfully verified. You can now log in.'}
+                            </p>
+                            <p style={{ fontSize: '0.875rem', color: '#6B7280', marginBottom: '1.5rem' }}>
+                                {t('emailConfirmationRedirectMessage').replace('{countdown}', countdown.toString())}
+                            </p>
+                            <button 
+                                type="button"
+                                className="btn btn-primary register-submit-button"
+                                onClick={() => navigate('/login')}
+                            >
+                                {t('goToLogin')}
+                            </button>
                         </div>
-                        <h1 className="confirmation-title">{t('emailConfirmationSuccessTitle') || 'Email Confirmed!'}</h1>
-                        <p className="confirmation-message">{t('emailConfirmationSuccessMessage') || 'Your email has been successfully verified. You can now log in.'}</p>
-                        <p className="confirmation-redirect">
-                            {t('emailConfirmationRedirectMessage').replace('{countdown}', countdown.toString())}
-                        </p>
-                        <Link to="/login" className="confirmation-btn confirmation-btn-primary">{t('goToLogin')}</Link>
-                    </>
-                ) : (
-                    <>
-                        <div className="confirmation-icon-wrapper">
-                            <FaTimesCircle className="confirmation-icon failure" />
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '2rem' }}>
+                            <FaTimesCircle size={56} color="#DC2626" style={{ marginBottom: '1.5rem' }} />
+                            <h2 style={{ fontSize: '1.75rem', fontWeight: '600', color: '#1F2937', marginBottom: '0.75rem' }}>
+                                {t('emailConfirmationFailureSubTitle') || 'Confirmation Failed'}
+                            </h2>
+                            <p style={{ fontSize: '1rem', color: '#4B5563', maxWidth: '420px', margin: '0 auto 1.5rem' }}>
+                                {t('emailConfirmationFailureMessage') || 'The confirmation link is invalid or has expired.'}
+                            </p>
+                            <button 
+                                type="button"
+                                className="btn btn-primary register-submit-button"
+                                onClick={() => navigate('/register')}
+                            >
+                                {t('backToRegister')}
+                            </button>
                         </div>
-                        <h1 className="confirmation-title">{t('emailConfirmationFailureTitle') || 'Confirmation Failed'}</h1>
-                        <p className="confirmation-message">{t('emailConfirmationFailureMessage') || 'The confirmation link is invalid or has expired.'}</p>
-                        <p className="confirmation-support">
-                            {t('emailConfirmationSupportMessage')}{' '}
-                            <a href="mailto:support@insanmekan.com">support@insanmekan.com</a>.
-                        </p>
-                        <Link to="/register" className="confirmation-btn confirmation-btn-secondary">{t('backToRegister')}</Link>
-                    </>
-                )}
-            </motion.div>
-        </div>
+                    )}
+                </div>
+            </div>
+        </>
     );
 };
 
