@@ -35,8 +35,6 @@ const EmailConfirmationPage: React.FC = () => {
             };
         }
     }, [isSuccess, navigate]);
-    
-    const redirectMessage = t('emailConfirmationRedirectMessage') || 'Redirecting to login in {countdown} seconds...';
 
     return (
         <div className="email-confirmation-container">
