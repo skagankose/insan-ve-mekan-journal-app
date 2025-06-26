@@ -485,7 +485,7 @@
 }
 
 .section-header.active::before {
-    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
 }
 
 .section-header.accepted::before {
@@ -494,6 +494,10 @@
 
 .section-header.rejected::before {
     background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+}
+
+.section-header.draft::before {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
 }
 
 .section-header h3 {
@@ -507,7 +511,7 @@
 }
 
 .section-header.active h3 {
-    color: #0D9488;
+    color: #D97706;
 }
 
 .section-header.accepted h3 {
@@ -516,6 +520,10 @@
 
 .section-header.rejected h3 {
     color: #B91C1C;
+}
+
+.section-header.draft h3 {
+    color: #D97706;
 }
 
 .section-header-icon {
@@ -531,7 +539,7 @@
 }
 
 .section-header.active .section-header-icon {
-    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
 }
 
 .section-header.accepted .section-header-icon {
@@ -540,6 +548,10 @@
 
 .section-header.rejected .section-header-icon {
     background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+}
+
+.section-header.draft .section-header-icon {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
 }
 
 .section-header-clickable {

@@ -5,9 +5,11 @@ import * as apiService from '../services/apiService';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios, { AxiosError } from 'axios';
+import { FaFileWord } from 'react-icons/fa';
+import './JournalEntryDetailsPage.css';
 
 const AuthorUpdateFormPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { entryId } = useParams<{ entryId: string }>();
   const navigate = useNavigate();
   
@@ -33,12 +35,20 @@ const AuthorUpdateFormPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
+  // Toast notification state
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string>('');
+  const [toastType, setToastType] = useState<'success' | 'warning'>('success');
+  
   useEffect(() => {
     const fetchEntryData = async () => {
-      if (!entryId) {
-        toast.error(t('entryIdNotFound') || 'Entry ID not found');
-        return;
-      }
+          if (!entryId) {
+      setToastMessage(language === 'tr' ? 'Makale ID bulunamadı' : 'Entry ID not found');
+      setToastType('warning');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 4000);
+      return;
+    }
       
       try {
         setIsLoading(true);
@@ -62,7 +72,10 @@ const AuthorUpdateFormPage: React.FC = () => {
         });
       } catch (error) {
         console.error('Error fetching entry data:', error);
-        toast.error(t('errorFetchingEntry') || 'Error fetching entry data');
+        setToastMessage(language === 'tr' ? 'Makale verisi yüklenirken hata oluştu' : 'Error fetching entry data');
+        setToastType('warning');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 4000);
       } finally {
         setIsLoading(false);
       }
@@ -80,7 +93,10 @@ const AuthorUpdateFormPage: React.FC = () => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       if (!file.name.toLowerCase().endsWith('.docx')) {
-        toast.error(t('onlyDocxAllowed') || 'Only .docx files are allowed');
+        setToastMessage(language === 'tr' ? 'Sadece .docx dosyalarına izin verilir' : 'Only .docx files are allowed');
+        setToastType('warning');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 4000);
         e.target.value = '';
         return;
       }
@@ -92,7 +108,10 @@ const AuthorUpdateFormPage: React.FC = () => {
     e.preventDefault();
     
     if (!entryId) {
-      toast.error(t('entryIdNotFound') || 'Entry ID not found');
+      setToastMessage(language === 'tr' ? 'Makale ID bulunamadı' : 'Entry ID not found');
+      setToastType('warning');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 4000);
       return;
     }
     
@@ -122,11 +141,23 @@ const AuthorUpdateFormPage: React.FC = () => {
         changedFields.notes = formData.notes;
       }
       
+      // Check if notes are provided (now required)
+      if (!formData.notes) {
+        setToastMessage(language === 'tr' ? 'Notlar alanı zorunludur.' : 'Notes field is required.');
+        setToastType('warning');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 4000);
+        return;
+      }
+      
       // Check if we have any changes or a file to upload
       const hasChanges = Object.keys(changedFields).length > 0 || selectedFile;
       
       if (!hasChanges) {
-        toast.error(t('noChangesDetected') || 'No changes detected. Please modify at least one field or upload a file.');
+        setToastMessage(language === 'tr' ? 'Hiçbir değişiklik algılanmadı. Lütfen en az bir alanı değiştirin veya dosya yükleyin.' : 'No changes detected. Please modify at least one field or upload a file.');
+        setToastType('warning');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 4000);
         return;
       }
       
@@ -174,8 +205,7 @@ const AuthorUpdateFormPage: React.FC = () => {
         await apiService.uploadEntryFile(parseInt(entryId), fileFormData);
       }
       
-      toast.success(t('authorUpdateSubmitted') || 'Author update submitted successfully');
-      navigate(`/entries/${entryId}/updates`);
+      navigate(`/entries/${entryId}/updates?authorUpdated=true`);
     } catch (error: unknown) {
       console.error('Error submitting author update:', error);
       if (axios.isAxiosError(error)) {
@@ -183,7 +213,10 @@ const AuthorUpdateFormPage: React.FC = () => {
         console.error('Response status:', axiosError.response?.status);
         console.error('Response data:', axiosError.response?.data);
       }
-      toast.error(t('errorSubmittingUpdate') || 'Error submitting update');
+      setToastMessage(language === 'tr' ? 'Güncelleme gönderilirken hata oluştu' : 'Error submitting update');
+      setToastType('warning');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 4000);
     } finally {
       setIsSubmitting(false);
     }
@@ -193,10 +226,10 @@ const AuthorUpdateFormPage: React.FC = () => {
     return (
       <>
         <div className="page-title-section">
-          <h1 style={{textAlign: 'center'}}>{t('addAuthorUpdate') || 'Add Author Update'}</h1>
+          <h1 style={{textAlign: 'center'}}>{language === 'tr' ? 'Yazar Güncellemesi Ekle' : 'Add Author Update'}</h1>
         </div>
         <div className="page-content-section">
-          <div className="loading">{t('loading') || 'Loading...'}</div>
+          <div className="loading">{language === 'tr' ? 'Yükleniyor...' : 'Loading...'}</div>
         </div>
       </>
     );
@@ -205,16 +238,16 @@ const AuthorUpdateFormPage: React.FC = () => {
   return (
     <>
       {/* Title Section */}
-      <div className="page-title-section">
-        <h1 style={{textAlign: 'center'}}>{t('addAuthorUpdate') || 'Add Author Update'}</h1>
+      <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
+        <h1>{language === 'tr' ? 'Yazar Güncellemesi Ekle' : 'Add Author Update'}</h1>
       </div>
 
       {/* Content Section */}
       <div className="page-content-section">
-        <div className="register-form-container">
+        <div className="register-form-container" style={{ marginBottom: '2rem' }}>
           <form onSubmit={handleSubmit} className="register-form" encType="multipart/form-data">
             <div className="form-group">
-              <label htmlFor="title" className="form-label">{t('title') || 'Title'} *</label>
+              <label htmlFor="title" className="form-label">{language === 'tr' ? 'Başlık' : 'Title'} *</label>
               <input
                 type="text"
                 id="title"
@@ -222,7 +255,7 @@ const AuthorUpdateFormPage: React.FC = () => {
                 value={formData.title}
                 onChange={handleChange}
                 className="form-input"
-                placeholder={t('enterTitle') || 'Enter title'}
+                placeholder={language === 'tr' ? 'Başlığı girin' : 'Enter title'}
                 required
                 maxLength={300}
                 disabled={isSubmitting}
@@ -230,14 +263,14 @@ const AuthorUpdateFormPage: React.FC = () => {
             </div>
             
             <div className="form-group">
-              <label htmlFor="abstract_tr" className="form-label">{t('abstractTr') || 'Abstract (Turkish)'}</label>
+              <label htmlFor="abstract_tr" className="form-label">{language === 'tr' ? 'Özet (Türkçe)' : 'Abstract (Turkish)'}</label>
               <textarea
                 id="abstract_tr"
                 name="abstract_tr"
                 value={formData.abstract_tr}
                 onChange={handleChange}
                 className="form-textarea"
-                placeholder={t('enterAbstractTr') || 'Enter abstract in Turkish'}
+                placeholder={language === 'tr' ? 'Türkçe özet girin' : 'Enter abstract in Turkish'}
                 rows={4}
                 maxLength={500}
                 disabled={isSubmitting}
@@ -245,14 +278,14 @@ const AuthorUpdateFormPage: React.FC = () => {
             </div>
             
             <div className="form-group">
-              <label htmlFor="abstract_en" className="form-label">{t('abstractEn') || 'Abstract (English)'}</label>
+              <label htmlFor="abstract_en" className="form-label">{language === 'tr' ? 'Özet (İngilizce)' : 'Abstract (English)'}</label>
               <textarea
                 id="abstract_en"
                 name="abstract_en"
                 value={formData.abstract_en}
                 onChange={handleChange}
                 className="form-textarea"
-                placeholder={t('enterAbstractEn') || 'Enter abstract in English'}
+                placeholder={language === 'tr' ? 'İngilizce özet girin' : 'Enter abstract in English'}
                 rows={4}
                 maxLength={500}
                 disabled={isSubmitting}
@@ -260,7 +293,7 @@ const AuthorUpdateFormPage: React.FC = () => {
             </div>
             
             <div className="form-group">
-              <label htmlFor="keywords" className="form-label">{t('keywords') || 'Keywords (Turkish)'}</label>
+              <label htmlFor="keywords" className="form-label">{language === 'tr' ? 'Anahtar Kelimeler (Türkçe)' : 'Keywords (Turkish)'}</label>
               <input
                 type="text"
                 id="keywords"
@@ -268,14 +301,14 @@ const AuthorUpdateFormPage: React.FC = () => {
                 value={formData.keywords}
                 onChange={handleChange}
                 className="form-input"
-                placeholder={t('keywordsSeparatedByCommas') || 'Separate keywords with commas'}
+                placeholder={language === 'tr' ? 'Anahtar kelimeleri virgülle ayırın' : 'Separate keywords with commas'}
                 maxLength={100}
                 disabled={isSubmitting}
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="keywords_en" className="form-label">{t('keywordsEn') || 'Keywords (English)'}</label>
+              <label htmlFor="keywords_en" className="form-label">{language === 'tr' ? 'Anahtar Kelimeler (İngilizce)' : 'Keywords (English)'}</label>
               <input
                 type="text"
                 id="keywords_en"
@@ -283,105 +316,141 @@ const AuthorUpdateFormPage: React.FC = () => {
                 value={formData.keywords_en}
                 onChange={handleChange}
                 className="form-input"
-                placeholder={t('keywordsSeparatedByCommasEn') || 'Separate English keywords with commas'}
+                placeholder={language === 'tr' ? 'İngilizce anahtar kelimeleri virgülle ayırın' : 'Separate English keywords with commas'}
                 maxLength={100}
                 disabled={isSubmitting}
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="notes" className="form-label">{t('notes') || 'Notes'}</label>
+              <label htmlFor="notes" className="form-label">{language === 'tr' ? 'Notlar' : 'Notes'} *</label>
               <textarea
                 id="notes"
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
                 className="form-textarea"
-                placeholder={t('enterNotes') || 'Enter any additional notes'}
+                placeholder={language === 'tr' ? 'Ek notlar girin' : 'Enter any additional notes'}
                 rows={4}
                 maxLength={1000}
                 disabled={isSubmitting}
+                required
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="file" className="form-label">{t('fileUpload') || 'Upload File'} *</label>
-              <input
-                type="file"
-                id="file"
-                name="file"
-                onChange={handleFileChange}
-                className="form-input"
-                accept=".docx"
-                required={!formData.title}
-                disabled={isSubmitting}
-                style={{
+              <label htmlFor="file" className="form-label">
+                {language === 'tr' ? 'Dosya Yükle' : 'Upload File'}
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="file"
+                  id="file"
+                  name="file"
+                  onChange={handleFileChange}
+                  className="form-input"
+                  accept=".docx"
+                  required={!formData.title}
+                  disabled={isSubmitting}
+                  style={{
+                    opacity: 0,
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%'
+                  }}
+                />
+                <div style={{
                   padding: '12px 16px',
                   border: '2px dashed #E2E8F0',
                   borderRadius: '12px',
                   background: 'rgba(249, 250, 251, 0.8)',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-              />
+                  transition: 'all 0.3s ease',
+                  color: '#6B7280',
+                  textAlign: 'center' as const,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  width: '100%'
+                }}>
+                  <span style={{ fontSize: '16px', color: '#2563EB' }}>📄</span>
+                  {selectedFile 
+                    ? selectedFile.name 
+                    : (language === 'tr' ? 'Dosya Seç (.docx)' : 'Choose File (.docx)')
+                  }
+                </div>
+              </div>
               <small style={{ 
-                display: 'block', 
-                marginTop: '8px', 
-                color: '#64748B', 
-                fontSize: '0.875rem' 
+                color: 'var(--color-text-tertiary)', 
+                fontSize: '0.8rem',
+                fontStyle: 'italic',
+                marginTop: 'var(--spacing-1)',
+                display: 'block'
               }}>
-                {t('uploadFileDescription') || 'Upload a .docx file'}
+                {language === 'tr' ? 'DOCX dosyası yükleyin' : 'Upload a DOCX file'}
               </small>
             </div>
             
             <div style={{ 
-              display: 'flex', 
-              gap: '16px', 
-              marginTop: '32px',
-              flexDirection: 'column'
+              display: 'flex',
+              gap: 'var(--spacing-3)',
+              marginTop: 'var(--spacing-6)'
             }}>
+              <button 
+                type="button" 
+                onClick={() => navigate(`/entries/${entryId}/updates`)} 
+                className="btn btn-outline"
+                disabled={isSubmitting}
+                style={{
+                  flex: '1',
+                  padding: '12px 20px',
+                  border: '2px solid #E2E8F0',
+                  borderRadius: '12px',
+                  background: 'transparent',
+                  color: 'var(--color-text-secondary)',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {language === 'tr' ? 'İptal' : 'Cancel'}
+              </button>
+              
               <button 
                 type="submit" 
                 className="register-submit-button"
                 disabled={isSubmitting}
+                style={{
+                  flex: '2'
+                }}
               >
                 {isSubmitting 
-                  ? (t('submitting') || 'Submitting...') 
-                  : (t('submitUpdate') || 'Submit Update')}
-              </button>
-              
-              <button 
-                type="button" 
-                onClick={() => navigate(`/entries/${entryId}/updates`)} 
-                disabled={isSubmitting}
-                style={{
-                  width: '100%',
-                  padding: '16px 20px',
-                  background: 'transparent',
-                  color: '#64748B',
-                  border: '2px solid #E2E8F0',
-                  borderRadius: '12px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  letterSpacing: '0.025em'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#94A3B8';
-                  e.currentTarget.style.background = 'rgba(248, 250, 252, 0.8)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#E2E8F0';
-                  e.currentTarget.style.background = 'transparent';
-                }}
-              >
-                {t('cancel') || 'Cancel'}
+                  ? (language === 'tr' ? 'Gönderiliyor...' : 'Submitting...') 
+                  : (language === 'tr' ? 'Güncellemeyi Gönder' : 'Submit Update')}
               </button>
             </div>
           </form>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="toast-notification">
+          <div className={`toast-content toast-${toastType}`}>
+            <div className="toast-icon">
+              {toastType === 'success' ? '✓' : '⚠'}
+            </div>
+            <span className="toast-message">{toastMessage}</span>
+            <button 
+              className="toast-close" 
+              onClick={() => setShowToast(false)}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

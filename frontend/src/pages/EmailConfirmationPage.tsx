@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import './EmailConfirmationPage.css';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import { motion } from 'framer-motion';
 
 const EmailConfirmationPage: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -48,13 +47,10 @@ const EmailConfirmationPage: React.FC = () => {
                         <div style={{ textAlign: 'center', padding: '2rem' }}>
                             <FaCheckCircle size={56} color="#14B8A6" style={{ marginBottom: '1.5rem' }} />
                             <h2 style={{ fontSize: '1.75rem', fontWeight: '600', color: '#1F2937', marginBottom: '0.75rem' }}>
-                                {t('emailConfirmationSuccessTitle') || 'Email Confirmed!'}
+                                {t('emailConfirmationSuccessSubTitle') || 'Email Confirmed!'}
                             </h2>
-                            <p style={{ fontSize: '1rem', color: '#4B5563', maxWidth: '420px', margin: '0 auto 1.5rem' }}>
-                                {t('emailConfirmationSuccessMessage') || 'Your email has been successfully verified. You can now log in.'}
-                            </p>
-                            <p style={{ fontSize: '0.875rem', color: '#6B7280', marginBottom: '1.5rem' }}>
-                                {t('emailConfirmationRedirectMessage').replace('{countdown}', countdown.toString())}
+                            <p style={{ fontSize: '1rem', color: '#4B5563', marginBottom: '1.5rem' }}>
+                                {t('redirecting')} <span style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#14B8A6' }}>({countdown})</span>...
                             </p>
                             <button 
                                 type="button"

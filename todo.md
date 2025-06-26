@@ -5,8 +5,8 @@ Public/Authentication Pages
 --------------------------------------------------------------- Secondary Pages & Mails
 [ + ] AutoLoginPage - Automatic Login
 [ + ] ForgotPasswordPage - Password Recovery
-[ - ] ResetPasswordPage - Password Reset (with token parameter)
-[ - ] EmailConfirmationPage - Confirmin  E-mail
+[ + ] ResetPasswordPage - Password Reset (with token parameter)
+[ + ] EmailConfirmationPage - Confirmin  E-mail
 --------------------------------------------------------------- Mails
 [ - ] Confirmations E-mail
 [ - ] Reset Password E-mail

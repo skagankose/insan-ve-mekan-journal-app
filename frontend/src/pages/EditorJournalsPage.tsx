@@ -6,7 +6,8 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveJournal } from '../contexts/ActiveJournalContext';
 import { Journal, JournalEntryRead } from '../services/apiService';
 import Footer from '../components/Footer';
-import { HiChevronRight, HiChevronDown } from "react-icons/hi2";
+import { HiChevronRight, HiChevronDown } from "react-icons/hi";
+import { PiFileTextFill } from "react-icons/pi";
 
 interface JournalWithEntries extends Journal {
     entries: JournalEntryRead[];
@@ -441,7 +442,9 @@ const EditorJournalsPage: React.FC = () => {
                                             </div>
                                         ) : journal.entries.length === 0 ? (
                                             <div style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', borderRadius: '16px', padding: '48px', textAlign: 'center', border: '2px dashed #E2E8F0' }}>
-                                                <div style={{ width: '80px', height: '80px', margin: '0 auto 24px', background: '#F1F5F9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>📄</div>
+                                                <div style={{ width: '80px', height: '80px', margin: '0 auto 24px', background: '#F1F5F9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', color: '#94A3B8' }}>
+                                                    <PiFileTextFill size={40} />
+                                                </div>
                                                 <p style={{ fontSize: '16px', color: '#64748B', fontWeight: '500' }}>{t('noEntriesInJournal') || 'No entries in this journal yet.'}</p>
                                             </div>
                                         ) : (

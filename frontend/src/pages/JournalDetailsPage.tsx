@@ -1653,7 +1653,7 @@ const JournalDetailsPage: React.FC = () => {
                                                     fontSize: '16px', 
                                                     fontWeight: '600', 
                                                     color: '#1E293B'
-                                                }}>{journal.publication_date ? new Date(journal.publication_date).toLocaleDateString() : 'Not set'}</div>
+                                                }}>{journal.publication_date ? new Date(journal.publication_date).toLocaleDateString() : t('notSet')}</div>
                                             </div>
                                         </div>
                                         
@@ -2315,7 +2315,7 @@ const JournalDetailsPage: React.FC = () => {
                                                             strokeLinecap="round"
                                                         />
                                                     </svg>
-                                                    <span>{entry.doi ? entry.doi : 'No DOI available'}</span>
+                                                    <span>{entry.doi ? entry.doi : t('notAvailable')}</span>
                                                 </div>
                                             ) : entry.status ? (
                                                 <span style={{
@@ -2366,7 +2366,7 @@ const JournalDetailsPage: React.FC = () => {
                                                             strokeLinecap="round"
                                                         />
                                                     </svg>
-                                                    <span>{entry.doi ? entry.doi : 'No DOI available'}</span>
+                                                    <span>{entry.doi ? entry.doi : t('notAvailable')}</span>
                                                 </div>
                                             )}
                                         </div>

@@ -143,6 +143,9 @@ const UserProfilePage: React.FC = () => {
                             } catch (err) {
                                 console.error("Failed to fetch editor journals:", err);
                             }
+                        } else {
+                            // Clear editor journals for users who are not editors or admins
+                            setEditorJournals([]);
                         }
                         // Owner users should not see any journals since they can't be editors or editor-in-chief
                     } catch (err: any) {
@@ -237,6 +240,9 @@ const UserProfilePage: React.FC = () => {
                                 } catch (err) {
                                     console.error("Failed to fetch editor journals for user:", err);
                                 }
+                            } else {
+                                // Clear editor journals for users who are not editors or admins
+                                setEditorJournals([]);
                             }
                             // Owner users should not see any journals since they can't be editors or editor-in-chief
                         } else {
@@ -944,7 +950,7 @@ const UserProfilePage: React.FC = () => {
                 {/* Draft journals section - Collapsible */}
                 {draftJournals.length > 0 && (
                     <div className="draft-journals-section" style={{ marginBottom: draftJournals.length > 0 ? '32px' : '0' }}>
-                        <div className="section-header active">
+                        <div className="section-header draft">
                             <div 
                                 className="section-header-clickable"
                                 onClick={() => setShowDraft(!showDraft)}
@@ -963,7 +969,7 @@ const UserProfilePage: React.FC = () => {
                                     marginBottom: '-16px'
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'rgba(20, 184, 166, 0.08)';
+                                    e.currentTarget.style.backgroundColor = 'rgba(245, 158, 11, 0.08)';
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.backgroundColor = 'transparent';
@@ -977,7 +983,7 @@ const UserProfilePage: React.FC = () => {
                                     className="section-collapse-icon"
                                     size={24}
                                     style={{
-                                        color: '#0D9488',
+                                        color: '#D97706',
                                         transform: showDraft ? 'rotate(180deg)' : 'rotate(0deg)'
                                     }}
                                 />
@@ -1120,7 +1126,7 @@ const UserProfilePage: React.FC = () => {
                                     marginBottom: '-16px'
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'rgba(20, 184, 166, 0.08)';
+                                    e.currentTarget.style.backgroundColor = 'rgba(245, 158, 11, 0.08)';
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.backgroundColor = 'transparent';
@@ -1134,7 +1140,7 @@ const UserProfilePage: React.FC = () => {
                                     className="section-collapse-icon"
                                     size={24}
                                     style={{
-                                        color: '#0D9488',
+                                        color: '#D97706',
                                         transform: showActive ? 'rotate(180deg)' : 'rotate(0deg)'
                                     }}
                                 />

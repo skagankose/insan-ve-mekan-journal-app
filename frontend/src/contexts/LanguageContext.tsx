@@ -71,6 +71,7 @@ type TranslationKeys =
   | 'bankName' | 'accountHolder' | 'processingTime' | 'keywords' | 'keywordsEn' | 'keywordsSeparatedByCommasEn' | 'updatedKeywordsEn' | 'referees' | 'files' | 'viewFile'
   | 'referenceToken' | 'manageAuthors' | 'changeJournal' | 'manageReferees' | 'noPublishedEntries'
   | 'loadingPublishedJournals' | 'failedToLoadPublishedJournals' | 'noPublishedJournals' | 'checkBackLaterForPublications'
+  | 'notAvailable' | 'notSet'
   | 'reviewFile' | 'updatedTitle' | 'updatedAbstract' | 'updatedAbstractEn' | 'updatedKeywords' | 'updatedFile'
   | 'updateCopied'   | 'privateNotes'
   | 'unmarkForDeletion' | 'unmarkForDeletionWarning' | 'markForDeletion' | 'markForDeletionWarning'
@@ -101,7 +102,7 @@ type TranslationKeys =
   | 'deleteUser' | 'deleteUserWarning' | 'deleting' | 'deleteUserConfirm' | 'confirmDelete' | 'customEmailAddress' | 'linkEmailSent'
   | 'linkCopied' | 'copyFailed' | 'pleaseWait'
   // Email Confirmation
-  | 'emailConfirmationSuccessTitle' | 'emailConfirmationSuccessMessage' | 'emailConfirmationRedirectMessage'
+  | 'emailConfirmationSuccessTitle' | 'emailConfirmationSuccessMessage' | 'emailConfirmationRedirectMessage' | 'emailConfirmationSuccessSubTitle'
   | 'emailConfirmationFailureTitle' | 'emailConfirmationFailureMessage' | 'emailConfirmationSupportMessage' | 'backToRegister' | 'emailConfirmationFailureSubTitle';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
@@ -494,6 +495,8 @@ const translations: Record<Language, TranslationDictionary> = {
     'failedToLoadPublishedJournals': 'Failed to load published journals.',
     'noPublishedJournals': 'No published journals found.',
     'checkBackLaterForPublications': 'Check back later for new publications',
+    'notAvailable': 'Not Available',
+    'notSet': 'Not Set',
     'reviewFile': 'Review File',
     'updatedTitle': 'Updated Title',
     'updatedAbstract': 'Updated Abstract',
@@ -631,6 +634,7 @@ const translations: Record<Language, TranslationDictionary> = {
 
     // Email Confirmation
     'emailConfirmationSuccessTitle': 'Email Confirmed!',
+    'emailConfirmationSuccessSubTitle': 'Email Confirmed!',
     'emailConfirmationSuccessMessage': 'Your email has been successfully verified. You can now log in.',
     'emailConfirmationRedirectMessage': 'Redirecting to login in {countdown} seconds...',
     'emailConfirmationFailureTitle': 'Confirmation Failed',
@@ -1023,8 +1027,10 @@ const translations: Record<Language, TranslationDictionary> = {
     'noPublishedEntries': 'Bu dergide yayınlanan makale bulunmamaktadır',
     'loadingPublishedJournals': 'Yayınlanmış dergiler yükleniyor',
     'failedToLoadPublishedJournals': 'Yayınlanmış dergiler yüklenemedi.',
-    'noPublishedJournals': 'Yayınlanan Dergiler Bulunamadı',
+    'noPublishedJournals': 'Yayınlanan Dergiler Bulunamadı!',
     'checkBackLaterForPublications': 'Yayınlanan dergiler kısa bir zaman içinde burada görüntülenecektir. Bizi takipte kalınız.',
+    'notAvailable': 'Mevcut Değil',
+    'notSet': 'Belirtilmemiş',
     'reviewFile': 'Değerlendirme Dosyası',
     'updatedTitle': 'Güncellenmiş Başlık',
     'updatedAbstract': 'Güncellenmiş Özet',
@@ -1161,7 +1167,8 @@ const translations: Record<Language, TranslationDictionary> = {
     'pleaseWait': 'Ana sayfaya yönlendiriliyorsunuz...',
 
     // Email Confirmation
-    'emailConfirmationSuccessTitle': 'E-posta Onaylandı!',
+    'emailConfirmationSuccessTitle': 'E-Posta Onayı',
+    'emailConfirmationSuccessSubTitle': 'E-posta Onaylandı!',
     'emailConfirmationSuccessMessage': 'E-postanız başarıyla doğrulandı. Artık giriş yapabilirsiniz.',
     'emailConfirmationRedirectMessage': '{countdown} saniye içinde giriş sayfasına yönlendiriliyorsunuz...',
     'emailConfirmationFailureTitle': 'E-Posta Onayı',

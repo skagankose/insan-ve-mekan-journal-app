@@ -54,6 +54,35 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [updateToDelete, setUpdateToDelete] = useState<CombinedUpdate | null>(null);
   
+  // Check for success parameters and show toast
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authorUpdated = urlParams.get('authorUpdated');
+    const refereeUpdated = urlParams.get('refereeUpdated');
+    
+    if (authorUpdated === 'true') {
+      setToastMessage(language === 'tr' ? 'Yazar güncellemesi başarıyla gönderildi' : 'Author update submitted successfully');
+      setToastType('success');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 4000);
+      
+      // Clear the parameter from URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+    
+    if (refereeUpdated === 'true') {
+      setToastMessage(language === 'tr' ? 'Hakem değerlendirmesi başarıyla gönderildi' : 'Referee update submitted successfully');
+      setToastType('success');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 4000);
+      
+      // Clear the parameter from URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [language]);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!entryId) return;
