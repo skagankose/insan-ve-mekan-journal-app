@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as apiService from '../services/apiService';
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios, { AxiosError } from 'axios';
-import { FaFileWord } from 'react-icons/fa';
 import './JournalEntryDetailsPage.css';
 
 const AuthorUpdateFormPage: React.FC = () => {

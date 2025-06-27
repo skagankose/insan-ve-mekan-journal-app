@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import * as apiService from '../services/apiService';
-import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios, { AxiosError } from 'axios';
-import { FaFileWord } from 'react-icons/fa';
 import './JournalEntryDetailsPage.css';
 
 const RefereeUpdateFormPage: React.FC = () => {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const { entryId } = useParams<{ entryId: string }>();
   const navigate = useNavigate();
   
