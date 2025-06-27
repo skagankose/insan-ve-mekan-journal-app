@@ -643,6 +643,146 @@ const EditUserPage: React.FC = () => {
         );
     }
 
+    if (error === 'User not found') {
+        return (
+            <div style={{
+                minHeight: '70vh',
+                background: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2rem',
+                marginLeft: '60px'
+            }}>
+                <div style={{
+                    maxWidth: '600px',
+                    width: '100%',
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '32px',
+                    padding: '48px',
+                    textAlign: 'center',
+                    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+                    border: '1px solid rgba(226, 232, 240, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    {/* Background Pattern */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '-50%',
+                        right: '-30%',
+                        width: '300px',
+                        height: '300px',
+                        background: 'radial-gradient(circle, rgba(239, 68, 68, 0.05) 0%, transparent 70%)',
+                        borderRadius: '50%',
+                        zIndex: 0
+                    }}></div>
+                    
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                        <div style={{
+                            width: '120px',
+                            height: '120px',
+                            margin: '0 auto 32px',
+                            background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                            borderRadius: '60px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '48px',
+                            boxShadow: '0 20px 40px rgba(20, 184, 166, 0.2)',
+                            animation: 'bounceIn 0.8s ease-out'
+                        }}>
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" 
+                                    stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" 
+                                    stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </div>
+                        
+                        <h1 style={{
+                            fontSize: '32px',
+                            fontWeight: '800',
+                            color: '#1E293B',
+                            marginBottom: '16px',
+                            letterSpacing: '-0.025em',
+                            background: 'linear-gradient(135deg, #1E293B 0%, #475569 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
+                        }}>{language === 'tr' ? 'Kullanıcı Bulunamadı!' : 'User Not Found!'}</h1>
+                        
+                        <p style={{
+                            fontSize: '18px',
+                            color: '#64748B',
+                            lineHeight: '1.6',
+                            marginBottom: '32px',
+                            fontWeight: '500'
+                        }}>{language === 'tr' ? 'Bu kullanıcı düzenlenemez veya mevcut değil.' : 'This user cannot be edited or does not exist.'}</p>
+                        
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center'
+                        }}>
+                            <button
+                                onClick={() => navigate('/')}
+                                style={{
+                                    padding: '16px 32px',
+                                    background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '16px',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: '0 8px 20px rgba(20, 184, 166, 0.3)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 12px 28px rgba(20, 184, 166, 0.4)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(20, 184, 166, 0.3)';
+                                }}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" 
+                                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                {language === 'tr' ? 'Ana Sayfa' : 'Go Home'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>{`
+                    @keyframes bounceIn {
+                        0% {
+                            opacity: 0;
+                            transform: scale(0.3);
+                        }
+                        50% {
+                            opacity: 1;
+                            transform: scale(1.05);
+                        }
+                        70% {
+                            transform: scale(0.9);
+                        }
+                        100% {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                    }
+                `}</style>
+            </div>
+        );
+    }
+
     return (
         <>
             {/* Toast Notification */}

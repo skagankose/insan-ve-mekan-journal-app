@@ -32,6 +32,7 @@ const AuthorUpdateFormPage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Toast notification state
   const [showToast, setShowToast] = useState<boolean>(false);
@@ -70,10 +71,14 @@ const AuthorUpdateFormPage: React.FC = () => {
         });
       } catch (error) {
         console.error('Error fetching entry data:', error);
-        setToastMessage(language === 'tr' ? 'Makale verisi yüklenirken hata oluştu' : 'Error fetching entry data');
-        setToastType('warning');
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 4000);
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          setError('Entry not found');
+        } else {
+          setToastMessage(language === 'tr' ? 'Makale verisi yüklenirken hata oluştu' : 'Error fetching entry data');
+          setToastType('warning');
+          setShowToast(true);
+          setTimeout(() => setShowToast(false), 4000);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -230,6 +235,144 @@ const AuthorUpdateFormPage: React.FC = () => {
           <div className="loading">{language === 'tr' ? 'Yükleniyor...' : 'Loading...'}</div>
         </div>
       </>
+    );
+  }
+
+  if (error === 'Entry not found') {
+    return (
+      <div style={{
+        minHeight: '70vh',
+        background: 'transparent',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        marginLeft: '60px'
+      }}>
+        <div style={{
+          maxWidth: '600px',
+          width: '100%',
+          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '32px',
+          padding: '48px',
+          textAlign: 'center',
+          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+          border: '1px solid rgba(226, 232, 240, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Background Pattern */}
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            right: '-30%',
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(239, 68, 68, 0.05) 0%, transparent 70%)',
+            borderRadius: '50%',
+            zIndex: 0
+          }}></div>
+          
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{
+              width: '120px',
+              height: '120px',
+              margin: '0 auto 32px',
+              background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+              borderRadius: '60px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '48px',
+              boxShadow: '0 20px 40px rgba(20, 184, 166, 0.2)',
+              animation: 'bounceIn 0.8s ease-out'
+            }}>
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+                <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" 
+                  stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M14 2V8H20M16 13H8M16 17H8M10 9H8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            
+            <h1 style={{
+              fontSize: '32px',
+              fontWeight: '800',
+              color: '#1E293B',
+              marginBottom: '16px',
+              letterSpacing: '-0.025em',
+              background: 'linear-gradient(135deg, #1E293B 0%, #475569 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>{language === 'tr' ? 'Makale Bulunamadı!' : 'Entry Not Found!'}</h1>
+            
+            <p style={{
+              fontSize: '18px',
+              color: '#64748B',
+              lineHeight: '1.6',
+              marginBottom: '32px',
+              fontWeight: '500'
+            }}>{language === 'tr' ? 'Bu makale için güncelleme eklenemez veya makale mevcut değil.' : 'Cannot add update for this entry or entry does not exist.'}</p>
+            
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center'
+            }}>
+              <button
+                onClick={() => navigate('/archive')}
+                style={{
+                  padding: '16px 32px',
+                  background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '16px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 8px 20px rgba(20, 184, 166, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(20, 184, 166, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(20, 184, 166, 0.3)';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {language === 'tr' ? 'Arşive Dön' : 'Browse Archive'}
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <style>{`
+          @keyframes bounceIn {
+            0% {
+              opacity: 0;
+              transform: scale(0.3);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(1.05);
+            }
+            70% {
+              transform: scale(0.9);
+            }
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+        `}</style>
+      </div>
     );
   }
   
