@@ -74,7 +74,7 @@ const countryFlags: { [key: string]: string } = {
     '+225': '🇨🇮', // Ivory Coast
     '+226': '🇧🇫', // Burkina Faso
     '+227': '🇳🇪', // Niger
-    '+228': '🇹��', // Togo
+    '+228': '🇹🇯', // Togo
     '+229': '🇧🇯', // Benin
     '+230': '🇲🇺', // Mauritius
     '+231': '🇱🇷', // Liberia
@@ -857,6 +857,7 @@ const EditUserPage: React.FC = () => {
                                     className="form-input"
                                     placeholder={language === 'tr' ? 'E-posta adresini girin' : 'Enter email address'}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 200`}
                                 />
                             </div>
                             
@@ -873,6 +874,7 @@ const EditUserPage: React.FC = () => {
                                     className="form-input"
                                     placeholder={language === 'tr' ? 'Tam adınızı girin' : 'Enter full name'}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 200`}
                                 />
                             </div>
                             
@@ -888,6 +890,7 @@ const EditUserPage: React.FC = () => {
                                     className="form-input"
                                     placeholder={language === 'tr' ? 'Akademik unvanınızı girin' : 'Enter academic title'}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 200`}
                                 />
                             </div>
                             
@@ -903,6 +906,7 @@ const EditUserPage: React.FC = () => {
                                     className="form-textarea"
                                     placeholder={language === 'tr' ? 'Biyografik bilgilerinizi girin' : 'Enter biographical information'}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 400`}
                                 />
                             </div>
                             
@@ -949,6 +953,7 @@ const EditUserPage: React.FC = () => {
                                     className="form-input"
                                     placeholder={language === 'tr' ? 'Çalışma alanınızı girin' : 'Enter field of study'}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 300`}
                                 />
                             </div>
                             
@@ -981,6 +986,8 @@ const EditUserPage: React.FC = () => {
                                         id="location"
                                         name="location"
                                         disabled={loading}
+                                        maxLength={200}
+                                        title={`${t('maxCharacters')}: 200`}
                                     />
                                 </div>
                             </div>
@@ -1329,6 +1336,8 @@ const EditUserPage: React.FC = () => {
                                                 onChange={(e) => setCustomEmailAddress(e.target.value)}
                                                 className="form-input"
                                                 style={{ flex: '1' }}
+                                                maxLength={200}
+                                                title={`${t('maxCharacters')}: 200`}
                                             />
                                             <button 
                                                 type="button" 

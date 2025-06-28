@@ -113,6 +113,13 @@ const JournalEditPage: React.FC = () => {
         const { name, files } = e.target;
         if (files && files.length > 0) {
             const file = files[0];
+            const maxSize = 100 * 1024 * 1024; // 100MB
+
+            if (file.size > maxSize) {
+                setSubmitError(t('fileTooLarge') || 'File size cannot exceed 100 MB.');
+                e.target.value = ''; // Clear the input
+                return;
+            }
             
             // Different validation for full_pdf
             if (name === 'full_pdf') {
@@ -394,6 +401,7 @@ const JournalEditPage: React.FC = () => {
                                 required
                                 disabled={isSubmitting}
                                 maxLength={300}
+                                title={`${t('maxCharacters')}: 300`}
                             />
                         </div>
                         
@@ -409,6 +417,7 @@ const JournalEditPage: React.FC = () => {
                                 placeholder={t('enterEntryTitleEn') || 'Enter title in English'}
                                 disabled={isSubmitting}
                                 maxLength={300}
+                                title={`${t('maxCharacters')}: 300`}
                             />
                         </div>
                         
@@ -445,6 +454,7 @@ const JournalEditPage: React.FC = () => {
                                 disabled={isSubmitting}
                                 rows={3}
                                 maxLength={500}
+                                title={`${t('maxCharacters')}: 500`}
                             />
                         </div>
 
@@ -460,6 +470,7 @@ const JournalEditPage: React.FC = () => {
                                 placeholder={t('enterKeywordsComma') || 'Enter keywords, separated by commas...'}
                                 disabled={isSubmitting}
                                 maxLength={100}
+                                title={`${t('maxCharacters')}: 100`}
                             />
                         </div>
                         
@@ -474,7 +485,8 @@ const JournalEditPage: React.FC = () => {
                                 placeholder={language === 'tr' ? 'İngilizce genişletilmiş özeti giriniz' : 'Enter an extended summary in English'}
                                 disabled={isSubmitting}
                                 rows={3}
-                                maxLength={500}
+                                maxLength={1000}
+                                title={`${t('maxCharacters')}: 1000`}
                             />
                         </div>
                         
@@ -492,6 +504,7 @@ const JournalEditPage: React.FC = () => {
                                 placeholder={t('keywordsSeparatedByCommasEn') || 'Separate English keywords with commas'}
                                 disabled={isSubmitting}
                                 maxLength={100}
+                                title={`${t('maxCharacters')}: 100`}
                             />
                         </div>
                         
@@ -507,6 +520,7 @@ const JournalEditPage: React.FC = () => {
                                 placeholder={language === 'tr' ? 'Sayfa numarası giriniz (örn: 1-15)' : 'Enter page number (e.g., 1-15)'}
                                 disabled={isSubmitting}
                                 maxLength={20}
+                                title={`${t('maxCharacters')}: 20`}
                             />
                         </div>
                         
@@ -524,6 +538,7 @@ const JournalEditPage: React.FC = () => {
                                 placeholder={language === 'tr' ? 'DOI giriniz' : 'Enter DOI'}
                                 disabled={isSubmitting}
                                 maxLength={100}
+                                title={`${t('maxCharacters')}: 100`}
                             />
                         </div>
 

@@ -103,6 +103,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     required
                     disabled={isSubmitting}
                     maxLength={300}
+                    title={`${t('maxCharacters')}: 300`}
                 />
             </div>
             
@@ -118,6 +119,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     placeholder={t('enterEntryTitleEn') || 'Enter title in English'}
                     disabled={isSubmitting}
                     maxLength={300}
+                    title={`${t('maxCharacters')}: 300`}
                     required
                 />
             </div>
@@ -135,6 +137,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     required
                     disabled={isSubmitting}
                     maxLength={500}
+                    title={`${t('maxCharacters')}: 500`}
                 />
             </div>
             
@@ -149,7 +152,8 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     placeholder={t('enterAbstractEnglish') || 'Enter a brief summary in English...'}
                     rows={3}
                     disabled={isSubmitting}
-                    maxLength={500}
+                    maxLength={1000}
+                    title={`${t('maxCharacters')}: 1000`}
                     required
                 />
             </div>
@@ -166,6 +170,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     placeholder={t('enterKeywordsComma') || 'Enter keywords, separated by commas...'}
                     disabled={isSubmitting}
                     maxLength={100}
+                    title={`${t('maxCharacters')}: 100`}
                     required
                 />
             </div>
@@ -182,6 +187,7 @@ const JournalForm: React.FC<JournalFormProps> = ({
                     placeholder={t('keywordsSeparatedByCommasEn') || 'Separate English keywords with commas'}
                     disabled={isSubmitting}
                     maxLength={100}
+                    title={`${t('maxCharacters')}: 100`}
                     required
                 />
             </div>

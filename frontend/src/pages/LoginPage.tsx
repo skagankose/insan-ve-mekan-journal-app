@@ -171,6 +171,8 @@ const LoginPage: React.FC = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            maxLength={200}
+                            title={`${t('maxCharacters')}: 200`}
                         />
                     </div>
                     <div className="form-group">
@@ -182,6 +184,8 @@ const LoginPage: React.FC = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
+                                maxLength={100}
+                                title={`${t('maxCharacters')}: 100`}
                             />
                             <button
                                 type="button"

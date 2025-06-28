@@ -100,6 +100,7 @@ const JournalCreateFormPage: React.FC = () => {
                                 required
                                 disabled={isSubmitting}
                                 maxLength={300}
+                                title={`${t('maxCharacters')}: 300`}
                             />
                         </div>
                         
@@ -116,6 +117,7 @@ const JournalCreateFormPage: React.FC = () => {
                                 required
                                 disabled={isSubmitting}
                                 maxLength={200}
+                                title={`${t('maxCharacters')}: 200`}
                             />
                         </div>
                         

@@ -64,6 +64,7 @@ type TranslationKeys =
   | 'noEntriesInJournal' | 'failedToMergeFiles' | 'mergingFiles' | 'selectEditorInChief' | 'noAdminUsers'
   | 'manageEditors' | 'noEditorUsers' | 'save'
   | 'publicationDetails' | 'publicationFiles' | 'coverPhoto' | 'metaFiles' | 'editorNotes' | 'fullPdf' | 'indexSection' | 'mergedFile'
+  | 'creationDate'
   | 'paymentRequired' | 'bankTransferInformation' | 'exampleBank' | 'insanMekanJournal' | 'ibanNumber' | 'importantPaymentInstructions'
   | 'includeYourUniqueToken' | 'youMustIncludeYourUniqueToken' | 'yourToken' | 'paymentVerification' | 'withoutTheCorrectToken'
   | 'paymentVerificationTypically' | 'paymentInfoMessage'
@@ -104,7 +105,9 @@ type TranslationKeys =
   // Email Confirmation
   | 'emailConfirmationSuccessTitle' | 'emailConfirmationSuccessMessage' | 'emailConfirmationRedirectMessage' | 'emailConfirmationSuccessSubTitle'
 | 'emailConfirmationFailureTitle' | 'emailConfirmationFailureMessage' | 'emailConfirmationSupportMessage' | 'backToRegister' | 'emailConfirmationFailureSubTitle'
-| 'resendConfirmationEmail' | 'resendingConfirmationEmail' | 'confirmationEmailSent' | 'resendConfirmationEmailError' | 'resendEmailLink';
+| 'resendConfirmationEmail' | 'resendingConfirmationEmail' | 'confirmationEmailSent' | 'resendConfirmationEmailError' | 'resendEmailLink'
+| 'maxCharacters'
+| 'fileTooLarge';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -425,34 +428,35 @@ const translations: Record<Language, TranslationDictionary> = {
     'change': 'Change',
     'manage': 'Manage',
     'journalFiles': 'Journal Files',
-    'viewCoverPhoto': 'Cover Photo',
-    'viewMetaFiles': 'Meta Files',
-    'viewEditorNotes': 'Editor Notes',
-    'viewFullPdf': 'PDF File',
-    'viewIndexSection': 'Index Section',
-    'viewMergedFile': 'Merged DOCX File',
+    'viewCoverPhoto': 'View Cover Photo',
+    'viewMetaFiles': 'View Meta Files',
+    'viewEditorNotes': 'View Editor Notes',
+    'viewFullPdf': 'View Full PDF',
+    'viewIndexSection': 'View Index Section',
+    'viewMergedFile': 'View Merged File',
     'downloadJournal': 'Download Journal',
     'downloadFullPdf': 'Download Full PDF',
     'downloadJournalDescription': 'Download the complete journal in PDF format',
-    'noEntriesInJournal': 'No papers found in this journal',
-    'failedToMergeFiles': 'Failed to merge journal files',
+    'noEntriesInJournal': 'No entries found in this journal.',
+    'failedToMergeFiles': 'Failed to merge journal files.',
     'mergingFiles': 'Merging Files...',
     'selectEditorInChief': 'Select Editor-in-Chief',
-    'noAdminUsers': 'No admin users found',
+    'noAdminUsers': 'No admin users found.',
     'manageEditors': 'Manage Editors',
-    'noEditorUsers': 'No editor users found',
+    'noEditorUsers': 'No editor users found.',
     'save': 'Save',
     'publicationDetails': 'Publication Details',
-    'publicationFiles': 'Files',
+    'publicationFiles': 'Publication Files',
     'coverPhoto': 'Cover Photo',
     'metaFiles': 'Meta Files',
     'editorNotes': 'Editor Notes',
-    'fullPdf': 'PDF File',
+    'fullPdf': 'Full PDF',
     'indexSection': 'Index Section',
-    'mergedFile': 'Merged DOCX File',
+    'mergedFile': 'Merged File',
+    'creationDate': 'Creation Date',
     
     // Payment Information
-    'paymentRequired': 'Processing Fee Required',
+    'paymentRequired': 'Payment Required',
     'bankTransferInformation': 'Bank Transfer Information',
     'exampleBank': 'Example Bank',
     'insanMekanJournal': 'İnsan Mekan Journal',
@@ -648,6 +652,8 @@ const translations: Record<Language, TranslationDictionary> = {
     'confirmationEmailSent': 'Confirmation email has been sent to your email address.',
     'resendConfirmationEmailError': 'Failed to send confirmation email. Please try again.',
     'resendEmailLink': 'Resend email',
+    'maxCharacters': 'Max characters',
+    'fileTooLarge': 'File size cannot exceed 100 MB.',
   },
   tr: {
     // Navigation
@@ -989,10 +995,11 @@ const translations: Record<Language, TranslationDictionary> = {
     'fullPdf': 'PDF Dosyası',
     'indexSection': 'İndeks Bölümü',
     'mergedFile': 'Birleştirilmiş Dosya',
+    'creationDate': 'Oluşturulma Tarihi',
     
     // Payment Information
-    'paymentRequired': 'İşleme Ücreti Gerekli',
-    'bankTransferInformation': 'Banka Havale Bilgileri',
+    'paymentRequired': 'Ödeme Gerekli',
+    'bankTransferInformation': 'Banka Transfer Bilgileri',
     'exampleBank': 'Örnek Banka',
     'insanMekanJournal': 'İnsan Mekan Dergisi',
     'ibanNumber': 'IBAN Numarası',
@@ -1186,7 +1193,9 @@ const translations: Record<Language, TranslationDictionary> = {
     'resendingConfirmationEmail': 'Gönderiliyor...',
     'confirmationEmailSent': 'Onay e-postası e-posta adresinize gönderildi.',
     'resendConfirmationEmailError': 'Onay e-postası gönderilemedi. Lütfen tekrar deneyin.',
-    'resendEmailLink': 'E-postayı tekrar gönder'
+    'resendEmailLink': 'E-postayı tekrar gönder',
+    'maxCharacters': 'Maksimum karakter',
+    'fileTooLarge': 'Dosya boyutu 100 MB\'ı geçemez.'
   }
 };
 

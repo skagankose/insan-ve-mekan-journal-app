@@ -242,7 +242,7 @@ interface UserForm {
 const CreateUserPage: React.FC = () => {
     const navigate = useNavigate();
     const { user: currentUser, isAuthenticated } = useAuth();
-    const { language } = useLanguage();
+    const { language, t } = useLanguage();
     const formRef = useRef<HTMLFormElement>(null);
     
     const [loading, setLoading] = useState<boolean>(false);
@@ -524,6 +524,7 @@ const CreateUserPage: React.FC = () => {
                                     className="form-input"
                                     placeholder={language === 'tr' ? 'E-posta adresini girin' : 'Enter email address'}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 200`}
                                 />
                             </div>
                             
@@ -540,6 +541,7 @@ const CreateUserPage: React.FC = () => {
                                     className="form-input"
                                     placeholder={language === 'tr' ? 'Tam adınızı girin' : 'Enter full name'}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 200`}
                                 />
                             </div>
                             
@@ -555,6 +557,7 @@ const CreateUserPage: React.FC = () => {
                                     className="form-input"
                                     placeholder={language === 'tr' ? 'Akademik unvanınızı girin' : 'Enter academic title'}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 200`}
                                 />
                             </div>
                             
@@ -570,6 +573,7 @@ const CreateUserPage: React.FC = () => {
                                     className="form-textarea"
                                     placeholder={language === 'tr' ? 'Biyografik bilgilerinizi girin' : 'Enter biographical information'}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 400`}
                                 />
                             </div>
                             
@@ -616,6 +620,7 @@ const CreateUserPage: React.FC = () => {
                                     className="form-input"
                                     placeholder={language === 'tr' ? 'Çalışma alanınızı girin' : 'Enter field of study'}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 300`}
                                 />
                             </div>
                             
@@ -650,6 +655,8 @@ const CreateUserPage: React.FC = () => {
                                         id="location"
                                         name="location"
                                         disabled={loading}
+                                        maxLength={200}
+                                        title={`${t('maxCharacters')}: 200`}
                                     />
                                 </div>
                             </div>
@@ -709,6 +716,7 @@ const CreateUserPage: React.FC = () => {
                                         className="form-input"
                                         placeholder={language === 'tr' ? 'Şifrenizi girin' : 'Enter password'}
                                         disabled={loading}
+                                        title={`${t('maxCharacters')}: 100`}
                                     />
                                     <button
                                         type="button"
@@ -739,9 +747,11 @@ const CreateUserPage: React.FC = () => {
                                         onChange={handleInputChange}
                                         required
                                         minLength={8}
+                                        maxLength={100}
                                         className="form-input"
                                         placeholder={language === 'tr' ? 'Şifrenizi tekrar girin' : 'Confirm password'}
                                         disabled={loading}
+                                        title={`${t('maxCharacters')}: 100`}
                                     />
                                     <button
                                         type="button"

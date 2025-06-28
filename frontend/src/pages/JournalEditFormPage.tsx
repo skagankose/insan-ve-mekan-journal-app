@@ -69,7 +69,7 @@ const JournalEditFormPage: React.FC = () => {
     
     const navigate = useNavigate();
     const { isAuthenticated, user } = useAuth();
-    const { language } = useLanguage();
+    const { language, t } = useLanguage();
 
     const isAdminOrOwner = user?.role === 'admin' || user?.role === 'owner';
 
@@ -136,9 +136,21 @@ const JournalEditFormPage: React.FC = () => {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, files } = event.target;
         if (files && files.length > 0) {
+            const file = files[0];
+            const maxSize = 100 * 1024 * 1024; // 100MB
+
+            if (file.size > maxSize) {
+                setToastMessage(t('fileTooLarge') || 'File size cannot exceed 100 MB.');
+                setToastType('warning');
+                setShowToast(true);
+                setTimeout(() => setShowToast(false), 4000);
+                event.target.value = ''; // Clear the input
+                return;
+            }
+            
             setSelectedFiles(prev => ({
                 ...prev,
-                [name]: files[0]
+                [name]: file
             }));
         }
     };
@@ -456,6 +468,7 @@ const JournalEditFormPage: React.FC = () => {
                                 required
                                 disabled={isSubmitting}
                                 maxLength={300}
+                                title={`${t('maxCharacters')}: 300`}
                                 placeholder={language === 'tr' ? 'Dergi başlığını girin' : 'Enter journal title'}
                             />
                         </div>
@@ -471,6 +484,7 @@ const JournalEditFormPage: React.FC = () => {
                                 onChange={handleChange}
                                 disabled={isSubmitting}
                                 maxLength={300}
+                                title={`${t('maxCharacters')}: 300`}
                                 placeholder={language === 'tr' ? 'İngilizce dergi başlığını girin' : 'Enter journal title in English'}
                             />
                         </div>
@@ -487,6 +501,7 @@ const JournalEditFormPage: React.FC = () => {
                                 required
                                 disabled={isSubmitting}
                                 maxLength={100}
+                                title={`${t('maxCharacters')}: 100`}
                                 placeholder={language === 'tr' ? 'Sayı numarasını girin' : 'Enter issue number'}
                             />
                         </div>
@@ -541,6 +556,7 @@ const JournalEditFormPage: React.FC = () => {
                                 name="publication_place"
                                 className="form-input"
                                 maxLength={100}
+                                title={`${t('maxCharacters')}: 100`}
                                 value={formData.publication_place || ''}
                                 onChange={handleChange}
                                 placeholder={language === 'tr' ? 'Yayın yerini girin' : 'Enter publication place'}

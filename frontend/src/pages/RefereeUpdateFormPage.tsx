@@ -7,7 +7,7 @@ import axios, { AxiosError } from 'axios';
 import './JournalEntryDetailsPage.css';
 
 const RefereeUpdateFormPage: React.FC = () => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { entryId } = useParams<{ entryId: string }>();
   const navigate = useNavigate();
   
@@ -62,6 +62,17 @@ const RefereeUpdateFormPage: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+      const maxSize = 100 * 1024 * 1024; // 100MB
+
+      if (file.size > maxSize) {
+        setToastMessage(t('fileTooLarge') || 'File size cannot exceed 100 MB.');
+        setToastType('warning');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 4000);
+        e.target.value = '';
+        return;
+      }
+
       if (!file.name.toLowerCase().endsWith('.docx')) {
         setToastMessage(language === 'tr' ? 'Sadece .docx dosyalarına izin verilir' : 'Only .docx files are allowed');
         setToastType('warning');
@@ -301,6 +312,7 @@ const RefereeUpdateFormPage: React.FC = () => {
                 placeholder={language === 'tr' ? 'Değerlendirme notlarınız ve geri bildirimlerinizi girin' : 'Enter your review notes and feedback'}
                 rows={6}
                 maxLength={1000}
+                title={`${t('maxCharacters')}: 1000`}
                 disabled={isSubmitting}
                 required
               />

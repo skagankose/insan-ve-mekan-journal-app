@@ -128,6 +128,7 @@ const ResetPasswordPage: React.FC = () => {
                                         disabled={isSubmitting}
                                         minLength={8}
                                         maxLength={100}
+                                        title={`${t('maxCharacters')}: 100`}
                                     />
                                     <button
                                         type="button"
@@ -159,6 +160,8 @@ const ResetPasswordPage: React.FC = () => {
                                         required
                                         disabled={isSubmitting}
                                         minLength={8}
+                                        maxLength={100}
+                                        title={`${t('maxCharacters')}: 100`}
                                     />
                                     <button
                                         type="button"

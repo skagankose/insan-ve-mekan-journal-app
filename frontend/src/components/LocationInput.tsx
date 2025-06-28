@@ -10,6 +10,8 @@ interface LocationInputProps {
     id?: string;
     name?: string;
     className?: string;
+    maxLength?: number;
+    title?: string;
 }
 
 const LocationInput: React.FC<LocationInputProps> = ({
@@ -19,7 +21,9 @@ const LocationInput: React.FC<LocationInputProps> = ({
     required = false,
     id,
     name,
-    className = 'form-input'
+    className = 'form-input',
+    maxLength,
+    title
 }) => {
     const { t } = useLanguage();
 
@@ -39,6 +43,8 @@ const LocationInput: React.FC<LocationInputProps> = ({
                 id={id}
                 name={name}
                 className={`${className} location-text-input`}
+                maxLength={maxLength}
+                title={title}
             />
         </div>
     );

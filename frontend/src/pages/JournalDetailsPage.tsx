@@ -1519,8 +1519,8 @@ const JournalDetailsPage: React.FC = () => {
                                         }}>{t('issue') || 'Issue'}</div>
                                         <div style={{ 
                                             fontSize: '18px', 
-                            fontWeight: '700',
-                            color: '#1E293B',
+            fontWeight: '700',
+            color: '#1E293B',
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '6px'
@@ -1617,7 +1617,7 @@ const JournalDetailsPage: React.FC = () => {
                                 {/* Status and Admin Info */}
                             {isEditorOrAdmin && (
                                     <>
-                                        {/* Publication Date */}
+                                        {/* Creation Date */}
                                 <div style={{
                                             display: 'flex',
                                             alignItems: 'center',
@@ -1648,12 +1648,12 @@ const JournalDetailsPage: React.FC = () => {
                                                     textTransform: 'uppercase',
                                                     letterSpacing: '0.5px',
                                                     marginBottom: '4px'
-                                                }}>{t('publicationDate') || 'Publication Date'}</div>
+                                                }}>{t('creationDate')}</div>
                                                 <div style={{ 
                                                     fontSize: '16px', 
                                                     fontWeight: '600', 
                                                     color: '#1E293B'
-                                                }}>{journal.publication_date ? new Date(journal.publication_date).toLocaleDateString() : t('notSet')}</div>
+                                                }}>{journal.created_date ? new Date(journal.created_date).toLocaleDateString() : t('notSet')}</div>
                                             </div>
                                         </div>
                                         

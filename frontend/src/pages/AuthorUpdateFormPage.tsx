@@ -95,6 +95,17 @@ const AuthorUpdateFormPage: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+      const maxSize = 100 * 1024 * 1024; // 100MB
+
+      if (file.size > maxSize) {
+        setToastMessage(t('fileTooLarge') || 'File size cannot exceed 100 MB.');
+        setToastType('warning');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 4000);
+        e.target.value = '';
+        return;
+      }
+
       if (!file.name.toLowerCase().endsWith('.docx')) {
         setToastMessage(language === 'tr' ? 'Sadece .docx dosyalarına izin verilir' : 'Only .docx files are allowed');
         setToastType('warning');
@@ -399,6 +410,7 @@ const AuthorUpdateFormPage: React.FC = () => {
                 placeholder={language === 'tr' ? 'Başlığı girin' : 'Enter title'}
                 required
                 maxLength={300}
+                title={`${t('maxCharacters')}: 300`}
                 disabled={isSubmitting}
               />
             </div>
@@ -414,6 +426,7 @@ const AuthorUpdateFormPage: React.FC = () => {
                 placeholder={language === 'tr' ? 'Türkçe özet girin' : 'Enter abstract in Turkish'}
                 rows={4}
                 maxLength={500}
+                title={`${t('maxCharacters')}: 500`}
                 disabled={isSubmitting}
               />
             </div>
@@ -428,7 +441,8 @@ const AuthorUpdateFormPage: React.FC = () => {
                 className="form-textarea"
                 placeholder={language === 'tr' ? 'İngilizce özet girin' : 'Enter abstract in English'}
                 rows={4}
-                maxLength={500}
+                maxLength={1000}
+                title={`${t('maxCharacters')}: 1000`}
                 disabled={isSubmitting}
               />
             </div>
@@ -444,6 +458,7 @@ const AuthorUpdateFormPage: React.FC = () => {
                 className="form-input"
                 placeholder={language === 'tr' ? 'Anahtar kelimeleri virgülle ayırın' : 'Separate keywords with commas'}
                 maxLength={100}
+                title={`${t('maxCharacters')}: 100`}
                 disabled={isSubmitting}
               />
             </div>
@@ -459,6 +474,7 @@ const AuthorUpdateFormPage: React.FC = () => {
                 className="form-input"
                 placeholder={language === 'tr' ? 'İngilizce anahtar kelimeleri virgülle ayırın' : 'Separate English keywords with commas'}
                 maxLength={100}
+                title={`${t('maxCharacters')}: 100`}
                 disabled={isSubmitting}
               />
             </div>
@@ -474,6 +490,7 @@ const AuthorUpdateFormPage: React.FC = () => {
                 placeholder={language === 'tr' ? 'Ek notlar girin' : 'Enter any additional notes'}
                 rows={4}
                 maxLength={1000}
+                title={`${t('maxCharacters')}: 1000`}
                 disabled={isSubmitting}
                 required
               />

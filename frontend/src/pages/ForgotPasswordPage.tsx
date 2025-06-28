@@ -76,6 +76,8 @@ const ForgotPasswordPage: React.FC = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     disabled={isSubmitting}
+                                    maxLength={200}
+                                    title={`${t('maxCharacters')}: 200`}
                                 />
                             </div>
                             

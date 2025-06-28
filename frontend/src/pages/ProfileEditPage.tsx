@@ -417,6 +417,7 @@ const ProfileEditPage: React.FC = () => {
                                     required
                                     maxLength={200}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 200`}
                                 />
                             </div>
 
@@ -431,6 +432,7 @@ const ProfileEditPage: React.FC = () => {
                                     className="form-input"
                                     maxLength={200}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 200`}
                                 />
                             </div>
 
@@ -445,6 +447,7 @@ const ProfileEditPage: React.FC = () => {
                                     rows={5}
                                     maxLength={400}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 400`}
                                 />
                             </div>
 
@@ -505,6 +508,8 @@ const ProfileEditPage: React.FC = () => {
                                     id="location"
                                     name="location"
                                     disabled={loading}
+                                    maxLength={200}
+                                    title={`${t('maxCharacters')}: 200`}
                                 />
                             </div>
 
@@ -519,6 +524,7 @@ const ProfileEditPage: React.FC = () => {
                                     className="form-input"
                                     maxLength={300}
                                     disabled={loading}
+                                    title={`${t('maxCharacters')}: 300`}
                                 />
                             </div>
 
@@ -663,6 +669,8 @@ const ProfileEditPage: React.FC = () => {
                                     className="form-input"
                                     required
                                     disabled={isChangingPassword}
+                                    maxLength={100}
+                                    title={`${t('maxCharacters')}: 100`}
                                 />
                                 <button
                                     type="button"
@@ -690,6 +698,8 @@ const ProfileEditPage: React.FC = () => {
                                     required
                                     disabled={isChangingPassword}
                                     minLength={8}
+                                    maxLength={100}
+                                    title={`${t('maxCharacters')}: 100`}
                                 />
                                 <button
                                     type="button"
@@ -724,6 +734,8 @@ const ProfileEditPage: React.FC = () => {
                                     required
                                     disabled={isChangingPassword}
                                     minLength={8}
+                                    maxLength={100}
+                                    title={`${t('maxCharacters')}: 100`}
                                 />
                                 <button
                                     type="button"

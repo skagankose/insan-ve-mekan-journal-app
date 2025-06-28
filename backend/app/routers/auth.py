@@ -319,7 +319,7 @@ def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_se
         print(f"Failed to send password reset email to {user_with_token.email}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to send password reset email. Please try again later."
+            detail="Şifre sıfırlama e-postası gönderilemedi. Lütfen daha sonra tekrar deneyiniz."
         )
 
 @router.post("/reset-password/{token}", status_code=status.HTTP_200_OK, tags=["auth"])

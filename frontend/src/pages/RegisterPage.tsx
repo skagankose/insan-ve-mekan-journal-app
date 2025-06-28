@@ -568,6 +568,7 @@ const RegisterPage: React.FC = () => {
                                 disabled={isSubmitting}
                                 maxLength={200}
                                 className="form-input"
+                                title={`${t('maxCharacters') || 'Max characters'}: 200`}
                             />
                         </div>
                         
@@ -582,6 +583,7 @@ const RegisterPage: React.FC = () => {
                                 disabled={isSubmitting}
                                 maxLength={200}
                                 className="form-input"
+                                title={`${t('maxCharacters') || 'Max characters'}: 200`}
                             />
                         </div>
                         
@@ -595,6 +597,7 @@ const RegisterPage: React.FC = () => {
                                 disabled={isSubmitting}
                                 maxLength={200}
                                 className="form-input"
+                                title={`${t('maxCharacters') || 'Max characters'}: 200`}
                             />
                         </div>
                         
@@ -608,6 +611,7 @@ const RegisterPage: React.FC = () => {
                                 disabled={isSubmitting}
                                 rows={3}
                                 maxLength={400}
+                                title={`${t('maxCharacters') || 'Max characters'}: 400`}
                             />
                         </div>
                         
@@ -650,6 +654,7 @@ const RegisterPage: React.FC = () => {
                                 disabled={isSubmitting}
                                 maxLength={300}
                                 className="form-input"
+                                title={`${t('maxCharacters') || 'Max characters'}: 300`}
                             />
                         </div>
                         
@@ -682,6 +687,8 @@ const RegisterPage: React.FC = () => {
                                 }}
                                 id="location"
                                 disabled={isSubmitting}
+                                maxLength={200}
+                                title={`${t('maxCharacters') || 'Max characters'}: 200`}
                             />
                         </div>
                         
@@ -734,6 +741,7 @@ const RegisterPage: React.FC = () => {
                                     minLength={8}
                                     maxLength={100}
                                     className="form-input"
+                                    title={`${t('maxCharacters') || 'Max characters'}: 100`}
                                 />
                                 <button
                                     type="button"
