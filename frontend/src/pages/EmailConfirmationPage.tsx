@@ -8,7 +8,7 @@ const EmailConfirmationPage: React.FC = () => {
     const [searchParams] = useSearchParams();
     const { t } = useLanguage();
     const navigate = useNavigate();
-    const [countdown, setCountdown] = useState(5);
+    const [countdown, setCountdown] = useState(2);
 
     const status = searchParams.get('status');
     const isSuccess = status === 'success';
@@ -26,7 +26,7 @@ const EmailConfirmationPage: React.FC = () => {
 
             const redirectTimeout = setTimeout(() => {
                 navigate('/login');
-            }, 5000);
+            }, 2000);
 
             return () => {
                 clearInterval(timer);
@@ -37,10 +37,6 @@ const EmailConfirmationPage: React.FC = () => {
 
     return (
         <>
-            <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
-                <h1>{isSuccess ? (t('emailConfirmationSuccessTitle') || 'Email Confirmed!') : (t('emailConfirmationFailureTitle') || 'Confirmation Failed')}</h1>
-            </div>
-
             <div className="page-content-section">
                 <div className="register-form-container">
                     {isSuccess ? (

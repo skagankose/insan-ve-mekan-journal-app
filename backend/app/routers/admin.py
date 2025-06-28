@@ -9,7 +9,7 @@ from sib_api_v3_sdk.rest import ApiException
 from .. import models, auth, schemas
 from ..database import get_session
 from .. import crud
-from ..email_utils import SENDER_EMAIL, SENDER_NAME
+from ..email_utils import SENDER_EMAIL, SENDER_NAME, send_login_link_email
 
 router = APIRouter(
     prefix="/admin",
@@ -229,7 +229,7 @@ def send_login_link_email(
         recipient_email = email_address if email_address else user.email
         recipient_name = user.name  # Always use the user's name
         
-        # Use the existing email sending function, but customize for login link
+        # Use the new styled email function for login link
         api_key = os.getenv("BREVO_API_KEY")
         if not api_key:
             raise HTTPException(
@@ -237,39 +237,14 @@ def send_login_link_email(
                 detail="Email service API key not configured"
             )
         
-        # Custom email for login link
-        subject = "Your Login Link"
-        html_content = f"""
-        <html>
-            <body>
-                <h1>Hi {user.name},</h1>
-                <p>You have been provided with a temporary login link:</p>
-                <p><a href="{login_link}">Click here to login</a></p>
-                <p>This link will expire in 6 months.</p>
-                <p>If you did not request this link, please contact the administrator.</p>
-                <p>Thanks,</p>
-                <p>The Human and Space Team</p>
-            </body>
-        </html>
-        """
-        
-        # Configure the Brevo client
-        configuration = sib_api_v3_sdk.Configuration()
-        configuration.api_key['api-key'] = api_key
-        
-        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
-        
-        sender = {"name": SENDER_NAME, "email": SENDER_EMAIL}
-        to = [{"email": recipient_email, "name": recipient_name}]
-        
-        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
-            to=to, 
-            sender=sender, 
-            subject=subject, 
-            html_content=html_content
+        # Send login link email using the new template
+        send_login_link_email(
+            api_key=api_key,
+            user_email=recipient_email,
+            user_name=recipient_name,
+            login_link=login_link,
+            language="en"  # Default to English, could be made configurable
         )
-        
-        api_response = api_instance.send_transac_email(send_smtp_email)
         return {"success": True, "message": f"Login link sent to {recipient_email}"}
         
     except ApiException as e:

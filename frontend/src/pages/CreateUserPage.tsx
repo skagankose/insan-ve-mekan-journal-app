@@ -823,7 +823,7 @@ const CreateUserPage: React.FC = () => {
                                     >
                                         <option value="author">{language === 'tr' ? 'Yazar' : 'Author'}</option>
                                         <option value="admin">{language === 'tr' ? 'Yönetici' : 'Admin'}</option>
-                                        <option value="owner">{language === 'tr' ? 'Sahip' : 'Owner'}</option>
+                                        <option value="owner">{language === 'tr' ? 'Kurucu' : 'Owner'}</option>
                                         <option value="editor">{language === 'tr' ? 'Editör' : 'Editor'}</option>
                                         <option value="referee">{language === 'tr' ? 'Hakem' : 'Referee'}</option>
                                     </select>

@@ -103,7 +103,8 @@ type TranslationKeys =
   | 'linkCopied' | 'copyFailed' | 'pleaseWait'
   // Email Confirmation
   | 'emailConfirmationSuccessTitle' | 'emailConfirmationSuccessMessage' | 'emailConfirmationRedirectMessage' | 'emailConfirmationSuccessSubTitle'
-  | 'emailConfirmationFailureTitle' | 'emailConfirmationFailureMessage' | 'emailConfirmationSupportMessage' | 'backToRegister' | 'emailConfirmationFailureSubTitle';
+| 'emailConfirmationFailureTitle' | 'emailConfirmationFailureMessage' | 'emailConfirmationSupportMessage' | 'backToRegister' | 'emailConfirmationFailureSubTitle'
+| 'resendConfirmationEmail' | 'resendingConfirmationEmail' | 'confirmationEmailSent' | 'resendConfirmationEmailError' | 'resendEmailLink';
 
 type TranslationDictionary = Record<TranslationKeys, string>;
 
@@ -642,6 +643,11 @@ const translations: Record<Language, TranslationDictionary> = {
     'emailConfirmationFailureMessage': 'The confirmation link is invalid or has expired.',
     'emailConfirmationSupportMessage': 'If you need help, please contact',
     'backToRegister': 'Back to Register',
+    'resendConfirmationEmail': 'Resend Confirmation Email',
+    'resendingConfirmationEmail': 'Sending...',
+    'confirmationEmailSent': 'Confirmation email has been sent to your email address.',
+    'resendConfirmationEmailError': 'Failed to send confirmation email. Please try again.',
+    'resendEmailLink': 'Resend email',
   },
   tr: {
     // Navigation
@@ -1175,7 +1181,12 @@ const translations: Record<Language, TranslationDictionary> = {
     'emailConfirmationFailureSubTitle': 'Onaylama Başarısız!',
     'emailConfirmationFailureMessage': 'Onaylama bağlantısı geçersiz veya süresi dolmuş. Lütfen tekrar onaylama bağlantısını alınız.',
     'emailConfirmationSupportMessage': 'Yardıma ihtiyacınız olursa, lütfen iletişime geçin',
-    'backToRegister': 'Kayıt Sayfasına Dön'
+    'backToRegister': 'Kayıt Sayfasına Dön',
+    'resendConfirmationEmail': 'Onay E-postasını Tekrar Gönder',
+    'resendingConfirmationEmail': 'Gönderiliyor...',
+    'confirmationEmailSent': 'Onay e-postası e-posta adresinize gönderildi.',
+    'resendConfirmationEmailError': 'Onay e-postası gönderilemedi. Lütfen tekrar deneyin.',
+    'resendEmailLink': 'E-postayı tekrar gönder'
   }
 };
 

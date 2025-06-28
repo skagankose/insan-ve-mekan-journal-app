@@ -88,9 +88,11 @@ const ResetPasswordPage: React.FC = () => {
 
     return (
         <>
-            <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
-                <h1>{t('resetPassword')}</h1>
-            </div>
+            {!success && (
+                <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
+                    <h1>{t('resetPassword')}</h1>
+                </div>
+            )}
 
             <div className="page-content-section">
                 <div className="register-form-container">
@@ -100,9 +102,16 @@ const ResetPasswordPage: React.FC = () => {
                             <h2 style={{ fontSize: '1.75rem', fontWeight: '600', color: '#1F2937', marginBottom: '0.75rem' }}>
                                 {t('passwordResetSuccess')}
                             </h2>
-                            <p style={{ fontSize: '1rem', color: '#4B5563' }}>
+                            <p style={{ fontSize: '1rem', color: '#4B5563', marginBottom: '1.5rem' }}>
                                 {t('redirectingToLogin')} <span style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#14B8A6' }}>({countdown})</span>...
                             </p>
+                            <button 
+                                type="button"
+                                className="btn btn-primary register-submit-button"
+                                onClick={() => navigate('/login?reset=success')}
+                            >
+                                {t('goToLogin') || 'Go to Login'}
+                            </button>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="register-form">

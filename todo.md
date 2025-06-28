@@ -29,8 +29,8 @@ Protected by User Role Pages
 [ + ] ProfileEditPage - User Edit Profile
 [ + ] JournalCreatePage - Entry Create
 [ + ] JournalEditPage - Entry Edit
-[ - ] AuthorUpdateFormPage - Author Update Create
-[ - ] RefereeUpdateFormPage - Referee Update Create
+[ + ] AuthorUpdateFormPage - Author Update Create
+[ + ] RefereeUpdateFormPage - Referee Update Create
 
 Admin-Only Pages
 [ + ] AdminPage - Dashboard

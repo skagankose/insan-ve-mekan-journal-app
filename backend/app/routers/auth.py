@@ -479,3 +479,51 @@ async def login_with_google(data: GoogleLoginData, db: Session = Depends(get_ses
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         ) 
+
+@router.post("/resend-confirmation", status_code=status.HTTP_200_OK, tags=["auth"])
+def resend_confirmation_email(request: ForgotPasswordRequest, db: Session = Depends(get_session)):
+    """
+    Resend a confirmation email to a user who hasn't confirmed their email yet.
+    """
+    # Check if user exists
+    user = crud.get_user_by_email(db, email=request.email)
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No user found with this email address."
+        )
+    
+    # Check if user is already confirmed
+    if user.is_auth:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This email address is already confirmed."
+        )
+    
+    # Create a new confirmation token for the user
+    user_with_token = crud.create_confirmation_token(db, email=request.email)
+    
+    if not user_with_token:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create confirmation token."
+        )
+    
+    try:
+        # Send confirmation email
+        base_url_for_email = "http://localhost:8000"  # Backend URL
+        send_confirmation_email(
+            api_key=BREVO_API_KEY,
+            user_email=user_with_token.email,
+            user_name=user_with_token.name,
+            confirmation_token=user_with_token.confirmation_token,
+            base_url=base_url_for_email
+        )
+        return {"message": "Confirmation email has been sent to your email address."}
+    except Exception as e:
+        print(f"Failed to send confirmation email to {user_with_token.email}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send confirmation email. Please try again later."
+        ) 

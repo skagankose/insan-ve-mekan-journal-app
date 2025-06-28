@@ -621,6 +621,12 @@ const sendLoginLinkEmail = async (userId: number, loginLink: string, emailAddres
     return response.data;
 };
 
+// Add function to resend confirmation email
+const resendConfirmationEmail = async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post('/resend-confirmation', { email });
+    return response.data;
+};
+
 const deleteUser = async (userId: number, transferToUserId: number): Promise<void> => {
     await apiClient.delete(`/admin/users/${userId}`, { 
         data: { transfer_to_user_id: transferToUserId }
@@ -1012,6 +1018,7 @@ export {
     changePassword,
     mergeJournalFiles,
     loginWithGoogle,
+    resendConfirmationEmail,
 };
 
 export type {

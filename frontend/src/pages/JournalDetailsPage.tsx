@@ -529,7 +529,7 @@ const JournalDetailsPage: React.FC = () => {
                             lineHeight: '1.6',
                             marginBottom: '32px',
                             fontWeight: '500'
-                        }}>{error}</p>
+                        }}>{t('failedToLoadJournalData') || 'Failed to load journal data.'}</p>
                         
                         <div style={{
                             display: 'flex',
@@ -661,7 +661,7 @@ const JournalDetailsPage: React.FC = () => {
                             background: 'linear-gradient(135deg, #1E293B 0%, #475569 100%)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
-                        }}>Journal Not Found</h1>
+                        }}>{language === 'en' ? 'Journal Not Found!' : 'Aradığınız Dergi Bulunamadı!'}</h1>
                         
                         <p style={{
                             fontSize: '18px',

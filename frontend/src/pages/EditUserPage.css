@@ -486,6 +486,34 @@
     }
 }
 
+/* Copy Login Link Button */
+.copy-login-link-button {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #6B7280;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+}
+
+.copy-login-link-button:hover {
+    color: #0369A1;
+    background-color: rgba(3, 105, 161, 0.1);
+    transform: translateY(-50%) scale(1.2);
+}
+
+.copy-login-link-button:active {
+    transform: translateY(-50%) scale(1.1);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .toast-notification {

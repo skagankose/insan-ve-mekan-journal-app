@@ -39,9 +39,11 @@ const ForgotPasswordPage: React.FC = () => {
 
     return (
         <>
-            <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
-                <h1>{t('forgotPassword')}</h1>
-            </div>
+            {!success && (
+                <div className="page-title-section" style={{ display: 'flex', justifyContent: 'center', paddingLeft: '0px' }}>
+                    <h1>{t('forgotPassword')}</h1>
+                </div>
+            )}
 
             <div className="page-content-section">
                 <div className="register-form-container">

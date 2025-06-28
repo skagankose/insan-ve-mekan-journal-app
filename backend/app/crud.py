@@ -568,6 +568,31 @@ def create_password_reset_token(db: Session, email: str) -> Optional[models.User
     
     return user
 
+def create_confirmation_token(db: Session, email: str) -> Optional[models.User]:
+    """Create a new confirmation token for a user and return the user object."""
+    # Find the user by email
+    user = get_user_by_email(db, email)
+    if not user:
+        return None
+    
+    # Don't generate a new token if the user is already confirmed
+    if user.is_auth:
+        return None
+    
+    # Generate confirmation token and set creation time
+    confirmation_token = secrets.token_urlsafe(32)
+    confirmation_token_created_at = datetime.utcnow()
+    
+    # Update the user with the new token
+    user.confirmation_token = confirmation_token
+    user.confirmation_token_created_at = confirmation_token_created_at
+    
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    
+    return user
+
 def update_user_password(db: Session, user_id: int, new_password: str) -> models.User:
     """Update a user's password and clear the reset token."""
     from .security import get_password_hash  # Import here to avoid circular imports

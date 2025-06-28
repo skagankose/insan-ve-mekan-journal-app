@@ -1092,7 +1092,7 @@ const EditUserPage: React.FC = () => {
                                     >
                                         <option value="author">{language === 'tr' ? 'Yazar' : 'Author'}</option>
                                         <option value="admin">{language === 'tr' ? 'Yönetici' : 'Admin'}</option>
-                                        <option value="owner">{language === 'tr' ? 'Sahip' : 'Owner'}</option>
+                                        <option value="owner">{language === 'tr' ? 'Kurucu' : 'Owner'}</option>
                                         <option value="editor">{language === 'tr' ? 'Editör' : 'Editor'}</option>
                                         <option value="referee">{language === 'tr' ? 'Hakem' : 'Referee'}</option>
                                         <option value="user">User</option>
@@ -1314,22 +1314,7 @@ const EditUserPage: React.FC = () => {
                                             <button
                                                 type="button"
                                                 onClick={handleCopyLoginLink}
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: '50%',
-                                                    right: '12px',
-                                                    transform: 'translateY(-50%)',
-                                                    background: 'transparent',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    color: '#6B7280',
-                                                    padding: '4px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center'
-                                                }}
-                                                onMouseOver={(e) => e.currentTarget.style.color = '#0369A1'}
-                                                onMouseOut={(e) => e.currentTarget.style.color = '#6B7280'}
+                                                className="copy-login-link-button"
                                             >
                                                 <FaCopy size={18} />
                                             </button>

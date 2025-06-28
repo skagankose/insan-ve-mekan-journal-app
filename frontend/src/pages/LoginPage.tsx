@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { GoogleLogin } from '@react-oauth/google';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { resendConfirmationEmail } from '../services/apiService';
 import '../styles/LoginPage.css';
 import '../styles/FormattedIdInput.css';
 import '../pages/UserProfilePage.css'; // Import toast styles
@@ -15,6 +16,9 @@ const LoginPage: React.FC = () => {
     const [showToast, setShowToast] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
+    const [isResendingEmail, setIsResendingEmail] = useState(false);
+    const [showEmailNotConfirmed, setShowEmailNotConfirmed] = useState(false);
+    const [showResendToast, setShowResendToast] = useState(false);
     const navigate = useNavigate();
     const { login, loginWithGoogle, isLoading } = useAuth();
     const { t } = useLanguage();
@@ -40,6 +44,10 @@ const LoginPage: React.FC = () => {
         setShowToast(false);
     };
 
+    const handleResendToastClose = () => {
+        setShowResendToast(false);
+    };
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setError(null);
@@ -52,8 +60,10 @@ const LoginPage: React.FC = () => {
             const detail = err.response?.data?.detail;
             if (err.response?.status === 403 && detail === "Please confirm your email address to login.") {
                 setError(t('pleaseConfirmEmail'));
+                setShowEmailNotConfirmed(true);
             } else {
                 setError(t('incorrectCredentials'));
+                setShowEmailNotConfirmed(false);
             }
         }
     };
@@ -70,6 +80,40 @@ const LoginPage: React.FC = () => {
 
     const handleGoogleError = () => {
         setError(t('googleSignInFailed'));
+    };
+
+    const handleResendConfirmationEmail = async () => {
+        if (!email) {
+            setError(t('enterEmail') || 'Please enter your email address');
+            return;
+        }
+
+        setIsResendingEmail(true);
+        setError(null);
+
+        try {
+            await resendConfirmationEmail(email);
+            setShowResendToast(true);
+            setShowEmailNotConfirmed(false);
+            setError(null);
+            
+            // Auto-hide toast after 5 seconds
+            setTimeout(() => {
+                setShowResendToast(false);
+            }, 5000);
+        } catch (err: any) {
+            console.error("Resend confirmation email failed:", err);
+            const detail = err.response?.data?.detail;
+            if (detail === "This email address is already confirmed.") {
+                setError(t('emailAlreadyRegistered') || 'This email address is already confirmed.');
+            } else if (detail === "No user found with this email address.") {
+                setError(t('emailNotFound') || 'No account found with this email address.');
+            } else {
+                setError(t('resendConfirmationEmailError'));
+            }
+        } finally {
+            setIsResendingEmail(false);
+        }
     };
 
     if (isLoading) {
@@ -89,6 +133,25 @@ const LoginPage: React.FC = () => {
                         <button 
                             className="toast-close"
                             onClick={handleToastClose}
+                            type="button"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Resend Confirmation Toast */}
+            {showResendToast && (
+                <div className="toast-notification">
+                    <div className="toast-content toast-success">
+                        <div className="toast-icon">✓</div>
+                        <div className="toast-message">
+                            {t('confirmationEmailSent')}
+                        </div>
+                        <button 
+                            className="toast-close"
+                            onClick={handleResendToastClose}
                             type="button"
                         >
                             ×
@@ -149,7 +212,33 @@ const LoginPage: React.FC = () => {
                     />
                 </div>
 
-                {error && <div className="error-message">{error}</div>}
+                {error && (
+                    <div className="error-message">
+                        {error}
+                        {showEmailNotConfirmed && (
+                            <>
+                                {' '}
+                                <button 
+                                    type="button"
+                                    onClick={handleResendConfirmationEmail}
+                                    disabled={isResendingEmail}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: '#b91c1c',
+                                        textDecoration: 'underline',
+                                        cursor: 'pointer',
+                                        fontSize: 'inherit',
+                                        padding: '0',
+                                        fontFamily: 'inherit'
+                                    }}
+                                >
+                                    {isResendingEmail ? t('resendingConfirmationEmail') : t('resendEmailLink')}
+                                </button>
+                            </>
+                        )}
+                    </div>
+                )}
 
                 <div className="register-links">
                     <span>{t('dontHaveAccount')}</span>

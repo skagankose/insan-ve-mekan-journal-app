@@ -229,15 +229,18 @@ async def search(
     
     # Search entries by title, title_en, or random_token (case-insensitive)
     if has_limited_access:
-        # For limited access, only show completed/published entries
-        entries_statement = select(models.JournalEntry).where(
+        # For limited access, only show accepted entries that are in published journals
+        entries_statement = select(models.JournalEntry).join(
+            models.Journal, models.JournalEntry.journal_id == models.Journal.id
+        ).where(
             and_(
                 or_(
                     models.JournalEntry.title.ilike(search_pattern),
                     models.JournalEntry.title_en.ilike(search_pattern),
                     models.JournalEntry.random_token.ilike(search_pattern)
                 ),
-                models.JournalEntry.status == JournalEntryStatus.ACCEPTED
+                models.JournalEntry.status == JournalEntryStatus.ACCEPTED,
+                models.Journal.is_published == True
             )
         ).limit(limit)
     else:
