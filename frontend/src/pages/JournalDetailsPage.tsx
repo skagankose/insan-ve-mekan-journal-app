@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useActiveJournal } from '../contexts/ActiveJournalContext';
 import Footer from '../components/Footer';
-import { HiMail, HiUser, HiCalendar, HiLocationMarker, HiCheckCircle, HiUserGroup, HiDocumentText, HiAcademicCap } from 'react-icons/hi';
+import { HiMail, HiUser, HiCalendar, HiLocationMarker, HiUserGroup, HiDocumentText, HiAcademicCap } from 'react-icons/hi';
 import { PiSubtitlesFill } from "react-icons/pi";
 import './JournalEntryUpdateDetailsPage.css'; // Import toast styles
 
@@ -959,7 +959,27 @@ const JournalDetailsPage: React.FC = () => {
                         )}
                     </div>
                 </div>
-                <h1>{language === 'en' && journal.title_en ? journal.title_en : journal.title}</h1>
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    gap: '20px'
+                }}>
+                    <div style={{ flex: 1 }}>
+                        <h1 style={{ margin: '0 12px 12px 0' }}>
+                            {language === 'en' && journal.title_en ? journal.title_en : journal.title}
+                            <span style={{
+                                fontSize: '21px',
+                                fontWeight: '500',
+                                color: '#64748B',
+                                letterSpacing: '0.25px',
+                                marginLeft: '8px'
+                            }}>
+                                • {journal.issue}
+                            </span>
+                        </h1>
+                    </div>
+                </div>
             </div>
 
             {/* Content Section */}
@@ -1192,7 +1212,7 @@ const JournalDetailsPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Editors Section */}
+                        {/* Publication Details Section */}
                         <div style={{
                             padding: '32px',
                             background: 'rgba(255, 255, 255, 0.7)',
@@ -1217,69 +1237,37 @@ const JournalDetailsPage: React.FC = () => {
                                 <div style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justifyContent: 'space-between',
+                                    gap: '12px',
                                     marginBottom: '8px'
                                 }}>
                                     <div style={{
+                                        width: '32px',
+                                        height: '32px',
+                                        background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+                                        borderRadius: '10px',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '12px'
+                                        justifyContent: 'center'
                                     }}>
-                                        <div style={{
-                                            width: '32px',
-                                            height: '32px',
-                                            background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                                            borderRadius: '10px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
-                                        </div>
-                                        <h3 style={{
-                                            fontSize: '24px',
-                                            fontWeight: '800',
-                                            color: '#0F172A',
-                                            margin: 0,
-                                            letterSpacing: '-0.025em',
-                                            background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
-                                            WebkitBackgroundClip: 'text',
-                                            WebkitTextFillColor: 'transparent'
-                                        }}>{t('editors') || 'Editors'}</h3>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M8 2V5M16 2V5M3.5 9H20.5M21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V8C3 7.46957 3.21071 6.96086 3.58579 6.58579C3.96086 6.21071 4.46957 6 5 6H19C19.5304 6 20.0391 6.21071 20.4142 6.58579C20.7893 6.96086 21 7.46957 21 8Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
                                     </div>
-                                    {isAdmin && (
-                                        <button
-                                            onClick={() => setShowEditorsModal(true)}
-                                            style={{
-                                                padding: '8px 12px',
-                                                background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '8px',
-                                                fontSize: '14px',
-                                                fontWeight: '600',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.3s ease'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.transform = 'translateY(-1px)';
-                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.transform = 'translateY(0)';
-                                                e.currentTarget.style.boxShadow = 'none';
-                                            }}
-                                        >
-                                            {t('manageEditors') || 'Manage Editors'}
-                                        </button>
-                                    )}
+                                    <h3 style={{
+                                        fontSize: '24px',
+                                        fontWeight: '800',
+                                        color: '#0F172A',
+                                        margin: 0,
+                                        letterSpacing: '-0.025em',
+                                        background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent'
+                                    }}>{language === 'tr' ? 'Yayın Bilgileri' : 'Publication Information'}</h3>
                                 </div>
                                 <div style={{
                                     width: '50px',
                                     height: '3px',
-                                    background: 'linear-gradient(90deg, #3B82F6 0%, #1D4ED8 100%)',
+                                    background: 'linear-gradient(90deg, #14B8A6 0%, #0D9488 100%)',
                                     borderRadius: '2px',
                                     marginLeft: '44px',
                                     marginBottom: '20px'
@@ -1287,97 +1275,97 @@ const JournalDetailsPage: React.FC = () => {
                                 
                                 <div style={{
                                     display: 'grid',
-                                    gridTemplateColumns: 'repeat(2, 1fr)',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                                     gap: '16px'
                                 }}>
-                                    {editors.length > 0 ? (
-                                        editors.map(editor => (
-                                            <div 
-                                                key={editor.id} 
-                                                onClick={() => handleUserClick(editor, 'editor')}
-                                                style={{
-                                                    padding: '20px',
-                                                    background: 'rgba(255, 255, 255, 0.7)',
-                                                    borderRadius: '16px',
-                                                    border: '1px solid rgba(226, 232, 240, 0.6)',
-                                                    transition: 'all 0.3s ease',
-                                                    cursor: 'pointer',
-                                                    position: 'relative',
-                                                    overflow: 'hidden',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'space-between',
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)';
-                                                    e.currentTarget.style.borderColor = '#3B82F6';
-                                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.15)';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
-                                                    e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
-                                                    e.currentTarget.style.transform = 'translateY(0)';
-                                                    e.currentTarget.style.boxShadow = 'none';
-                                                }}
-                                            >
-                                                {/* Subtle background pattern */}
-                                                <div style={{
-                                                    position: 'absolute',
-                                                    top: '-50%',
-                                                    right: '-30%',
-                                                    width: '120px',
-                                                    height: '120px',
-                                                    background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
-                                                    borderRadius: '50%',
-                                                    zIndex: 0
-                                                }}></div>
-                                                
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, zIndex: 1 }}>
-                                                    {/* User Avatar/Icon */}
-                                                    <div style={{
-                                                        width: '40px',
-                                                        height: '40px',
-                                                        background: 'rgba(100, 116, 139, 0.1)',
-                                                        borderRadius: '12px',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        flexShrink: 0,
-                                                        border: '1px solid rgba(100, 116, 139, 0.2)'
-                                                    }}>
-                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                                            <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                        </svg>
-                                                    </div>
-                                                    
-                                                    {/* User Info */}
-                                                    <div style={{ flex: 1 }}>
-                                                        <div style={{ 
-                                                            fontSize: '16px', 
-                                                            fontWeight: '600', 
-                                                            color: '#1E293B'
-                                                        }}>{editor.name}</div>
-                                                        {editor.title && (
-                                                            <p style={{
-                                                                fontSize: '13px',
-                                                                color: '#64748B',
-                                                                margin: '4px 0 0 0',
-                                                                fontWeight: '500'
-                                                            }}>
-                                                                {editor.title}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                
-
-                                            </div>
-                                        ))
-                                    ) : (
+                                    {/* Publication Date */}
+                                    {journal.publication_date && (
                                         <div style={{
-                                            gridColumn: '1 / -1',
-                                            padding: '12px 20px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px',
+                                            padding: '16px 20px',
+                                            background: 'rgba(255, 255, 255, 0.7)',
+                                            borderRadius: '16px',
+                                            border: '1px solid rgba(226, 232, 240, 0.6)',
+                                            transition: 'all 0.3s ease'
+                                        }}>
+                                            <div style={{
+                                                width: '36px',
+                                                height: '36px',
+                                                background: 'rgba(100, 116, 139, 0.1)',
+                                                borderRadius: '10px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexShrink: 0
+                                            }}>
+                                                <HiCalendar size={20} color="#64748B" />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ 
+                                                    fontSize: '13px', 
+                                                    fontWeight: '600', 
+                                                    color: '#64748B',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.5px',
+                                                    marginBottom: '4px'
+                                                }}>{t('publicationDate') || 'Publication Date'}</div>
+                                                <div style={{ 
+                                                    fontSize: '16px', 
+                                                    fontWeight: '600', 
+                                                    color: '#1E293B'
+                                                }}>{new Date(journal.publication_date).toLocaleDateString()}</div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Publication Place */}
+                                    {journal.publication_place && (
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px',
+                                            padding: '16px 20px',
+                                            background: 'rgba(255, 255, 255, 0.7)',
+                                            borderRadius: '16px',
+                                            border: '1px solid rgba(226, 232, 240, 0.6)',
+                                            transition: 'all 0.3s ease'
+                                        }}>
+                                            <div style={{
+                                                width: '36px',
+                                                height: '36px',
+                                                background: 'rgba(100, 116, 139, 0.1)',
+                                                borderRadius: '10px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexShrink: 0
+                                            }}>
+                                                <HiLocationMarker size={20} color="#64748B" />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ 
+                                                    fontSize: '13px', 
+                                                    fontWeight: '600', 
+                                                    color: '#64748B',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.5px',
+                                                    marginBottom: '4px'
+                                                }}>{t('publicationPlace') || 'Publication Place'}</div>
+                                                <div style={{ 
+                                                    fontSize: '16px', 
+                                                    fontWeight: '600', 
+                                                    color: '#1E293B'
+                                                }}>{journal.publication_place}</div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Empty state if no publication info */}
+                                    {!journal.publication_date && !journal.publication_place && (
+                                        <div style={{
+                                            padding: '20px',
                                             textAlign: 'center',
                                             background: 'rgba(255, 255, 255, 0.6)',
                                             borderRadius: '16px',
@@ -1393,13 +1381,17 @@ const JournalDetailsPage: React.FC = () => {
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 fontSize: '18px'
-                                            }}><HiUserGroup size={20} color="#64748B" /></div>
+                                            }}>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M8 2V5M16 2V5M3.5 9H20.5M21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V8C3 7.46957 3.21071 6.96086 3.58579 6.58579C3.96086 6.21071 4.46957 6 5 6H19C19.5304 6 20.0391 6.21071 20.4142 6.58579C20.7893 6.96086 21 7.46957 21 8Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                </svg>
+                                            </div>
                                             <p style={{
                                                 margin: 0,
                                                 fontSize: '14px',
                                                 fontWeight: '500',
                                                 color: '#64748B'
-                                            }}>{language === 'tr' ? 'Dergiye Editör Atanmamıştır' : 'No Editors Assigned to this Journal'}</p>
+                                            }}>{language === 'tr' ? 'Yayın bilgisi mevcut değil' : 'No publication information available'}</p>
                                         </div>
                                     )}
                                 </div>
@@ -1407,18 +1399,233 @@ const JournalDetailsPage: React.FC = () => {
                         </div>
                     </div>
 
-
+                {/* Full Width Editors Section */}
                 <div style={{
-                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: '24px',
-                    padding: '40px',
-                    marginBottom: '32px',
-                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
-                    border: '1px solid rgba(20, 184, 166, 0.15)',
+                    padding: '32px',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(226, 232, 240, 0.6)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.06)',
                     position: 'relative',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    marginBottom: '32px'
                 }}>
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: '100%',
+                        background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23f1f5f9" fill-opacity="0.3"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat',
+                        opacity: 0.3,
+                        zIndex: 0
+                    }} />
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: '8px'
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px'
+                            }}>
+                                <div style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                    borderRadius: '10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M13 7C13 9.20914 11.2091 11 9 11C6.79086 11 5 9.20914 5 7C5 4.79086 6.79086 3 9 3C11.2091 3 13 4.79086 13 7ZM23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13M16 3.13C16.8604 3.3503 17.623 3.8507 18.1676 4.55231C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
+                                <h3 style={{
+                                    fontSize: '24px',
+                                    fontWeight: '800',
+                                    color: '#0F172A',
+                                    margin: 0,
+                                    letterSpacing: '-0.025em',
+                                    background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent'
+                                }}>{t('editors') || 'Editors'}</h3>
+                            </div>
+                            {isAdmin && (
+                                <button
+                                    onClick={() => setShowEditorsModal(true)}
+                                    style={{
+                                        padding: '8px 12px',
+                                        background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-1px)';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
+                                >
+                                    {t('manageEditors') || 'Manage Editors'}
+                                </button>
+                            )}
+                        </div>
+                        <div style={{
+                            width: '50px',
+                            height: '3px',
+                            background: 'linear-gradient(90deg, #3B82F6 0%, #1D4ED8 100%)',
+                            borderRadius: '2px',
+                            marginLeft: '44px',
+                            marginBottom: '20px'
+                        }}></div>
+                        
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                            gap: '16px'
+                        }}>
+                            {editors.length > 0 ? (
+                                editors.map(editor => (
+                                    <div 
+                                        key={editor.id} 
+                                        onClick={() => handleUserClick(editor, 'editor')}
+                                        style={{
+                                            padding: '20px',
+                                            background: 'rgba(255, 255, 255, 0.7)',
+                                            borderRadius: '16px',
+                                            border: '1px solid rgba(226, 232, 240, 0.6)',
+                                            transition: 'all 0.3s ease',
+                                            cursor: 'pointer',
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)';
+                                            e.currentTarget.style.borderColor = '#3B82F6';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.15)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)';
+                                            e.currentTarget.style.borderColor = 'rgba(226, 232, 240, 0.6)';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
+                                    >
+                                        {/* Subtle background pattern */}
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '-50%',
+                                            right: '-30%',
+                                            width: '120px',
+                                            height: '120px',
+                                            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
+                                            borderRadius: '50%',
+                                            zIndex: 0
+                                        }}></div>
+                                        
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, zIndex: 1 }}>
+                                            {/* User Avatar/Icon */}
+                                            <div style={{
+                                                width: '40px',
+                                                height: '40px',
+                                                background: 'rgba(100, 116, 139, 0.1)',
+                                                borderRadius: '12px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexShrink: 0,
+                                                border: '1px solid rgba(100, 116, 139, 0.2)'
+                                            }}>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                </svg>
+                                            </div>
+                                            
+                                            {/* User Info */}
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ 
+                                                    fontSize: '16px', 
+                                                    fontWeight: '600', 
+                                                    color: '#1E293B'
+                                                }}>{editor.name}</div>
+                                                {editor.title && (
+                                                    <p style={{
+                                                        fontSize: '13px',
+                                                        color: '#64748B',
+                                                        margin: '4px 0 0 0',
+                                                        fontWeight: '500'
+                                                    }}>
+                                                        {editor.title}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div style={{
+                                    gridColumn: '1 / -1',
+                                    padding: '40px 20px',
+                                    textAlign: 'center',
+                                    background: 'rgba(255, 255, 255, 0.6)',
+                                    borderRadius: '16px',
+                                    border: '2px dashed #E2E8F0'
+                                }}>
+                                    <div style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        margin: '0 auto 16px',
+                                        background: '#F1F5F9',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '24px'
+                                    }}><HiUserGroup size={28} color="#64748B" /></div>
+                                    <p style={{
+                                        margin: 0,
+                                        fontSize: '16px',
+                                        fontWeight: '500',
+                                        color: '#64748B'
+                                    }}>{language === 'tr' ? 'Dergiye Editör Atanmamıştır' : 'No Editors Assigned to this Journal'}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+
+                {/* Publication Details Section */}
+                {canViewJournalFiles && (
+                    <div style={{
+                        background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '24px',
+                        padding: '40px',
+                        marginBottom: '32px',
+                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.1) inset',
+                        border: '1px solid rgba(20, 184, 166, 0.15)',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}>
                     {/* Background Pattern */}
                     <div style={{
                         position: 'absolute',
@@ -1458,7 +1665,7 @@ const JournalDetailsPage: React.FC = () => {
                                 </svg>
                             </div>
                             <h3 style={{
-                                fontSize: '28px',
+                                fontSize: '24px',
                                 fontWeight: '800',
                                 color: '#0F172A',
                                 margin: 0,
@@ -1485,136 +1692,7 @@ const JournalDetailsPage: React.FC = () => {
                         position: 'relative',
                         zIndex: 1
                     }}>
-                                {/* Issue Number */}
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '12px',
-                                    padding: '16px 20px',
-                                    background: 'rgba(255, 255, 255, 0.7)',
-                                    borderRadius: '16px',
-                                    border: '1px solid rgba(226, 232, 240, 0.6)',
-                                    transition: 'all 0.3s ease'
-                                }}>
-                                    <div style={{
-                                        width: '36px',
-                                        height: '36px',
-                                        background: 'rgba(100, 116, 139, 0.1)',
-                                        borderRadius: '10px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0
-                                    }}>
-                                        <HiCheckCircle size={20} color="#64748B" />
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ 
-                                            fontSize: '13px', 
-                                            fontWeight: '600', 
-                                            color: '#64748B',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.5px',
-                                            marginBottom: '4px'
-                                        }}>{t('issue') || 'Issue'}</div>
-                                        <div style={{ 
-                                            fontSize: '18px', 
-            fontWeight: '700',
-            color: '#1E293B',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px'
-                                        }}>
-                                            #{journal.issue}
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                {/* Publication Date */}
-                                {journal.publication_date && (
-                        <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '12px',
-                                        padding: '16px 20px',
-                                        background: 'rgba(255, 255, 255, 0.7)',
-                                        borderRadius: '16px',
-                                        border: '1px solid rgba(226, 232, 240, 0.6)',
-                                        transition: 'all 0.3s ease'
-                        }}>
-                            <div style={{
-                                            width: '36px',
-                                            height: '36px',
-                                            background: 'rgba(100, 116, 139, 0.1)',
-                                            borderRadius: '10px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            flexShrink: 0
-                                        }}>
-                                            <HiCalendar size={20} color="#64748B" />
-                            </div>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ 
-                                                fontSize: '13px', 
-                                                fontWeight: '600', 
-                                                color: '#64748B',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.5px',
-                                                marginBottom: '4px'
-                                            }}>{t('publicationDate') || 'Publication Date'}</div>
-                                            <div style={{ 
-                                                fontSize: '16px', 
-                                                fontWeight: '600', 
-                                                color: '#1E293B'
-                                            }}>{new Date(journal.publication_date).toLocaleDateString()}</div>
-                                        </div>
-                                    </div>
-                                )}
-                                
-                                {/* Publication Place */}
-                                {journal.publication_place && (
-                                <div style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '12px',
-                                        padding: '16px 20px',
-                                        background: 'rgba(255, 255, 255, 0.7)',
-                                        borderRadius: '16px',
-                                        border: '1px solid rgba(226, 232, 240, 0.6)',
-                                        transition: 'all 0.3s ease'
-                                    }}>
-                                        <div style={{
-                                            width: '36px',
-                                            height: '36px',
-                                            background: 'rgba(100, 116, 139, 0.1)',
-                                            borderRadius: '10px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            flexShrink: 0
-                                        }}>
-                                            <HiLocationMarker size={20} color="#64748B" />
-                                        </div>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ 
-                                                fontSize: '13px', 
-                                                fontWeight: '600', 
-                                                color: '#64748B',
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.5px',
-                                                marginBottom: '4px'
-                                            }}>{t('publicationPlace') || 'Publication Place'}</div>
-                                            <div style={{ 
-                                                fontSize: '16px', 
-                                                fontWeight: '600', 
-                                                color: '#1E293B'
-                                            }}>{journal.publication_place}</div>
-                                        </div>
-                                </div>
-                            )}
-                            
-                                {/* Status and Admin Info */}
+                            {/* Status and Admin Info */}
                             {isEditorOrAdmin && (
                                     <>
                                         {/* Creation Date */}
@@ -1721,6 +1799,7 @@ const JournalDetailsPage: React.FC = () => {
                                 )}
                     </div>
                 </div>
+                )}
 
                 {/* Publication Files Section */}
                 {canViewJournalFiles && (
@@ -1775,7 +1854,7 @@ const JournalDetailsPage: React.FC = () => {
                                     </svg>
                                 </div>
                                 <h3 style={{
-                                    fontSize: '28px',
+                                    fontSize: '24px',
                                     fontWeight: '800',
                                     color: '#0F172A',
                                     margin: 0,
@@ -2152,11 +2231,15 @@ const JournalDetailsPage: React.FC = () => {
 
                 <div style={{ marginBottom: '32px' }}>
                     <h3 style={{
-                        fontSize: '20px',
-                        fontWeight: '700',
-                        color: '#1E293B',
+                        fontSize: '24px',
+                        fontWeight: '800',
+                        color: '#0F172A',
+                        margin: 0,
                         marginBottom: '20px',
-                        letterSpacing: '-0.025em'
+                        letterSpacing: '-0.025em',
+                        background: 'linear-gradient(135deg, #0F172A 0%, #334155 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
                     }}>{t('entriesInJournal') || 'Entries in this Journal'}</h3>
                     
                     {entries.length === 0 ? (

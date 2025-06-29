@@ -53,12 +53,13 @@
   border: 1px solid #ddd;
   border-radius: 5px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  max-height: 350px;
+  max-height: calc(100vh - 300px);
   overflow-y: auto;
+  overflow-x: hidden;
   z-index: 1000;
   margin-top: 5px;
+  margin-bottom: 80px;
   padding: 0;
-  overflow: hidden;
 }
 
 .search-section {
@@ -80,6 +81,7 @@
   line-height: 1;
   background-color: #f8f9fa;
   border-bottom: 1px solid #eee;
+  text-align: center;
 }
 
 .search-result-list {

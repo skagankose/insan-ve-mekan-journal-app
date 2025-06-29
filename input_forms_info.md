@@ -58,17 +58,14 @@ Based on comprehensive analysis of the codebase, here are all the forms that use
 - **Purpose**: Edit existing journal information
 - **Access**: Admin/Editor
 
-### 11. **Journal Details Management** (`JournalEditPage.tsx`)
-- **Fields**: File uploads (Cover Photo, Meta Files, Full PDF, Index Section), Publication settings
-- **Purpose**: Manage journal files and publication details
-- **Features**: File upload with validation
-
 ## 📄 **Journal Entry Forms**
 
-### 12. **Journal Entry Form** (`JournalForm.tsx` component)
+### 11. **Journal Entry Form** (`JournalForm.tsx` component)
 - **Fields**: Title (Turkish)*, Title (English)*, Abstract (Turkish)*, Abstract (English)*, Keywords*, Keywords (English)*
 - **Purpose**: Create/edit journal entries
 - **Used in**: Multiple pages for entry creation and editing
+
+### 12. **Entry Edit Form** (`JournalEditPage.tsx`)
 
 ### 13. **Author Update Form** (`AuthorUpdateFormPage.tsx`)
 - **Fields**: Title, Abstract (English), Abstract (Turkish), Keywords, Keywords (English), Notes, File Upload

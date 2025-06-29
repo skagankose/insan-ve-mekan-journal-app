@@ -167,7 +167,7 @@ def get_public_user_info(
 async def search(
     q: str,
     db: Session = Depends(get_session),
-    limit: int = 10,
+    limit: int = 25,
     current_user: Optional[models.User] = Depends(get_current_user_optional)
 ):
     """
