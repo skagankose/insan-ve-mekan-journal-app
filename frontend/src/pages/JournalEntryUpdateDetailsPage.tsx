@@ -47,6 +47,20 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
   const [isJournalEditor, setIsJournalEditor] = useState<boolean>(false);
   const [authorNamesMap, setAuthorNamesMap] = useState<Map<number, string>>(new Map());
   const [refereeNamesMap, setRefereeNamesMap] = useState<Map<number, string>>(new Map());
+  
+  // State to track journal and its editors for access control
+  const [journal, setJournal] = useState<apiService.Journal | null>(null);
+  const [journalEditors, setJournalEditors] = useState<apiService.UserRead[]>([]);
+  
+  // Access control logic
+  const isAdmin = user && (user.role === 'admin' || user.role === 'owner');
+  const isEditorInChief = user && journal && journal.editor_in_chief_id === user.id;
+  const isJournalEditorAccess = user && journalEditors.some(editor => editor.id === user.id);
+  const isAuthorOfEntry = user && authors.some(author => author.id === user.id);
+  const isRefereeOfEntry = user && referees.some(referee => referee.id === user.id);
+  
+  // Check if user has access to this update page
+  const hasAccess = isAdmin || isEditorInChief || isJournalEditorAccess || isAuthorOfEntry || isRefereeOfEntry;
   const [showParticipantsTooltip, setShowParticipantsTooltip] = useState<boolean>(false);
   const [showToast, setShowToast] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>('');
@@ -108,11 +122,37 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
           setReferees([]);
         }
         
-        // Check if the current user is an editor of the journal
-        if (user && entryData.journal_id) {
-          const journalEditors = await apiService.getJournalEditors(entryData.journal_id);
-          const isEditor = journalEditors.some((editor: apiService.JournalEditorLink) => editor.user_id === user.id);
-          setIsJournalEditor(isEditor);
+        // Fetch journal information if entry has a journal
+        if (entryData.journal_id) {
+          try {
+            const [journalData, journalEditorsData] = await Promise.all([
+              apiService.getJournalById(entryData.journal_id),
+              apiService.getJournalEditors(entryData.journal_id)
+            ]);
+            
+            setJournal(journalData);
+            
+            // Fetch full user data for each editor
+            const editorUsers = await Promise.all(
+              journalEditorsData.map(async (editorLink: apiService.JournalEditorLink) => {
+                try {
+                  return await apiService.getPublicUserInfo(editorLink.user_id.toString());
+                } catch (err) {
+                  console.error(`Error fetching editor user ${editorLink.user_id}:`, err);
+                  return null;
+                }
+              })
+            );
+            setJournalEditors(editorUsers.filter((editor): editor is apiService.UserRead => editor !== null));
+            
+
+            
+            // Legacy check for journal editor
+            const isEditor = journalEditorsData.some((editor: apiService.JournalEditorLink) => editor.user_id === user?.id);
+            setIsJournalEditor(isEditor);
+          } catch (err) {
+            console.error('Error fetching journal data:', err);
+          }
         }
         
         // Fetch author and referee updates for this entry
@@ -134,6 +174,16 @@ const JournalEntryUpdateDetailsPage: React.FC = () => {
     
     fetchData();
   }, [entryId, user]);
+
+  // Check access control after data is loaded
+  useEffect(() => {
+    if (entry && !loading && user) {
+      // After entry data is loaded, check if user has access
+      if (!hasAccess) {
+        setError(t('accessDeniedNotAuthorizedToViewEntryUpdates') || 'Access denied: You are not authorized to view this entry\'s updates.');
+      }
+    }
+  }, [entry, journal, journalEditors, authors, referees, hasAccess, loading, user, t]);
 
   // Fetch missing author and referee names
   useEffect(() => {

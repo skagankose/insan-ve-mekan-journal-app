@@ -43,7 +43,17 @@ const JournalDetailsPage: React.FC = () => {
     const isEditor = isAuthenticated && user && user.role === 'editor';
     const isEditorOrAdmin = isAuthenticated && user && (isEditor || isAdmin);
     
+    // Check if current user is the editor-in-chief of this journal
+    const isEditorInChief = isAuthenticated && user && journal && journal.editor_in_chief_id === user.id;
+    
+    // Admin/Owner only access
+    const isAdminOnly = isAdmin;
+    
+    // Admin/Owner/Editor-in-Chief of this journal access
+    const canManageJournal = isAdmin || isEditorInChief;
+    
     // Check if current user can view journal files (admin/owner or editor related to this journal)
+    // Note: This is now only used for viewing journal files that regular editors can access
     const canViewJournalFiles = isAdmin || 
                                (isEditor && user && (
                                    editors.some(editor => editor.id === user.id) ||
@@ -129,14 +139,62 @@ const JournalDetailsPage: React.FC = () => {
                 let journalData;
                 let entriesData;
 
-                if (isEditorOrAdmin) {
+                if (isAdmin) {
+                    // Admins can see all journals
                     const [journalsData, fetchedEntries] = await Promise.all([
                         apiService.getJournals(),
                         apiService.getEntriesByJournal(parseInt(journalId))
                     ]);
                     journalData = journalsData.find(j => j.id === parseInt(journalId));
                     entriesData = fetchedEntries;
+                } else if (isEditor) {
+                    // Editors can see journals they're assigned to OR any published journal
+                    try {
+                        // First try to get the journal from their assigned journals
+                        const editorJournalsData = await apiService.getEditorJournals();
+                        journalData = editorJournalsData.find(j => j.id === parseInt(journalId));
+                        
+                        if (journalData) {
+                            // Editor has access to this journal, get all entries
+                            const fetchedEntries = await apiService.getEntriesByJournal(parseInt(journalId));
+                            entriesData = fetchedEntries;
+                        } else {
+                            // Not in their assigned journals, check if it's a published journal
+                            const [publishedJournals, publishedEntries] = await Promise.all([
+                                apiService.getPublishedJournals(),
+                                apiService.getPublishedJournalEntries(parseInt(journalId))
+                            ]);
+                            journalData = publishedJournals.find(j => j.id === parseInt(journalId));
+                            entriesData = publishedEntries;
+                            
+                            if (!journalData) {
+                                // Journal doesn't exist or is not published and editor is not assigned
+                                throw new Error('Access denied: You are not assigned to this journal and it is not published');
+                            }
+                        }
+                    } catch (err: any) {
+                        // If there's an API error, fall back to checking published journals only
+                        const [publishedJournals, publishedEntries] = await Promise.all([
+                            apiService.getPublishedJournals(),
+                            apiService.getPublishedJournalEntries(parseInt(journalId))
+                        ]);
+                        journalData = publishedJournals.find(j => j.id === parseInt(journalId));
+                        entriesData = publishedEntries;
+                        
+                        if (!journalData) {
+                            throw new Error('Access denied: You are not assigned to this journal and it is not published');
+                        }
+                    }
+                } else if (isAuthenticated) {
+                    // Other authenticated users can only see published journals
+                    const [journals, entries] = await Promise.all([
+                        apiService.getPublishedJournals(),
+                        apiService.getPublishedJournalEntries(parseInt(journalId))
+                    ]);
+                    journalData = journals.find(j => j.id === parseInt(journalId));
+                    entriesData = entries;
                 } else {
+                    // Unauthenticated users can only see published journals
                     const [journals, entries] = await Promise.all([
                         apiService.getPublishedJournals(),
                         apiService.getPublishedJournalEntries(parseInt(journalId))
@@ -177,14 +235,20 @@ const JournalDetailsPage: React.FC = () => {
                 }
             } catch (err: any) {
                 console.error("Failed to fetch journal data:", err);
-                setError(err.response?.data?.detail || t('failedToLoadJournalData') || 'Failed to load journal data.');
+                if (err.message === 'Access denied: You are not assigned to this journal and it is not published') {
+                    setError(t('accessDeniedNotAssignedToJournal') || 'Access denied: You are not assigned to this journal and it is not published');
+                } else if (err.message === 'Access denied: You are not assigned to this journal') {
+                    setError(t('accessDeniedNotAssignedToJournal') || 'Access denied: You are not assigned to this journal');
+                } else {
+                    setError(err.response?.data?.detail || t('failedToLoadJournalData') || 'Failed to load journal data.');
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         fetchJournalAndEntries();
-    }, [journalId, isEditorOrAdmin, t]);
+    }, [journalId, isEditor, isAdmin, isAuthenticated, t]);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -871,34 +935,37 @@ const JournalDetailsPage: React.FC = () => {
                             </a>
                         )}
                         
-                        {isEditorOrAdmin && (
+                        {/* Set as Active button - Admin/Owner only */}
+                        {isAdminOnly && activeJournal?.id !== journal.id && (
+                            <button
+                                onClick={handleSetActive}
+                                style={{
+                                    padding: '12px 20px',
+                                    background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }}
+                            >
+                                {t('setAsActive') || 'Set as Active'}
+                            </button>
+                        )}
+                        
+                        {/* Merge and Edit buttons - Admin/Owner/Editor-in-Chief only */}
+                        {canManageJournal && (
                             <>
-                                {activeJournal?.id !== journal.id && (
-                                    <button
-                                        onClick={handleSetActive}
-                                        style={{
-                                            padding: '12px 20px',
-                                            background: 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '12px',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                            e.currentTarget.style.boxShadow = 'none';
-                                        }}
-                                    >
-                                        {t('setAsActive') || 'Set as Active'}
-                                    </button>
-                                )}
                                 <button
                                     onClick={handleMergeJournal}
                                     disabled={isMerging}
@@ -1065,7 +1132,7 @@ const JournalDetailsPage: React.FC = () => {
                                             WebkitTextFillColor: 'transparent'
                                         }}>{t('editorInChief') || 'Editor-in-Chief'}</h3>
                                     </div>
-                                    {isAdmin && (
+                                    {isAdminOnly && (
                                         <button
                                             onClick={() => setShowEditorInChiefModal(true)}
                                             style={{
@@ -1457,7 +1524,7 @@ const JournalDetailsPage: React.FC = () => {
                                     WebkitTextFillColor: 'transparent'
                                 }}>{t('editors') || 'Editors'}</h3>
                             </div>
-                            {isAdmin && (
+                            {isAdminOnly && (
                                 <button
                                     onClick={() => setShowEditorsModal(true)}
                                     style={{
@@ -1614,7 +1681,7 @@ const JournalDetailsPage: React.FC = () => {
 
 
                 {/* Publication Details Section */}
-                {canViewJournalFiles && (
+                {canManageJournal && (
                     <div style={{
                         background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
                         backdropFilter: 'blur(20px)',
@@ -1802,7 +1869,7 @@ const JournalDetailsPage: React.FC = () => {
                 )}
 
                 {/* Publication Files Section */}
-                {canViewJournalFiles && (
+                {canManageJournal && (
                     <div style={{
                         background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%)',
                         backdropFilter: 'blur(20px)',
@@ -1993,7 +2060,7 @@ const JournalDetailsPage: React.FC = () => {
                                 </a>
                             )}
                             
-                            {canViewJournalFiles && journal.editor_notes && (
+                            {canManageJournal && journal.editor_notes && (
                                 <a 
                                     href={`/api${journal.editor_notes}`}
                                     download
@@ -3189,7 +3256,7 @@ const JournalDetailsPage: React.FC = () => {
                                 </div>
                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                     {/* Go to Profile Button - Only for Admin users */}
-                                    {isAdmin && (
+                                    {isAdminOnly && (
                                         <button
                                             onClick={() => handleGoToProfile(selectedUser.id)}
                                             style={{

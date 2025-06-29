@@ -26,7 +26,8 @@ type TranslationKeys =
   | 'writer' | 'editor' | 'arbitrator' | 'admin' | 'owner'
   | 'roleAuthor' | 'roleAdmin' | 'roleOwner' | 'roleEditor' | 'roleReferee'
   | 'isAuth' | 'isAuthDescription'
-  | 'publicationDate' | 'isPublished' | 'editJournal' | 'updateJournal' | 'accessDeniedAdminOnly'
+  | 'publicationDate' | 'isPublished' | 'editJournal' | 'updateJournal' | 'accessDeniedAdminOnly' | 'accessDeniedNotAssignedToJournal' | 'accessDeniedNotAuthorizedToViewEntry' | 'accessDeniedNotAuthorizedToEditEntry'
+  | 'accessDeniedNotAuthorizedToViewEntryUpdates' | 'accessDeniedNotAuthorizedToCreateAuthorUpdate' | 'accessDeniedNotAuthorizedToCreateRefereeUpdate'
   | 'theme' | 'lightMode' | 'darkMode' | 'switchToDark' | 'switchToLight'
   | 'previousIssues' | 'publishedJournals' | 'acceptedEntries'
   | 'createUser' | 'userCreatedSuccessfully' | 'userDeletedSuccessfully' | 'cancel' | 'editUser' | 'userUpdatedSuccessfully' | 'createJournal'
@@ -235,6 +236,12 @@ const translations: Record<Language, TranslationDictionary> = {
     'editJournal': 'Edit Journal',
     'updateJournal': 'Update Journal',
     'accessDeniedAdminOnly': 'Access Denied: Only administrators can perform this action.',
+    'accessDeniedNotAssignedToJournal': 'Access denied: You are not assigned to this journal',
+    'accessDeniedNotAuthorizedToViewEntry': 'Access denied: You are not authorized to view this entry',
+    'accessDeniedNotAuthorizedToEditEntry': 'Access denied: You are not authorized to edit this entry',
+    'accessDeniedNotAuthorizedToViewEntryUpdates': 'Access denied: You are not authorized to view this entry\'s updates',
+    'accessDeniedNotAuthorizedToCreateAuthorUpdate': 'Access denied: You are not authorized to create author updates for this entry',
+    'accessDeniedNotAuthorizedToCreateRefereeUpdate': 'Access denied: You are not authorized to create referee updates for this entry',
 
     // Theme
     'theme': 'Theme',
@@ -777,6 +784,12 @@ const translations: Record<Language, TranslationDictionary> = {
     'editJournal': 'Dergiyi Düzenle',
     'updateJournal': 'Dergiyi Güncelle',
     'accessDeniedAdminOnly': 'Erişim Reddedildi: Yalnızca yöneticiler bu işlemi gerçekleştirebilir.',
+    'accessDeniedNotAssignedToJournal': 'Erişim reddedildi: Bu dergiye atanmadınız',
+    'accessDeniedNotAuthorizedToViewEntry': 'Erişim reddedildi: Bu makaleyi görüntüleme yetkiniz yok',
+    'accessDeniedNotAuthorizedToEditEntry': 'Erişim reddedildi: Bu makaleyi düzenleme yetkiniz yok',
+    'accessDeniedNotAuthorizedToViewEntryUpdates': 'Erişim reddedildi: Bu makalenin güncellemelerini görüntüleme yetkiniz yok',
+    'accessDeniedNotAuthorizedToCreateAuthorUpdate': 'Erişim reddedildi: Bu makale için yazar güncellemesi oluşturma yetkiniz yok',
+    'accessDeniedNotAuthorizedToCreateRefereeUpdate': 'Erişim reddedildi: Bu makale için hakem değerlendirmesi oluşturma yetkiniz yok',
 
     // Theme
     'theme': 'Tema',
@@ -957,7 +970,7 @@ const translations: Record<Language, TranslationDictionary> = {
     // Journal Details Page
     'backToJournals': 'Dergilere Dön',
     'backToArchive': 'Yayınlanan Dergilere Dön',
-    'failedToLoadJournalData': 'Dergi verileri sunucudan yüklenemedi. Bu durum geçici bir ağ sorunu, sunucu bakımı veya derginin taşınmış ya da silinmiş olması nedeniyle ortaya çıkabilir. Lütfen internet bağlantınızı kontrol edin ve sayfayı yenilemeyi deneyin. Sorun devam ederse, teknik destek ekibimizle iletişime geçin.',
+    'failedToLoadJournalData': 'Dergi verileri sunucudan yüklenemedi. İnternet bağlantınızı kontrol edin ve sayfayı yenilemeyi deneyin.',
     'loadingJournalData': 'Dergi verileri yükleniyor...',
     'journalNotFound': 'Dergi bulunamadı',
     'createdDate': 'Oluşturulma Tarihi',
@@ -1083,7 +1096,7 @@ const translations: Record<Language, TranslationDictionary> = {
     'errorLoadingUserTitle': 'Kullanıcı Yüklenirken Hata',
     'errorLoadingUserExplanation': 'Kullanıcı profili yüklenemedi. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
     'paperNotFoundTitle': 'Makale Bulunamadı!',
-    'paperNotFoundExplanation': 'Makale verileri sunucudan yüklenemedi. Bu durum geçici bir ağ sorunu, sunucu bakımı veya derginin taşınmış ya da silinmiş olması nedeniyle ortaya çıkabilir. Lütfen internet bağlantınızı kontrol edin ve sayfayı yenilemeyi deneyin. Sorun devam ederse, teknik destek ekibimizle iletişime geçin.',
+    'paperNotFoundExplanation': 'Makale verileri sunucudan yüklenemedi. İnternet bağlantınızı kontrol edin ve sayfayı yenilemeyi deneyin.',
     'paperNotFoundUpdateExplanation': 'Bu makalenin güncellemelerini yüklerken bir sorunla karşılaştık.',
           'tryAgain': 'Tekrar Dene',
       'addAuthorUpdate': 'Yazar Güncellemesi',

@@ -8,10 +8,10 @@ Public/Authentication Pages
 [ + ] ResetPasswordPage - Password Reset (with token parameter)
 [ + ] EmailConfirmationPage - Confirmin  E-mail
 --------------------------------------------------------------- Mails
-[ - ] Confirmations E-mail
-[ - ] Reset Password E-mail
-[ - ] Auto-Logim E-mail
-[ - ] Update E-mails (Referee Assigned, Author Updated, Referee Update)
+[ + ] Confirmations E-mail
+[ + ] Reset Password E-mail
+[ + ] Auto-Logim E-mail
+[ + ] Update E-mails (Referee Assigned, Author Updated, Referee Update)
 
 Public Pages
 [ + ] ArchivedJournalsPage - Journal List - Published
@@ -42,3 +42,6 @@ Admin-Only Pages
 
 Error/Fallback Pages
 [ + ] 404 Not Found
+
+-----------------
+[ - ] add logo to emails

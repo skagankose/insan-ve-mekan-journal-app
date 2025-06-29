@@ -84,9 +84,16 @@ def read_single_journal_entry(
     # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
     is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_author and not is_referee:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_author and not is_referee:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to access this entry."
@@ -120,10 +127,16 @@ def update_journal_entry(
     
     # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
-    is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_author:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_author:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to update this entry."
@@ -156,10 +169,16 @@ def delete_journal_entry(
     
     # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
-    is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_author:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_author:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to delete this entry."
@@ -238,9 +257,16 @@ def get_entry_author_updates(
     # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
     is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_author and not is_referee:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_author and not is_referee:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to access updates for this entry."
@@ -272,10 +298,16 @@ def create_author_update(
     
     # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
-    is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_author:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_author:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to create author updates for this entry."
@@ -332,9 +364,16 @@ async def create_author_update_with_file(
     
     # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_author:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False  
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_author:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to create author updates for this entry."
@@ -429,9 +468,16 @@ def get_entry_referee_updates(
     # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
     is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_author and not is_referee:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_author and not is_referee:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to access updates for this entry."
@@ -463,9 +509,16 @@ def create_referee_update(
     
     # Check if the user has permissions to access this entry
     is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_referee:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_referee:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to create referee updates for this entry."
@@ -517,9 +570,16 @@ async def create_referee_update_with_file(
     
     # Check if the user has permissions to access this entry
     is_referee = any(referee.id == current_user.id for referee in db_entry.referees)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_referee:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_referee:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to create referee updates for this entry."
@@ -683,9 +743,16 @@ async def upload_entry_file(
     
     # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_author:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_author:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to upload files for this entry."
@@ -725,9 +792,16 @@ async def upload_entry_full_pdf(
     
     # Check if the user has permissions to access this entry
     is_author = any(author.id == current_user.id for author in db_entry.authors)
-    is_admin_or_editor = current_user.role in [models.UserRole.admin, models.UserRole.owner, models.UserRole.editor]
+    is_admin_or_owner = current_user.role in [models.UserRole.admin, models.UserRole.owner]
     
-    if not is_admin_or_editor and not is_author:
+    # Check if user is editor of the journal containing this entry
+    is_journal_editor = False
+    if current_user.role == models.UserRole.editor and db_entry.journal_id:
+        editor_journals = crud.get_journals_by_editor(db, user_id=current_user.id)
+        journal_ids = [j.id for j in editor_journals]
+        is_journal_editor = db_entry.journal_id in journal_ids
+    
+    if not is_admin_or_owner and not is_journal_editor and not is_author:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to upload files for this entry."

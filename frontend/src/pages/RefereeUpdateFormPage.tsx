@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import * as apiService from '../services/apiService';
 import 'react-toastify/dist/ReactToastify.css';
 import axios, { AxiosError } from 'axios';
@@ -8,6 +9,7 @@ import './JournalEntryDetailsPage.css';
 
 const RefereeUpdateFormPage: React.FC = () => {
   const { language, t } = useLanguage();
+  const { user } = useAuth();
   const { entryId } = useParams<{ entryId: string }>();
   const navigate = useNavigate();
   
@@ -19,6 +21,20 @@ const RefereeUpdateFormPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // State to track journal and its editors for access control
+  const [entry, setEntry] = useState<apiService.JournalEntryRead | null>(null);
+  const [journal, setJournal] = useState<apiService.Journal | null>(null);
+  const [journalEditors, setJournalEditors] = useState<apiService.UserRead[]>([]);
+  
+  // Access control logic
+  const isAdmin = user && (user.role === 'admin' || user.role === 'owner');
+  const isEditorInChief = user && journal && journal.editor_in_chief_id === user.id;
+  const isJournalEditor = user && journalEditors.some(editor => editor.id === user.id);
+  const isRefereeOfEntry = user && entry?.referees?.some(referee => referee.id === user.id);
+  
+  // Check if user has access to this referee update form
+  const hasAccess = isAdmin || isEditorInChief || isJournalEditor || isRefereeOfEntry;
   
   // Toast notification state
   const [showToast, setShowToast] = useState<boolean>(false);
@@ -35,7 +51,38 @@ const RefereeUpdateFormPage: React.FC = () => {
       
       try {
         setIsLoading(true);
-        await apiService.getEntryById(parseInt(entryId));
+        const entryData = await apiService.getEntryById(parseInt(entryId));
+        setEntry(entryData);
+        
+        // Fetch journal information if entry has a journal
+        if (entryData.journal_id) {
+          try {
+            const [journalData, journalEditorsData] = await Promise.all([
+              apiService.getJournalById(entryData.journal_id),
+              apiService.getJournalEditors(entryData.journal_id)
+            ]);
+            
+            setJournal(journalData);
+            
+            // Fetch full user data for each editor
+            const editorUsers = await Promise.all(
+              journalEditorsData.map(async (editorLink: apiService.JournalEditorLink) => {
+                try {
+                  return await apiService.getUserById(editorLink.user_id.toString());
+                } catch (err) {
+                  console.error(`Error fetching editor user ${editorLink.user_id}:`, err);
+                  return null;
+                }
+              })
+            );
+            setJournalEditors(editorUsers.filter((editor): editor is apiService.UserRead => editor !== null));
+            
+
+          } catch (err) {
+            console.error('Error fetching journal data:', err);
+          }
+        }
+        
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching entry data:', error);
@@ -53,6 +100,16 @@ const RefereeUpdateFormPage: React.FC = () => {
     
     checkEntry();
   }, [entryId, language]);
+
+  // Check access control after data is loaded
+  useEffect(() => {
+    if (entry && !isLoading && user) {
+      // After entry data is loaded, check if user has access
+      if (!hasAccess) {
+        setError(t('accessDeniedNotAuthorizedToCreateRefereeUpdate') || 'Access denied: You are not authorized to create referee updates for this entry.');
+      }
+    }
+  }, [entry, journal, journalEditors, hasAccess, isLoading, user, t]);
   
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;

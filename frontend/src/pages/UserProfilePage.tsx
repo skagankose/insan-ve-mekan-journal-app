@@ -1330,8 +1330,8 @@ const UserProfilePage: React.FC = () => {
                 <div className="user-info-card">
                     {/* Profile actions in top right corner */}
                     <div className="profile-actions-corner">
-                        {/* Edit Profile button shown only when viewing own profile and not an editor or referee */}
-                        {!userId && user && user.role !== 'editor' && user.role !== 'referee' && (
+                        {/* Edit Profile button shown when viewing own profile */}
+                        {!userId && user && (
                             <button 
                                 onClick={() => navigate(`/profile/edit`)} 
                                 className="btn btn-primary"

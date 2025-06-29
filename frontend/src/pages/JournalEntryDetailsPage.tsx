@@ -26,57 +26,62 @@ const JournalEntryDetailsPage: React.FC = () => {
   const isOwner = isAuthenticated && user && user.role === 'owner';
   const isEditor = isAuthenticated && user && user.role === 'editor';
   const isEditorOrAdmin = isAuthenticated && user && (isEditor || isAdmin || isOwner);
-  const canViewFullDetails = isEditorOrAdmin;
   
-  // Check if user can view referees and files sections
-  // This should be visible to:
-  // 1. Admin and Owner users (always)
-  // 2. Editors of the specific journal this entry belongs to
-  // Note: For now, we show to all editors. This should be modified to check journal-specific editors
-  const canViewRefereesAndFiles = isAuthenticated && user && (
-    user.role === 'admin' || 
-    user.role === 'owner' || 
-    (user.role === 'editor' && entry?.journal_id) // Editor can see if entry belongs to a journal
+  // State to track journal editors
+  const [journalEditors, setJournalEditors] = useState<apiService.UserRead[]>([]);
+  const [editorInChief, setEditorInChief] = useState<apiService.UserRead | null>(null);
+  
+  // Check if the entry is publicly accessible (accepted entry in published journal)
+  const isPubliclyAccessible = entry && journal && 
+    entry.status === 'accepted' && 
+    journal.is_published;
+  
+  // Check if current user is editor-in-chief of the related journal
+  const isEditorInChief = isAuthenticated && user && journal && 
+    journal.editor_in_chief_id === user.id;
+  
+  // Check if current user is an editor of the related journal
+  const isJournalEditor = isAuthenticated && user && 
+    journalEditors.some(editor => editor.id === user.id);
+  
+  // Check if current user is an author of the entry
+  const isEntryAuthor = isAuthenticated && user && 
+    entry?.authors?.some(author => author.id === user.id);
+  
+  // Check if current user is a referee of the entry
+  const isEntryReferee = isAuthenticated && user && 
+    entry?.referees?.some(referee => referee.id === user.id);
+  
+  // Main access control: Can user view this entry?
+  const canViewEntry = isPubliclyAccessible || // Public access for accepted entries in published journals
+    (isAuthenticated && user && (
+      isAdmin || // Admin/Owner access
+      isEditorInChief || // Editor-in-chief of related journal
+      isJournalEditor || // Editor of related journal
+      isEntryAuthor || // Author of the entry
+      isEntryReferee // Referee of the entry
+    ));
+  
+  // Can view full details (non-public API)
+  const canViewFullDetails = isAuthenticated && user && (
+    isAdmin ||
+    isEditorInChief ||
+    isJournalEditor ||
+    isEntryAuthor ||
+    isEntryReferee
   );
   
-  // Check if user can view reference token and updates button
-  // This should be visible to:
-  // 1. Authors and referees of the entry
-  // 2. Editors of the related journal
-  // 3. Owner and admin role users
-  const canViewTokenAndUpdates = isAuthenticated && user && (
-    user.role === 'admin' || 
-    user.role === 'owner' || 
-    (user.role === 'editor' && entry?.journal_id) || // Editor can see if entry belongs to a journal
-    entry?.authors?.some(author => author.id === user.id) || // User is an author
-    entry?.referees?.some(referee => referee.id === user.id) // User is a referee
-  );
+  // Can view referees and files sections - same as full details
+  const canViewRefereesAndFiles = canViewFullDetails;
   
-  // Check if user can view payment processing fee section
-  // This should be visible to:
-  // 1. Authors and referees of the entry
-  // 2. Editors of the related journal
-  // 3. Owner and admin role users
-  const canViewPaymentSection = isAuthenticated && user && (
-    user.role === 'admin' || 
-    user.role === 'owner' || 
-    (user.role === 'editor' && entry?.journal_id) || // Editor can see if entry belongs to a journal
-    entry?.authors?.some(author => author.id === user.id) || // User is an author
-    entry?.referees?.some(referee => referee.id === user.id) // User is a referee
-  );
+  // Can view reference token and updates - same as full details
+  const canViewTokenAndUpdates = canViewFullDetails;
   
-  // Check if user can view status information
-  // This should be visible to:
-  // 1. Authors and referees of the entry
-  // 2. Editors of the related journal
-  // 3. Owner and admin role users
-  const canViewStatus = isAuthenticated && user && (
-    user.role === 'admin' || 
-    user.role === 'owner' || 
-    (user.role === 'editor' && entry?.journal_id) || // Editor can see if entry belongs to a journal
-    entry?.authors?.some(author => author.id === user.id) || // User is an author
-    entry?.referees?.some(referee => referee.id === user.id) // User is a referee
-  );
+  // Can view payment processing fee section - same as full details
+  const canViewPaymentSection = canViewFullDetails;
+  
+  // Can view status information - same as full details
+  const canViewStatus = canViewFullDetails;
   
   // Modal states for managing authors and referees
   const [showAuthorsModal, setShowAuthorsModal] = useState(false);
@@ -424,30 +429,75 @@ const JournalEntryDetailsPage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
+        // First, try to get the entry data to determine access
         let entryData;
-        // Determine if the user has rights to see full details
-        if (canViewFullDetails) {
-          entryData = await apiService.getEntryById(parseInt(entryId));
-        } else {
-          entryData = await apiService.getPublicEntryById(parseInt(entryId));
-        }
-        setEntry(entryData);
+        let journalData = null;
         
-        // Set the selected journal ID if the entry has one
-        if (entryData.journal_id) {
-          setSelectedJournalId(entryData.journal_id);
-        }
-
-        // If the entry belongs to a journal, fetch that journal directly
-        if (entryData.journal_id) {
-          try {
-            const journalData = await apiService.getJournalById(entryData.journal_id);
-            setJournal(journalData);
-          } catch (journalErr) {
-            console.error("Failed to fetch journal data:", journalErr);
-            // Don't set an error for journal fetch failure, as we can still display the entry
+        // Try to fetch entry data (start with public access)
+        try {
+          entryData = await apiService.getPublicEntryById(parseInt(entryId));
+          setEntry(entryData);
+        } catch (publicErr: any) {
+          // If public access fails, and user is authenticated, try full access
+          if (isAuthenticated && user) {
+            try {
+              entryData = await apiService.getEntryById(parseInt(entryId));
+              setEntry(entryData);
+            } catch (privateErr: any) {
+              throw privateErr; // Re-throw if both fail
+            }
+          } else {
+            throw publicErr; // Re-throw if user not authenticated
           }
         }
+        
+        // Fetch journal data if entry belongs to a journal
+        if (entryData.journal_id) {
+          setSelectedJournalId(entryData.journal_id);
+          
+          try {
+            // Try public journal access first
+            const publishedJournals = await apiService.getPublishedJournals();
+            journalData = publishedJournals.find(j => j.id === entryData.journal_id);
+            
+            // If not found in published journals and user is authenticated, try full access
+            if (!journalData && isAuthenticated && user) {
+              try {
+                journalData = await apiService.getJournalById(entryData.journal_id);
+              } catch (err) {
+                console.error("Failed to fetch journal data:", err);
+              }
+            }
+            
+            if (journalData) {
+              setJournal(journalData);
+              
+              // Fetch journal editors and editor-in-chief
+              try {
+                const editorLinksData = await apiService.getPublicJournalEditors(journalData.id);
+                if (editorLinksData.length > 0) {
+                  const editorsData = await Promise.all(
+                    editorLinksData.map(link => apiService.getPublicUserInfo(link.user_id.toString()))
+                  );
+                  setJournalEditors(editorsData);
+                }
+                
+                if (journalData.editor_in_chief_id) {
+                  const editorInChiefData = await apiService.getPublicUserInfo(journalData.editor_in_chief_id.toString());
+                  setEditorInChief(editorInChiefData);
+                }
+              } catch (err) {
+                console.error("Failed to fetch journal editors:", err);
+              }
+            }
+          } catch (journalErr) {
+            console.error("Failed to fetch journal data:", journalErr);
+          }
+        }
+        
+        // After all data is fetched, check access permission
+        // This will be checked after the state updates in the next useEffect
+        
       } catch (err: any) {
         console.error("Failed to fetch entry data:", err);
         setError(err.response?.data?.detail || t('failedToLoadEntryData') || 'Failed to load entry data.');
@@ -458,6 +508,16 @@ const JournalEntryDetailsPage: React.FC = () => {
 
     fetchEntryDetails();
   }, [entryId, t, isAuthenticated, user]);
+
+  // Check access control after data is loaded
+  useEffect(() => {
+    if (entry && !loading) {
+      // After entry data is loaded, check if user has access
+      if (!canViewEntry) {
+        setError(t('accessDeniedNotAuthorizedToViewEntry') || 'Access denied: You are not authorized to view this entry.');
+      }
+    }
+  }, [entry, journal, journalEditors, editorInChief, canViewEntry, loading, t]);
 
   // Check for success parameter and show toast
   useEffect(() => {
@@ -1620,7 +1680,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                        WebkitTextFillColor: 'transparent'
                      }}>{t('publishedIn') || 'Published In'}</h3>
                   </div>
-                  {isEditorOrAdmin && (
+                  {isAdmin && (
                     <button
                       onClick={() => setShowJournalModal(true)}
                       style={{

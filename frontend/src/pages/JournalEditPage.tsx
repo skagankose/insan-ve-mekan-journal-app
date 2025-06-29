@@ -29,8 +29,29 @@ const JournalEditPage: React.FC = () => {
     const navigate = useNavigate();
     const { t, language } = useLanguage();
     const { isAuthenticated, user } = useAuth();
+    const isAdmin = isAuthenticated && user && (user.role === 'admin' || user.role === 'owner');
     const isEditorOrAdmin = isAuthenticated && user && (user.role === 'editor' || user.role === 'admin' || user.role === 'owner');
     const [isDateInput, setIsDateInput] = useState(false);
+    
+    // State to track journal and its editors
+    const [journal, setJournal] = useState<apiService.Journal | null>(null);
+    const [journalEditors, setJournalEditors] = useState<apiService.UserRead[]>([]);
+    const [editorInChief, setEditorInChief] = useState<apiService.UserRead | null>(null);
+    
+    // Check if current user is editor-in-chief of the related journal
+    const isEditorInChief = isAuthenticated && user && journal && 
+      journal.editor_in_chief_id === user.id;
+    
+    // Check if current user is an editor of the related journal
+    const isJournalEditor = isAuthenticated && user && 
+      journalEditors.some(editor => editor.id === user.id);
+    
+    // Main access control: Can user edit this entry?
+    const canEditEntry = isAuthenticated && user && (
+      isAdmin || // Admin/Owner access
+      isEditorInChief || // Editor-in-chief of related journal
+      isJournalEditor // Editor of related journal
+    );
 
     const [formData, setFormData] = useState<JournalFormData>({
         title: '',
@@ -93,6 +114,46 @@ const JournalEditPage: React.FC = () => {
                     referees_ids: entry.referees?.map((referee: apiService.UserRead) => referee.id),
                     publication_date: entry.publication_date ? new Date(entry.publication_date).toISOString().slice(0, 10) : ''
                 });
+                
+                // Fetch journal data if entry belongs to a journal
+                if (entry.journal_id) {
+                    try {
+                        let journalData = null;
+                        
+                        // Try to get journal data
+                        try {
+                            journalData = await apiService.getJournalById(entry.journal_id);
+                        } catch (journalErr) {
+                            // If that fails, try published journals
+                            const publishedJournals = await apiService.getPublishedJournals();
+                            journalData = publishedJournals.find(j => j.id === entry.journal_id);
+                        }
+                        
+                        if (journalData) {
+                            setJournal(journalData);
+                            
+                            // Fetch journal editors and editor-in-chief
+                            try {
+                                const editorLinksData = await apiService.getPublicJournalEditors(journalData.id);
+                                if (editorLinksData.length > 0) {
+                                    const editorsData = await Promise.all(
+                                        editorLinksData.map(link => apiService.getPublicUserInfo(link.user_id.toString()))
+                                    );
+                                    setJournalEditors(editorsData);
+                                }
+                                
+                                if (journalData.editor_in_chief_id) {
+                                    const editorInChiefData = await apiService.getPublicUserInfo(journalData.editor_in_chief_id.toString());
+                                    setEditorInChief(editorInChiefData);
+                                }
+                            } catch (err) {
+                                console.error("Failed to fetch journal editors:", err);
+                            }
+                        }
+                    } catch (journalErr) {
+                        console.error("Failed to fetch journal data:", journalErr);
+                    }
+                }
             } catch (err: any) {
                 console.error("Failed to fetch entry for editing:", err);
                 setError(err.response?.data?.detail || "Failed to load entry data.");
@@ -103,6 +164,16 @@ const JournalEditPage: React.FC = () => {
 
         fetchEntry();
     }, [id, entryId]);
+
+    // Check access control after data is loaded
+    useEffect(() => {
+        if (formData.title && !isLoading) {
+            // After entry data is loaded, check if user has access
+            if (!canEditEntry) {
+                setError(t('accessDeniedNotAuthorizedToEditEntry') || 'Access denied: You are not authorized to edit this entry.');
+            }
+        }
+    }, [formData.title, journal, journalEditors, editorInChief, canEditEntry, isLoading, t]);
 
     const validateFileType = (file: File, allowedTypes: string[]): boolean => {
         const fileType = file.name.split('.').pop()?.toLowerCase();
