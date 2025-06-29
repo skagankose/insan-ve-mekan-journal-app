@@ -1400,7 +1400,7 @@ const JournalEntryDetailsPage: React.FC = () => {
           {/* Authors and Published In Section - Side by Side */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 0.8fr',
+            gridTemplateColumns: '1fr 0.6fr',
             gap: '24px',
             marginBottom: '32px'
           }}>
@@ -1498,7 +1498,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                 }}></div>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))',
+                  gridTemplateColumns: entry.authors && entry.authors.length === 1 ? '1fr' : entry.authors && entry.authors.length === 2 ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
                   gap: '16px'
                 }}>
                   {entry.authors && entry.authors.length > 0 ? (
@@ -1518,7 +1518,7 @@ const JournalEntryDetailsPage: React.FC = () => {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          maxWidth: entry.authors && entry.authors.length === 1 ? '400px' : undefined,
+
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.background = 'rgba(245, 158, 11, 0.08)';

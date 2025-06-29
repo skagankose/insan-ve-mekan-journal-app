@@ -250,7 +250,7 @@ const EditUserPage: React.FC = () => {
     const [success, setSuccess] = useState<boolean>(false);
     const [loginLinkGenerated, setLoginLinkGenerated] = useState<boolean>(false);
     const [loginLink, setLoginLink] = useState<string>('');
-    const [emailSent, setEmailSent] = useState<boolean>(false);
+
     const [sendingEmail, setSendingEmail] = useState<boolean>(false);
     const [customEmailAddress, setCustomEmailAddress] = useState<string>('');
     const [deleting, setDeleting] = useState<boolean>(false);
@@ -568,10 +568,18 @@ const EditUserPage: React.FC = () => {
             // Use custom email address if provided, otherwise use the user's email
             const emailToSend = customEmailAddress.trim() || formData.email;
             
-            // Call API to send the login link via email
-            await apiService.sendLoginLinkEmail(Number(id), loginLink, emailToSend);
-            
-            setEmailSent(true);
+                    // Call API to send the login link via email
+        await apiService.sendLoginLinkEmail(Number(id), loginLink, emailToSend);
+        
+        // Show success toast
+        setToastMessage(t('linkEmailSent'));
+        setToastType('success');
+        setShowToast(true);
+        
+        // Hide toast after 4 seconds
+        setTimeout(() => {
+            setShowToast(false);
+        }, 4000);
             
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to send login link via email');
@@ -1363,14 +1371,7 @@ const EditUserPage: React.FC = () => {
                                             </button>
                                         </div>
                                         
-                                        {/* Status Messages */}
-                                        <div style={{ textAlign: 'right', minHeight: '20px', fontSize: '0.9rem', color: '#059669', fontWeight: '500' }}>
-                                            {emailSent && (
-                                                <span className="email-sent-message">
-                                                    {t('linkEmailSent')}
-                                                </span>
-                                            )}
-                                        </div>
+
                                     </div>
                                 ) : (
                                     <div style={{ textAlign: 'center' }}>

@@ -75,7 +75,7 @@ const Sidebar: React.FC = () => {
         </ul>
       </nav>
       
-      <div className="sidebar-footer" style={{ borderTop: '1px solid rgba(20, 184, 166, 0.15)', paddingTop: '16px', marginTop: 'auto' }}>
+      <div className="sidebar-footer" style={{ borderTop: '1px solid rgba(20, 184, 166, 0.15)', paddingTop: '10px', paddingBottom: '10px', marginTop: 'auto' }}>
         <div className="sidebar-footer-content">
           <p className="sidebar-footer-text">
             © {new Date().getFullYear()} {language === 'en' ? 'Human & Space' : 'İnsan & Mekan'}

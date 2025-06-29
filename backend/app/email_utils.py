@@ -23,7 +23,7 @@ def get_email_template() -> str:
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>İnsan ve Mekan</title>
     </head>
-    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; color: #333333; background-color: #f5f5f5;">
+    <body style="margin: 0; padding: 0; font-size: 16px; font-family: 'Helvatice', system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Inter', 'Arial', sans-serif; line-height: 1.6; color: #333333; background-color: #f5f5f5;">
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
             <tr>
                 <td align="center">

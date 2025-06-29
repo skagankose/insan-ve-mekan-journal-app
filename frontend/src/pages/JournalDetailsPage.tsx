@@ -1342,7 +1342,7 @@ const JournalDetailsPage: React.FC = () => {
                                 
                                 <div style={{
                                     display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 0.5fr))',
                                     gap: '16px'
                                 }}>
                                     {/* Publication Date */}

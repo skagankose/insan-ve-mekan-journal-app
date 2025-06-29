@@ -7,6 +7,7 @@ The project uses **Brevo (formerly Sendinblue)** as the email service provider, 
 ## 🎨 Design Features
 
 - **Modern responsive design** with professional styling
+- **Clean typography** - Uses modern font stack: system-ui, Segoe UI, Roboto, Helvetica Neue, Inter, Arial
 - **Bilingual support** - All emails display content in both English and Turkish
 - **Brand consistency** - Features the Human and Space black logo and color scheme
 - **Mobile-friendly** - Responsive design that works on all devices
@@ -135,6 +136,7 @@ The project uses **Brevo (formerly Sendinblue)** as the email service provider, 
   - General links: `http://localhost:5173`
 - **Error Handling:** Email failures don't break main operations, just logged
 - **Email Format:** Responsive HTML emails with CSS styling and modern design
+- **Typography:** Modern font stack for clean readability: `system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Inter', 'Arial', sans-serif`
 - **Template System:** Centralized template function `get_email_template()` for consistency
 
 ## 📱 Frontend Integration
@@ -289,6 +291,7 @@ send_confirmation_email(
 ## 🆕 Recent Improvements
 
 - **Modern Design:** Complete visual overhaul with professional styling
+- **Clean Typography:** Upgraded to modern font stack with system fonts and clean fallbacks
 - **Bilingual Content:** Every email shows both English and Turkish text
 - **Brand Integration:** Consistent use of logo and color scheme
 - **Enhanced UX:** Better buttons, highlights, and visual elements

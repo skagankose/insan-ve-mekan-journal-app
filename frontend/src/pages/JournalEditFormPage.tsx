@@ -596,7 +596,7 @@ const JournalEditFormPage: React.FC = () => {
                             },
                             {
                                 key: 'full_pdf',
-                                label: language === 'tr' ? 'Tam PDF' : 'Full PDF',
+                                label: language === 'tr' ? 'PDF Dosyası' : 'PDF File',
                                 accept: '.pdf',
                                 description: language === 'tr' ? 'PDF dosyası yükleyin' : 'Upload a PDF file',
                                 icon: FaFilePdf,
@@ -612,7 +612,7 @@ const JournalEditFormPage: React.FC = () => {
                             },
                             {
                                 key: 'file_path',
-                                label: language === 'tr' ? 'Dosya Yolu' : 'File Path',
+                                label: language === 'tr' ? 'DOCX Dosyası' : 'DOCX File',
                                 accept: '.docx',
                                 description: language === 'tr' ? 'DOCX dosyası yükleyin' : 'Upload a DOCX file',
                                 icon: FaFolder,

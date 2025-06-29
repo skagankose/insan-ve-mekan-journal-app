@@ -9,7 +9,7 @@ from sib_api_v3_sdk.rest import ApiException
 from .. import models, auth, schemas
 from ..database import get_session
 from .. import crud
-from ..email_utils import SENDER_EMAIL, SENDER_NAME, send_login_link_email
+from ..email_utils import SENDER_EMAIL, SENDER_NAME, send_login_link_email as send_login_link_email_util
 
 router = APIRouter(
     prefix="/admin",
@@ -238,7 +238,7 @@ def send_login_link_email(
             )
         
         # Send login link email using the new template
-        send_login_link_email(
+        send_login_link_email_util(
             api_key=api_key,
             user_email=recipient_email,
             user_name=recipient_name,
