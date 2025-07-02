@@ -1,0 +1,949 @@
+/* LoginPage.css - Modern Login Styling to match application design */
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px); /* Account for navbar height */
+  padding: var(--spacing-6);
+  background: transparent;
+  position: relative;
+}
+
+/* Register page container adjustment for taller content */
+.register-container {
+  align-items: flex-start;
+  padding-top: var(--spacing-8);
+  padding-bottom: var(--spacing-8);
+  min-height: auto;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  padding: 48px 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Register page specific modifications */
+.register-box {
+  max-width: 800px;
+  padding: 36px 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Two-column grid layout for register form */
+.register-box form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4) var(--spacing-5);
+  align-items: start;
+}
+
+/* Full-width elements that should span both columns */
+.register-box .form-group.full-width,
+.register-box .recaptcha-group,
+.register-box .register-button {
+  grid-column: 1 / -1;
+}
+
+/* Specific field ordering for better UX */
+.register-box .form-group:nth-of-type(1) { /* email */
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.register-box .form-group:nth-of-type(2) { /* name */
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.register-box .form-group:nth-of-type(3) { /* title */
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.register-box .form-group:nth-of-type(4) { /* bio - full width */
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+.register-box .form-group:nth-of-type(5) { /* telephone */
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.register-box .form-group:nth-of-type(6) { /* science branch */
+  grid-column: 1;
+  grid-row: 4;
+}
+
+.register-box .form-group:nth-of-type(7) { /* location */
+  grid-column: 2;
+  grid-row: 4;
+}
+
+.register-box .form-group:nth-of-type(8) { /* yoksis id */
+  grid-column: 1;
+  grid-row: 5;
+}
+
+.register-box .form-group:nth-of-type(9) { /* orcid id */
+  grid-column: 2;
+  grid-row: 5;
+}
+
+.register-box .form-group:nth-of-type(10) { /* password - full width */
+  grid-column: 1 / -1;
+  grid-row: 6;
+}
+
+.register-box .form-group:nth-of-type(11) { /* confirm password - full width */
+  grid-column: 1 / -1;
+  grid-row: 7;
+}
+
+.login-box h2 {
+  text-align: left;
+  margin: 0 0 32px 0;
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1E293B 0%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.025em;
+  position: relative;
+  z-index: 1;
+}
+
+.form-group {
+  margin-bottom: var(--spacing-5);
+  position: relative;
+  z-index: 1;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--spacing-2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.025em;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #14B8A6;
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.form-group input:hover {
+  border-color: #94A3B8;
+}
+
+.login-button {
+  width: 100%;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+  letter-spacing: 0.025em;
+  margin-bottom: var(--spacing-6);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.login-button:hover {
+  background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+.login-button:hover::after {
+  opacity: 1;
+}
+
+.login-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+}
+
+.social-login {
+  margin: var(--spacing-6) 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Commenting out this rule to remove the line behind/through the Google button
+.social-login::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #E2E8F0, transparent);
+  transform: translateY(-50%);
+}
+*/
+
+/* Google Login button styling */
+.social-login > div {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  background-color: transparent !important;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--color-text-tertiary);
+  margin: var(--spacing-6) 0;
+  position: relative;
+  z-index: 1;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.divider span {
+  display: inline-block;
+  padding: 0 var(--spacing-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: transparent;
+}
+
+.error-message {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-left: 4px solid #EF4444;
+  padding: 16px 20px;
+  margin: var(--spacing-4) 0;
+  color: #DC2626;
+  font-size: var(--font-size-sm);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  position: relative;
+  z-index: 1;
+  animation: slideInDown 0.3s ease-out;
+}
+
+.links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid rgba(226, 232, 240, 0.6);
+  position: relative;
+  z-index: 1;
+}
+
+.links a {
+  color: #14B8A6;
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.links a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(13, 148, 136, 0.05) 100%);
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.links a:hover {
+  color: #0D9488;
+  transform: translateY(-1px);
+}
+
+.links a:hover::before {
+  left: 0;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  gap: 24px;
+  color: var(--color-text-secondary);
+}
+
+.loading::before {
+  content: '';
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(20, 184, 166, 0.1);
+  border-top-color: #14B8A6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to { 
+    transform: rotate(360deg); 
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .register-box {
+    max-width: 100%;
+    padding: 28px 24px;
+  }
+
+  /* Collapse to single column on tablets and mobile */
+  .register-box form {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+
+  /* Reset all specific grid positioning on mobile */
+  .register-box .form-group,
+  .register-box .recaptcha-group,
+  .register-box .register-button {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+
+  /* Adjust phone input for mobile */
+  .phone-input-container .react-tel-input .form-control {
+    padding: 14px 18px 14px 55px !important;
+    font-size: var(--font-size-sm) !important;
+  }
+
+  .phone-input-container .react-tel-input .flag-dropdown {
+    width: 50px !important;
+  }
+
+  /* Adjust ID inputs for mobile */
+  .register-box .formatted-id-container input {
+    padding: 14px 18px !important;
+    font-size: var(--font-size-xs) !important;
+    letter-spacing: 0.25px;
+  }
+
+  /* Adjust location input for mobile */
+  .register-box .location-input-container input {
+    padding: 14px 18px !important;
+    font-size: var(--font-size-sm) !important;
+  }
+
+  /* Adjust email field for mobile */
+  .register-box .form-group:nth-of-type(1) input {
+    font-size: var(--font-size-xs) !important;
+    letter-spacing: 0.1px;
+  }
+
+  /* Adjust password fields for mobile */
+  .register-box .form-group:nth-of-type(10) input,
+  .register-box .form-group:nth-of-type(11) input {
+    font-size: var(--font-size-xs) !important;
+    letter-spacing: 1px;
+  }
+
+  /* Mobile phone dropdown adjustments */
+  .phone-input-container .react-tel-input .country-list {
+    width: 280px !important;
+    max-height: 180px !important;
+    font-size: var(--font-size-xs) !important;
+  }
+
+  .phone-input-container .react-tel-input .search-box {
+    padding: 10px 14px !important;
+    font-size: var(--font-size-xs) !important;
+    margin: 6px 12px !important;
+    width: calc(100% - 24px) !important;
+  }
+
+  .phone-input-container .react-tel-input .country {
+    padding: 10px 14px !important;
+    font-size: var(--font-size-xs) !important;
+  }
+
+  .phone-input-container .react-tel-input .country .flag {
+    width: 18px !important;
+    height: 13px !important;
+    margin-right: 10px !important;
+  }
+
+  .phone-input-container .react-tel-input .no-entries-message {
+    padding: 12px !important;
+    margin: 6px 12px !important;
+    font-size: var(--font-size-xs) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .login-container {
+    padding: var(--spacing-4);
+    min-height: calc(100vh - 80px);
+  }
+  
+  .login-box {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+
+  .register-box {
+    padding: 24px 20px;
+    max-width: 100%;
+  }
+  
+  .login-box h2 {
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+  
+  .links {
+    flex-direction: column;
+    gap: var(--spacing-3);
+    text-align: center;
+  }
+
+  .password-requirements {
+    padding: 10px 12px;
+  }
+
+  .recaptcha-group {
+    margin: var(--spacing-4) 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .register-box {
+    max-width: 900px;
+  }
+}
+
+.forgot-password-link {
+  margin-top: 8px;
+  text-align: right;
+}
+
+.forgot-password-link a {
+  color: #14B8A6;
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all 0.3s ease;
+}
+
+.forgot-password-link a:hover {
+  color: #0D9488;
+  text-decoration: underline;
+}
+
+/* Register-specific form elements */
+.register-textarea {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.register-textarea:focus {
+  outline: none;
+  border-color: #14B8A6;
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.register-textarea:hover {
+  border-color: #94A3B8;
+}
+
+/* Phone input specific styling for register */
+.phone-input-container {
+  width: 100% !important;
+  position: relative;
+}
+
+.phone-input-container .react-tel-input {
+  width: 100% !important;
+}
+
+.phone-input-container .react-tel-input .form-control {
+  width: 100% !important;
+  padding: 16px 20px 16px 60px !important;
+  border: 2px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  font-family: var(--font-family-sans) !important;
+  font-size: var(--font-size-base) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease !important;
+  color: var(--color-text-primary) !important;
+  box-sizing: border-box !important;
+  height: auto !important;
+}
+
+.phone-input-container .react-tel-input .form-control:focus {
+  outline: none !important;
+  border-color: #14B8A6 !important;
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.phone-input-container .react-tel-input .form-control:hover {
+  border-color: #94A3B8 !important;
+}
+
+.phone-input-container .react-tel-input .flag-dropdown {
+  border: 2px solid #E2E8F0 !important;
+  border-radius: 12px 0 0 12px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease !important;
+}
+
+.phone-input-container .react-tel-input .flag-dropdown:hover {
+  border-color: #94A3B8 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.phone-input-container .react-tel-input .flag-dropdown.open {
+  border-color: #14B8A6 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Phone input dropdown menu styling */
+.phone-input-container .react-tel-input .country-list {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 2px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(20, 184, 166, 0.08) !important;
+  margin-top: 4px !important;
+  z-index: 1000 !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  position: absolute !important;
+  width: 300px !important;
+  left: 0 !important;
+}
+
+/* Phone input search field styling */
+.phone-input-container .react-tel-input .search-box {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: none !important;
+  border-bottom: 2px solid #E2E8F0 !important;
+  padding: 12px 16px !important;
+  font-family: var(--font-family-sans) !important;
+  font-size: var(--font-size-sm) !important;
+  color: var(--color-text-primary) !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  width: calc(100% - 32px) !important;
+  margin: 8px 16px !important;
+  box-sizing: border-box !important;
+}
+
+.phone-input-container .react-tel-input .search-box:focus {
+  border-bottom-color: #14B8A6 !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.phone-input-container .react-tel-input .search-box::placeholder {
+  color: var(--color-text-tertiary) !important;
+  font-style: italic;
+}
+
+/* Phone input country list items */
+.phone-input-container .react-tel-input .country {
+  padding: 12px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+  background: transparent !important;
+  color: var(--color-text-primary) !important;
+  font-family: var(--font-family-sans) !important;
+  font-size: var(--font-size-sm) !important;
+}
+
+.phone-input-container .react-tel-input .country:hover {
+  background: rgba(20, 184, 166, 0.08) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.phone-input-container .react-tel-input .country.highlight {
+  background: rgba(20, 184, 166, 0.12) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.phone-input-container .react-tel-input .country .flag {
+  margin-right: 12px !important;
+  width: 20px !important;
+  height: 15px !important;
+  border-radius: 2px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.phone-input-container .react-tel-input .country .country-name {
+  flex: 1 !important;
+  text-align: left !important;
+  color: var(--color-text-primary) !important;
+  font-weight: var(--font-weight-medium) !important;
+}
+
+.phone-input-container .react-tel-input .country .dial-code {
+  color: var(--color-text-secondary) !important;
+  font-family: var(--font-family-mono, 'Courier New', monospace) !important;
+  font-size: var(--font-size-xs) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  margin-left: 8px !important;
+}
+
+/* Scrollbar styling for country dropdown */
+.phone-input-container .react-tel-input .country-list::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.phone-input-container .react-tel-input .country-list::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.3) !important;
+  border-radius: 3px !important;
+}
+
+.phone-input-container .react-tel-input .country-list::-webkit-scrollbar-thumb {
+  background: rgba(20, 184, 166, 0.4) !important;
+  border-radius: 3px !important;
+  transition: background 0.3s ease !important;
+}
+
+.phone-input-container .react-tel-input .country-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(20, 184, 166, 0.6) !important;
+}
+
+/* No countries found message */
+.phone-input-container .react-tel-input .no-entries-message {
+  padding: 16px !important;
+  text-align: center !important;
+  color: var(--color-text-tertiary) !important;
+  font-size: var(--font-size-sm) !important;
+  font-style: italic !important;
+  background: rgba(248, 250, 252, 0.5) !important;
+  margin: 8px 16px !important;
+  border-radius: 8px !important;
+}
+
+/* LocationInput specific styling */
+.register-box .location-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.register-box .location-input-container input {
+  width: 100% !important;
+  padding: 16px 20px !important;
+  border: 2px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  font-family: var(--font-family-sans) !important;
+  font-size: var(--font-size-base) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease !important;
+  color: var(--color-text-primary) !important;
+  box-sizing: border-box !important;
+}
+
+.register-box .location-input-container input:focus {
+  outline: none !important;
+  border-color: #14B8A6 !important;
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.register-box .location-input-container input:hover {
+  border-color: #94A3B8 !important;
+}
+
+/* FormattedIdInput specific styling */
+.register-box .formatted-id-container {
+  position: relative;
+  width: 100%;
+}
+
+.register-box .formatted-id-container input {
+  width: 100% !important;
+  padding: 16px 20px !important;
+  border: 2px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  font-family: var(--font-family-mono, 'Courier New', monospace) !important;
+  font-size: var(--font-size-sm) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease !important;
+  color: var(--color-text-primary) !important;
+  box-sizing: border-box !important;
+  letter-spacing: 0.5px;
+}
+
+.register-box .formatted-id-container input:focus {
+  outline: none !important;
+  border-color: #14B8A6 !important;
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+.register-box .formatted-id-container input:hover {
+  border-color: #94A3B8 !important;
+}
+
+/* Field-specific width adjustments */
+.register-box .form-group:nth-of-type(3) input { /* title */
+  font-size: var(--font-size-sm);
+}
+
+.register-box .form-group:nth-of-type(6) input { /* science branch */
+  font-size: var(--font-size-sm);
+}
+
+/* Email field styling */
+.register-box .form-group:nth-of-type(1) input { /* email */
+  font-family: var(--font-family-mono, 'Courier New', monospace);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.25px;
+}
+
+/* Name field - keep standard styling */
+.register-box .form-group:nth-of-type(2) input { /* name */
+  font-weight: var(--font-weight-medium);
+}
+
+/* Password fields - add security styling */
+.register-box .form-group:nth-of-type(10) input, /* password */
+.register-box .form-group:nth-of-type(11) input { /* confirm password */
+  font-family: var(--font-family-mono, 'Courier New', monospace);
+  font-size: var(--font-size-sm);
+  letter-spacing: 2px;
+}
+
+/* Password requirements styling */
+.password-requirements {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  padding: 12px 16px;
+  background: rgba(248, 250, 252, 0.9);
+  border-radius: 8px;
+  border-left: 3px solid #14B8A6;
+}
+
+.password-requirements small {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.password-requirements ul {
+  margin: 0;
+  padding-left: 16px;
+  list-style: none;
+}
+
+.password-requirements li {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 4px;
+}
+
+.password-requirements li::before {
+  content: '•';
+  color: #14B8A6;
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+
+/* reCAPTCHA container */
+.recaptcha-group {
+  display: flex;
+  justify-content: center;
+  margin: var(--spacing-5) 0;
+}
+
+/* Success message styling */
+.success-message {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(21, 128, 61, 0.05) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-left: 4px solid #22C55E;
+  padding: 16px 20px;
+  margin: var(--spacing-4) 0;
+  color: #16A34A;
+  font-size: var(--font-size-sm);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  position: relative;
+  z-index: 1;
+  animation: slideInDown 0.3s ease-out;
+}
+
+/* Register button styling */
+.register-button {
+  margin-top: var(--spacing-4);
+  height: 52px;
+}
+
+/* Register submit button - match login button styling */
+.register-submit-button {
+  width: 100%;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+  letter-spacing: 0.025em;
+  margin-top: var(--spacing-1);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+}
+
+.register-submit-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.register-submit-button:hover {
+  background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+.register-submit-button:hover::after {
+  opacity: 1;
+}
+
+.register-submit-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+}
+
+.register-submit-button:disabled {
+  background: linear-gradient(135deg, #94A3B8 0%, #64748B 100%);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.register-submit-button:disabled::after {
+  opacity: 0;
+} 

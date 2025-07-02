@@ -1,0 +1,548 @@
+/* Records Page - Aligned with Application Theme */
+
+/* Page Title Section */
+.page-title-section {
+    padding: 32px 0px 10px 40px;
+    background: transparent;
+    backdrop-filter: none; 
+    border-radius: 20px;
+    margin-bottom: 0px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.page-title-section h1 {
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #1E293B 0%, #475569 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    letter-spacing: -0.025em;
+}
+
+/* Section cards */
+.section-card {
+    background-color: var(--color-background-primary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-6);
+    border: 1px solid var(--color-border-light);
+}
+
+.section-card h2 {
+    font-size: var(--font-size-xl);
+    margin: 0 0 var(--spacing-4) 0;
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+    border-bottom: 1px solid var(--color-border-light);
+    padding-bottom: var(--spacing-3);
+}
+
+/* Entries sections */
+.entries-section {
+    margin-bottom: var(--spacing-8);
+}
+
+.entries-section h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1E293B;
+    margin-bottom: var(--spacing-6);
+    letter-spacing: -0.025em;
+    position: relative;
+    padding: 24px 32px 24px 0;
+}
+
+/* Section headers for subsections */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding: 16px 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.section-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 2px 0 0 2px;
+}
+
+.section-header.active::before {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+.section-header.accepted::before {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.section-header.rejected::before {
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+}
+
+.section-header.draft::before {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-header.active h3 {
+    color: #D97706;
+}
+
+.section-header.accepted h3 {
+    color: #047857;
+}
+
+.section-header.rejected h3 {
+    color: #B91C1C;
+}
+
+.section-header.draft h3 {
+    color: #D97706;
+}
+
+.section-header-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+}
+
+.section-header.active .section-header-icon {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+.section-header.accepted .section-header-icon {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.section-header.rejected .section-header-icon {
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+}
+
+.section-header.draft .section-header-icon {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+.section-header-clickable {
+    display: inline-flex;
+}
+
+.section-header.clickable {
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.section-header.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.section-header.rejected.clickable:hover {
+    background: rgba(220, 38, 38, 0.05);
+}
+
+.section-collapse-icon {
+    transition: transform 0.3s ease;
+    opacity: 0.7;
+}
+
+.section-collapse-icon:hover {
+    opacity: 1;
+}
+
+.entries-section-content {
+    position: relative;
+}
+
+/* Journals grid */
+.journals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.journal-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid var(--color-border-light);
+}
+
+.journal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.journal-header h3 {
+    margin: 0 0 var(--spacing-3) 0;
+    font-size: var(--font-size-lg);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+.journal-issue {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    background-color: var(--color-background-secondary);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-3);
+    display: inline-block;
+}
+
+.journal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-4);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+}
+
+/* Payment info block */
+.payment-info-block {
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border-light);
+    border-left: 4px solid var(--color-warning);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-4);
+    margin-top: var(--spacing-3);
+}
+
+.payment-info-block h4 {
+    color: var(--color-warning);
+    margin: 0 0 var(--spacing-2) 0;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+}
+
+.payment-info-block p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-3);
+}
+
+.payment-details {
+    background-color: var(--color-background-primary);
+    padding: var(--spacing-3);
+    border-radius: var(--border-radius-md);
+    font-family: var(--font-family-mono, monospace);
+    font-size: var(--font-size-sm);
+    margin: var(--spacing-3) 0;
+}
+
+.payment-details p {
+    margin: var(--spacing-1) 0;
+    color: var(--color-text-primary);
+}
+
+.payment-reference {
+    margin-top: var(--spacing-3);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+}
+
+/* Rejected entries section */
+.rejected-entries-section {
+    margin-top: var(--spacing-8);
+}
+
+/* Badges - matching application theme */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    min-height: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.badge-admin {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.badge-owner {
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+}
+
+.badge-editor {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.badge-author {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.badge-referee {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.badge-verified {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.badge-published {
+    background-color: var(--color-success);
+    color: var(--color-text-inverse);
+}
+
+.badge-waiting_for_payment {
+    background-color: #FDE68A;
+    color: #92400E;
+}
+
+.badge-waiting_for_authors {
+    background-color: #FED7AA;
+    color: #C2410C;
+}
+
+.badge-waiting_for_referees {
+    background-color: #DDD6FE;
+    color: #6B21A8;
+}
+
+.badge-waiting_for_editors {
+    background-color: #BFDBFE;
+    color: #1E40AF;
+}
+
+.badge-accepted {
+    background-color: #10B981;
+    color: white;
+}
+
+.badge-not_accepted {
+    background-color: #FCA5A5;
+    color: #991B1B;
+}
+
+.badge-completed {
+    background-color: var(--color-success);
+    color: var(--color-text-inverse);
+}
+
+.badge-submitted,
+.badge-under_review,
+.badge-revisions_requested {
+    background-color: var(--color-secondary);
+    color: var(--color-text-inverse);
+}
+
+/* Empty states */
+.empty-state {
+    text-align: center;
+    padding: 40px 24px;
+    background: white;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    margin: 24px 0;
+}
+
+.empty-state-icon {
+    margin-bottom: 8px;
+    color: #6b7280;
+}
+
+.empty-state h3 {
+    font-size: 16px;
+    color: #6b7280;
+    margin: 0;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+}
+
+/* Records empty state - more prominent styling */
+.records-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 40px;
+    color: #64748B;
+    max-width: 600px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(226, 232, 240, 0.4);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.records-empty-state::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.05) 0%, transparent 70%);
+    borderRadius: 50%;
+    zIndex: 0;
+}
+
+.records-empty-state > * {
+    position: relative;
+    z-index: 1;
+}
+
+.records-empty-state .empty-state-icon {
+    margin-bottom: 32px;
+    color: #94A3B8;
+    opacity: 0.8;
+}
+
+.records-empty-state h3 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1E293B;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.025em;
+    background: linear-gradient(135deg, #1E293B 0%, #475569 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.records-empty-state p {
+    font-size: 16px;
+    color: #64748B;
+    margin: 0 0 32px 0;
+    line-height: 1.6;
+    max-width: 480px;
+    font-weight: 500;
+}
+
+.empty-state-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.empty-state-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    outline: none;
+}
+
+.empty-state-button.primary {
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(20, 184, 166, 0.3);
+}
+
+.empty-state-button.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.4);
+}
+
+.empty-state-button.primary:active {
+    transform: translateY(0);
+    transition: transform 0.1s;
+}
+
+/* Loading and error states */
+.loading, .error-message {
+    text-align: center;
+    padding: var(--spacing-8);
+    font-size: var(--font-size-lg);
+}
+
+.loading {
+    color: var(--color-text-secondary);
+}
+
+.error-message {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid var(--color-danger);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
+    color: #b91c1c;
+    font-size: var(--font-size-base);
+    border-radius: var(--border-radius-md);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .entries-section h2 {
+        font-size: 24px;
+        padding: 16px 24px 16px 0;
+    }
+    
+    .journals-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .records-empty-state {
+        margin: 20px 16px;
+        padding: 60px 24px;
+        max-width: none;
+    }
+    
+    .records-empty-state h3 {
+        font-size: 24px;
+    }
+    
+    .records-empty-state p {
+        font-size: 15px;
+        max-width: none;
+    }
+    
+    .empty-state-button {
+        padding: 14px 20px;
+        font-size: 14px;
+    }
+} 
