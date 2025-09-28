@@ -21,10 +21,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Your Brevo API Key - consider moving to environment variables for production
-# BREVO_API_KEY = "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"
+# BREVO_API_KEY = ""
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
 RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
-# RECAPTCHA_SECRET_KEY = "6Lc0kEYrAAAAACYXOmcyvtXYvt4vXaibHBKQo1Hz"
+# RECAPTCHA_SECRET_KEY = ""
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 # Log configuration status
