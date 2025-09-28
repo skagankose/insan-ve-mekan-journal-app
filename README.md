@@ -3,8 +3,6 @@
 A lightweight, editor-friendly web application for the academic journal **İNSAN VE MEKAN**.  
 It streamlines **submission**, **peer review**, **issue building**, and **publishing** with a clean UI, bilingual content (TR/EN), and role-based workflows (Author, Reviewer, Editor, Admin).
 
-> 📝 Tip: This README is structured as a living document. Keep it close to the code and update sections marked with **TODO** as you evolve the app.
-
 ---
 
 ## Table of Contents
