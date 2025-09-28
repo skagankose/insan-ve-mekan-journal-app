@@ -47,17 +47,7 @@ It streamlines **submission**, **peer review**, **issue building**, and **publis
 
 ## Architecture
 
-> **Note:** Keep only the relevant block below, depending on your stack.
-
-### Option A — Node/Next.js (recommended)
-- **Web**: Next.js (App Router) + TypeScript + Tailwind + shadcn/ui  
-- **API**: Next.js Route Handlers (REST)  
-- **DB**: PostgreSQL via Prisma  
-- **Auth**: NextAuth (email + OAuth providers)  
-- **Storage**: S3/MinIO for uploads  
-- **Search**: Postgres `tsvector` or MeiliSearch (optional)
-
-### Option B — Python/FastAPI
+### Python/FastAPI
 - **Web**: Next.js (frontend) or Jinja templates (if monolith)  
 - **API**: FastAPI + Pydantic  
 - **DB**: PostgreSQL via SQLAlchemy + Alembic  
